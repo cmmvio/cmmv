@@ -287,43 +287,40 @@ export class Application {
         });
 
         const lines: string[] = [];
-        lines.push(`/**
-    **********************************************
-    This script was generated automatically by CMMV.
-    It is recommended not to modify this file manually,
-    as it may be overwritten by the application.
-    **********************************************
-**/`);
 
         files.forEach(file => {
             lines.push(fs.readFileSync(file, 'utf-8'));
             lines.push('');
         });
 
-        const bundleContent = lines.join('\n');
+        if (lines.length > 0) {
+            const bundleContent = lines.join('\n');
 
-        const result = await Terser.minify(bundleContent, {
-            compress: {
-                dead_code: true,
-                conditionals: true,
-                unused: true,
-                drop_debugger: true,
-                drop_console: process.env.NODE_ENV !== 'dev',
-            },
-            mangle: { toplevel: true },
-            output: {
-                beautify: false,
-            },
-            sourceMap: {
-                url: 'inline',
-            },
-        });
+            const result = await Terser.minify(bundleContent, {
+                compress: {
+                    dead_code: true,
+                    conditionals: true,
+                    unused: true,
+                    drop_debugger: true,
+                    drop_console: process.env.NODE_ENV !== 'dev',
+                },
+                mangle: { toplevel: true },
+                output: {
+                    beautify: false,
+                },
+                sourceMap: {
+                    url: 'inline',
+                },
+            });
 
-        if (finalbundle.length > 0) {
-            if (!fs.existsSync(dirBuild))
-                fs.mkdirSync(dirBuild, { recursive: true });
+            if (finalbundle.length > 0) {
+                if (!fs.existsSync(dirBuild))
+                    fs.mkdirSync(dirBuild, { recursive: true });
 
-            fs.writeFileSync(finalbundle, result.code, { encoding: 'utf-8' });
+                fs.writeFileSync(finalbundle, result.code, {
+                    encoding: 'utf-8',
+                });
+            }
         }
     }
 
@@ -336,20 +333,23 @@ export class Application {
         });
 
         const lines: string[] = [];
-        lines.push('/* Generated automatically by CMMV */');
 
         files.forEach(file => {
             lines.push(fs.readFileSync(file, 'utf-8'));
             lines.push('');
         });
 
-        const bundleContent = lines.join('\n');
+        if (lines.length > 0) {
+            const bundleContent = lines.join('\n');
 
-        if (finalbundle.length > 0) {
-            if (!fs.existsSync(dirBuild))
-                fs.mkdirSync(dirBuild, { recursive: true });
+            if (finalbundle.length > 0) {
+                if (!fs.existsSync(dirBuild))
+                    fs.mkdirSync(dirBuild, { recursive: true });
 
-            fs.writeFileSync(finalbundle, bundleContent, { encoding: 'utf-8' });
+                fs.writeFileSync(finalbundle, bundleContent, {
+                    encoding: 'utf-8',
+                });
+            }
         }
     }
 
