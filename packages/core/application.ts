@@ -280,10 +280,6 @@ export class Application {
 
     protected async createScriptBundle() {
         const dirBuild = path.resolve('./public/assets');
-
-        if (!fs.existsSync(dirBuild))
-            fs.mkdirSync(dirBuild, { recursive: true });
-
         const finalbundle = path.resolve('./public/assets/bundle.min.js');
 
         const files = await fg(path.resolve('./public/core/*.min.js'), {
@@ -323,15 +319,16 @@ export class Application {
             },
         });
 
-        fs.writeFileSync(finalbundle, result.code, { encoding: 'utf-8' });
+        if (finalbundle.length > 0) {
+            if (!fs.existsSync(dirBuild))
+                fs.mkdirSync(dirBuild, { recursive: true });
+
+            fs.writeFileSync(finalbundle, result.code, { encoding: 'utf-8' });
+        }
     }
 
     protected async createCSSBundle() {
         const dirBuild = path.resolve('./public/assets');
-
-        if (!fs.existsSync(dirBuild))
-            fs.mkdirSync(dirBuild, { recursive: true });
-
         const finalbundle = path.resolve('./public/assets/bundle.min.css');
 
         const files = await fg(path.resolve('./public/core/*.min.css'), {
@@ -347,7 +344,13 @@ export class Application {
         });
 
         const bundleContent = lines.join('\n');
-        fs.writeFileSync(finalbundle, bundleContent, { encoding: 'utf-8' });
+
+        if (finalbundle.length > 0) {
+            if (!fs.existsSync(dirBuild))
+                fs.mkdirSync(dirBuild, { recursive: true });
+
+            fs.writeFileSync(finalbundle, bundleContent, { encoding: 'utf-8' });
+        }
     }
 
     protected loadModules(modules: Array<Module>): void {
