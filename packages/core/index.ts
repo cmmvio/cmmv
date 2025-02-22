@@ -78,5 +78,5 @@ export {
     ValidateIf,
 } from 'class-validator';
 
-import * as fastJson from 'fast-json-stringify';
+import fastJson from 'fast-json-stringify';
 export { fastJson };
