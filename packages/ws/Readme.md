@@ -42,7 +42,7 @@ CMMV now provides a CLI (Command Line Interface) to streamline the installation 
 To initialize a new project, you can use the following command:
 
 ```bash
-$ pnpm dlx @cmmv/cli@latest create <project-name>
+$ pnpm dlx @cmmv/cli@latest create project-name
 ```
 
 This command will walk you through a guided setup process, asking about your preferred configurations, such as enabling Vite, RPC, caching, repository type, and view setup (e.g., Vue 3 or Reactivity). It will automatically create the necessary files and folders, set up dependencies, and configure the project.
@@ -52,7 +52,7 @@ This command will walk you through a guided setup process, asking about your pre
 If you prefer to set up the project manually, you can still install the necessary modules individually:
 
 ```bash
-$ pnpm add @cmmv/core @cmmv/http @cmmv/view reflect-metadata class-validator class-transformer fast-json-stringify
+$ pnpm add @cmmv/core @cmmv/http @cmmv/view reflect-metadata fast-json-stringify
 ```
 
 ## Quick Start
