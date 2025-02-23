@@ -19,8 +19,5 @@
     "bugs": {
         "url": "https://github.com/cmmvio/cmmv/issues"
     },
-    "homepage": "https://cmmv.io",
-    "dependencies": {
-        "@cmmv/core": "0.8.23"
-    }
+    "homepage": "https://cmmv.io"
 }

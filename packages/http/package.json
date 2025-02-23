@@ -21,17 +21,15 @@
     },
     "homepage": "https://cmmv.io",
     "dependencies": {
-        "@cmmv/body-parser": "^0.8.7",
-        "@cmmv/compression": "^0.8.7",
-        "@cmmv/cookie-parser": "^0.8.7",
-        "@cmmv/cors": "^0.8.7",
-        "@cmmv/etag": "^0.8.7",
-        "@cmmv/helmet": "^0.8.7",
-        "@cmmv/server": "^0.8.7",
-        "@cmmv/server-static": "^0.8.7",
+        "@cmmv/body-parser": "^0.9.0",
+        "@cmmv/compression": "^0.9.0",
+        "@cmmv/cookie-parser": "^0.9.0",
+        "@cmmv/cors": "^0.9.0",
+        "@cmmv/etag": "^0.9.0",
+        "@cmmv/helmet": "^0.9.0",
+        "@cmmv/server": "^0.9.0",
+        "@cmmv/server-static": "^0.9.0",
+        "@cmmv/view": "0.8.23",
         "fast-json-stringify": "^6.0.1"
-    },
-    "devDependencies": {
-        "@cmmv/view": "0.8.23"
     }
 }
