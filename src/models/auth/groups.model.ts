@@ -1,7 +1,7 @@
-/**                                                                               
+/**
     **********************************************
     This script was generated automatically by CMMV.
-    It is recommended not to modify this file manually, 
+    It is recommended not to modify this file manually,
     as it may be overwritten by the application.
     **********************************************
 **/
@@ -27,10 +27,6 @@ export interface IGroups {
 
 //Model
 export class Groups implements IGroups {
-    @Expose()
-    @IsOptional()
-    _id?: ObjectId;
-
     @Expose({ toClassOnly: true })
     @IsOptional()
     id: string;

@@ -1,7 +1,7 @@
-/**                                                                               
+/**
     **********************************************
     This script was generated automatically by CMMV.
-    It is recommended not to modify this file manually, 
+    It is recommended not to modify this file manually,
     as it may be overwritten by the application.
     **********************************************
 **/
@@ -43,10 +43,6 @@ export interface IUser {
 
 //Model
 export class User implements IUser {
-    @Expose()
-    @IsOptional()
-    _id?: ObjectId;
-
     @Expose({ toClassOnly: true })
     @IsOptional()
     id: string;
@@ -107,12 +103,13 @@ export class User implements IUser {
 
     @Expose()
     @Transform(
-        value => (typeof value === 'object' ? JSON.stringify(value) : '{}'),
+        (value) => (typeof value === 'object' ? JSON.stringify(value) : '{}'),
         { toClassOnly: true },
     )
-    @Transform(value => (typeof value === 'string' ? JSON.parse(value) : {}), {
-        toPlainOnly: true,
-    })
+    @Transform(
+        (value) => (typeof value === 'string' ? JSON.parse(value) : {}),
+        { toPlainOnly: true },
+    )
     profile?: string = '{}';
 
     constructor(partial: Partial<User>) {

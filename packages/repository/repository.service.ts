@@ -27,11 +27,12 @@ export class Repository extends Singleton {
         const instance = Repository.getInstance();
         const config = Config.get('repository');
 
-        const entitiesDir = path.resolve(cwd(), './src/entities');
+        const sourceDir = Config.get<string>('app.sourceDir', 'src');
+        const entitiesDir = path.join(cwd(), sourceDir, 'entities');
         const entityFiles = await fg(`${entitiesDir}/**/*.entity.ts`);
 
         const entities = await Promise.all(
-            entityFiles.map(async file => {
+            entityFiles.map(async (file) => {
                 const entityModule = await import(file);
                 const entityContructor = Object.values(entityModule)[0];
                 this.entities.set(
@@ -357,7 +358,7 @@ export class RepositorySchema<Entity, T> {
             data:
                 result && result.data.length > 0
                     ? result.data //@ts-ignore
-                          .map(item => this.model.fromEntity(item))
+                          .map((item) => this.model.fromEntity(item))
                     : [],
         };
     }

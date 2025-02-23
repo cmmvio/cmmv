@@ -49,7 +49,7 @@ export class UserEntity implements IUser {
     })
     provider?: string;
 
-    @ManyToOne(() => GroupsEntity, groups => groups._id, { nullable: false })
+    @ManyToOne(() => GroupsEntity, (groups) => groups._id, { nullable: false })
     @Column({
         type: 'simple-array',
         nullable: true,

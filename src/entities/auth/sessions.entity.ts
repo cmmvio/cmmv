@@ -41,7 +41,7 @@ export class SessionsEntity implements ISessions {
     })
     fingerprint: string;
 
-    @ManyToOne(() => UserEntity, user => user._id, { nullable: false })
+    @ManyToOne(() => UserEntity, (user) => user._id, { nullable: false })
     @Column({
         type: 'string',
         nullable: true,
