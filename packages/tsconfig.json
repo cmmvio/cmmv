@@ -10,6 +10,7 @@
         { "path": "./repository/tsconfig.build.json" },
         { "path": "./scheduling/tsconfig.build.json" },
         { "path": "./testing/tsconfig.build.json" },
+        { "path": "./vault/tsconfig.build.json" },
         { "path": "./view/tsconfig.build.json" },
         { "path": "./ws/tsconfig.build.json" }
     ]
