@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/vault",
-    "version": "0.8.26",
+    "version": "0.8.27",
     "description": "Module for CMMV to store encrypted data",
     "keywords": [
         "cmmv",
@@ -23,6 +23,7 @@
     },
     "homepage": "https://cmmv.io",
     "dependencies": {
-        "@cmmv/encryptor": "^0.7.0"
+        "@cmmv/encryptor": "^0.7.0",
+        "elliptic": "^6.6.1"
     }
 }

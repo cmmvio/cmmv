@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/view",
-    "version": "0.8.26",
+    "version": "0.8.27",
     "description": "SSR view module for CMMV",
     "keywords": [
         "cmmv",
@@ -23,7 +23,7 @@
     },
     "homepage": "https://cmmv.io",
     "dependencies": {
-        "@cmmv/protobuf": "0.8.26",
+        "@cmmv/protobuf": "0.8.27",
         "@cmmv/reactivity": "^0.4.8",
         "fast-glob": "^3.3.2",
         "html-minifier-terser": "^7.2.0",
