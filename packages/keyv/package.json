@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/keyv",
-    "version": "0.8.27",
+    "version": "0.8.28",
     "description": "In-memory cache management module using Key for CMMV",
     "keywords": [
         "cmmv",
@@ -29,5 +29,5 @@
     "devDependencies": {
         "@types/keyv": "^4.2.0"
     },
-    "gitHead": "9b28f002268080dc8d283263da48e07aa754581f"
+    "gitHead": "a5eb20dfef59e2184a236f47f3eb54aaa11a125d"
 }

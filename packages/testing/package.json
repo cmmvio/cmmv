@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/testing",
-    "version": "0.8.27",
+    "version": "0.8.28",
     "description": "Module testing module and application for CMMV",
     "keywords": [
         "cmmv",
@@ -19,5 +19,6 @@
     "bugs": {
         "url": "https://github.com/cmmvio/cmmv/issues"
     },
-    "homepage": "https://cmmv.io"
+    "homepage": "https://cmmv.io",
+    "gitHead": "a5eb20dfef59e2184a236f47f3eb54aaa11a125d"
 }

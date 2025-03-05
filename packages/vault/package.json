@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/vault",
-    "version": "0.8.27",
+    "version": "0.8.28",
     "description": "Module for CMMV to store encrypted data",
     "keywords": [
         "cmmv",
@@ -25,5 +25,6 @@
     "dependencies": {
         "@cmmv/encryptor": "^0.7.0",
         "elliptic": "^6.6.1"
-    }
+    },
+    "gitHead": "a5eb20dfef59e2184a236f47f3eb54aaa11a125d"
 }
