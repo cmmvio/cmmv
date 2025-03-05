@@ -53,6 +53,7 @@ export interface ContractIndexOptions {
 }
 
 export interface ContractExtraOptions {
+    moduleContract?: boolean;
     databaseSchemaName?: string;
     databaseTimestamps?: boolean;
     databaseUserAction?: boolean;
@@ -146,13 +147,11 @@ export function Contract(options?: ContractOptions): ClassDecorator {
         return typeof value === 'function' && value.prototype;
     };
 
-    if (options?.viewForm && !isValidClass(options.viewForm)) {
+    if (options?.viewForm && !isValidClass(options.viewForm))
         throw new Error(`Invalid viewForm provided: ${options.viewForm}`);
-    }
 
-    if (options?.viewPage && !isValidClass(options.viewPage)) {
+    if (options?.viewPage && !isValidClass(options.viewPage))
         throw new Error(`Invalid viewPage provided: ${options.viewPage}`);
-    }
 
     const defaultControllerName = 'DefaultContract';
     const defaultSubPath = '';

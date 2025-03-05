@@ -8,6 +8,7 @@ import { UserContract } from './users.contract';
     subPath: '/auth',
     generateController: false,
     options: {
+        moduleContract: true,
         databaseSchemaName: 'auth_sessions',
         databaseTimestamps: true,
     },

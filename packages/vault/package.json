@@ -1,0 +1,28 @@
+{
+    "name": "@cmmv/vault",
+    "version": "0.8.26",
+    "description": "Module for CMMV to store encrypted data",
+    "keywords": [
+        "cmmv",
+        "framework",
+        "vault",
+        "secret",
+        "encrypted"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cmmvio/cmmv.git"
+    },
+    "author": "Andre Ferreira",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/cmmvio/cmmv/issues"
+    },
+    "homepage": "https://cmmv.io",
+    "dependencies": {
+        "@cmmv/encryptor": "^0.7.0"
+    }
+}

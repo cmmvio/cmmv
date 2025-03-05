@@ -168,7 +168,7 @@ export class AuthService extends AbstractService {
             throw new HttpException('User Blocked', HttpStatus.FORBIDDEN);
 
         const sesssionId = uuidv4();
-        const fingerprint = generateFingerprint(req, usernameHashed);
+        const fingerprint = generateFingerprint(req.req, usernameHashed);
 
         // Creating JWT token
         const accessToken = jwt.sign(
@@ -290,133 +290,108 @@ export class AuthService extends AbstractService {
     }
 
     public async refreshToken(request: any) {
-        try {
-            const { authorization } = request.req.headers;
+        const { authorization } = request.req.headers;
 
-            if (!authorization) {
-                throw new HttpException(
-                    'Authorization header missing',
-                    HttpStatus.UNAUTHORIZED,
-                );
-            }
-
-            const refreshCookieName = Config.get<string>(
-                'auth.refreshCookieName',
-                'refreshToken',
+        if (!authorization) {
+            throw new HttpException(
+                'Authorization header missing',
+                HttpStatus.UNAUTHORIZED,
             );
-            const jwtSecret = Config.get<string>('auth.jwtSecret');
-            const jwtSecretRefresh = Config.get<string>(
-                'auth.jwtSecretRefresh',
-                jwtSecret,
-            );
-            const UserEntity = Repository.getEntity('UserEntity');
-
-            const token = authorization.split(' ')[1] || null;
-            const refreshTokenHeader = request.req.headers['refreshToken'];
-            const refreshToken =
-                request.cookies?.[refreshCookieName] || refreshTokenHeader;
-
-            if (!refreshToken || !token)
-                throw new HttpException(
-                    'Invalid credentials',
-                    HttpStatus.UNAUTHORIZED,
-                );
-
-            if (!(await AuthSessionsService.validateRefreshToken(refreshToken)))
-                throw new HttpException(
-                    'Invalid refresh token',
-                    HttpStatus.UNAUTHORIZED,
-                );
-
-            const verifyAsync = promisify(jwt.verify);
-            const decoded = (await verifyAsync(
-                refreshToken,
-                jwtSecretRefresh,
-            )) as { f: string; u: string };
-            const tokenDecoded = jwt.decode(token) as any;
-
-            tokenDecoded.username = decryptJWTData(
-                tokenDecoded.username,
-                jwtSecret,
-            );
-
-            if (!tokenDecoded)
-                throw new HttpException(
-                    'Invalid access token',
-                    HttpStatus.UNAUTHORIZED,
-                );
-
-            if (
-                tokenDecoded.fingerprint !== decoded.f ||
-                tokenDecoded.id !== decoded.u
-            ) {
-                throw new HttpException(
-                    'Token mismatch',
-                    HttpStatus.UNAUTHORIZED,
-                );
-            }
-
-            const user = await Repository.findBy(
-                UserEntity,
-                Repository.queryBuilder({
-                    id: decoded.u,
-                    blocked: false,
-                }),
-            );
-
-            if (!user)
-                throw new HttpException(
-                    'User not found',
-                    HttpStatus.UNAUTHORIZED,
-                );
-
-            const usernameHashed = crypto
-                .createHash('sha1')
-                .update(tokenDecoded.username)
-                .digest('hex');
-
-            const fingerprint = generateFingerprint(
-                request.req,
-                usernameHashed,
-            );
-
-            const accessToken = jwt.sign(
-                {
-                    id:
-                        Config.get('repository.type') === 'mongodb'
-                            ? user._id
-                            : user.id,
-                    username: encryptJWTData(tokenDecoded.username, jwtSecret),
-                    fingerprint,
-                    root: user.root || false,
-                    roles: user.roles || [],
-                    groups: user.groups || [],
-                },
-                jwtSecret,
-                { expiresIn: '15m' },
-            );
-
-            return {
-                result: {
-                    success: true,
-                    token: accessToken,
-                    message: 'Refresh successful',
-                },
-            };
-        } catch (error) {
-            console.error('Refresh Token Error:', error.message);
-
-            return {
-                result: {
-                    success: false,
-                    token: '',
-                    message:
-                        error instanceof HttpException
-                            ? error.message
-                            : 'Internal server error',
-                },
-                user: null,
-            };
         }
+
+        const refreshCookieName = Config.get<string>(
+            'auth.refreshCookieName',
+            'refreshToken',
+        );
+        const jwtSecret = Config.get<string>('auth.jwtSecret');
+        const jwtSecretRefresh = Config.get<string>(
+            'auth.jwtSecretRefresh',
+            jwtSecret,
+        );
+        const UserEntity = Repository.getEntity('UserEntity');
+
+        const token = authorization.split(' ')[1] || null;
+        const refreshTokenHeader =
+            request.req.headers['refresh-token'] ||
+            request.req.headers['refreshToken'];
+        const refreshToken =
+            request.cookies?.[refreshCookieName] || refreshTokenHeader;
+
+        if (!refreshToken || !token)
+            throw new HttpException(
+                'Invalid credentials',
+                HttpStatus.UNAUTHORIZED,
+            );
+
+        if (!(await AuthSessionsService.validateRefreshToken(refreshToken)))
+            throw new HttpException(
+                'Invalid refresh token',
+                HttpStatus.UNAUTHORIZED,
+            );
+
+        const verifyAsync = promisify(jwt.verify);
+        const decoded = (await verifyAsync(refreshToken, jwtSecretRefresh)) as {
+            f: string;
+            u: string;
+        };
+        const tokenDecoded = jwt.decode(token) as any;
+
+        tokenDecoded.username = decryptJWTData(
+            tokenDecoded.username,
+            jwtSecret,
+        );
+
+        if (!tokenDecoded)
+            throw new HttpException(
+                'Invalid access token',
+                HttpStatus.UNAUTHORIZED,
+            );
+
+        if (
+            tokenDecoded.fingerprint !== decoded.f ||
+            tokenDecoded.id !== decoded.u
+        ) {
+            throw new HttpException('Token mismatch', HttpStatus.UNAUTHORIZED);
+        }
+
+        const user = await Repository.findBy(
+            UserEntity,
+            Repository.queryBuilder({
+                id: decoded.u,
+                blocked: false,
+            }),
+        );
+
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+
+        const usernameHashed = crypto
+            .createHash('sha1')
+            .update(tokenDecoded.username)
+            .digest('hex');
+
+        const fingerprint = generateFingerprint(request.req, usernameHashed);
+
+        const accessToken = jwt.sign(
+            {
+                id:
+                    Config.get('repository.type') === 'mongodb'
+                        ? user._id
+                        : user.id,
+                username: encryptJWTData(tokenDecoded.username, jwtSecret),
+                fingerprint,
+                root: user.root || false,
+                roles: user.roles || [],
+                groups: user.groups || [],
+            },
+            jwtSecret,
+            { expiresIn: '15m' },
+        );
+
+        return {
+            success: true,
+            token: accessToken,
+            message: 'Refresh successful',
+        };
     }
 }

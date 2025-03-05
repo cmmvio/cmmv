@@ -29,7 +29,11 @@ export class Repository extends Singleton {
 
         const sourceDir = Config.get<string>('app.sourceDir', 'src');
         const entitiesDir = path.join(cwd(), sourceDir, 'entities');
-        const entityFiles = await fg(`${entitiesDir}/**/*.entity.ts`);
+        const entitiesGeneratedDir = path.join(cwd(), '.generated', 'entities');
+        const entityFiles = await fg([
+            `${entitiesDir}/**/*.entity.ts`,
+            `${entitiesGeneratedDir}/**/*.entity.ts`,
+        ]);
 
         const entities = await Promise.all(
             entityFiles.map(async (file) => {

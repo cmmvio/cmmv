@@ -19,7 +19,11 @@ export class ApplicationTranspile
         const modelName = `${contract.controllerName}`;
         const modelInterfaceName = `I${modelName}`;
         const modelFileName = `${modelName.toLowerCase()}.model.ts`;
-        const outputDir = this.getRootPath(contract, 'models');
+        const isModuleContract = contract.options?.moduleContract === true;
+        const outputDir = isModuleContract
+            ? this.getGeneratedPath(contract, 'models')
+            : this.getRootPath(contract, 'models');
+
         const outputFilePath = path.join(outputDir, modelFileName);
         let includeId = '';
 
@@ -202,7 +206,7 @@ import {
             if (field.link && field.link.length > 0) {
                 //validationImports.add('ValidateNested');
 
-                field.link.map(link => {
+                field.link.map((link) => {
                     const contractInstance = new link.contract();
                     const controllerName = Reflect.getMetadata(
                         CONTROLLER_NAME_METADATA,
@@ -235,7 +239,7 @@ import {
         }
 
         if (importEntitiesList.length > 0) {
-            importEntitiesList.map(importEntity => {
+            importEntitiesList.map((importEntity) => {
                 importStatements.push(
                     `import {
     ${importEntity.entityName}
@@ -294,7 +298,7 @@ import {
                 const validationParams = Array.isArray(validation.type)
                     ? validation.type
                           .slice(1)
-                          .map(param => JSON.stringify(param))
+                          .map((param) => JSON.stringify(param))
                           .join(', ')
                     : validation.value !== undefined
                       ? validation.value
@@ -417,7 +421,7 @@ import {
             );
 
             if (field.link && field.link.length > 0) {
-                field.link.map(link => {
+                field.link.map((link) => {
                     parts.push(
                         `    items: ${field.entityType.replace('Entity', '')}FastSchemaStructure`,
                     );

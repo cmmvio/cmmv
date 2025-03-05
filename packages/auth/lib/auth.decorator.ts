@@ -19,14 +19,17 @@ export function Auth(
                 'server.session.options.sessionCookieName',
                 'token',
             );
+
             const sessionEnabled = Config.get<boolean>(
                 'server.session.enabled',
                 true,
             );
+
             const refreshCookieName = Config.get<string>(
                 'auth.refreshCookieName',
                 'refreshToken',
             );
+
             const logging = Config.get<string>('server.logging', 'all');
 
             let sessionId = request.cookies
@@ -47,6 +50,8 @@ export function Auth(
             if (!token) {
                 token =
                     request.req.headers.authorization?.split(' ')[1] || null;
+
+                if (token === 'null' || token === 'undefined') token = null;
             }
 
             if (!token) {
@@ -65,53 +70,12 @@ export function Auth(
 
             const jwtSecret = Config.get('auth.jwtSecret');
 
-            jwt.verify(
-                token,
-                jwtSecret,
-                async (err: any, decoded: IJWTDecoded) => {
-                    if (err) {
-                        if (
-                            logging === 'all' ||
-                            logging === 'error' ||
-                            logging === 'warning'
-                        ) {
-                            logger.warning(
-                                `${request.method.toUpperCase()} ${request.path} (0ms) 401 - ${request.req.socket.remoteAddress}`,
-                            );
-                        }
-
-                        if (
-                            !refreshToken ||
-                            !(await AuthSessionsService.validateRefreshToken(
-                                refreshToken,
-                            ))
-                        )
-                            return response.code(401).end('Unauthorized');
-                    }
-
-                    decoded.username = decryptJWTData(
-                        decoded.username,
-                        jwtSecret,
-                    );
-
-                    if (decoded.root !== true) {
-                        if (
-                            !(await AuthSessionsService.validateSession(
-                                decoded,
-                            ))
-                        )
-                            return response.code(401).end('Unauthorized');
-
-                        if (
-                            (rolesOrSettings &&
-                                Array.isArray(rolesOrSettings) &&
-                                (!decoded.roles ||
-                                    !rolesOrSettings.some(role =>
-                                        decoded?.roles.includes(role),
-                                    ))) ||
-                            (typeof rolesOrSettings == 'string' &&
-                                !decoded?.roles.includes(rolesOrSettings))
-                        ) {
+            if (token !== null) {
+                jwt.verify(
+                    token,
+                    jwtSecret,
+                    async (err: any, decoded: IJWTDecoded) => {
+                        if (err || !decoded) {
                             if (
                                 logging === 'all' ||
                                 logging === 'error' ||
@@ -122,63 +86,119 @@ export function Auth(
                                 );
                             }
 
-                            return response.code(401).end('Unauthorized');
-                        } else if (rolesOrSettings) {
-                            try {
-                                const settings =
-                                    rolesOrSettings as IAuthSettings;
-
-                                if (
-                                    settings.roles &&
-                                    Array.isArray(settings.roles)
-                                ) {
-                                    if (
-                                        !decoded.roles ||
-                                        !settings.roles.some(role =>
-                                            decoded.roles.includes(role),
-                                        )
-                                    ) {
-                                        if (
-                                            logging === 'all' ||
-                                            logging === 'error' ||
-                                            logging === 'warning'
-                                        ) {
-                                            logger.warning(
-                                                `${request.method.toUpperCase()} ${request.path} (0ms) 401 - ${request.req.socket.remoteAddress}`,
-                                            );
-                                        }
-
-                                        return response
-                                            .code(401)
-                                            .end('Unauthorized');
-                                    }
-                                }
-                            } catch {
+                            if (
+                                !refreshToken ||
+                                !(await AuthSessionsService.validateRefreshToken(
+                                    refreshToken,
+                                ))
+                            ) {
                                 return response.code(401).end('Unauthorized');
                             }
                         }
-                    }
 
-                    const usernameHashed = crypto
-                        .createHash('sha1')
-                        .update(decoded.username)
-                        .digest('hex');
-
-                    if (
-                        decoded.fingerprint !==
-                        generateFingerprint(request.req, usernameHashed)
-                    ) {
-                        logger.warning(
-                            `${request.method.toUpperCase()} ${request.path} (0ms) 403 - ${request.req.socket.remoteAddress}`,
+                        decoded.username = decryptJWTData(
+                            decoded.username,
+                            jwtSecret,
                         );
 
-                        return response.code(403).end('Forbidden');
-                    }
+                        try {
+                            const settings = rolesOrSettings as IAuthSettings;
 
-                    request.user = decoded;
-                    next();
-                },
-            );
+                            if (settings.rootOnly && !decoded.root)
+                                return response.code(401).end('Unauthorized');
+                        } catch {}
+
+                        if (decoded.root !== true) {
+                            if (
+                                !(await AuthSessionsService.validateSession(
+                                    decoded,
+                                ))
+                            ) {
+                                return response.code(401).end('Unauthorized');
+                            }
+
+                            if (
+                                (rolesOrSettings &&
+                                    Array.isArray(rolesOrSettings) &&
+                                    (!decoded.roles ||
+                                        !rolesOrSettings.some((role) =>
+                                            decoded?.roles.includes(role),
+                                        ))) ||
+                                (typeof rolesOrSettings == 'string' &&
+                                    !decoded?.roles.includes(rolesOrSettings))
+                            ) {
+                                if (
+                                    logging === 'all' ||
+                                    logging === 'error' ||
+                                    logging === 'warning'
+                                ) {
+                                    logger.warning(
+                                        `${request.method.toUpperCase()} ${request.path} (0ms) 401 - ${request.req.socket.remoteAddress}`,
+                                    );
+                                }
+
+                                return response.code(401).end('Unauthorized');
+                            } else if (rolesOrSettings) {
+                                try {
+                                    const settings =
+                                        rolesOrSettings as IAuthSettings;
+
+                                    if (
+                                        settings.roles &&
+                                        Array.isArray(settings.roles)
+                                    ) {
+                                        if (
+                                            !decoded.roles ||
+                                            !settings.roles.some((role) =>
+                                                decoded.roles.includes(role),
+                                            )
+                                        ) {
+                                            if (
+                                                logging === 'all' ||
+                                                logging === 'error' ||
+                                                logging === 'warning'
+                                            ) {
+                                                logger.warning(
+                                                    `${request.method.toUpperCase()} ${request.path} (0ms) 401 - ${request.req.socket.remoteAddress}`,
+                                                );
+                                            }
+
+                                            return response
+                                                .code(401)
+                                                .end('Unauthorized');
+                                        }
+                                    }
+                                } catch {
+                                    return response
+                                        .code(401)
+                                        .end('Unauthorized');
+                                }
+                            }
+                        }
+
+                        const usernameHashed = crypto
+                            .createHash('sha1')
+                            .update(decoded.username)
+                            .digest('hex');
+
+                        if (
+                            decoded.fingerprint !==
+                            generateFingerprint(request.req, usernameHashed)
+                        ) {
+                            logger.warning(
+                                `${request.method.toUpperCase()} ${request.path} (0ms) 403 - ${request.req.socket.remoteAddress}`,
+                            );
+
+                            return response.code(403).end('Forbidden');
+                        }
+
+                        request.user = decoded;
+                        next();
+                    },
+                );
+            } else {
+                return response.code(401).end('Unauthorized');
+            }
         };
 
         const existingFields =

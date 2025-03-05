@@ -1,8 +1,11 @@
 import { AbstractService, Config } from '@cmmv/core';
+import { RepositorySchema } from './repository.service';
 
 import { ObjectId } from 'mongodb';
 
 export abstract class AbstractRepositoryService extends AbstractService {
+    protected schema: RepositorySchema<any, any>;
+
     override fixIds(item: any, subtree: boolean = false) {
         if (item && typeof item === 'object') {
             if (item._id) {

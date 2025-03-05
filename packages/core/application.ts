@@ -1,9 +1,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-//import * as os from "os";
 import * as fg from 'fast-glob';
 import * as Terser from 'terser';
-//import { build } from "esbuild";
 
 import { IHTTPSettings, ConfigSchema, IContract } from './interfaces';
 
@@ -51,10 +49,11 @@ export interface IApplicationSettings {
     transpilers?: Array<new () => ITranspile>;
     modules?: Array<Module>;
     contracts?: Array<new () => any>;
-    services?: Array<any>;
+    services?: Array<any>; //#deprecad
+    providers?: Array<any>;
 }
 
-process.on('uncaughtException', err => {
+process.on('uncaughtException', (err) => {
     console.error(err);
 });
 
@@ -81,6 +80,8 @@ export class Application {
     protected submodules: Array<Module> = [];
     protected contracts: Array<any> = [];
     protected configs: Array<ConfigSchema> = [];
+    protected entities: Array<any> = [];
+    protected models: Array<any> = [];
     public providersMap = new Map<string, any>();
     public static models = new Map<string, new () => any>();
 
@@ -107,8 +108,9 @@ export class Application {
             this.transpilers = settings.transpilers || [];
             this.modules = settings.modules || [];
             this.contracts =
-                settings.contracts?.map(contractClass => new contractClass()) ||
-                [];
+                settings.contracts?.map(
+                    (contractClass) => new contractClass(),
+                ) || [];
             this.initialize(settings, compile);
         } else if (settings && settings.contracts?.length > 0) {
             this.transpilers = (settings && settings.transpilers) || [];
@@ -116,7 +118,7 @@ export class Application {
             this.contracts =
                 (settings &&
                     settings.contracts?.map(
-                        contractClass => new contractClass(),
+                        (contractClass) => new contractClass(),
                     )) ||
                 [];
             this.initialize(settings, compile);
@@ -171,17 +173,17 @@ export class Application {
                 }
             }
 
-            const servicesLoad = [];
+            const providersLoad = [];
 
-            settings.services?.forEach(async service => {
-                if (service && typeof service.loadConfig === 'function')
-                    servicesLoad.push(service?.loadConfig(this));
+            const processProvider = async (provider) => {
+                if (provider && typeof provider.loadConfig === 'function')
+                    providersLoad.push(provider?.loadConfig(this));
 
-                if (Scope.has(`_await_service_${service.name}`)) {
-                    servicesLoad.push(
-                        new Promise(async resolve => {
+                if (Scope.has(`_await_service_${provider.name}`)) {
+                    providersLoad.push(
+                        new Promise(async (resolve) => {
                             const actions = Scope.getArray(
-                                `_await_service_${service.name}`,
+                                `_await_service_${provider.name}`,
                             );
 
                             if (actions.length > 0) {
@@ -194,15 +196,18 @@ export class Application {
                         }),
                     );
                 }
-            });
+            };
 
-            await Promise.all(servicesLoad);
+            settings.services?.forEach(processProvider);
+            settings.providers?.forEach(processProvider);
+
+            await Promise.all(providersLoad);
             await Hooks.execute(HooksType.onInitialize);
 
             if (this.httpAdapter && !compile) {
                 await this.httpAdapter.init(this, this.httpOptions);
 
-                settings?.httpMiddlewares?.forEach(middleware => {
+                settings?.httpMiddlewares?.forEach((middleware) => {
                     this.httpAdapter?.use(middleware);
                 });
 
@@ -221,7 +226,7 @@ export class Application {
                             `Server HTTP successfully started on ${this.host}:${this.port}`,
                         );
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         this.logger.error(
                             `Failed to start HTTP server on ${this.httpBind}: ${error.message || error}`,
                         );
@@ -244,8 +249,9 @@ export class Application {
             this.modules = (settings && settings.modules) || [];
             this.transpilers = settings.transpilers || [];
             this.contracts =
-                settings.contracts?.map(contractClass => new contractClass()) ||
-                [];
+                settings.contracts?.map(
+                    (contractClass) => new contractClass(),
+                ) || [];
 
             await Hooks.execute(HooksType.onPreInitialize);
             this.loadModules(this.modules);
@@ -262,14 +268,19 @@ export class Application {
                 this.logger.log('No transpilers provided.');
             }
 
-            const servicesLoad = [];
+            const providersLoad = [];
 
-            settings.services?.forEach(async service => {
+            settings.services?.forEach(async (service) => {
                 if (service && typeof service.loadConfig === 'function')
-                    servicesLoad.push(service?.loadConfig(this));
+                    providersLoad.push(service?.loadConfig(this));
             });
 
-            await Promise.all(servicesLoad);
+            settings.providers?.forEach(async (provider) => {
+                if (provider && typeof provider.loadConfig === 'function')
+                    providersLoad.push(provider?.loadConfig(this));
+            });
+
+            await Promise.all(providersLoad);
             await Hooks.execute(HooksType.onInitialize);
         } catch (error) {
             await Hooks.execute(HooksType.onError, { error });
@@ -288,7 +299,7 @@ export class Application {
 
         const lines: string[] = [];
 
-        files.forEach(file => {
+        files.forEach((file) => {
             lines.push(fs.readFileSync(file, 'utf-8'));
             lines.push('');
         });
@@ -334,7 +345,7 @@ export class Application {
 
         const lines: string[] = [];
 
-        files.forEach(file => {
+        files.forEach((file) => {
             lines.push(fs.readFileSync(file, 'utf-8'));
             lines.push('');
         });
@@ -355,15 +366,17 @@ export class Application {
 
     protected loadModules(modules: Array<Module>): void {
         if (modules && modules.length > 0) {
-            modules.forEach(module => {
+            modules.forEach((module) => {
                 if (module) {
                     this.transpilers.push(...module.getTranspilers());
                     this.controllers.push(...module.getControllers());
                     this.submodules.push(...module.getSubmodules());
                     this.contracts.push(...module.getContracts());
+                    this.entities.push(...module.getEntities());
+                    this.models.push(...module.getModels());
                     this.configs.push(...module.getConfigsSchemas());
 
-                    module.getProviders().forEach(provider => {
+                    module.getProviders().forEach((provider) => {
                         const paramTypes =
                             Reflect.getMetadata(
                                 'design:paramtypes',
@@ -374,6 +387,12 @@ export class Application {
                                 this.providersMap.get(paramType.name) ||
                                 new paramType(),
                         );
+
+                        if (
+                            provider &&
+                            typeof provider.loadConfig === 'function'
+                        )
+                            provider?.loadConfig(this);
 
                         const providerInstance = new provider(...instances);
                         this.providersMap.set(provider.name, providerInstance);
@@ -388,7 +407,7 @@ export class Application {
 
     protected processContracts(): void {
         if (Array.isArray(this.contracts) && this.contracts.length > 0) {
-            this.contracts.forEach(contract => {
+            this.contracts.forEach((contract) => {
                 const target = contract.constructor || contract;
                 const prototype = target.prototype || contract.prototype;
 
@@ -493,7 +512,11 @@ export class Application {
     protected async loadModels(contract: IContract) {
         const modelName = `${contract.controllerName}`;
         const modelFileName = `${modelName.toLowerCase()}.model.ts`;
-        const outputDir = this.getRootPath(contract, 'models');
+        const isModuleContract = contract.options?.moduleContract === true;
+        const outputDir = isModuleContract
+            ? this.getGeneratedPath(contract, 'models')
+            : this.getRootPath(contract, 'models');
+
         const outputFilePath = path.join(outputDir, modelFileName);
         const modelImport = await import(path.resolve(outputFilePath));
         Application.models.set(modelName, modelImport[modelName]);
@@ -572,18 +595,18 @@ import {
 } from "@cmmv/core";
 
 //Controllers
-${Application.appModule.controllers.map(controller => `import { ${controller.name} } from "${controller.path}";`).join('\n')}
+${Application.appModule.controllers.map((controller) => `import { ${controller.name} } from "${controller.path}";`).join('\n')}
 
 //Providers
-${Application.appModule.providers.map(provider => `import { ${provider.name} } from "${provider.path}";`).join('\n')}
+${Application.appModule.providers.map((provider) => `import { ${provider.name} } from "${provider.path}";`).join('\n')}
 
 export let ApplicationModule = new Module("app", {
     configs: [ApplicationConfig],
     controllers: [
-        ${Application.appModule.controllers.map(controller => controller.name).join(', \n\t\t')}
+        ${Application.appModule.controllers.map((controller) => controller.name).join(', \n\t\t')}
     ],
     providers: [
-        ${Application.appModule.providers.map(provider => provider.name).join(', \n\t\t')}
+        ${Application.appModule.providers.map((provider) => provider.name).join(', \n\t\t')}
     ],
     transpilers: [ApplicationTranspile]
 });`;
@@ -624,6 +647,30 @@ export let ApplicationModule = new Module("app", {
 
     public static exec(settings?: IApplicationSettings) {
         return new Application(settings, true).execProcess(settings);
+    }
+
+    public static async execAsyncFn(
+        settings: IApplicationSettings,
+        providerClass: new () => any,
+        functionName: string,
+    ) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const app = new Application(settings, true);
+                await app.execProcess(settings);
+                const provider = new providerClass();
+
+                if (typeof provider[functionName] !== 'function')
+                    throw new Error(
+                        `The function '${functionName}' was not found in the provider`,
+                    );
+
+                const result = await provider[functionName]();
+                resolve(result);
+            } catch (e) {
+                reject(e);
+            }
+        });
     }
 
     public static setHTTPMiddleware(cb: Function) {

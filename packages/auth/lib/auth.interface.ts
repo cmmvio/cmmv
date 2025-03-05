@@ -6,8 +6,9 @@ export interface LoginPayload {
 }
 
 export interface IAuthSettings {
-    roles: string[];
-    groups: string[];
+    roles?: string[];
+    groups?: string[];
+    rootOnly?: boolean;
 }
 
 export interface IJWTDecoded {

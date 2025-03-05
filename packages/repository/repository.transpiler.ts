@@ -27,6 +27,7 @@ export class RepositoryTranspile
         const entityName = contract.controllerName;
         const modelName = `${entityName}.Model`;
         const entityFileName = `${entityName.toLowerCase()}.entity.ts`;
+        const isModuleContract = contract.options?.moduleContract === true;
         const schemaName = contract.options?.databaseSchemaName
             ? contract.options?.databaseSchemaName
             : entityName.toLowerCase();
@@ -34,20 +35,20 @@ export class RepositoryTranspile
         const extraFields = this.generateExtraFields(contract);
         const extraEntitiesImport = this.generateExtraImport(contract);
 
-        const entityTemplate = `/**                                                                               
+        const entityTemplate = `/**
     **********************************************
     This script was generated automatically by CMMV.
-    It is recommended not to modify this file manually, 
+    It is recommended not to modify this file manually,
     as it may be overwritten by the application.
     **********************************************
 **/
-        
-import { 
+
+import {
     ${this.generateTypeORMImports(contract)}
 } from "@cmmv/repository";
 
-import { 
-    I${entityName} 
+import {
+    I${entityName}
 } from "${this.getImportPath(contract, 'models', modelName.toLowerCase(), '@models')}";${this.generateEntitiesImport(contract, extraEntitiesImport)}
 
 @Entity("${schemaName}")
@@ -59,7 +60,9 @@ export class ${entityName}Entity implements I${entityName} {
 ${contract.fields.map((field: any) => this.generateField(field)).join('\n\n')}${extraFields}
 }`;
 
-        const outputDir = this.getRootPath(contract, 'entities');
+        const outputDir = isModuleContract
+            ? this.getGeneratedPath(contract, 'entities')
+            : this.getRootPath(contract, 'entities');
         const outputFilePath = path.join(outputDir, entityFileName);
         fs.writeFileSync(outputFilePath, entityTemplate, 'utf8');
     }
@@ -75,33 +78,33 @@ ${contract.fields.map((field: any) => this.generateField(field)).join('\n\n')}${
         let importsFromModel = [];
 
         contract.services
-            .filter(service => service.createBoilerplate === true)
-            .map(service => {
+            .filter((service) => service.createBoilerplate === true)
+            .map((service) => {
                 importsFromModel.push(service.request);
                 importsFromModel.push(service.response);
             });
 
         importsFromModel = [...new Set(importsFromModel)];
 
-        let serviceTemplateGenerated = `/**                                                                               
+        let serviceTemplateGenerated = `/**
     **********************************************
     This script was generated automatically by CMMV.
-    It is recommended not to modify this file manually, 
+    It is recommended not to modify this file manually,
     as it may be overwritten by the application.
     **********************************************
 **/
 
-import { 
+import {
     AbstractRepositoryService,
-    RepositorySchema 
+    RepositorySchema
 } from "@cmmv/repository";
 
-import { 
+import {
     ${modelName}${importsFromModel.join(', \n   ')}
 } from "${this.getImportPath(contract, 'models', modelName.toLowerCase(), '@models')}.model";
 
-import { 
-    ${entityName} 
+import {
+    ${entityName}
 } from "${this.getImportPath(contract, 'entities', modelName.toLowerCase(), '@entities')}.entity";
 
 export class ${serviceName}Generated extends AbstractRepositoryService {
@@ -131,8 +134,8 @@ export class ${serviceName}Generated extends AbstractRepositoryService {
         return await this.schema.delete(id);
     }
 ${contract.services
-    .filter(service => service.createBoilerplate === true)
-    .map(service => {
+    .filter((service) => service.createBoilerplate === true)
+    .map((service) => {
         return `\n    async ${service.functionName}(payload: ${service.request}): Promise<${service.response}> {
         throw new Error("Function ${service.functionName} not implemented");
     }`;
@@ -159,8 +162,8 @@ ${contract.services
         contract: IContract,
     ): string {
         let indexDecorators: any = fields
-            .filter(field => field.index || field.unique)
-            .map(field => {
+            .filter((field) => field.index || field.unique)
+            .map((field) => {
                 const indexName = `idx_${entityName.toLowerCase()}_${field.propertyKey}`;
                 const columns = `["${field.propertyKey}"]`;
                 const uniqueOption = field.unique ? `{ unique: true }` : '';
@@ -174,7 +177,7 @@ ${contract.services
         ) {
             indexDecorators = [
                 ...indexDecorators,
-                contract.indexs.map(index => {
+                contract.indexs.map((index) => {
                     return `@Index("${index.name}", ${JSON.stringify(index.fields)}${index.options ? `, ${JSON.stringify(index.options)}` : ''})`;
                 }),
             ];
@@ -187,8 +190,8 @@ ${contract.services
         let tsType = this.mapToTsType(field.protoType, field);
         const columnOptions = this.generateColumnOptions(field);
         let decorators = [
-            `@Column({ 
-        ${columnOptions} 
+            `@Column({
+        ${columnOptions}
     })`,
         ];
         let optional = field.nullable ? '?' : '';
@@ -196,7 +199,7 @@ ${contract.services
         if (field.link) {
             decorators = [];
 
-            field.link.map(link => {
+            field.link.map((link) => {
                 const contractInstance = new link.contract();
                 const controllerName = Reflect.getMetadata(
                     CONTROLLER_NAME_METADATA,
@@ -206,9 +209,9 @@ ${contract.services
 
                 decorators.push(
                     `@ManyToOne(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${link.field}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
-    @Column({ 
-        type: "${field.protoRepeated ? 'simple-array' : 'string'}", 
-        nullable: true 
+    @Column({
+        type: "${field.protoRepeated ? 'simple-array' : 'string'}",
+        nullable: true
     })`,
                 );
             });
@@ -302,14 +305,14 @@ ${contract.services
 
         if (contract.options?.databaseUserAction) extraImport.push('ManyToOne');
 
-        contract.fields.map(field => {
+        contract.fields.map((field) => {
             if (field.link && field.link.length > 0)
                 extraImport.push('ManyToOne');
         });
 
         extraImport = [...new Set(extraImport)];
 
-        return `Entity, ${Config.get('repository.type') === 'mongodb' ? 'ObjectIdColumn' : 'PrimaryGeneratedColumn'}, 
+        return `Entity, ${Config.get('repository.type') === 'mongodb' ? 'ObjectIdColumn' : 'PrimaryGeneratedColumn'},
     Column, Index, ${Config.get('repository.type') === 'mongodb' ? 'ObjectId,' : ''} ${extraImport.length > 0 ? `\n\t${extraImport.join(', \n    ')}` : ''}`;
     }
 
@@ -318,16 +321,16 @@ ${contract.services
 
         if (contract.options?.databaseTimestamps) {
             extraFields += `
-    @CreateDateColumn({ 
-        type: "timestamp", 
-        default: () => "CURRENT_TIMESTAMP" 
+    @CreateDateColumn({
+        type: "timestamp",
+        default: () => "CURRENT_TIMESTAMP"
     })
     createdAt: Date;
 
-    @UpdateDateColumn({ 
-        type: "timestamp", 
-        default: () => "CURRENT_TIMESTAMP", 
-        onUpdate: "CURRENT_TIMESTAMP" 
+    @UpdateDateColumn({
+        type: "timestamp",
+        default: () => "CURRENT_TIMESTAMP",
+        onUpdate: "CURRENT_TIMESTAMP"
     })
     updatedAt: Date;`;
         }
@@ -357,7 +360,7 @@ ${contract.services
 
         contract.fields?.forEach((field: any) => {
             if (field.link && field.link.length > 0) {
-                field.link.map(link => {
+                field.link.map((link) => {
                     const contractInstance = new link.contract();
                     const controllerName = Reflect.getMetadata(
                         CONTROLLER_NAME_METADATA,
@@ -393,7 +396,7 @@ ${contract.services
         }
 
         if (importEntitiesList.length > 0) {
-            importEntitiesList.map(importEntity => {
+            importEntitiesList.map((importEntity) => {
                 imports.push({
                     name: importEntity.entityName,
                     path: importEntity.path,
@@ -411,7 +414,7 @@ ${contract.services
         return extraImports.length > 0
             ? '\n' +
                   extraImports
-                      .map(value => {
+                      .map((value) => {
                           return `\nimport { ${value.name} } from "${value.path}";`;
                       })
                       .join('')

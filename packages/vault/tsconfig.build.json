@@ -1,0 +1,24 @@
+{
+    "extends": "../tsconfig.build.json",
+    "compilerOptions": {
+        "outDir": ".",
+        "rootDir": ".",
+        "paths": {
+            "@cmmv/core": ["../core"],
+            "@cmmv/core/*": ["../core/*"],
+            "@cmmv/repository": ["../repository"],
+            "@cmmv/repository/*": ["../repository/*"],
+            "@cmmv/http": ["../http"],
+            "@cmmv/http/*": ["../http/*"],
+            "@cmmv/auth": ["../auth"],
+            "@cmmv/auth/*": ["../auth/*"]
+        }
+    },
+    "exclude": ["node_modules", "dist"],
+    "references": [
+        { "path": "../core/tsconfig.build.json" },
+        { "path": "../repository/tsconfig.build.json" },
+        { "path": "../http/tsconfig.build.json" },
+        { "path": "../auth/tsconfig.build.json" }
+    ]
+}

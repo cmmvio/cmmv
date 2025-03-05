@@ -221,4 +221,10 @@ module.exports = {
             defer: 'defer',
         }
     ],
+
+    vault: {
+        namespace: process.env.VAULT_NAMESPACE,
+        publicKey: process.env.VAULT_PUBLIC_KEY,
+        privateKey: process.env.VAULT_PRIVATE_KEY
+    }
 };

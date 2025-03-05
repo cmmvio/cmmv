@@ -9,6 +9,7 @@ import {
     Get,
     User,
     Session,
+    Header,
 } from '@cmmv/http';
 
 import { AuthService } from '../services/auth.service';
@@ -22,6 +23,12 @@ export class AuthController {
     @Auth()
     async user(@User() user) {
         return user;
+    }
+
+    @Get('check')
+    @Auth()
+    async handlerCheckToken() {
+        return { success: true };
     }
 
     @Post('login')

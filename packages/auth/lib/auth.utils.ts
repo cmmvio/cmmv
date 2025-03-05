@@ -1,4 +1,5 @@
-import { promisify } from 'util';
+import { promisify } from 'node:util';
+import { URL } from 'node:url';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 
@@ -43,7 +44,7 @@ export function decryptJWTData(encryptedText: string, secret: string) {
     try {
         const [iv, encrypted, authTag] = encryptedText
             .split(':')
-            .map(part => Buffer.from(part, 'hex'));
+            .map((part) => Buffer.from(part, 'hex'));
         const decipher = crypto.createDecipheriv(
             'aes-256-gcm',
             crypto.createHash('sha256').update(secret).digest(),
@@ -64,10 +65,12 @@ export function decryptJWTData(encryptedText: string, secret: string) {
 
 export function generateFingerprint(req, usernameHashed) {
     const userAgent = req.headers['user-agent'] || '';
-    const ip = req.ip || req.connection.remoteAddress || '';
+    const ip = req.ip || req.connection?.remoteAddress || '';
     const accept = req.headers['accept'] || '';
     const language = req.headers['accept-language'] || '';
-    const referer = req.headers['referer'] || '';
+    const referer = req.headers['referer']
+        ? new URL(req.headers['referer']).origin
+        : '';
     const rawFingerprint = `${userAgent}|${ip}|${accept}|${language}|${referer}|${usernameHashed}`;
     return crypto.createHash('sha256').update(rawFingerprint).digest('hex');
 }

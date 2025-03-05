@@ -15,7 +15,7 @@ import { GroupsContract } from './groups.contract';
     protoPackage: 'auth',
     subPath: '/auth',
     generateController: true,
-    auth: true,
+    auth: false,
     imports: ['crypto'],
     index: [
         {
@@ -24,6 +24,7 @@ import { GroupsContract } from './groups.contract';
         },
     ],
     options: {
+        moduleContract: true,
         databaseSchemaName: 'auth_users',
         databaseTimestamps: true,
     },
@@ -170,9 +171,10 @@ export class UserContract extends AbstractContract {
         objectType: 'string',
         defaultValue: "'{}'",
         nullable: true,
-        transform: value =>
+        transform: (value) =>
             typeof value === 'object' ? JSON.stringify(value) : '{}',
-        toPlain: value => (typeof value === 'string' ? JSON.parse(value) : {}),
+        toPlain: (value) =>
+            typeof value === 'string' ? JSON.parse(value) : {},
     })
     profile: string;
 

@@ -5,17 +5,19 @@ import { Repository } from '@cmmv/repository';
 
 import { Service, AbstractService, Config } from '@cmmv/core';
 
-import { jwtVerify } from '../lib/auth.utils';
+import { jwtVerify, decryptJWTData } from '../lib/auth.utils';
 
 import { IJWTDecoded } from '../lib/auth.interface';
+import { HttpCode, HttpException, HttpStatus } from '@cmmv/http';
 
 @Service('opt')
 export class AuthOptService extends AbstractService {
     public async generateOptSecret(token: string) {
         const UserEntity = Repository.getEntity('UserEntity');
         const decoded: IJWTDecoded = await jwtVerify(token);
+        const jwtSecret = Config.get<string>('auth.jwtSecret');
         const issuer = Config.get('auth.optSecret.issuer', 'Cmmv');
-        const algorithm = Config.get('auth.optSecret.algorithm', 'sha512');
+        const algorithm = Config.get('auth.optSecret.algorithm', 'sha1');
         const qrCodeOptions = Config.get<object>('auth.qrCode', {});
 
         const account: any = await Repository.findBy(
@@ -25,6 +27,8 @@ export class AuthOptService extends AbstractService {
                 optSecretVerify: true,
             }),
         );
+
+        decoded.username = decryptJWTData(decoded.username, jwtSecret);
 
         if (account) throw new Error('The user already has an active OPT.');
 
@@ -44,6 +48,7 @@ export class AuthOptService extends AbstractService {
         const otpUrl = speakeasy.otpauthURL({
             secret: secret.base32,
             label: decoded.username || 'User',
+            encoding: 'base32',
             issuer,
             algorithm,
         });
@@ -65,6 +70,7 @@ export class AuthOptService extends AbstractService {
 
     public async validateOptSecret(token: string, secret: string) {
         const UserEntity = Repository.getEntity('UserEntity');
+        const algorithm = Config.get('auth.optSecret.algorithm', 'sha1');
         const decoded: IJWTDecoded = await jwtVerify(token);
 
         const account: any = await Repository.findBy(
@@ -75,21 +81,27 @@ export class AuthOptService extends AbstractService {
             }),
         );
 
-        if (!account) throw new Error('Invalid user or without active OPT.');
+        if (!account)
+            throw new HttpException(
+                'Invalid user or without active OPT.',
+                HttpStatus.UNAUTHORIZED,
+            );
 
         const verify = speakeasy.totp.verify({
             secret: account.optSecret,
             encoding: 'base32',
             token: secret,
+            algorithm,
         });
 
         if (!verify) throw new Error('Invalid code');
 
-        return true;
+        return { success: true };
     }
 
     public async updateOptSecret(token: string, secret: string) {
         const UserEntity = Repository.getEntity('UserEntity');
+        const algorithm = Config.get('auth.optSecret.algorithm', 'sha1');
         const decoded: IJWTDecoded = await jwtVerify(token);
 
         const account: any = await Repository.findBy(
@@ -100,12 +112,17 @@ export class AuthOptService extends AbstractService {
             }),
         );
 
-        if (!account) throw new Error('Invalid user or without active OPT.');
+        if (!account)
+            throw new HttpException(
+                'Invalid user or without active OPT.',
+                HttpStatus.UNAUTHORIZED,
+            );
 
         const verify = speakeasy.totp.verify({
             secret: account.optSecret,
             encoding: 'base32',
             token: secret,
+            algorithm,
         });
 
         if (!verify) throw new Error('Invalid code');
@@ -116,6 +133,43 @@ export class AuthOptService extends AbstractService {
 
         if (!result) throw new Error('Unable to activate OPT');
 
-        return true;
+        return { success: true };
+    }
+
+    public async removeOptSecret(token: string, secret: string) {
+        const UserEntity = Repository.getEntity('UserEntity');
+        const algorithm = Config.get('auth.optSecret.algorithm', 'sha1');
+        const decoded: IJWTDecoded = await jwtVerify(token);
+
+        const account: any = await Repository.findBy(
+            UserEntity,
+            Repository.queryBuilder({
+                id: decoded.id,
+                optSecretVerify: true,
+            }),
+        );
+
+        if (!account)
+            throw new HttpException(
+                'Invalid user or without active OPT.',
+                HttpStatus.UNAUTHORIZED,
+            );
+
+        const verify = speakeasy.totp.verify({
+            secret: account.optSecret,
+            encoding: 'base32',
+            token: secret,
+            algorithm,
+        });
+
+        if (!verify) throw new Error('Invalid code');
+
+        const result = await Repository.updateById(UserEntity, decoded.id, {
+            optSecretVerify: false,
+        });
+
+        if (!result) throw new Error('Unable to activate OPT');
+
+        return { success: true };
     }
 }

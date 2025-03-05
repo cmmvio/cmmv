@@ -10,6 +10,8 @@ export interface IModuleOptions {
     submodules?: Array<Module>;
     contracts?: Array<new () => AbstractContract>;
     configs?: Array<ConfigSchema>;
+    entities?: Array<any>;
+    models?: Array<any>;
 }
 
 export interface IModule {
@@ -19,6 +21,8 @@ export interface IModule {
     getContracts(): Array<AbstractContract>;
     getProviders(): Array<any>;
     getConfigsSchemas(): Array<any>;
+    getEntities(): Array<any>;
+    getModels(): Array<any>;
 }
 
 export class Module implements IModule {
@@ -30,6 +34,8 @@ export class Module implements IModule {
     private contracts: Array<any>;
     private providers: Array<any>;
     private configs: Array<any>;
+    private entities: Array<any>;
+    private models: Array<any>;
 
     constructor(name: string, options: IModuleOptions) {
         this.providers = options.providers || [];
@@ -37,8 +43,11 @@ export class Module implements IModule {
         this.transpilers = options.transpilers || [];
         this.submodules = options.submodules || [];
         this.configs = options.configs || [];
+        this.entities = options.entities || [];
+        this.models = options.models || [];
         this.contracts =
-            options.contracts?.map(contractClass => new contractClass()) || [];
+            options.contracts?.map((contractClass) => new contractClass()) ||
+            [];
 
         Module.modules.set(name, this);
 
@@ -88,5 +97,13 @@ export class Module implements IModule {
 
     public getConfigsSchemas(): Array<any> {
         return this.configs;
+    }
+
+    public getEntities(): Array<any> {
+        return this.entities;
+    }
+
+    public getModels(): Array<any> {
+        return this.models;
     }
 }

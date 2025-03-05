@@ -7,6 +7,9 @@ import { AbstractContract, Contract, ContractField } from '@cmmv/core';
     directMessage: true,
     generateController: false,
     generateEntities: false,
+    options: {
+        moduleContract: true,
+    },
 })
 export class WSContract extends AbstractContract {
     @ContractField({ protoType: 'int32' })
@@ -26,6 +29,9 @@ export class WSContract extends AbstractContract {
     directMessage: true,
     generateController: false,
     generateEntities: false,
+    options: {
+        moduleContract: true,
+    },
 })
 export class WSError extends AbstractContract {
     @ContractField({ protoType: 'string' })
