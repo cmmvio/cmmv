@@ -19,3 +19,12 @@ export interface IJWTDecoded {
     roles?: string[];
     groups?: string[];
 }
+
+export interface IRoleContract {
+    rootOnly: boolean;
+    roles: string[];
+}
+
+export interface IGetRolesResponse {
+    contracts: Record<string, IRoleContract>;
+}

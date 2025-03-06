@@ -1,6 +1,7 @@
-import * as fastJson from 'fast-json-stringify';
+import fastJson from 'fast-json-stringify';
+const fastJsonStringify = (fastJson as any).default || fastJson;
 
-export const ResponseSchema = fastJson({
+export const ResponseSchema = fastJsonStringify({
     title: 'Response Schema',
     type: 'object',
     properties: {

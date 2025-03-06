@@ -23,7 +23,7 @@ import {
     decryptJWTData,
 } from '../lib/auth.utils';
 
-import { LoginPayload } from '../lib/auth.interface';
+import { LoginPayload, IGetRolesResponse } from '../lib/auth.interface';
 import { AuthSessionsService } from '../services/sessions.service';
 import { AuthRecaptchaService } from '../services/recaptcha.service';
 
@@ -105,12 +105,14 @@ export class AuthService extends AbstractService {
             .update(payload.username)
             .digest('hex');
 
+        const passwordHashed = crypto
+            .createHash('sha256')
+            .update(payload.password)
+            .digest('hex');
+
         let user: any = await Repository.findBy(UserEntity, {
             username: usernameHashed,
-            password: crypto
-                .createHash('sha256')
-                .update(payload.password)
-                .digest('hex'),
+            password: passwordHashed,
         });
 
         if (
@@ -142,6 +144,12 @@ export class AuthService extends AbstractService {
             );
         else if (user.blocked)
             throw new HttpException('User Blocked', HttpStatus.FORBIDDEN);
+        else if (user.password !== passwordHashed)
+            //Test
+            throw new HttpException(
+                'Invalid credentials',
+                HttpStatus.UNAUTHORIZED,
+            );
 
         const sesssionId = uuidv4();
         const fingerprint = generateFingerprint(req.req, usernameHashed);
@@ -176,7 +184,7 @@ export class AuthService extends AbstractService {
         );
 
         // Recording session
-        if (!user.root) {
+        if (!user.root && this.sessionsService) {
             await this.sessionsService.registrySession(
                 sesssionId,
                 req,
@@ -189,19 +197,21 @@ export class AuthService extends AbstractService {
         }
 
         // Preparing session cookie
-        res.cookie(cookieName, sesssionId, {
-            httpOnly: true,
-            secure: cookieSecure,
-            sameSite: 'strict',
-            maxAge: cookieTTL,
-        });
+        if (res) {
+            res.cookie(cookieName, sesssionId, {
+                httpOnly: true,
+                secure: cookieSecure,
+                sameSite: 'strict',
+                maxAge: cookieTTL,
+            });
 
-        res.cookie(refreshCookieName, refreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'strict',
-            maxAge: 604800,
-        });
+            res.cookie(refreshCookieName, refreshToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'strict',
+                maxAge: 604800,
+            });
+        }
 
         // Creating a session if a session plugin is active
         if (sessionEnabled && session) {
@@ -380,7 +390,7 @@ export class AuthService extends AbstractService {
     }
 
     /* Roles */
-    public async getRoles() {
+    public async getRoles(): Promise<IGetRolesResponse> {
         const contracts = Scope.getArray<any>('__contracts');
         const rolesSufixs = [
             'get',
@@ -390,7 +400,13 @@ export class AuthService extends AbstractService {
             'export',
             'import',
         ];
-        const roles = new Map<string, Array<string>>();
+        const roles = new Map<
+            string,
+            {
+                rootOnly: boolean;
+                roles: Array<string>;
+            }
+        >();
 
         contracts?.forEach((contract: IContract) => {
             if (contract.auth && contract.generateController) {
@@ -402,7 +418,10 @@ export class AuthService extends AbstractService {
                     );
                 });
 
-                roles.set(contract.controllerName, controllerRoles);
+                roles.set(contract.controllerName, {
+                    rootOnly: contract.rootOnly,
+                    roles: controllerRoles,
+                });
             }
         });
 
@@ -412,12 +431,15 @@ export class AuthService extends AbstractService {
             returnRoles[key] = value;
         });
 
-        return { roles: returnRoles };
+        return { contracts: returnRoles };
     }
 
     public async hasRole(name: string): Promise<boolean> {
         const rolesObj = await this.getRoles();
-        return Object.values(rolesObj.roles).flat().includes(name);
+        return Object.values(rolesObj.contracts)
+            .map((contract) => contract.roles)
+            .flat()
+            .includes(name);
     }
 
     public async assignRoles(
@@ -428,9 +450,28 @@ export class AuthService extends AbstractService {
         const rolesToAssign = Array.isArray(rolesInput)
             ? rolesInput
             : [rolesInput];
-        const validRoles = Object.values((await this.getRoles()).roles).flat();
+
+        const rolesData = await this.getRoles();
+        const allRoles = Object.values(rolesData.contracts).flatMap(
+            (contract) => contract.roles,
+        );
+        const rootOnlyRoles = Object.values(rolesData.contracts)
+            .filter((contract) => contract.rootOnly)
+            .flatMap((contract) => contract.roles);
+
+        const hasRootOnly = rolesToAssign.some((role) =>
+            rootOnlyRoles.includes(role),
+        );
+
+        if (hasRootOnly) {
+            throw new HttpException(
+                'Cannot assign root-only roles',
+                HttpStatus.FORBIDDEN,
+            );
+        }
+
         const invalidRoles = rolesToAssign.filter(
-            (role) => !validRoles.includes(role),
+            (role) => !allRoles.includes(role),
         );
 
         if (invalidRoles.length > 0)
@@ -469,7 +510,11 @@ export class AuthService extends AbstractService {
         const rolesToRemove = Array.isArray(rolesInput)
             ? rolesInput
             : [rolesInput];
-        const validRoles = Object.values((await this.getRoles()).roles).flat();
+
+        const validRoles = Object.values(
+            (await this.getRoles()).contracts,
+        ).flatMap((contract) => contract.roles);
+
         const invalidRoles = rolesToRemove.filter(
             (role) => !validRoles.includes(role),
         );
