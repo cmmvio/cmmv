@@ -12,11 +12,13 @@ import {
     FindOptionsSelect,
     FindOptionsOrder,
     FindOneOptions,
+    Table,
+    TableIndex,
 } from 'typeorm';
 
 import { Config, Logger, Singleton } from '@cmmv/core';
 import { IFindResponse, IInsertResponse } from './repository.interface';
-import { ObjectId } from 'mongodb';
+import { ObjectId, MongoClient } from 'mongodb';
 
 export class Repository extends Singleton {
     public static logger: Logger = new Logger('Repository');
@@ -54,6 +56,34 @@ export class Repository extends Singleton {
         });
 
         instance.dataSource = await AppDataSource.initialize();
+    }
+
+    public static generateMongoUrl(): string {
+        const config = Config.get('repository');
+
+        const protocol = 'mongodb';
+        const username = config.username
+            ? encodeURIComponent(config.username)
+            : '';
+        const password = config.password
+            ? encodeURIComponent(config.password)
+            : '';
+        const authSource = config.authSource
+            ? `?authSource=${config.authSource}`
+            : '';
+        const replicaSet = config.replicaSet
+            ? `&replicaSet=${config.replicaSet}`
+            : '';
+        const host = Array.isArray(config.host)
+            ? config.host.join(',')
+            : config.host;
+        const port = config.port ? `:${config.port}` : '';
+        const database = config.database ? `/${config.database}` : '';
+
+        if (username && password)
+            return `${protocol}://${username}:${password}@${host}${port}${database}${authSource}${replicaSet}`;
+
+        return `${protocol}://${host}${port}${database}${authSource}${replicaSet}`;
     }
 
     private static getRepository<Entity>(
@@ -338,6 +368,166 @@ export class Repository extends Singleton {
             return result !== null;
         } catch (e) {
             return false;
+        }
+    }
+
+    public static async listDatabases(): Promise<{ databases: string[] }> {
+        const instance = this.getInstance();
+        const type = Config.get('repository.type');
+
+        if (type === 'mongodb') {
+            const client = new MongoClient(Repository.generateMongoUrl());
+            const conn = await client.connect();
+            const result: any = await conn.db().admin().listDatabases();
+            return { databases: result.databases.map((db) => db.name) };
+        } else {
+            const queryRunner = instance.dataSource.createQueryRunner();
+            const databases = await queryRunner.query('SHOW DATABASES');
+            await queryRunner.release();
+            return {
+                databases: databases.map((db: any) => Object.values(db)[0]),
+            };
+        }
+    }
+
+    public static async listTables(
+        database: string,
+    ): Promise<{ tables: string[] }> {
+        const instance = this.getInstance();
+        const type = Config.get('repository.type');
+
+        if (type === 'mongodb') {
+            const client = new MongoClient(Repository.generateMongoUrl());
+            const conn = await client.connect();
+            const result: any = await conn
+                .db(database)
+                .listCollections()
+                .toArray();
+            return { tables: result.map((collection) => collection.name) };
+        } else {
+            const queryRunner = instance.dataSource.createQueryRunner();
+            let query = '';
+
+            switch (type) {
+                case 'mysql':
+                    query = `SHOW TABLES FROM \`${database}\``;
+                    break;
+                case 'postgres':
+                    query = `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_catalog = '${database}'`;
+                    break;
+                case 'mssql':
+                    query = `SELECT name FROM ${database}.sys.tables`;
+                    break;
+                default:
+                    throw new Error(
+                        `Database type '${type}' is not supported for table listing.`,
+                    );
+            }
+
+            const result = await queryRunner.query(query);
+            await queryRunner.release();
+            return { tables: result.map((row: any) => Object.values(row)[0]) };
+        }
+    }
+
+    public static async listIndexes(table: string): Promise<any[]> {
+        try {
+            const queryRunner =
+                this.getInstance().dataSource.createQueryRunner();
+            const indexes = await queryRunner.getTable(table);
+            await queryRunner.release();
+            return indexes ? indexes.indices : [];
+        } catch (error) {
+            Repository.logger.error(
+                `Error listing indexes for ${table}: ${error.message}`,
+            );
+            return [];
+        }
+    }
+
+    public static async createTable(
+        tableName: string,
+        columns: any[],
+    ): Promise<boolean> {
+        try {
+            const queryRunner =
+                this.getInstance().dataSource.createQueryRunner();
+            await queryRunner.createTable(
+                new Table({
+                    name: tableName,
+                    columns: columns,
+                }),
+            );
+            await queryRunner.release();
+            return true;
+        } catch (error) {
+            Repository.logger.error(
+                `Error creating table ${tableName}: ${error.message}`,
+            );
+            return false;
+        }
+    }
+
+    public static async updateIndex(
+        table: string,
+        indexName: string,
+        newIndexDefinition: any,
+    ): Promise<boolean> {
+        try {
+            const queryRunner =
+                this.getInstance().dataSource.createQueryRunner();
+            const tableSchema = await queryRunner.getTable(table);
+            if (!tableSchema) return false;
+
+            const existingIndex = tableSchema.indices.find(
+                (index) => index.name === indexName,
+            );
+            if (existingIndex) await queryRunner.dropIndex(table, indexName);
+
+            await queryRunner.createIndex(
+                table,
+                new TableIndex(newIndexDefinition),
+            );
+            await queryRunner.release();
+            return true;
+        } catch (error) {
+            Repository.logger.error(
+                `Error updating index ${indexName} on table ${table}: ${error.message}`,
+            );
+            return false;
+        }
+    }
+
+    public static async removeIndex(
+        table: string,
+        indexName: string,
+    ): Promise<boolean> {
+        try {
+            const queryRunner =
+                this.getInstance().dataSource.createQueryRunner();
+            await queryRunner.dropIndex(table, indexName);
+            await queryRunner.release();
+            return true;
+        } catch (error) {
+            Repository.logger.error(
+                `Error removing index ${indexName} from table ${table}: ${error.message}`,
+            );
+            return false;
+        }
+    }
+
+    public static async listFields(table: string): Promise<any[]> {
+        try {
+            const queryRunner =
+                this.getInstance().dataSource.createQueryRunner();
+            const tableSchema = await queryRunner.getTable(table);
+            await queryRunner.release();
+            return tableSchema ? tableSchema.columns : [];
+        } catch (error) {
+            Repository.logger.error(
+                `Error listing fields for ${table}: ${error.message}`,
+            );
+            return [];
         }
     }
 }

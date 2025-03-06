@@ -9,7 +9,9 @@ import {
     Get,
     User,
     Session,
-    Header,
+    Put,
+    Param,
+    Delete,
 } from '@cmmv/http';
 
 import { AuthService } from '../services/auth.service';
@@ -76,5 +78,43 @@ export class AuthController {
     @Post('refresh')
     async handlerRefreshToken(@Request() req) {
         return this.authService.refreshToken(req);
+    }
+
+    /* Block User */
+    @Put('block-user/:userId')
+    @Auth({ rootOnly: true })
+    async handlerBlockUser(@Param('userId') userId) {
+        return this.authService.blockUser(userId);
+    }
+
+    @Put('unblock-user/:userId')
+    @Auth({ rootOnly: true })
+    async handlerUnblockUser(@Param('userId') userId) {
+        return this.authService.unblockUser(userId);
+    }
+
+    /* Roles */
+    @Get('roles')
+    @Auth({ rootOnly: true })
+    async handlerGetRoles() {
+        return this.authService.getRoles();
+    }
+
+    @Put('roles/:userId')
+    @Auth({ rootOnly: true })
+    async handlerAssignRoles(
+        @Param('userId') userId,
+        @Body() payload: { roles: string | string[] },
+    ) {
+        return this.authService.assignRoles(userId, payload.roles);
+    }
+
+    @Delete('roles/:userId')
+    @Auth({ rootOnly: true })
+    async handlerRemoveRoles(
+        @Param('userId') userId,
+        @Body() payload: { roles: string | string[] },
+    ) {
+        return this.authService.removeRoles(userId, payload.roles);
     }
 }

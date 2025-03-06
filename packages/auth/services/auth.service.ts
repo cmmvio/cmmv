@@ -29,34 +29,11 @@ import { AuthRecaptchaService } from '../services/recaptcha.service';
 
 @Service('auth')
 export class AuthService extends AbstractService {
-    public static roles = new Set<string>();
-
     constructor(
         private readonly sessionsService: AuthSessionsService,
         private readonly recaptchaService: AuthRecaptchaService,
     ) {
         super();
-    }
-
-    @Hook(HooksType.onListen)
-    public async syncRoles() {
-        const contracts = Scope.getArray<any>('__contracts');
-        const rolesSufixs = ['get', 'insert', 'update', 'delete', 'export'];
-        const rolesNames = new Set<string>();
-
-        contracts?.forEach((contract: IContract) => {
-            if (contract.auth && contract.generateController) {
-                rolesSufixs.map((sufix: string) => {
-                    rolesNames.add(
-                        `${contract.controllerName.toLowerCase()}:${sufix}`,
-                    );
-                });
-            }
-        });
-
-        rolesNames.forEach((roleName: string) =>
-            AuthService.roles.add(roleName),
-        );
     }
 
     private isLocalhost(req: any): boolean {
@@ -129,7 +106,6 @@ export class AuthService extends AbstractService {
             .digest('hex');
 
         let user: any = await Repository.findBy(UserEntity, {
-            blocked: false,
             username: usernameHashed,
             password: crypto
                 .createHash('sha256')
@@ -200,13 +176,17 @@ export class AuthService extends AbstractService {
         );
 
         // Recording session
-        await this.sessionsService.registrySession(
-            sesssionId,
-            req,
-            fingerprint,
-            Config.get('repository.type') === 'mongodb' ? user._id : user.id,
-            refreshToken,
-        );
+        if (!user.root) {
+            await this.sessionsService.registrySession(
+                sesssionId,
+                req,
+                fingerprint,
+                Config.get('repository.type') === 'mongodb'
+                    ? user._id
+                    : user.id,
+                refreshToken,
+            );
+        }
 
         // Preparing session cookie
         res.cookie(cookieName, sesssionId, {
@@ -267,9 +247,13 @@ export class AuthService extends AbstractService {
             validated: false,
         });
 
-        return result.success
-            ? { success: true, message: 'User registered successfully!' }
-            : { success: false, message: 'Error trying to register new user' };
+        if (!result.success)
+            throw new HttpException(
+                'Error trying to register new user',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+
+        return { success: true, message: 'User registered successfully!' };
     }
 
     public async checkUsernameExists(username: string): Promise<boolean> {
@@ -393,5 +377,205 @@ export class AuthService extends AbstractService {
             token: accessToken,
             message: 'Refresh successful',
         };
+    }
+
+    /* Roles */
+    public async getRoles() {
+        const contracts = Scope.getArray<any>('__contracts');
+        const rolesSufixs = [
+            'get',
+            'insert',
+            'update',
+            'delete',
+            'export',
+            'import',
+        ];
+        const roles = new Map<string, Array<string>>();
+
+        contracts?.forEach((contract: IContract) => {
+            if (contract.auth && contract.generateController) {
+                let controllerRoles = new Array<string>();
+
+                rolesSufixs.map((sufix: string) => {
+                    controllerRoles.push(
+                        `${contract.controllerName.toLowerCase()}:${sufix}`,
+                    );
+                });
+
+                roles.set(contract.controllerName, controllerRoles);
+            }
+        });
+
+        const returnRoles: any = {};
+
+        roles.forEach((value, key) => {
+            returnRoles[key] = value;
+        });
+
+        return { roles: returnRoles };
+    }
+
+    public async hasRole(name: string): Promise<boolean> {
+        const rolesObj = await this.getRoles();
+        return Object.values(rolesObj.roles).flat().includes(name);
+    }
+
+    public async assignRoles(
+        userId: string,
+        rolesInput: string | string[],
+    ): Promise<{ success: boolean; message: string }> {
+        const UserEntity = Repository.getEntity('UserEntity');
+        const rolesToAssign = Array.isArray(rolesInput)
+            ? rolesInput
+            : [rolesInput];
+        const validRoles = Object.values((await this.getRoles()).roles).flat();
+        const invalidRoles = rolesToAssign.filter(
+            (role) => !validRoles.includes(role),
+        );
+
+        if (invalidRoles.length > 0)
+            throw new HttpException(
+                `Invalid roles: ${invalidRoles.join(', ')}`,
+                HttpStatus.BAD_REQUEST,
+            );
+
+        const user = await Repository.findBy(
+            UserEntity,
+            Repository.queryBuilder({ id: userId }),
+        );
+
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+        const rolesJson = JSON.stringify(rolesToAssign);
+        const result = await Repository.update(UserEntity, userId, {
+            roles: rolesJson,
+        });
+
+        if (result <= 0)
+            throw new HttpException(
+                'Failed to update roles',
+                HttpStatus.BAD_REQUEST,
+            );
+
+        return { success: true, message: 'Roles assigned successfully' };
+    }
+
+    public async removeRoles(
+        userId: string,
+        rolesInput: string | string[],
+    ): Promise<{ success: boolean; message: string }> {
+        const UserEntity = Repository.getEntity('UserEntity');
+        const rolesToRemove = Array.isArray(rolesInput)
+            ? rolesInput
+            : [rolesInput];
+        const validRoles = Object.values((await this.getRoles()).roles).flat();
+        const invalidRoles = rolesToRemove.filter(
+            (role) => !validRoles.includes(role),
+        );
+
+        if (invalidRoles.length > 0)
+            throw new HttpException(
+                `Invalid roles: ${invalidRoles.join(', ')}`,
+                HttpStatus.BAD_REQUEST,
+            );
+
+        const user = await Repository.findBy(
+            UserEntity,
+            Repository.queryBuilder({ id: userId }),
+        );
+
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+        let currentRoles: string[] = [];
+
+        try {
+            currentRoles = user.roles ? JSON.parse(user.roles) : [];
+        } catch (error) {
+            throw new HttpException(
+                'Failed to parse user roles',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+
+        const updatedRoles = currentRoles.filter(
+            (role) => !rolesToRemove.includes(role),
+        );
+        const rolesJson = JSON.stringify(updatedRoles);
+        const result = await Repository.update(UserEntity, userId, {
+            roles: rolesJson,
+        });
+
+        if (result <= 0)
+            throw new HttpException(
+                'Failed to update roles',
+                HttpStatus.BAD_REQUEST,
+            );
+
+        return { success: true, message: 'Roles removed successfully' };
+    }
+
+    /* Block */
+    public async blockUser(
+        userId: string,
+    ): Promise<{ success: boolean; message: string }> {
+        const UserEntity = Repository.getEntity('UserEntity');
+        const user = await Repository.findBy(
+            UserEntity,
+            Repository.queryBuilder({ id: userId }),
+        );
+
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+        if (user.blocked)
+            throw new HttpException(
+                'User is already blocked',
+                HttpStatus.BAD_REQUEST,
+            );
+
+        const result = await Repository.update(UserEntity, userId, {
+            blocked: true,
+        });
+
+        if (result <= 0)
+            throw new HttpException(
+                'Failed to block user',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+
+        return { success: true, message: 'User blocked successfully' };
+    }
+
+    public async unblockUser(
+        userId: string,
+    ): Promise<{ success: boolean; message: string }> {
+        const UserEntity = Repository.getEntity('UserEntity');
+        const user = await Repository.findBy(
+            UserEntity,
+            Repository.queryBuilder({ id: userId }),
+        );
+
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+        if (!user.blocked)
+            throw new HttpException(
+                'User is already unblocked',
+                HttpStatus.BAD_REQUEST,
+            );
+
+        const result = await Repository.update(UserEntity, userId, {
+            blocked: false,
+        });
+
+        if (result <= 0)
+            throw new HttpException(
+                'Failed to unblock user',
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+
+        return { success: true, message: 'User unblocked successfully' };
     }
 }

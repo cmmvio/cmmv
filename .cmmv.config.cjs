@@ -60,11 +60,18 @@ module.exports = {
         scriptsTimestamp: false
     },
 
-    repository: {
+    /*repository: {
         type: 'mongodb',
         host: 'localhost',
         port: 27017,
         database: 'cmmv',
+        synchronize: true,
+        logging: false,
+    },*/
+
+    repository: {
+        type: 'sqlite',
+        database: "./database.sqlite",
         synchronize: true,
         logging: false,
     },

@@ -48,8 +48,8 @@ export class DefaultHTTPTranspiler
         let importsFromModel = [];
 
         contract.services
-            .filter(service => service.createBoilerplate === true)
-            .map(service => {
+            .filter((service) => service.createBoilerplate === true)
+            .map((service) => {
                 importsFromModel.push(service.request);
                 importsFromModel.push(service.response);
             });
@@ -148,8 +148,8 @@ export class ${serviceName}Generated extends AbstractService {
     }
 
     ${contract.services
-        .filter(service => service.createBoilerplate === true)
-        .map(service => {
+        .filter((service) => service.createBoilerplate === true)
+        .map((service) => {
             return `    async ${service.name}(payload: ${service.request}): Promise<${service.response}> {
             throw new Error("Function ${service.name} not implemented");
         }`;
@@ -180,8 +180,8 @@ import {
 @Service("${contract.controllerName.toLowerCase()}")
 export class ${serviceName} extends ${serviceName}Generated {
 ${contract.services
-    .filter(service => service.createBoilerplate === true)
-    .map(service => {
+    .filter((service) => service.createBoilerplate === true)
+    .map((service) => {
         return `    override async ${service.functionName}(payload: ${service.request}): Promise<${service.response}> {
         throw new Error("Function ${service.functionName} not implemented");
     }`;
@@ -201,14 +201,16 @@ ${contract.services
     }
 
     private getControllerDecorators(
-        { authRouter, hasCache, contract },
+        { authRouter, rootOnlyRouter = false, hasCache, contract },
         medatada?: any,
         authRole = 'get',
     ) {
         let decoracotrs = '';
 
-        if (authRouter === true)
+        if (authRouter === true && !rootOnlyRouter)
             decoracotrs += `\n    @Auth("${contract.controllerName.toLowerCase()}:${authRole}")`;
+        else if (authRouter === true && rootOnlyRouter)
+            decoracotrs += `\n    @Auth({ rootOnly: true })`;
 
         if (hasCache === true)
             decoracotrs += `\n    @Cache("${medatada.cacheKeyPrefix}getAll", { ttl: ${medatada.cacheTtl}, compress: ${medatada.cacheCompress}, schema: ${contract.controllerName}FastSchema })`;
@@ -229,6 +231,7 @@ ${contract.services
             contract.cache !== undefined &&
             contract.cache !== null;
         const authRouter = contract.auth === true;
+        const rootOnlyRouter = contract.rootOnly === true;
         const cacheKeyPrefix = hasCache
             ? contract.cache.key || `${contract.controllerName.toLowerCase()}:`
             : '';
@@ -241,7 +244,7 @@ ${contract.services
 
         let importsFromModel = [];
 
-        contract.services.map(service => {
+        contract.services.map((service) => {
             importsFromModel.push(service.request);
             importsFromModel.push(service.response);
         });
@@ -277,12 +280,12 @@ import {
 export class ${controllerName}Generated {
     constructor(private readonly ${serviceName.toLowerCase()}: ${serviceName}) {}
 
-    @Get()${this.getControllerDecorators({ authRouter, hasCache, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'get')}
+    @Get()${this.getControllerDecorators({ authRouter, rootOnlyRouter, hasCache, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'get')}
     async getAll(@Queries() queries: any, @Req() req) {
         return this.${serviceName.toLowerCase()}.getAll(queries, req);
     }
 
-    @Get(':id')${this.getControllerDecorators({ authRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'get')}
+    @Get(':id')${this.getControllerDecorators({ authRouter, rootOnlyRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'get')}
     async getById(@Param('id') id: string, @Req() req) {
         ${
             hasCache
@@ -292,33 +295,33 @@ export class ${controllerName}Generated {
         }
     }
 
-    @Get(':id/raw')${this.getControllerDecorators({ authRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'get')}
+    @Get(':id/raw')${this.getControllerDecorators({ authRouter, rootOnlyRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'get')}
     async getByIdRaw(@Param('id') id: string, @Req() req) {
         const result = await this.${serviceName.toLowerCase()}.getById(id, req);
         return ${contract.controllerName}FastSchema(result.data);
     }
 
-    @Post()${this.getControllerDecorators({ authRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'insert')}
+    @Post()${this.getControllerDecorators({ authRouter, rootOnlyRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'insert')}
     async insert(@Body() item: ${contract.controllerName}, @Req() req) {
         const result = await this.${serviceName.toLowerCase()}.insert(item, req);${hasCache ? `\n        await CacheService.del("${cacheKeyPrefix}getAll");` : ''}
         return result;
     }
 
-    @Put(':id')${this.getControllerDecorators({ authRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'update')}
+    @Put(':id')${this.getControllerDecorators({ authRouter, rootOnlyRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'update')}
     async update(@Param('id') id: string, @Body() item: ${contract.controllerName}, @Req() req) {
         const result = await this.${serviceName.toLowerCase()}.update(id, item, req);${hasCache ? `\n        await CacheService.del(\`${cacheKeyPrefix}\${id}\`);\n        await CacheService.del("${cacheKeyPrefix}getAll");` : ''}
         return result;
     }
 
-    @Delete(':id')${this.getControllerDecorators({ authRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'delete')}
+    @Delete(':id')${this.getControllerDecorators({ authRouter, rootOnlyRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'delete')}
     async delete(@Param('id') id: string, @Req() req) {
         const result = await this.${serviceName.toLowerCase()}.delete(id, req);${hasCache ? `\n        await CacheService.del(\`${cacheKeyPrefix}\${id}\`);\n        await CacheService.del("${cacheKeyPrefix}getAll");` : ''}
         return result;
     }
 ${contract.services
-    .filter(service => service.createBoilerplate === true)
-    .map(service => {
-        return `    @${this.getMethodFormated(service.method)}("${service.path}")${this.getControllerDecorators({ authRouter: service.auth, hasCache: service.cache, contract }, service.cache, service.method.toLowerCase())}
+    .filter((service) => service.createBoilerplate === true)
+    .map((service) => {
+        return `    @${this.getMethodFormated(service.method)}("${service.path}")${this.getControllerDecorators({ authRouter: service.auth, rootOnlyRouter: service.rootOnly, hasCache: service.cache, contract }, service.cache, service.method.toLowerCase())}
     async ${service.functionName}(@Body() payload: ${service.request}, @Req() req): Promise<${service.response}> {
         return this.${serviceName.toLowerCase()}.${service.functionName}(payload);
     }`;

@@ -6,6 +6,7 @@ import { AbstractContract, Contract, ContractField } from '@cmmv/core';
     subPath: '/auth',
     generateController: true,
     auth: true,
+    rootOnly: true,
     options: {
         moduleContract: true,
         databaseSchemaName: 'auth_groups',

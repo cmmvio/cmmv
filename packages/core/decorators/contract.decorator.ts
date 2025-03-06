@@ -69,6 +69,7 @@ export interface ContractOptions {
     generateController?: boolean;
     generateEntities?: boolean;
     auth?: boolean;
+    rootOnly?: boolean;
     imports?: Array<string>;
     cache?: CacheOptions;
     index?: ContractIndex[];
@@ -80,6 +81,7 @@ export interface ContractOptions {
 export interface ContractLink {
     contract: new () => any;
     entityName: string;
+    entityNullable?: boolean;
     field: string;
     array?: boolean;
 }
@@ -132,6 +134,7 @@ export const GENERATE_CONTROLLER_METADATA = Symbol(
 );
 export const GENERATE_ENTITIES_METADATA = Symbol('generate_entities_metadata');
 export const AUTH_METADATA = Symbol('auth_metadata');
+export const ROOTONLY_METADATA = Symbol('rootonly_metadata');
 export const CONTROLLER_CUSTOM_PATH_METADATA = Symbol(
     'controller_custom_path_metadata',
 );
@@ -161,6 +164,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
     const defaultGenerateController = true;
     const defaultGenerateEntities = true;
     const defaultAuth = true;
+    const defaultRootOnly = false;
     const defaultControllerCustomPath = '';
     const defaultImports = [];
     const defaultIndexs = [];
@@ -178,6 +182,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
         generateController,
         generateEntities,
         auth,
+        rootOnly,
         controllerCustomPath,
         imports,
         indexs,
@@ -195,6 +200,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
               defaultGenerateController,
               defaultGenerateEntities,
               defaultAuth,
+              defaultRootOnly,
               defaultControllerCustomPath,
               defaultImports,
               defaultIndexs,
@@ -212,6 +218,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
               options.generateController ?? defaultGenerateController,
               options.generateEntities ?? defaultGenerateEntities,
               options.auth ?? defaultAuth,
+              options.rootOnly ?? defaultRootOnly,
               options.controllerCustomPath || defaultControllerCustomPath,
               options.imports || defaultImports,
               options.index || defaultIndexs,
@@ -243,6 +250,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
             target,
         );
         Reflect.defineMetadata(AUTH_METADATA, auth, target);
+        Reflect.defineMetadata(ROOTONLY_METADATA, rootOnly, target);
         Reflect.defineMetadata(
             CONTROLLER_CUSTOM_PATH_METADATA,
             controllerCustomPath,

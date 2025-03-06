@@ -271,7 +271,7 @@ import {
                 .replace(/_([a-zA-Z]+)/g, ' $1');
 
             decorators.push(
-                `    @Transform(${cleanedTransform}, { toClassOnly: true })`,
+                `    //@ts-ignore\n    @Transform(${cleanedTransform}, { toClassOnly: true })`,
             );
         }
 
@@ -281,7 +281,7 @@ import {
                 .replace(/_([a-zA-Z]+)/g, ' $1');
 
             decorators.push(
-                `    @Transform(${cleanedToPlain}, { toPlainOnly: true })`,
+                `    //@ts-ignore\n    @Transform(${cleanedToPlain}, { toPlainOnly: true })`,
             );
         }
 

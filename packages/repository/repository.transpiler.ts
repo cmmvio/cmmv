@@ -206,11 +206,15 @@ ${contract.services
                     contractInstance.constructor,
                 );
                 const entityName = controllerName;
+                const isMongoDB = Config.get('repository.type') === 'mongodb';
+                const linkType = isMongoDB ? 'string' : 'varchar';
+                const linkField =
+                    link.field === '_id' && !isMongoDB ? 'id' : link.field;
 
                 decorators.push(
-                    `@ManyToOne(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${link.field}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
+                    `@ManyToOne(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${linkField}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
     @Column({
-        type: "${field.protoRepeated ? 'simple-array' : 'string'}",
+        type: "${field.protoRepeated ? 'simple-array' : linkType}",
         nullable: true
     })`,
                 );
@@ -225,12 +229,15 @@ ${contract.services
     }
 
     private generateColumnOptions(field: any): string {
+        const isMongoDB = Config.get('repository.type') === 'mongodb';
+        const typeField = this.mapToTypeORMType(field.protoType, field);
         const options = [];
-        options.push(
-            `type: "${this.mapToTypeORMType(field.protoType, field)}"`,
-        );
+        options.push(`type: "${typeField}"`);
 
-        if (field.defaultValue !== undefined) {
+        if (
+            field.defaultValue !== undefined &&
+            (isMongoDB || typeField !== 'simple-array')
+        ) {
             options.push(
                 `        default: ${typeof field.defaultValue === 'object' ? JSON.stringify(field.defaultValue) : field.defaultValue}`,
             );
@@ -318,19 +325,19 @@ ${contract.services
 
     private generateExtraFields(contract: IContract) {
         let extraFields = '';
+        const isSQLite = Config.get('repository.type') === 'sqlite';
 
         if (contract.options?.databaseTimestamps) {
             extraFields += `
     @CreateDateColumn({
-        type: "timestamp",
-        default: () => "CURRENT_TIMESTAMP"
+        type: "${isSQLite ? 'datetime' : 'timestamp'}",
+        nullable: false
     })
     createdAt: Date;
 
     @UpdateDateColumn({
-        type: "timestamp",
-        default: () => "CURRENT_TIMESTAMP",
-        onUpdate: "CURRENT_TIMESTAMP"
+        type: "${isSQLite ? 'datetime' : 'timestamp'}",
+        nullable: true
     })
     updatedAt: Date;`;
         }
@@ -339,13 +346,13 @@ ${contract.services
             if (extraFields) extraFields += '\n';
 
             extraFields += `
-    @ManyToOne(() => UserEntity, { nullable: true })
-    ${Config.get('repository.type') === 'mongodb' ? '@ObjectIdColumn({ nullable: true })' : '@Column({ type: "varchar", nullable: true })'}
-    userCreator: ${Config.get('repository.type') === 'mongodb' ? 'ObjectId' : 'string'};
+        @ManyToOne(() => UserEntity, { nullable: true })
+        ${Config.get('repository.type') === 'mongodb' ? '@ObjectIdColumn({ nullable: true })' : '@Column({ type: "varchar", nullable: true })'}
+        userCreator: ${Config.get('repository.type') === 'mongodb' ? 'ObjectId' : 'string'};
 
-    @ManyToOne(() => UserEntity, { nullable: true })
-    ${Config.get('repository.type') === 'mongodb' ? '@ObjectIdColumn({ nullable: true })' : '@Column({ type: "varchar", nullable: true })'}
-    userLastUpdate: ${Config.get('repository.type') === 'mongodb' ? 'ObjectId' : 'string'};`;
+        @ManyToOne(() => UserEntity, { nullable: true })
+        ${Config.get('repository.type') === 'mongodb' ? '@ObjectIdColumn({ nullable: true })' : '@Column({ type: "varchar", nullable: true })'}
+        userLastUpdate: ${Config.get('repository.type') === 'mongodb' ? 'ObjectId' : 'string'};`;
         }
 
         return extraFields ? `\n${extraFields}` : '';

@@ -28,6 +28,7 @@ import {
     PROTO_PACKAGE_METADATA,
     GENERATE_CONTROLLER_METADATA,
     AUTH_METADATA,
+    ROOTONLY_METADATA,
     CONTROLLER_CUSTOM_PATH_METADATA,
     CONTROLLER_IMPORTS,
     CONTROLLER_INDEXS,
@@ -449,6 +450,10 @@ export class Application {
                     AUTH_METADATA,
                     contract.constructor,
                 );
+                const rootOnly = Reflect.getMetadata(
+                    ROOTONLY_METADATA,
+                    contract.constructor,
+                );
                 const controllerCustomPath = Reflect.getMetadata(
                     CONTROLLER_CUSTOM_PATH_METADATA,
                     contract.constructor,
@@ -490,6 +495,7 @@ export class Application {
                     generateController,
                     generateEntities,
                     auth,
+                    rootOnly,
                     controllerCustomPath,
                     imports,
                     indexs,

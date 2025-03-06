@@ -174,10 +174,6 @@ export class AuthSessionsService extends AbstractService {
         };
 
         const result = await Repository.insert(SessionsEntity, newSession);
-
-        if (hasCacheModule) {
-        }
-
         if (!result.success) throw new Error('Failed to create session');
 
         return true;

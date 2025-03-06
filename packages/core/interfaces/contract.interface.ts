@@ -16,6 +16,7 @@ export class IContract {
     generateController?: boolean;
     generateEntities?: boolean;
     auth?: boolean;
+    rootOnly?: boolean;
     controllerCustomPath?: string;
     imports?: Array<string>;
     indexs?: ContractIndex[];
@@ -48,6 +49,7 @@ export class IContractService {
     path: string;
     method: string;
     auth?: boolean;
+    rootOnly?: boolean;
     cache?: CacheOptions;
     functionName?: string;
     request: string;
