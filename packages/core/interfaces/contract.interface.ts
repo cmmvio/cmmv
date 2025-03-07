@@ -35,6 +35,7 @@ export class IContractField {
     validations?: Array<any>;
     transform?: Function;
     link?: ContractIndex[];
+    resolver?: string;
 }
 
 export class IContractMessage {

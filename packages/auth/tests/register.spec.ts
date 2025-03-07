@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../services/autorization.service';
 import { Repository } from '@cmmv/repository';
 import { Application } from '@cmmv/core';
 import { HttpException, HttpStatus } from '@cmmv/http';

@@ -7,31 +7,20 @@ import {
     Request,
     Response,
     Get,
-    User,
     Session,
     Put,
     Param,
     Delete,
 } from '@cmmv/http';
 
-import { AuthService } from '../services/auth.service';
+import { AuthAutorizationService } from '../services/autorization.service';
 import { Auth } from '../lib/auth.decorator';
 
 @Controller('auth')
-export class AuthController {
-    constructor(private readonly authService: AuthService) {}
-
-    @Get('user')
-    @Auth()
-    async user(@User() user) {
-        return user;
-    }
-
-    @Get('check')
-    @Auth()
-    async handlerCheckToken() {
-        return { success: true };
-    }
+export class AuthAutorizationController {
+    constructor(
+        private readonly autorizationService: AuthAutorizationService,
+    ) {}
 
     @Post('login')
     async handlerLogin(
@@ -43,7 +32,7 @@ export class AuthController {
         const localLogin = Config.get('auth.localLogin', false);
 
         if (localLogin) {
-            const { result } = await this.authService.login(
+            const { result } = await this.autorizationService.login(
                 payload,
                 req,
                 res,
@@ -59,9 +48,16 @@ export class AuthController {
     async handlerRegister(@Body() payload) {
         const localRegister = Config.get('auth.localRegister', false);
 
-        if (localRegister) return await this.authService.register(payload);
+        if (localRegister)
+            return await this.autorizationService.register(payload);
 
         return false;
+    }
+
+    @Get('check')
+    @Auth()
+    async handlerCheckToken() {
+        return { success: true };
     }
 
     @Post('check-username')
@@ -69,7 +65,7 @@ export class AuthController {
         @Body() payload: { username: string },
         @Response() res,
     ) {
-        const exists = await this.authService.checkUsernameExists(
+        const exists = await this.autorizationService.checkUsernameExists(
             payload.username,
         );
         res.type('text/json').send(exists.toString());
@@ -77,27 +73,14 @@ export class AuthController {
 
     @Post('refresh')
     async handlerRefreshToken(@Request() req) {
-        return this.authService.refreshToken(req);
-    }
-
-    /* Block User */
-    @Put('block-user/:userId')
-    @Auth({ rootOnly: true })
-    async handlerBlockUser(@Param('userId') userId) {
-        return this.authService.blockUser(userId);
-    }
-
-    @Put('unblock-user/:userId')
-    @Auth({ rootOnly: true })
-    async handlerUnblockUser(@Param('userId') userId) {
-        return this.authService.unblockUser(userId);
+        return this.autorizationService.refreshToken(req);
     }
 
     /* Roles */
     @Get('roles')
     @Auth({ rootOnly: true })
     async handlerGetRoles() {
-        return this.authService.getRoles();
+        return this.autorizationService.getRoles();
     }
 
     @Put('roles/:userId')
@@ -106,7 +89,7 @@ export class AuthController {
         @Param('userId') userId,
         @Body() payload: { roles: string | string[] },
     ) {
-        return this.authService.assignRoles(userId, payload.roles);
+        return this.autorizationService.assignRoles(userId, payload.roles);
     }
 
     @Delete('roles/:userId')
@@ -115,6 +98,6 @@ export class AuthController {
         @Param('userId') userId,
         @Body() payload: { roles: string | string[] },
     ) {
-        return this.authService.removeRoles(userId, payload.roles);
+        return this.autorizationService.removeRoles(userId, payload.roles);
     }
 }

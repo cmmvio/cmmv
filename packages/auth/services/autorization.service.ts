@@ -22,11 +22,11 @@ import {
 } from '../lib/auth.utils';
 
 import { LoginPayload, IGetRolesResponse } from '../lib/auth.interface';
-import { AuthSessionsService } from '../services/sessions.service';
-import { AuthRecaptchaService } from '../services/recaptcha.service';
+import { AuthSessionsService } from './sessions.service';
+import { AuthRecaptchaService } from './recaptcha.service';
 
 @Service('auth')
-export class AuthService extends AbstractService {
+export class AuthAutorizationService extends AbstractService {
     constructor(
         private readonly sessionsService: AuthSessionsService,
         private readonly recaptchaService: AuthRecaptchaService,
@@ -552,68 +552,5 @@ export class AuthService extends AbstractService {
         }
 
         return { success: true, message: 'Roles removed successfully' };
-    }
-
-    /* Block */
-    public async blockUser(
-        userId: string,
-    ): Promise<{ success: boolean; message: string }> {
-        const UserEntity = Repository.getEntity('UserEntity');
-        const user = await Repository.findBy(
-            UserEntity,
-            Repository.queryBuilder({ id: userId }),
-        );
-
-        if (!user)
-            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-
-        if (user.blocked)
-            throw new HttpException(
-                'User is already blocked',
-                HttpStatus.BAD_REQUEST,
-            );
-
-        const result = await Repository.update(UserEntity, userId, {
-            blocked: true,
-        });
-
-        if (result <= 0)
-            throw new HttpException(
-                'Failed to block user',
-                HttpStatus.INTERNAL_SERVER_ERROR,
-            );
-
-        return { success: true, message: 'User blocked successfully' };
-    }
-
-    public async unblockUser(
-        userId: string,
-    ): Promise<{ success: boolean; message: string }> {
-        const UserEntity = Repository.getEntity('UserEntity');
-        const user = await Repository.findBy(
-            UserEntity,
-            Repository.queryBuilder({ id: userId }),
-        );
-
-        if (!user)
-            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-
-        if (!user.blocked)
-            throw new HttpException(
-                'User is already unblocked',
-                HttpStatus.BAD_REQUEST,
-            );
-
-        const result = await Repository.update(UserEntity, userId, {
-            blocked: false,
-        });
-
-        if (result <= 0)
-            throw new HttpException(
-                'Failed to unblock user',
-                HttpStatus.INTERNAL_SERVER_ERROR,
-            );
-
-        return { success: true, message: 'User unblocked successfully' };
     }
 }

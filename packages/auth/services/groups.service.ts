@@ -1,23 +1,12 @@
-import {
-    Service,
-    AbstractService,
-    Config,
-    Module,
-    Application,
-} from '@cmmv/core';
+import { Service, AbstractService, Application } from '@cmmv/core';
 
 import { HttpException, HttpStatus } from '@cmmv/http';
 import { Repository } from '@cmmv/repository';
 
-import { AuthService } from './auth.service';
 import { GroupPayload } from '../lib/auth.interface';
 
 @Service('auth_groups')
 export class AuthGroupsService extends AbstractService {
-    constructor(private readonly authService: AuthService) {
-        super();
-    }
-
     public async getAllGroups() {
         const GroupsEntity = Repository.getEntity('GroupsEntity');
         const Groups: any = Application.getModel('Groups');
@@ -25,7 +14,31 @@ export class AuthGroupsService extends AbstractService {
 
         return {
             ...result,
-            data: result.data.map((item) => Groups.fromEntity(item)),
+            data: Groups.fromEntities(result.data),
+        };
+    }
+
+    public async getGroupsIn(inArr: string[] | string) {
+        if (!inArr)
+            throw new HttpException(
+                `Ids must be defined in the URL query`,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+
+        const GroupsEntity = Repository.getEntity('GroupsEntity');
+        const Groups: any = Application.getModel('Groups');
+        const groupsToAssign = Array.isArray(inArr) ? inArr : [inArr];
+
+        const result = await Repository.findAll(
+            GroupsEntity,
+            Repository.queryBuilder({
+                id: { $in: groupsToAssign },
+            }),
+        );
+
+        return {
+            ...result,
+            data: Groups.fromEntities(result.data),
         };
     }
 
@@ -50,11 +63,12 @@ export class AuthGroupsService extends AbstractService {
             roles: rolesArr,
         });
 
-        if (!result.success)
+        if (!result.success) {
             throw new HttpException(
                 'Failed to create group',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+        }
 
         return { success: true, message: 'Group created successfully' };
     }
@@ -76,11 +90,12 @@ export class AuthGroupsService extends AbstractService {
             roles: rolesArr,
         });
 
-        if (!result)
+        if (!result) {
             throw new HttpException(
                 'Failed to update group',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+        }
 
         return { success: true, message: 'Group updated successfully' };
     }
@@ -95,11 +110,12 @@ export class AuthGroupsService extends AbstractService {
 
         const result = await Repository.delete(GroupsEntity, groupId);
 
-        if (!result)
+        if (!result) {
             throw new HttpException(
                 'Failed to delete group',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+        }
 
         return { success: true, message: 'Group deleted successfully' };
     }
@@ -122,11 +138,12 @@ export class AuthGroupsService extends AbstractService {
             roles: updatedRoles,
         });
 
-        if (!result)
+        if (!result) {
             throw new HttpException(
                 'Failed to assign roles to group',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+        }
 
         return {
             success: true,
@@ -156,11 +173,12 @@ export class AuthGroupsService extends AbstractService {
             roles: updatedRoles,
         });
 
-        if (!result)
+        if (!result) {
             throw new HttpException(
                 'Failed to remove roles from group',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+        }
 
         return {
             success: true,

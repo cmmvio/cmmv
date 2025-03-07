@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AuthService } from '../services/auth.service';
+import { AuthAutorizationService } from '../services/autorization.service';
 import { Repository } from '@cmmv/repository';
 import { Config } from '@cmmv/core';
 import { HttpException, HttpStatus } from '@cmmv/http';
@@ -17,10 +17,10 @@ vi.mock('../utils/fingerprint', () => ({
 }));
 
 describe('AuthService - User Login', () => {
-    let authService: AuthService;
+    let authService: AuthAutorizationService;
 
     beforeEach(() => {
-        authService = new AuthService(
+        authService = new AuthAutorizationService(
             {} as any, // Mock das dependências
             {} as any,
         );

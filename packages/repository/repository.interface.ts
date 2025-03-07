@@ -19,3 +19,7 @@ export interface IInsertResponse {
     message?: string;
     data?: any;
 }
+
+export interface IFindOptions {
+    resolvers?: string | string[];
+}

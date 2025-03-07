@@ -8,15 +8,17 @@ import { GroupsContract, UserContract, SessionsContract } from '../contracts';
 import {
     AuthOptService,
     AuthSessionsService,
-    AuthService,
+    AuthAutorizationService,
     AuthGroupsService,
+    AuthUsersService,
 } from '../services';
 
 import {
     AuthOPTController,
-    AuthController,
+    AuthAutorizationController,
     AuthSessionsController,
     AuthGroupsController,
+    AuthUsersController,
 } from '../controllers';
 
 export const AuthModule = new Module('auth', {
@@ -24,15 +26,17 @@ export const AuthModule = new Module('auth', {
     transpilers: [AuthTranspile],
     contracts: [GroupsContract, UserContract, SessionsContract],
     providers: [
+        AuthAutorizationService,
         AuthOptService,
         AuthSessionsService,
-        AuthService,
         AuthGroupsService,
+        AuthUsersService,
     ],
     controllers: [
+        AuthAutorizationController,
         AuthOPTController,
-        AuthController,
         AuthSessionsController,
         AuthGroupsController,
+        AuthUsersController,
     ],
 });

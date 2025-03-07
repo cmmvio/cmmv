@@ -26,6 +26,7 @@ export class SessionsContract extends AbstractContract {
         nullable: false,
         unique: true,
         index: true,
+        exclude: true,
     })
     fingerprint: string;
 
@@ -36,6 +37,7 @@ export class SessionsContract extends AbstractContract {
         protoRepeated: false,
         nullable: false,
         index: true,
+        exclude: true,
         link: [
             {
                 contract: UserContract,
@@ -87,6 +89,7 @@ export class SessionsContract extends AbstractContract {
     @ContractField({
         protoType: 'string',
         nullable: false,
+        exclude: true,
     })
     refreshToken: string;
 }

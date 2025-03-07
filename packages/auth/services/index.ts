@@ -1,4 +1,5 @@
-export * from './auth.service';
+export * from './autorization.service';
 export * from './groups.service';
 export * from './opt.service';
 export * from './sessions.service';
+export * from './users.service';

@@ -9,6 +9,7 @@ import {
 } from '@cmmv/core';
 
 import { GroupsContract } from './groups.contract';
+import { AuthUsersService } from '../services/users.service';
 
 @Contract({
     controllerName: 'User',
@@ -77,11 +78,20 @@ export class UserContract extends AbstractContract {
 
     @ContractField({
         protoType: 'string',
-        defaultValue: '[]',
-        objectType: 'string[]',
-        entityType: 'simple-array',
+        objectType: 'object',
+        entityType: 'GroupsEntity',
         protoRepeated: true,
         nullable: true,
+        resolver: 'user-groups',
+        link: [
+            {
+                createRelationship: false,
+                contract: GroupsContract,
+                entityName: 'groups',
+                field: '_id',
+                array: true,
+            },
+        ],
     })
     groups: Array<string>;
 

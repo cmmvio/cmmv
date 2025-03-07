@@ -14,11 +14,18 @@ import {
     FindOneOptions,
     Table,
     TableIndex,
+    In,
 } from 'typeorm';
 
-import { Config, Logger, Singleton } from '@cmmv/core';
-import { IFindResponse, IInsertResponse } from './repository.interface';
+import { Config, Logger, Singleton, Resolvers } from '@cmmv/core';
+
 import { ObjectId, MongoClient } from 'mongodb';
+
+import {
+    IFindResponse,
+    IInsertResponse,
+    IFindOptions,
+} from './repository.interface';
 
 export class Repository extends Singleton {
     public static logger: Logger = new Logger('Repository');
@@ -108,6 +115,24 @@ export class Repository extends Singleton {
                 : id.toString();
     }
 
+    public static fixObjectIds(value: any): any {
+        const isMongoDB = Config.get('repository.type') === 'mongodb';
+
+        if (typeof value === 'string') {
+            value = this.fixId(value);
+        } else if (typeof value === 'object' && value !== null) {
+            if (value.$in && Array.isArray(value.$in)) {
+                value = isMongoDB
+                    ? { $in: value.$in.map((id) => this.fixId(id)) }
+                    : In(value.$in.map((id) => this.fixId(id)));
+            } else {
+                value = value;
+            }
+        }
+
+        return value;
+    }
+
     private static escape(str: any): string {
         if (typeof str !== 'string') return str;
 
@@ -134,8 +159,16 @@ export class Repository extends Singleton {
         let query = {};
 
         for (let key in payload) {
-            if (key === 'id' || key === '_id')
+            if (
+                (key === 'id' || key === '_id') &&
+                typeof payload[key] === 'string'
+            )
                 query[this.getIdField()] = this.fixId(payload[key]);
+            else if (
+                (key === 'id' || key === '_id') &&
+                typeof payload[key] === 'object'
+            )
+                query[this.getIdField()] = this.fixObjectIds(payload[key]);
             else query[key] = payload[key];
         }
 
@@ -544,7 +577,7 @@ export class RepositorySchema<Entity, T> {
         private readonly model: T,
     ) {}
 
-    public async getAll(queries?: any, req?: any) {
+    public async getAll(queries?: any, req?: any, options?: IFindOptions) {
         let result = await Repository.findAll(this.entity, queries);
 
         if (Config.get('repository.type') === 'mongodb')
@@ -552,18 +585,73 @@ export class RepositorySchema<Entity, T> {
 
         if (!result) throw new Error('Unable to return a valid result.');
 
+        let resultModels =
+            result && result.data.length > 0
+                ? result.data //@ts-ignore
+                      .map((item) => this.model.fromEntity(item))
+                : [];
+
+        if (options && options.resolvers) {
+            const resolvers = Array.isArray(options.resolvers)
+                ? options.resolvers
+                : [options.resolvers];
+            for (let keyResolver in resolvers) {
+                if (Resolvers.has(resolvers[keyResolver])) {
+                    for (let key in resultModels)
+                        resultModels[key] = await Resolvers.execute(
+                            resolvers[keyResolver],
+                            resultModels[key],
+                        );
+                }
+            }
+        }
+
         return {
             count: result.count,
             pagination: result.pagination,
-            data:
-                result && result.data.length > 0
-                    ? result.data //@ts-ignore
-                          .map((item) => this.model.fromEntity(item))
-                    : [],
+            data: resultModels,
         };
     }
 
-    public async getById(id) {
+    public async getIn(inArr: Array<any>, options?: IFindOptions) {
+        const inToAssign = Array.isArray(inArr) ? inArr : [inArr];
+
+        const result = await Repository.findAll(
+            this.entity,
+            Repository.queryBuilder({
+                id: { $in: inToAssign },
+            }),
+        );
+
+        let resultModels =
+            result && result.data.length > 0
+                ? result.data //@ts-ignore
+                      .map((item) => this.model.fromEntity(item))
+                : [];
+
+        if (options && options.resolvers) {
+            const resolvers = Array.isArray(options.resolvers)
+                ? options.resolvers
+                : [options.resolvers];
+            for (let keyResolver in resolvers) {
+                if (Resolvers.has(resolvers[keyResolver])) {
+                    for (let key in resultModels)
+                        resultModels[key] = await Resolvers.execute(
+                            resolvers[keyResolver],
+                            resultModels[key],
+                        );
+                }
+            }
+        }
+
+        return {
+            count: result.count,
+            pagination: result.pagination,
+            data: resultModels,
+        };
+    }
+
+    public async getById(id, options?: IFindOptions) {
         let result = await Repository.findBy(
             this.entity,
             Repository.queryBuilder({ id }),
@@ -573,6 +661,23 @@ export class RepositorySchema<Entity, T> {
             result = this.fixIds(result);
 
         if (!result) throw new Error('Unable to return a valid result.');
+
+        //@ts-ignore
+        let resultModel = this.model.fromEntity(result.data);
+
+        if (options && options.resolvers) {
+            const resolvers = Array.isArray(options.resolvers)
+                ? options.resolvers
+                : [options.resolvers];
+            for (let keyResolver in resolvers) {
+                if (Resolvers.has(resolvers[keyResolver])) {
+                    resultModel = await Resolvers.execute(
+                        resolvers[keyResolver],
+                        resultModel,
+                    );
+                }
+            }
+        }
 
         return {
             count: 1,
@@ -584,8 +689,8 @@ export class RepositorySchema<Entity, T> {
                 sortBy: 'id',
                 sort: 'asc',
                 filters: {},
-            }, //@ts-ignore
-            data: this.model.fromEntity(result.data),
+            },
+            data: resultModel,
         };
     }
 

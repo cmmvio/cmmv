@@ -71,11 +71,15 @@ ${contract.fields.map((field: any) => this.generateField(field)).join('\n\n')}${
         const telemetry = Config.get<boolean>('app.telemetry');
         const serviceName = `${contract.controllerName}Service`;
         const modelName = `${contract.controllerName}`;
-        const modelInterfaceName = `I${modelName}`;
         const entityName = `${contract.controllerName}Entity`;
         const serviceFileNameGenerated = `${contract.controllerName.toLowerCase()}.service.ts`;
 
         let importsFromModel = [];
+        let resolvers = [];
+
+        contract.fields.map((field) => {
+            if (field.resolver) resolvers.push(field.resolver);
+        });
 
         contract.services
             .filter((service) => service.createBoilerplate === true)
@@ -83,6 +87,11 @@ ${contract.fields.map((field: any) => this.generateField(field)).join('\n\n')}${
                 importsFromModel.push(service.request);
                 importsFromModel.push(service.response);
             });
+
+        const findOptions =
+            resolvers.length > 0
+                ? `, { resolvers: ["${resolvers.join('","')}"] }`
+                : '';
 
         importsFromModel = [...new Set(importsFromModel)];
 
@@ -111,11 +120,15 @@ export class ${serviceName}Generated extends AbstractRepositoryService {
     protected schema = new RepositorySchema(${entityName}, ${modelName});
 
     async getAll(queries?: any, req?: any) {
-        return await this.schema.getAll(queries, req);
+        return await this.schema.getAll(queries, req${findOptions});
+    }
+
+    async getIn(inArr: Array<string>) {
+        return await this.schema.getIn(inArr${findOptions});
     }
 
     async getById(id: string, req?: any) {
-        return await this.schema.getById(id);
+        return await this.schema.getById(id${findOptions});
     }
 
     async insert(payload: Partial<${modelName}>, req?: any) {
@@ -211,13 +224,22 @@ ${contract.services
                 const linkField =
                     link.field === '_id' && !isMongoDB ? 'id' : link.field;
 
-                decorators.push(
-                    `@ManyToOne(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${linkField}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
+                if (link.createRelationship !== false && !link.array) {
+                    decorators.push(
+                        `@ManyToOne(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${linkField}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
     @Column({
         type: "${field.protoRepeated ? 'simple-array' : linkType}",
         nullable: true
     })`,
-                );
+                    );
+                } else {
+                    decorators.push(
+                        `@Column({
+        type: "${field.protoRepeated ? 'simple-array' : linkType}",
+        nullable: true
+    })`,
+                    );
+                }
             });
 
             tsType =

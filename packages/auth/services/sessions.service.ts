@@ -2,7 +2,14 @@ import * as crypto from 'node:crypto';
 import * as jwt from 'jsonwebtoken';
 import { promisify } from 'util';
 
-import { Service, AbstractService, Config, Module } from '@cmmv/core';
+import {
+    Service,
+    AbstractService,
+    Config,
+    Module,
+    Application,
+} from '@cmmv/core';
+
 import { Repository } from '@cmmv/repository';
 
 import { IJWTDecoded } from '../lib/auth.interface';
@@ -181,6 +188,7 @@ export class AuthSessionsService extends AbstractService {
 
     public async getSessions(queries: any, user: IJWTDecoded) {
         const SessionsEntity = Repository.getEntity('SessionsEntity');
+        const Sessions: any = Application.getModel('Sessions');
         let userId: any = user.id;
 
         if (Config.get('repository.type') === 'mongodb') {
@@ -190,12 +198,19 @@ export class AuthSessionsService extends AbstractService {
 
         let session = await Repository.findAll(
             SessionsEntity,
-            Repository.queryBuilder({ user: userId, ...queries }),
+            Repository.queryBuilder({
+                user: userId,
+                revoked: false,
+                ...queries,
+            }),
         );
 
         if (!session) throw new Error('Unable to load sessions for this user.');
 
-        return session;
+        return {
+            ...session,
+            data: session.data.map((item) => Sessions.fromEntity(item)),
+        };
     }
 
     private extractDevice(userAgent: string): string {

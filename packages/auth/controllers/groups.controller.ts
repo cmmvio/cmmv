@@ -1,4 +1,13 @@
-import { Controller, Get, Body, Post, Put, Param, Delete } from '@cmmv/http';
+import {
+    Controller,
+    Get,
+    Body,
+    Post,
+    Put,
+    Param,
+    Delete,
+    Query,
+} from '@cmmv/http';
 
 import { AuthGroupsService } from '../services/groups.service';
 
@@ -10,10 +19,17 @@ import { GroupPayload, GroupRolesPayload } from '../lib/auth.interface';
 export class AuthGroupsController {
     constructor(private readonly groupsService: AuthGroupsService) {}
 
-    @Get('group-getall')
+    @Get('group-get-all')
     @Auth({ rootOnly: true })
     async handlerGroupGetAll() {
         return this.groupsService.getAllGroups();
+    }
+
+    @Get('group-get-in')
+    @Auth({ rootOnly: true })
+    async handlerGroupGetIn(@Query('ids') ids: string[] | string) {
+        console.log(ids);
+        return this.groupsService.getGroupsIn(ids);
     }
 
     @Post('group-create')

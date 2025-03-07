@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AuthService } from '../services/auth.service';
+import { AuthAutorizationService } from '../services/autorization.service';
 import { Repository } from '@cmmv/repository';
 import { HttpException } from '@cmmv/http';
 
@@ -15,10 +15,10 @@ vi.mock('fast-json-stringify', async () => {
 });
 
 describe('AuthService - Roles Management', () => {
-    let authService: AuthService;
+    let authService: AuthAutorizationService;
 
     beforeEach(() => {
-        authService = new AuthService(
+        authService = new AuthAutorizationService(
             {} as any, // Mock das dependências de sessão e recaptcha
             {} as any,
         );

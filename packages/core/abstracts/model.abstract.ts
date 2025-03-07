@@ -28,4 +28,10 @@ export class AbstractModel {
             excludeExtraneousValues: true,
         });
     }
+
+    public static fromEntity(entity: any): any {}
+
+    public static fromEntities(entities: Array<any>): Array<any> {
+        return entities.map((item) => this.fromEntity(item));
+    }
 }

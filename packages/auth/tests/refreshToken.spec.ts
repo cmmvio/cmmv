@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AuthService } from '../services/auth.service';
+import { AuthAutorizationService } from '../services/autorization.service';
 import { AuthSessionsService } from '../services/sessions.service';
 import { Repository } from '@cmmv/repository';
 import { Config } from '@cmmv/core';
@@ -28,11 +28,11 @@ vi.mock('../services/sessions.service', () => ({
 }));
 
 describe('AuthService - Refresh Token', () => {
-    let authService: AuthService;
+    let authService: AuthAutorizationService;
     let mockRequest: any;
 
     beforeEach(() => {
-        authService = new AuthService(
+        authService = new AuthAutorizationService(
             {} as any, // Mock das dependências
             {} as any,
         );

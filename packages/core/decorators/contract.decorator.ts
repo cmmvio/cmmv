@@ -31,6 +31,7 @@ export interface ContractFieldOptions {
     entityNullable?: boolean;
     validations?: ValidationOption[];
     link?: ContractLink[];
+    resolver?: string;
 }
 
 export interface ContractIndex {
@@ -84,6 +85,7 @@ export interface ContractLink {
     entityNullable?: boolean;
     field: string;
     array?: boolean;
+    createRelationship?: boolean;
 }
 
 export interface ContractMessageProperty {
