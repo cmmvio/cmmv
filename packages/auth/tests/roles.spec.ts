@@ -14,7 +14,7 @@ vi.mock('fast-json-stringify', async () => {
     };
 });
 
-describe('AuthService - Roles Management', () => {
+describe('AuthAutorizationService - Roles Management', () => {
     let authService: AuthAutorizationService;
 
     beforeEach(() => {

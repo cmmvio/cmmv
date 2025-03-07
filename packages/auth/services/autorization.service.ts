@@ -536,8 +536,8 @@ export class AuthAutorizationService extends AbstractService {
         if (!user)
             throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
 
-        const updatedRoles = user.roles.filter(
-            (role) => !rolesToRemove.includes(role),
+        const updatedRoles = Array.from(user.roles)?.filter(
+            (role: any) => !rolesToRemove.includes(role),
         );
 
         const result = await Repository.update(UserEntity, userId, {
