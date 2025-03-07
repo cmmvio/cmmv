@@ -6,6 +6,6 @@ import { RepositoryTranspile } from './repository.transpiler';
 
 export const RepositoryModule = new Module('repository', {
     configs: [RepositoryConfig],
-    controllers: [RepositoryController],
+    //controllers: [RepositoryController],
     transpilers: [RepositoryTranspile],
 });
