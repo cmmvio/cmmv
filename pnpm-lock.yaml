@@ -35,8 +35,8 @@ importers:
                 specifier: ^0.9.0
                 version: 0.9.0
             '@cmmv/view':
-                specifier: ^0.8.23
-                version: 0.8.23
+                specifier: ^0.8.31
+                version: 0.8.31
             '@loskir/styled-qr-code-node':
                 specifier: ^1.5.2
                 version: 1.5.2(encoding@0.1.13)
@@ -108,8 +108,8 @@ importers:
                 version: 3.5.13(typescript@5.7.3)
         devDependencies:
             '@cmmv/auth':
-                specifier: ^0.8.30
-                version: 0.8.30(encoding@0.1.13)
+                specifier: ^0.8.31
+                version: 0.8.31(encoding@0.1.13)
             '@cmmv/swagger':
                 specifier: ^0.5.0
                 version: 0.5.0(conventional-commits-filter@5.0.0)
@@ -541,10 +541,10 @@ packages:
             }
         engines: { node: '>=6.9.0' }
 
-    '@cmmv/auth@0.8.30':
+    '@cmmv/auth@0.8.31':
         resolution:
             {
-                integrity: sha512-CMmj57acjaV+SfL5CaqHsqnj/xObfRGqNcnyt1vvwozTbT6JvdANpmfMG0FAK7KDA9/cfCOhZSgT5afHO3Vpvg==,
+                integrity: sha512-ZqQwpNXOkVs+b4i2YxPLEBkeDqHC+ensoKYGcSPxtnhfrNknHmCnOwz6+PG5dcFDrhay6chd26JATaKdBesOvA==,
             }
 
     '@cmmv/body-parser@0.9.0':
@@ -596,10 +596,10 @@ packages:
                 integrity: sha512-054XpvpdOIpYmVirPH6fduLmVrQunEMRXUWSO0eRXxqRqv7+cCXTCcRxG5fpb1OxIxuBU/TS5gnjnZko7PRZvg==,
             }
 
-    '@cmmv/protobuf@0.8.23':
+    '@cmmv/protobuf@0.8.31':
         resolution:
             {
-                integrity: sha512-vTMvjN6nWxz/yQq3TmjiCEFBRrj/5Qj5JKS3KepIk60HDpqy4PQ/SYJChfQ5Vc7KBEhFGhrGCq6MHveoGnzi/g==,
+                integrity: sha512-wxWg9Yw32u80CX9B+k7uF4F2VPn8vxq8HfLDO6Yh6xFBk4S7+Ql+DIYZ7C3tPhfhdxXaYMZjp4omSrsRRBL43g==,
             }
 
     '@cmmv/reactivity@0.4.8':
@@ -627,10 +627,10 @@ packages:
                 integrity: sha512-1hqHyPYkmpE8c5X276U4nwxJgUQweLlsIfPogagG3RBsBUh23X0PP0QFcOpDQKr6Wj8xu51qZRJC7wNk1UnDgQ==,
             }
 
-    '@cmmv/view@0.8.23':
+    '@cmmv/view@0.8.31':
         resolution:
             {
-                integrity: sha512-IKghZxLmQjWpzj8LbIWo0PYnki0j+ZtqoDrhj9lcTbNDy06qTSyH3PcaGrDZBsx7LR0BYHYnC3LGZ5fdkBLEWg==,
+                integrity: sha512-ensVXvfEGXxz22pYx3cdgSfjaENcizbGg5ie4G6lj9dMAobe/un/tmT4yYGyT8zLl8KDpr2J6Lgu+CsREqjoJA==,
             }
 
     '@codechecks/client@0.0.50':
@@ -13222,7 +13222,7 @@ snapshots:
             '@babel/helper-string-parser': 7.25.9
             '@babel/helper-validator-identifier': 7.25.9
 
-    '@cmmv/auth@0.8.30(encoding@0.1.13)':
+    '@cmmv/auth@0.8.31(encoding@0.1.13)':
         dependencies:
             '@loskir/styled-qr-code-node': 1.5.2(encoding@0.1.13)
             jsonwebtoken: 9.0.2
@@ -13298,7 +13298,7 @@ snapshots:
         dependencies:
             helmet: 8.0.0
 
-    '@cmmv/protobuf@0.8.23':
+    '@cmmv/protobuf@0.8.31':
         dependencies:
             fast-glob: 3.3.3
             protobufjs: 7.4.0
@@ -13363,9 +13363,9 @@ snapshots:
         transitivePeerDependencies:
             - conventional-commits-filter
 
-    '@cmmv/view@0.8.23':
+    '@cmmv/view@0.8.31':
         dependencies:
-            '@cmmv/protobuf': 0.8.23
+            '@cmmv/protobuf': 0.8.31
             '@cmmv/reactivity': 0.4.8
             fast-glob: 3.3.3
             html-minifier-terser: 7.2.0

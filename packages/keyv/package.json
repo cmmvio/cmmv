@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/keyv",
-    "version": "0.8.31",
+    "version": "0.8.32",
     "description": "In-memory cache management module using Key for CMMV",
     "keywords": [
         "cmmv",

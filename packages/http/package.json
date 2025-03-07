@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/http",
-    "version": "0.8.31",
+    "version": "0.8.32",
     "description": "HTTP module implementing controllers, using CMMV standard adapter",
     "keywords": [
         "cmmv",
@@ -29,7 +29,7 @@
         "@cmmv/helmet": "^0.9.0",
         "@cmmv/server": "^0.9.0",
         "@cmmv/server-static": "^0.9.0",
-        "@cmmv/view": "0.8.31",
+        "@cmmv/view": "0.8.32",
         "fast-json-stringify": "^6.0.1"
     },
     "gitHead": "6592cb04b434730006720131534dbc2c551ea395"

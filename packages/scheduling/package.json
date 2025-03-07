@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/scheduling",
-    "version": "0.8.31",
+    "version": "0.8.32",
     "description": "Scheduling module for CMMV",
     "keywords": [
         "cmmv",
