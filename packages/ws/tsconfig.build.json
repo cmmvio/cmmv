@@ -7,12 +7,12 @@
             "@cmmv/core": ["../core"],
             "@cmmv/core/*": ["../core/*"],
             "@cmmv/protobuf": ["../protobuf"],
-            "@cmmv/protobuf/*": ["../protobuf/*"],
+            "@cmmv/protobuf/*": ["../protobuf/*"]
         }
     },
     "exclude": ["node_modules", "dist"],
     "references": [
-        { "path": "../core/tsconfig.build.json"},
-        { "path": "../protobuf/tsconfig.build.json"},
+        { "path": "../core/tsconfig.build.json" },
+        { "path": "../protobuf/tsconfig.build.json" }
     ]
 }
