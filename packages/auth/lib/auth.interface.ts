@@ -28,3 +28,12 @@ export interface IRoleContract {
 export interface IGetRolesResponse {
     contracts: Record<string, IRoleContract>;
 }
+
+export interface GroupPayload {
+    name: string;
+    roles?: string | string[];
+}
+
+export interface GroupRolesPayload {
+    roles: string | string[];
+}

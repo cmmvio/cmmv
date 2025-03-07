@@ -77,19 +77,11 @@ export class UserContract extends AbstractContract {
 
     @ContractField({
         protoType: 'string',
-        objectType: 'object',
-        entityType: 'GroupsEntity',
+        defaultValue: '[]',
+        objectType: 'string[]',
+        entityType: 'simple-array',
         protoRepeated: true,
         nullable: true,
-        link: [
-            {
-                contract: GroupsContract,
-                entityName: 'groups',
-                entityNullable: true,
-                field: '_id',
-                array: true,
-            },
-        ],
     })
     groups: Array<string>;
 

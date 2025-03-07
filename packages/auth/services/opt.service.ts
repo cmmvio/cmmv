@@ -8,9 +8,9 @@ import { Service, AbstractService, Config } from '@cmmv/core';
 import { jwtVerify, decryptJWTData } from '../lib/auth.utils';
 
 import { IJWTDecoded } from '../lib/auth.interface';
-import { HttpCode, HttpException, HttpStatus } from '@cmmv/http';
+import { HttpException, HttpStatus } from '@cmmv/http';
 
-@Service('opt')
+@Service('auth_opt')
 export class AuthOptService extends AbstractService {
     public async generateOptSecret(token: string) {
         const UserEntity = Repository.getEntity('UserEntity');

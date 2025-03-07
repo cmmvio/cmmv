@@ -346,13 +346,13 @@ ${contract.services
             if (extraFields) extraFields += '\n';
 
             extraFields += `
-        @ManyToOne(() => UserEntity, { nullable: true })
-        ${Config.get('repository.type') === 'mongodb' ? '@ObjectIdColumn({ nullable: true })' : '@Column({ type: "varchar", nullable: true })'}
-        userCreator: ${Config.get('repository.type') === 'mongodb' ? 'ObjectId' : 'string'};
+    @ManyToOne(() => UserEntity, { nullable: true })
+    ${Config.get('repository.type') === 'mongodb' ? '@ObjectIdColumn({ nullable: true })' : '@Column({ type: "varchar", nullable: true })'}
+    userCreator: ${Config.get('repository.type') === 'mongodb' ? 'ObjectId' : 'string'};
 
-        @ManyToOne(() => UserEntity, { nullable: true })
-        ${Config.get('repository.type') === 'mongodb' ? '@ObjectIdColumn({ nullable: true })' : '@Column({ type: "varchar", nullable: true })'}
-        userLastUpdate: ${Config.get('repository.type') === 'mongodb' ? 'ObjectId' : 'string'};`;
+    @ManyToOne(() => UserEntity, { nullable: true })
+    ${Config.get('repository.type') === 'mongodb' ? '@ObjectIdColumn({ nullable: true })' : '@Column({ type: "varchar", nullable: true })'}
+    userLastUpdate: ${Config.get('repository.type') === 'mongodb' ? 'ObjectId' : 'string'};`;
         }
 
         return extraFields ? `\n${extraFields}` : '';

@@ -10,12 +10,10 @@ import {
     IContract,
     Application,
     Config,
-    Hook,
-    HooksType,
 } from '@cmmv/core';
 
 import { Repository } from '@cmmv/repository';
-import { HttpException, HttpCode, HttpStatus } from '@cmmv/http';
+import { HttpException, HttpStatus } from '@cmmv/http';
 
 import {
     generateFingerprint,
@@ -135,21 +133,20 @@ export class AuthService extends AbstractService {
                 username: payload.username,
                 root: true,
             };
-        }
-
-        if (!user)
+        } else if (!user) {
             throw new HttpException(
                 'Invalid credentials',
                 HttpStatus.UNAUTHORIZED,
             );
-        else if (user.blocked)
+        } else if (user.blocked) {
             throw new HttpException('User Blocked', HttpStatus.FORBIDDEN);
-        else if (user.password !== passwordHashed)
+        } else if (user.password !== passwordHashed) {
             //Test
             throw new HttpException(
                 'Invalid credentials',
                 HttpStatus.UNAUTHORIZED,
             );
+        }
 
         const sesssionId = uuidv4();
         const fingerprint = generateFingerprint(req.req, usernameHashed);
@@ -434,12 +431,16 @@ export class AuthService extends AbstractService {
         return { contracts: returnRoles };
     }
 
-    public async hasRole(name: string): Promise<boolean> {
+    public async hasRole(name: string | string[]): Promise<boolean> {
         const rolesObj = await this.getRoles();
-        return Object.values(rolesObj.contracts)
+        const allRoles = Object.values(rolesObj.contracts)
             .map((contract) => contract.roles)
-            .flat()
-            .includes(name);
+            .flat();
+
+        if (Array.isArray(name))
+            return name.some((role) => allRoles.includes(role));
+
+        return allRoles.includes(name);
     }
 
     public async assignRoles(
@@ -474,11 +475,12 @@ export class AuthService extends AbstractService {
             (role) => !allRoles.includes(role),
         );
 
-        if (invalidRoles.length > 0)
+        if (invalidRoles.length > 0) {
             throw new HttpException(
                 `Invalid roles: ${invalidRoles.join(', ')}`,
                 HttpStatus.BAD_REQUEST,
             );
+        }
 
         const user = await Repository.findBy(
             UserEntity,
@@ -488,16 +490,16 @@ export class AuthService extends AbstractService {
         if (!user)
             throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
 
-        const rolesJson = JSON.stringify(rolesToAssign);
         const result = await Repository.update(UserEntity, userId, {
-            roles: rolesJson,
+            roles: rolesToAssign,
         });
 
-        if (result <= 0)
+        if (result <= 0) {
             throw new HttpException(
                 'Failed to update roles',
                 HttpStatus.BAD_REQUEST,
             );
+        }
 
         return { success: true, message: 'Roles assigned successfully' };
     }
@@ -519,11 +521,12 @@ export class AuthService extends AbstractService {
             (role) => !validRoles.includes(role),
         );
 
-        if (invalidRoles.length > 0)
+        if (invalidRoles.length > 0) {
             throw new HttpException(
                 `Invalid roles: ${invalidRoles.join(', ')}`,
                 HttpStatus.BAD_REQUEST,
             );
+        }
 
         const user = await Repository.findBy(
             UserEntity,
@@ -533,30 +536,20 @@ export class AuthService extends AbstractService {
         if (!user)
             throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
 
-        let currentRoles: string[] = [];
-
-        try {
-            currentRoles = user.roles ? JSON.parse(user.roles) : [];
-        } catch (error) {
-            throw new HttpException(
-                'Failed to parse user roles',
-                HttpStatus.INTERNAL_SERVER_ERROR,
-            );
-        }
-
-        const updatedRoles = currentRoles.filter(
+        const updatedRoles = user.roles.filter(
             (role) => !rolesToRemove.includes(role),
         );
-        const rolesJson = JSON.stringify(updatedRoles);
+
         const result = await Repository.update(UserEntity, userId, {
-            roles: rolesJson,
+            roles: updatedRoles,
         });
 
-        if (result <= 0)
+        if (result <= 0) {
             throw new HttpException(
                 'Failed to update roles',
                 HttpStatus.BAD_REQUEST,
             );
+        }
 
         return { success: true, message: 'Roles removed successfully' };
     }

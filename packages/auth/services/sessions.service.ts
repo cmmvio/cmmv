@@ -8,7 +8,7 @@ import { Repository } from '@cmmv/repository';
 import { IJWTDecoded } from '../lib/auth.interface';
 import { decryptJWTData } from '../lib/auth.utils';
 
-@Service('sessions')
+@Service('auth_sessions')
 export class AuthSessionsService extends AbstractService {
     public static async validateSession(user: IJWTDecoded): Promise<boolean> {
         const SessionsEntity = Repository.getEntity('SessionsEntity');

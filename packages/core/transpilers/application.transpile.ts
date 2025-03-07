@@ -62,7 +62,7 @@ ${includeId}${contract.fields
 }
 
 //Model
-export class ${modelName} implements ${modelInterfaceName} {
+export class ${modelName} extends AbstractModel implements ${modelInterfaceName} {
 ${includeId === '_id' ? '    @Expose()\n    @IsOptional()\n' + includeId + '\n' : ''}    @Expose({ toClassOnly: true })
     @IsOptional()
     id: string;
@@ -70,11 +70,8 @@ ${includeId === '_id' ? '    @Expose()\n    @IsOptional()\n' + includeId + '\n' 
 ${contract.fields?.map((field: any) => this.generateClassField(field)).join('\n\n')}
 
     constructor(partial: Partial<${modelName}>) {
+        super();
         Object.assign(this, partial);
-    }
-
-    public serialize(){
-        return instanceToPlain(this);
     }
 
     public static fromPartial(partial: Partial<${modelName}>): ${modelName}{
@@ -86,11 +83,7 @@ ${contract.fields?.map((field: any) => this.generateClassField(field)).join('\n\
     }
 
     public static fromEntity(entity: any) : any {
-        return plainToInstance(this, entity, {
-            exposeUnsetFields: false,
-            enableImplicitConversion: true,
-            excludeExtraneousValues: true
-        })
+        return this.sanitizeEntity(${modelName}, entity);
     }
 
     public toString(){
@@ -135,7 +128,7 @@ ${this.generateDTOs(contract)}
         outputFilePath?: string,
     ): string {
         let importStatements: string[] = [
-            `import { fastJson } from "@cmmv/core";`,
+            `import { fastJson, AbstractModel } from "@cmmv/core";`,
         ];
 
         if (contract.imports && contract.imports.length > 0) {
@@ -162,7 +155,7 @@ ${this.generateDTOs(contract)}
         );
 
         const hasTransform = contract.fields?.some(
-            (field: any) => field.transform,
+            (field: any) => field.transform || field.toPlain || field.toObject,
         );
 
         const hasType = contract.fields?.some(

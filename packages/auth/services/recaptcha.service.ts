@@ -2,7 +2,7 @@ import { Service, AbstractService } from '@cmmv/core';
 
 import { HttpService } from '@cmmv/http';
 
-@Service('recaptcha')
+@Service('auth_recaptcha')
 export class AuthRecaptchaService extends AbstractService {
     constructor(private readonly httpService: HttpService) {
         super();

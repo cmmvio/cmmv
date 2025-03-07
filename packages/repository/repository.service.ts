@@ -380,6 +380,9 @@ export class Repository extends Singleton {
             const conn = await client.connect();
             const result: any = await conn.db().admin().listDatabases();
             return { databases: result.databases.map((db) => db.name) };
+        }
+        if (type === 'sqlite') {
+            throw new Error(`SQLite does not support database listing`);
         } else {
             const queryRunner = instance.dataSource.createQueryRunner();
             const databases = await queryRunner.query('SHOW DATABASES');
@@ -417,6 +420,9 @@ export class Repository extends Singleton {
                     break;
                 case 'mssql':
                     query = `SELECT name FROM ${database}.sys.tables`;
+                    break;
+                case 'sqlite':
+                    query = `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`;
                     break;
                 default:
                     throw new Error(
