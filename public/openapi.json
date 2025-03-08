@@ -1,0 +1,319 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Contract-Model-Model-View (CMMV)",
+    "description": "CMMV is a minimalist Node.js framework focused on contract-driven development, combining automatic code generation, RPC communication, and declarative programming to build efficient, scalable applications with simplified backend and frontend integration.",
+    "version": "0.8.31"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {},
+  "components": {
+    "schemas": {
+      "WsCall": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "contract": {
+            "type": "number",
+            "required": true
+          },
+          "message": {
+            "type": "number",
+            "required": true
+          },
+          "data": {
+            "type": "uint8array",
+            "required": true
+          }
+        },
+        "required": [
+          "contract",
+          "message",
+          "data"
+        ]
+      },
+      "WsError": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "required": true
+          },
+          "code": {
+            "type": "number",
+            "required": true
+          },
+          "context": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "required": [
+          "message",
+          "code",
+          "context"
+        ]
+      },
+      "Groups": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "roles": {
+            "type": "array",
+            "default": [],
+            "required": false,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "User": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "username": {
+            "type": "string",
+            "required": true
+          },
+          "password": {
+            "type": "string",
+            "required": true
+          },
+          "provider": {
+            "type": "string",
+            "readOnly": true,
+            "required": false
+          },
+          "groups": {
+            "type": "array",
+            "readOnly": true,
+            "required": false,
+            "items": {
+              "$ref": "#/components/schemas/Groups"
+            }
+          },
+          "roles": {
+            "type": "array",
+            "readOnly": true,
+            "default": [],
+            "required": false,
+            "items": {
+              "type": "string"
+            }
+          },
+          "blocked": {
+            "type": "boolean",
+            "readOnly": true,
+            "required": true,
+            "default": false
+          },
+          "validated": {
+            "type": "boolean",
+            "readOnly": true,
+            "required": true,
+            "default": false
+          },
+          "verifyEmail": {
+            "type": "boolean",
+            "readOnly": true,
+            "required": true,
+            "default": false
+          },
+          "verifySMS": {
+            "type": "boolean",
+            "readOnly": true,
+            "required": true,
+            "default": false
+          },
+          "profile": {
+            "type": "string",
+            "default": "{}",
+            "required": false
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "blocked",
+          "validated",
+          "verifyEmail",
+          "verifySMS"
+        ]
+      },
+      "LoginRequestDTO": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "required": true
+          },
+          "password": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "LoginResponseDTO": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "required": true
+          },
+          "token": {
+            "type": "string",
+            "required": true
+          },
+          "message": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "required": [
+          "success",
+          "token",
+          "message"
+        ]
+      },
+      "RegisterRequestDTO": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "required": true
+          },
+          "email": {
+            "type": "string",
+            "required": true
+          },
+          "password": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "password"
+        ]
+      },
+      "RegisterResponseDTO": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "required": true
+          },
+          "message": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      },
+      "Sessions": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string",
+            "required": true
+          },
+          "ipAddress": {
+            "type": "string",
+            "required": true
+          },
+          "device": {
+            "type": "string",
+            "required": false
+          },
+          "browser": {
+            "type": "string",
+            "required": false
+          },
+          "os": {
+            "type": "string",
+            "required": false
+          },
+          "revoked": {
+            "type": "boolean",
+            "required": true,
+            "default": false
+          },
+          "userAgent": {
+            "type": "string",
+            "required": false
+          }
+        },
+        "required": [
+          "uuid",
+          "ipAddress",
+          "revoked"
+        ]
+      },
+      "Vault": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "key": {
+            "type": "string",
+            "required": true
+          },
+          "payload": {
+            "type": "string",
+            "required": true
+          },
+          "iv": {
+            "type": "string",
+            "required": true
+          },
+          "tag": {
+            "type": "string",
+            "required": true
+          },
+          "ephemeral": {
+            "type": "string",
+            "required": true
+          }
+        },
+        "required": [
+          "key",
+          "payload",
+          "iv",
+          "tag",
+          "ephemeral"
+        ]
+      }
+    },
+    "securitySchemes": {}
+  },
+  "security": []
+}

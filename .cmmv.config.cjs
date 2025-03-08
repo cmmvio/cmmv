@@ -233,5 +233,17 @@ module.exports = {
         namespace: process.env.VAULT_NAMESPACE,
         publicKey: process.env.VAULT_PUBLIC_KEY,
         privateKey: process.env.VAULT_PRIVATE_KEY
+    },
+
+    openapi: {
+        openapi: "3.0.4",
+        info: {
+            "title": "Contract-Model-Model-View (CMMV)",
+            "description": "CMMV is a minimalist Node.js framework focused on contract-driven development, combining automatic code generation, RPC communication, and declarative programming to build efficient, scalable applications with simplified backend and frontend integration.",
+            "version": "0.8.31"
+        },
+        servers: [
+            { "url": "http://localhost:3000" }
+        ],
     }
 };

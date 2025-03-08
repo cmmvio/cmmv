@@ -15,7 +15,8 @@ export interface CacheOptions {
 
 export interface ContractFieldOptions {
     protoType: string;
-    protoRepeated?: boolean;
+    protoRepeated?: boolean; //deprecated
+    array?: boolean;
     defaultValue?: any;
     index?: boolean;
     unique?: boolean;
@@ -29,9 +30,21 @@ export interface ContractFieldOptions {
     objectType?: string;
     entityType?: string;
     entityNullable?: boolean;
+    modelName?: string;
     validations?: ValidationOption[];
     link?: ContractLink[];
     resolver?: string;
+    customDecorator?: ContractCustomDecorator;
+    readOnly?: boolean;
+}
+
+export interface ContractCustomDecorator {
+    [key: string]: ContractCustomOptions;
+}
+
+export interface ContractCustomOptions {
+    import: string;
+    options?: object;
 }
 
 export interface ContractIndex {
@@ -58,6 +71,8 @@ export interface ContractExtraOptions {
     databaseSchemaName?: string;
     databaseTimestamps?: boolean;
     databaseUserAction?: boolean;
+    tags?: string | string[];
+    description?: string;
 }
 
 export interface ContractOptions {

@@ -1,0 +1,29 @@
+{
+    "name": "@cmmv/openapi",
+    "version": "0.8.32",
+    "description": "Module for automatic generation of OpenAPI schema for CMMV",
+    "keywords": [
+        "cmmv",
+        "framework",
+        "openapi",
+        "swagger",
+        "docs"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cmmvio/cmmv.git"
+    },
+    "author": "Andre Ferreira",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/cmmvio/cmmv/issues"
+    },
+    "homepage": "https://cmmv.io",
+    "dependencies": {
+        "cron": "^3.1.7",
+        "js-yaml": "^4.1.0"
+    }
+}

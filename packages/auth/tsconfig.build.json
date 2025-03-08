@@ -4,14 +4,16 @@
         "outDir": ".",
         "rootDir": ".",
         "paths": {
+            "@cmmv/cache": ["../cache"],
+            "@cmmv/cache/*": ["../cache/*"],
             "@cmmv/core": ["../core"],
             "@cmmv/core/*": ["../core/*"],
             "@cmmv/http": ["../http"],
             "@cmmv/http/*": ["../http/*"],
             "@cmmv/repository": ["../repository"],
             "@cmmv/repository/*": ["../repository/*"],
-            "@cmmv/cache": ["../cache"],
-            "@cmmv/cache/*": ["../cache/*"]
+            "@cmmv/openapi": ["../openapi"],
+            "@cmmv/openapi/*": ["../openapi/*"]
         }
     },
     "exclude": ["node_modules", "dist"],
@@ -19,6 +21,7 @@
         { "path": "../core/tsconfig.build.json" },
         { "path": "../http/tsconfig.build.json" },
         { "path": "../repository/tsconfig.build.json" },
-        { "path": "../cache/tsconfig.build.json" }
+        { "path": "../cache/tsconfig.build.json" },
+        { "path": "../openapi/tsconfig.build.json" }
     ]
 }

@@ -419,4 +419,32 @@ export const AuthConfig: ConfigSchema = {
             },
         },
     },
+
+    password: {
+        requireUpperCase: {
+            type: 'boolean',
+            required: false,
+            default: true,
+        },
+        requireLowerCase: {
+            type: 'boolean',
+            required: false,
+            default: true,
+        },
+        requireNumber: {
+            type: 'boolean',
+            required: false,
+            default: true,
+        },
+        requireSpecialChar: {
+            type: 'boolean',
+            required: false,
+            default: true,
+        },
+        minLength: {
+            type: 'number',
+            required: false,
+            default: 8,
+        },
+    },
 };

@@ -167,6 +167,7 @@
 		"fast-json-stringify": "^6.0.1",
 		"html-minifier-terser": "^7.2.0",
 		"jimp": "^1.6.0",
+		"js-yaml": "^4.1.0",
 		"jsonwebtoken": "^9.0.2",
 		"mongodb": "^6.13.1",
 		"protobufjs": "^7.4.0",

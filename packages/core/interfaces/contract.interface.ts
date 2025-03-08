@@ -24,6 +24,7 @@ export class IContract {
     customProto?: string | Function;
     customTypes?: string | Function;
     options?: ContractExtraOptions;
+    tags?: string | string[];
     viewForm?: new () => any;
     viewPage?: new () => any;
 }

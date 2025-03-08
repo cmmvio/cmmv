@@ -8,6 +8,7 @@ import { SchedulingModule, SchedulingService } from '@cmmv/scheduling';
 import { AuthModule } from '@cmmv/auth';
 import { FormModule } from '@cmmv/form';
 import { VaultModule } from '@cmmv/vault';
+import { OpenAPIModule } from '@cmmv/openapi';
 
 import { IndexModule } from './index.module';
 
@@ -24,6 +25,7 @@ Application.create({
         AuthModule,
         FormModule,
         VaultModule,
+        OpenAPIModule,
         IndexModule,
     ],
     services: [Repository, SchedulingService],

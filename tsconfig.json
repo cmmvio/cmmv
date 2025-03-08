@@ -53,6 +53,8 @@
             "@cmmv/form/*": ["packages/form/*"],
             "@cmmv/vault": ["packages/vault"],
             "@cmmv/vault/*": ["packages/vault/*"],
+            "@cmmv/openapi": ["packages/openapi"],
+            "@cmmv/openapi/*": ["packages/openapi/*"],
             "@models": ["src/models"],
             "@models/*": ["src/models/*", ".generated/models/*"],
             "@modules": ["src/modules"],

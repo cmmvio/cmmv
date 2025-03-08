@@ -9,7 +9,6 @@ import {
 } from '@cmmv/core';
 
 import { GroupsContract } from './groups.contract';
-import { AuthUsersService } from '../services/users.service';
 
 @Contract({
     controllerName: 'User',
@@ -26,6 +25,7 @@ import { AuthUsersService } from '../services/users.service';
         },
     ],
     options: {
+        tags: ['user'],
         moduleContract: true,
         databaseSchemaName: 'auth_users',
         databaseTimestamps: true,
@@ -58,6 +58,14 @@ export class UserContract extends AbstractContract {
 
     @ContractField({
         protoType: 'string',
+        customDecorator: {
+            IsStrongPassword: {
+                import: '@cmmv/core',
+                options: {
+                    message: 'Password must be strong',
+                },
+            },
+        },
         validations: [
             {
                 type: 'IsString',
@@ -73,6 +81,7 @@ export class UserContract extends AbstractContract {
         protoType: 'string',
         index: true,
         nullable: true,
+        readOnly: true,
     })
     provider?: string;
 
@@ -83,6 +92,8 @@ export class UserContract extends AbstractContract {
         protoRepeated: true,
         nullable: true,
         resolver: 'user-groups',
+        modelName: 'Groups',
+        readOnly: true,
         link: [
             {
                 createRelationship: false,
@@ -102,12 +113,15 @@ export class UserContract extends AbstractContract {
         entityType: 'simple-array',
         protoRepeated: true,
         nullable: true,
+        readOnly: true,
     })
     roles: Array<string>;
 
     @ContractField({
         protoType: 'bool',
         defaultValue: false,
+        exclude: true,
+        readOnly: true,
     })
     root: boolean;
 
@@ -116,6 +130,7 @@ export class UserContract extends AbstractContract {
         index: true,
         defaultValue: false,
         toPlainOnly: true,
+        readOnly: true,
     })
     blocked: boolean;
 
@@ -123,12 +138,14 @@ export class UserContract extends AbstractContract {
         protoType: 'bool',
         index: true,
         defaultValue: false,
+        readOnly: true,
     })
     validated: boolean;
 
     @ContractField({
         protoType: 'bool',
         defaultValue: false,
+        readOnly: true,
     })
     verifyEmail: boolean;
 
@@ -137,12 +154,14 @@ export class UserContract extends AbstractContract {
         nullable: true,
         exclude: true,
         toPlainOnly: true,
+        readOnly: true,
     })
     verifyEmailCode: number;
 
     @ContractField({
         protoType: 'bool',
         defaultValue: false,
+        readOnly: true,
     })
     verifySMS: boolean;
 
@@ -151,6 +170,7 @@ export class UserContract extends AbstractContract {
         nullable: true,
         exclude: true,
         toPlainOnly: true,
+        readOnly: true,
     })
     verifySMSCode: number;
 
@@ -159,6 +179,7 @@ export class UserContract extends AbstractContract {
         nullable: true,
         exclude: true,
         toPlainOnly: true,
+        readOnly: true,
     })
     optSecret: string;
 
@@ -167,6 +188,7 @@ export class UserContract extends AbstractContract {
         defaultValue: false,
         exclude: true,
         toPlainOnly: true,
+        readOnly: true,
     })
     optSecretVerify: boolean;
 

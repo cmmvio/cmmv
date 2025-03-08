@@ -221,6 +221,7 @@ ${contract.services
     private generateController(contract: IContract): void {
         const telemetry = Config.get<boolean>('app.telemetry');
         const hasCacheModule = Module.hasModule('cache');
+        const hasOpenAPIModule = Module.hasModule('openapi');
         const controllerName = `${contract.controllerName}Controller`;
         const serviceName = `${contract.controllerName}Service`;
         const controllerFileNameGenerated = `${contract.controllerName.toLowerCase()}.controller.ts`;
@@ -245,11 +246,31 @@ ${contract.services
         let importsFromModel = [];
 
         contract.services.map((service) => {
-            importsFromModel.push(service.request);
-            importsFromModel.push(service.response);
+            //importsFromModel.push(service.request);
+            //importsFromModel.push(service.response);
         });
 
         importsFromModel = [...new Set(importsFromModel)];
+
+        let extraImports = [];
+        let openAPIControllerDecorators = [];
+        let openAPIControllerMethods = {};
+
+        if (hasCache)
+            extraImports.push(
+                `import { Cache, CacheService } from "@cmmv/cache";`,
+            );
+
+        if (authRouter) extraImports.push(`import { Auth } from "@cmmv/auth";`);
+
+        if (hasOpenAPIModule) {
+            extraImports.push(`import { ApiTags } from "@cmmv/openapi";`);
+
+            if (contract.options.tags)
+                openAPIControllerDecorators.push(
+                    `@ApiTags(${typeof contract.options.tags === 'string' ? '"' + contract.options.tags + '"' : '"' + contract.options.tags.join(',') + '"'})`,
+                );
+        }
 
         let controllerTemplateGenerated = `/**
     **********************************************
@@ -259,8 +280,7 @@ ${contract.services
     **********************************************
 **/
 
-import { Telemetry } from "@cmmv/core";${hasCache ? `\nimport { Cache, CacheService } from "@cmmv/cache";` : ''}
-${authRouter ? `import { Auth } from "@cmmv/auth";` : ''}
+import { Telemetry } from "@cmmv/core";${extraImports.length > 0 ? '\n' + extraImports.join('\n') : ''}
 
 import {
    Controller, Get, Post, Put, Delete,
@@ -276,7 +296,7 @@ import {
    ${serviceName}
 } from "${this.getImportPath(contract, 'services', contract.controllerName.toLowerCase() + '.service', '@services')}";
 
-@Controller('${controllerPath}')
+@Controller('${controllerPath}')${openAPIControllerDecorators.length > 0 ? '\n' + openAPIControllerDecorators.join('\n') : ''}
 export class ${controllerName}Generated {
     constructor(private readonly ${serviceName.toLowerCase()}: ${serviceName}) {}
 
@@ -359,9 +379,7 @@ import {
 } from "@generated/controllers${contract.subPath}/${contract.controllerName.toLowerCase()}.controller"; ${this.importServices(importsFromModel, contract)}
 
 @Controller('${controllerPath}')
-export class ${controllerName} extends ${controllerName}Generated {
-    //Function ${controllerName} not implemented
-}`;
+export class ${controllerName} extends ${controllerName}Generated {}`;
 
         const outputFilePathFinal = path.join(outputDir, controllerFileName);
 
@@ -407,6 +425,8 @@ export class ${controllerName} extends ${controllerName}Generated {
                 return 'Post';
             case 'put':
                 return 'Put';
+            case 'patch':
+                return 'Patch';
             case 'delete':
                 return 'Delete';
         }

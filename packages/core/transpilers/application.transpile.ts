@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { AbstractTranspile, Config, ITranspile, Scope } from '../lib';
+import { AbstractTranspile, Config, ITranspile, Scope, Module } from '../lib';
 
 import { IContract } from '../interfaces/contract.interface';
 import { CONTROLLER_NAME_METADATA } from '../decorators';
@@ -16,6 +16,7 @@ export class ApplicationTranspile
     }
 
     private generateModel(contract: IContract): void {
+        const hasOpenAPI = Module.hasModule('openapi');
         const modelName = `${contract.controllerName}`;
         const modelInterfaceName = `I${modelName}`;
         const modelFileName = `${modelName.toLowerCase()}.model.ts`;
@@ -26,12 +27,16 @@ export class ApplicationTranspile
 
         const outputFilePath = path.join(outputDir, modelFileName);
         let includeId = '';
+        const idApiDecorator = hasOpenAPI
+            ? '    @ApiResponseProperty({ type: String })\n    '
+            : '    ';
 
         if (
             modelInterfaceName !== 'IWsCall' &&
             modelInterfaceName !== 'IWsError'
-        )
+        ) {
             includeId = `${Config.get('repository.type') === 'mongodb' ? '    _id?: ObjectId' : '    id?: any'};\n`;
+        }
 
         const modelTemplate = `/**
     **********************************************
@@ -61,9 +66,9 @@ ${includeId}${contract.fields
             .join('\n')}
 }
 
-//Model
+//Model${hasOpenAPI ? `\n@ApiSchema({ name: "${modelName}" })` : ''}
 export class ${modelName} extends AbstractModel implements ${modelInterfaceName} {
-${includeId === '_id' ? '    @Expose()\n    @IsOptional()\n' + includeId + '\n' : ''}    @Expose({ toClassOnly: true })
+${includeId === '_id' ? idApiDecorator + '@Expose()\n    @IsOptional()\n' + includeId + '\n' : ''}${idApiDecorator}@Expose({ toClassOnly: true })
     @IsOptional()
     id: string;
 
@@ -131,6 +136,13 @@ ${this.generateDTOs(contract)}
             `import { fastJson, AbstractModel } from "@cmmv/core";`,
         ];
 
+        if (Module.hasModule('openapi'))
+            importStatements.push(`\nimport {
+    ApiSchema, ApiProperty,
+    ApiPropertyOptional, ApiHideProperty,
+    ApiResponseProperty
+} from "@cmmv/openapi";\n`);
+
         if (contract.imports && contract.imports.length > 0) {
             for (const module of contract.imports) {
                 importStatements.push(
@@ -173,7 +185,7 @@ ${this.generateDTOs(contract)}
         importStatements.push(
             `
 import {
-    ${imports.join(', ')}
+    ${imports.join(',\n    ')}
 } from "@cmmv/core";\n`,
         );
 
@@ -195,6 +207,20 @@ import {
             }
 
             if (field.nullable === false) validationImports.add('IsNotEmpty');
+
+            if (field.customDecorator) {
+                for (let decoratorName in field.customDecorator) {
+                    if (
+                        field.customDecorator[decoratorName].import ===
+                        '@cmmv/core'
+                    )
+                        validationImports.add(decoratorName);
+                    else
+                        importStatements.push(
+                            `import { ${decoratorName} } from "${field.customDecorator[decoratorName].import}";`,
+                        );
+                }
+            }
 
             if (field.link && field.link.length > 0) {
                 //validationImports.add('ValidateNested');
@@ -226,7 +252,7 @@ import {
             importStatements.push(
                 `
 import {
-    ${Array.from(validationImports).join(', ')}
+    ${Array.from(validationImports).join(',\n    ')}
 } from "@cmmv/core"; \n`,
             );
         }
@@ -246,6 +272,7 @@ import {
     }
 
     private generateClassField(field: any): string {
+        const hasOpenAPI = Module.hasModule('openapi');
         const decorators: string[] = [];
 
         if (field.exclude) {
@@ -264,7 +291,7 @@ import {
                 .replace(/_([a-zA-Z]+)/g, ' $1');
 
             decorators.push(
-                `    //@ts-ignore\n    @Transform(${cleanedTransform}, { toClassOnly: true })`,
+                `    @Transform(${cleanedTransform}, { toClassOnly: true })`,
             );
         }
 
@@ -274,12 +301,23 @@ import {
                 .replace(/_([a-zA-Z]+)/g, ' $1');
 
             decorators.push(
-                `    //@ts-ignore\n    @Transform(${cleanedToPlain}, { toPlainOnly: true })`,
+                `    @Transform(${cleanedToPlain}, { toPlainOnly: true })`,
             );
         }
 
-        if (field.protoType === 'date') {
+        if (field.protoType === 'date')
             decorators.push(`    @Type(() => Date)`);
+
+        if (field.customDecorator) {
+            for (let decoratorName in field.customDecorator) {
+                const options = field.customDecorator[decoratorName].options
+                    ? JSON.stringify(
+                          field.customDecorator[decoratorName].options,
+                      )
+                    : '';
+
+                decorators.push(`    @${decoratorName}(${options})`);
+            }
         }
 
         if (field.validations) {
@@ -337,6 +375,35 @@ import {
                 : ` = ${defaultValue};`;
         }
 
+        if (hasOpenAPI) {
+            const fieldType = field.modelName
+                ? field.modelName
+                : this.mapToTsTypeUpper(field.protoType);
+
+            const apiType =
+                field.protoRepeated || field.array
+                    ? `[${fieldType}]`
+                    : `${fieldType}`;
+
+            if (!field.exclude) {
+                if (optional)
+                    decorators.push(`    @ApiPropertyOptional({
+        type: ${apiType},
+        readOnly: ${field?.readOnly ?? undefined},
+        default: ${field.defaultValue ?? undefined}
+    })`);
+                else
+                    decorators.push(`    @ApiProperty({
+        type: ${apiType},
+        readOnly: ${field?.readOnly ?? undefined},
+        required: true,
+        default: ${field.defaultValue ?? undefined}
+    })`);
+            } else {
+                decorators.push(`    @ApiHideProperty()`);
+            }
+        }
+
         if (field.link && field.link.length > 0) {
             //decorators.push('    @ValidateNested()');
             return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${field.propertyKey}${optional}: ${field.entityType.replace('Entity', '')}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null;`;
@@ -382,6 +449,31 @@ import {
         };
 
         return typeMapping[protoType] || 'any';
+    }
+
+    private mapToTsTypeUpper(protoType: string) {
+        const type = this.mapToTsType(protoType);
+
+        switch (type) {
+            case 'any':
+                return 'Any';
+                break;
+            case 'number':
+                return 'Number';
+                break;
+            case 'string':
+                return 'String';
+                break;
+            case 'boolean':
+                return 'Boolean';
+                break;
+            case 'Uint8Array':
+                return 'Uint8Array';
+                break;
+            case 'simpleArray':
+                return 'Array<any>';
+                break;
+        }
     }
 
     private generateJsonSchemaField(field: any): string {
@@ -468,6 +560,7 @@ import {
     }
 
     private generateDTOs(contract: IContract) {
+        const hasOpenAPI = Module.hasModule('openapi');
         let result = '';
 
         if (Object.keys(contract.messages).length > 0) {
@@ -483,13 +576,27 @@ ${Object.entries(contract.messages[key].properties)
     .join('\n')}
 }\n\n`;
 
-                result += `export class ${contract.messages[key].name}DTO implements ${contract.messages[key].name} {
+                result += `${hasOpenAPI ? `\n@ApiSchema({ name: "${contract.messages[key].name}DTO" })\n` : ''}export class ${contract.messages[key].name}DTO implements ${contract.messages[key].name} {
 ${Object.entries(contract.messages[key].properties)
     .map(([fieldName, field]: [string, any]) => {
         const fieldType = this.mapToTsType(field.type);
-        return `    ${fieldName}${field.required ? '' : '?'}: ${fieldType}${field.default ? ' = ' + JSON.stringify(field.default) : ''};`;
+        const fieldTypeUpper = this.mapToTsTypeUpper(fieldType);
+
+        const apiType =
+            field.protoRepeated || field.array
+                ? `[${fieldTypeUpper}]`
+                : `${fieldTypeUpper}`;
+
+        const apiDocs = hasOpenAPI
+            ? `    @ApiProperty({
+        type: ${apiType},
+        required: true,
+        default: ${field.default ?? undefined}
+    })\n    `
+            : '    ';
+        return `${apiDocs}${fieldName}${field.required ? '' : '?'}: ${fieldType}${field.default ? ' = ' + JSON.stringify(field.default) : ''};`;
     })
-    .join('\n')}
+    .join('\n\n')}
 
     constructor(partial: Partial<${contract.messages[key].name}DTO>) {
         Object.assign(this, partial);
