@@ -9,8 +9,25 @@ info:
   version: 0.8.31
 servers:
   - url: http://localhost:3000
-paths: {}
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    OAuth2:
+      name: CMMV OAuth2
+      type: oauth2
+      scheme: bearer
+      bearerFormat: JWT
+      flows:
+        password:
+          authorizationUrl: /oauth2/authorize
+          tokenUrl: /oauth2/token
+          scopes:
+            email: email
+            openid: openid
+            profile: profile
   schemas:
     WsCall:
       properties:
@@ -206,6 +223,218 @@ components:
         - uuid
         - ipAddress
         - revoked
+    OAuthClients:
+      properties:
+        id:
+          readOnly: true
+          type: string
+        client_id:
+          type: string
+          required: true
+        client_secret:
+          type: string
+          required: true
+        redirect_uris:
+          type: string
+          required: true
+        scope:
+          type: string
+          required: true
+        enabled:
+          type: boolean
+          required: true
+          default: true
+      required:
+        - client_id
+        - client_secret
+        - redirect_uris
+        - scope
+        - enabled
+    OAuthCodes:
+      properties:
+        id:
+          readOnly: true
+          type: string
+        code:
+          type: string
+          required: true
+        client_id:
+          type: string
+          required: true
+        user_id:
+          type: string
+          required: true
+        redirect_uri:
+          type: string
+          required: true
+        scope:
+          type: string
+          required: false
+        expires_at:
+          type: number
+          required: true
+      required:
+        - code
+        - client_id
+        - user_id
+        - redirect_uri
+        - expires_at
+    OAuthTokens:
+      properties:
+        id:
+          readOnly: true
+          type: string
+        access_token:
+          type: string
+          required: true
+        refresh_token:
+          type: string
+          required: false
+        client_id:
+          type: string
+          required: true
+        user_id:
+          type: string
+          required: true
+        scope:
+          type: string
+          required: true
+        expires_at:
+          type: number
+          required: true
+      required:
+        - access_token
+        - client_id
+        - user_id
+        - scope
+        - expires_at
+    OAuth2:
+      properties:
+        id:
+          readOnly: true
+          type: string
+      required: []
+    AuthorizationRequestDTO:
+      properties:
+        response_type:
+          type: string
+          required: true
+        client_id:
+          type: string
+          required: true
+        redirect_uri:
+          type: string
+          required: true
+        scope:
+          type: string
+          required: true
+        state:
+          type: string
+          required: true
+      required:
+        - response_type
+        - client_id
+        - redirect_uri
+        - scope
+        - state
+    AuthorizationResponseDTO:
+      properties:
+        code:
+          type: string
+          required: true
+        state:
+          type: string
+          required: true
+      required:
+        - code
+        - state
+    TokenRequestDTO:
+      properties:
+        grant_type:
+          type: string
+          required: true
+        code:
+          type: string
+          required: true
+        refresh_token:
+          type: string
+          required: true
+        client_id:
+          type: string
+          required: true
+        client_secret:
+          type: string
+          required: true
+        redirect_uri:
+          type: string
+          required: true
+      required:
+        - grant_type
+        - code
+        - refresh_token
+        - client_id
+        - client_secret
+        - redirect_uri
+    TokenResponseDTO:
+      properties:
+        access_token:
+          type: string
+          required: true
+        token_type:
+          type: string
+          required: true
+          default: Bearer
+        expires_in:
+          type: number
+          required: true
+        refresh_token:
+          type: string
+          required: true
+      required:
+        - access_token
+        - token_type
+        - expires_in
+        - refresh_token
+    TokenValidationRequestDTO:
+      properties:
+        token:
+          type: string
+          required: true
+      required:
+        - token
+    TokenValidationResponseDTO:
+      properties:
+        valid:
+          type: boolean
+          required: true
+        user_id:
+          type: string
+          required: true
+        expires_in:
+          type: number
+          required: true
+      required:
+        - valid
+        - user_id
+        - expires_in
+    TokenRevocationRequestDTO:
+      properties:
+        token:
+          type: string
+          required: true
+      required:
+        - token
+    TokenRevocationResponseDTO:
+      properties:
+        success:
+          type: boolean
+          required: true
+        message:
+          type: string
+          required: true
+      required:
+        - success
+        - message
     Vault:
       properties:
         id:
@@ -232,5 +461,1035 @@ components:
         - iv
         - tag
         - ephemeral
-  securitySchemes: {}
+    Catch:
+      properties:
+        status:
+          readOnly: true
+          type: number
+          default: 500
+          required: true
+        processingTime:
+          readOnly: true
+          type: number
+          required: true
+        message:
+          readOnly: true
+          type: string
+          required: true
+        requestId:
+          readOnly: true
+          type: string
+          required: false
+        telemetry:
+          readOnly: true
+          type: array
+          required: false
+      required:
+        - status
+        - processingTime
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Autorization
+      summary: >-
+        Route to login using username and password, requires release and depends
+        on authorization on the server
+      externalDocs:
+        url: https://cmmv.io/docs/modules/authentication#login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  required: true
+                password:
+                  type: string
+                  required: true
+                token:
+                  type: string
+                  required: false
+                opt:
+                  type: string
+                  required: false
+            examples:
+              default:
+                value:
+                  username: ''
+                  password: ''
+              reCAPTCHA:
+                value:
+                  username: ''
+                  password: ''
+                  token: ''
+              F2A:
+                value:
+                  username: ''
+                  password: ''
+                  token: ''
+                  opt: ''
+      responses:
+        '200':
+          description: Login response schema
+          headers:
+            set-cookie:
+              schema:
+                type: string
+                description: Session cookie for authentication if application is enabled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                      refreshToken:
+                        type: string
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security: []
+  /auth/register:
+    post:
+      tags:
+        - Autorization
+      summary: >-
+        Route to register a new public user, requires release depends on
+        authorization on the server
+      externalDocs:
+        url: https://cmmv.io/docs/modules/authentication#user-registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Registry response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security: []
+  /auth/check:
+    get:
+      tags:
+        - Autorization
+      summary: Check if authentication is still valid
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sucess:
+                    type: boolean
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security:
+        - BearerAuth: []
+  /auth/check-username:
+    post:
+      tags:
+        - Autorization
+      summary: Checks if the user is already in use
+      externalDocs:
+        url: null
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                type: boolean
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security: []
+  /auth/refresh:
+    post:
+      tags:
+        - Autorization
+      summary: Route to refresh authentication token using refresh token
+      externalDocs:
+        url: https://cmmv.io/docs/modules/authentication#refresh-token
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - in: header
+          name: authorization
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: refreshToken
+          required: false
+          schema:
+            type: string
+        - in: cookie
+          name: refreshToken
+          required: false
+          schema:
+            type: string
+      security: []
+  /groups:
+    get:
+      tags:
+        - Groups
+      summary: Returns Groups records by filter
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: Groups response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Groups'
+                      count:
+                        type: number
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: number
+                          offset:
+                            type: number
+                          sortBy:
+                            type: string
+                            default: id
+                          sort:
+                            type: string
+                            default: asc
+                          search:
+                            type: string
+                          searchField:
+                            type: string
+                          filters:
+                            type: object
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: &ref_1
+        - name: limit
+          in: query
+          required: false
+          default: 10
+          schema:
+            type: number
+        - name: offset
+          in: query
+          required: false
+          default: 0
+          schema:
+            type: number
+        - name: sortBy
+          in: query
+          required: false
+          default: id
+          schema:
+            type: string
+        - name: sort
+          in: query
+          required: false
+          default: asc
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: searchField
+          in: query
+          required: false
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+    post:
+      tags:
+        - Groups
+      summary: Insert new Groups
+      externalDocs:
+        url: null
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: false
+                  uniqueItems: true
+                  validations: &ref_0
+                    - type: IsString
+                      message: Invalid name
+                    - type: MinLength
+                      value: 3
+                      message: Invalid name
+                    - type: MaxLength
+                      value: 40
+                      message: Invalid name
+                roles:
+                  type: array
+                  items:
+                    type: string[]
+                  default: '[]'
+      responses:
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security:
+        - BearerAuth: []
+  /groups/{id}:
+    get:
+      tags:
+        - Groups
+      summary: Returns Groups record by ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: Groups response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Groups'
+                      count:
+                        type: number
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: number
+                          offset:
+                            type: number
+                          sortBy:
+                            type: string
+                            default: id
+                          sort:
+                            type: string
+                            default: asc
+                          search:
+                            type: string
+                          searchField:
+                            type: string
+                          filters:
+                            type: object
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+    put:
+      tags:
+        - Groups
+      summary: Update Groups by ID
+      externalDocs:
+        url: null
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: false
+                  uniqueItems: true
+                  validations: *ref_0
+                roles:
+                  type: array
+                  items:
+                    type: string[]
+                  default: '[]'
+      responses:
+        '200':
+          description: Groups update response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected:
+                    type: number
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+    delete:
+      tags:
+        - Groups
+      summary: Delete Groups by ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: Groups delete response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected:
+                    type: number
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+  /groups/{id}/raw:
+    get:
+      tags:
+        - Groups
+      summary: Return Groups record by raw ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: Groups response schema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+  /user:
+    get:
+      tags:
+        - User
+      summary: Returns User records by filter
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: User response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      count:
+                        type: number
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: number
+                          offset:
+                            type: number
+                          sortBy:
+                            type: string
+                            default: id
+                          sort:
+                            type: string
+                            default: asc
+                          search:
+                            type: string
+                          searchField:
+                            type: string
+                          filters:
+                            type: object
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: *ref_1
+      security:
+        - BearerAuth: []
+    post:
+      tags:
+        - User
+      summary: Insert new User
+      externalDocs:
+        url: null
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  nullable: false
+                  uniqueItems: true
+                  validations: &ref_2
+                    - type: IsString
+                      message: Invalid username
+                    - type: MinLength
+                      value: 4
+                      message: Invalid username
+                    - type: MaxLength
+                      value: 40
+                      message: Invalid username
+                password:
+                  type: string
+                  nullable: false
+                  validations: &ref_3
+                    - type: IsString
+                      message: Invalid password
+                profile:
+                  type: string
+                  nullable: true
+                  default: '''{}'''
+      responses:
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security:
+        - BearerAuth: []
+  /user/{id}:
+    get:
+      tags:
+        - User
+      summary: Returns User record by ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: User response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      count:
+                        type: number
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: number
+                          offset:
+                            type: number
+                          sortBy:
+                            type: string
+                            default: id
+                          sort:
+                            type: string
+                            default: asc
+                          search:
+                            type: string
+                          searchField:
+                            type: string
+                          filters:
+                            type: object
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+    put:
+      tags:
+        - User
+      summary: Update User by ID
+      externalDocs:
+        url: null
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  nullable: false
+                  uniqueItems: true
+                  validations: *ref_2
+                password:
+                  type: string
+                  nullable: false
+                  validations: *ref_3
+                profile:
+                  type: string
+                  nullable: true
+                  default: '''{}'''
+      responses:
+        '200':
+          description: User update response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected:
+                    type: number
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+    delete:
+      tags:
+        - User
+      summary: Delete User by ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: User delete response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected:
+                    type: number
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+  /user/{id}/raw:
+    get:
+      tags:
+        - User
+      summary: Return User record by raw ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: User response schema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
 security: []

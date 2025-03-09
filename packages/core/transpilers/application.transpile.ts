@@ -38,6 +38,28 @@ export class ApplicationTranspile
             includeId = `${Config.get('repository.type') === 'mongodb' ? '    _id?: ObjectId' : '    id?: any'};\n`;
         }
 
+        let afterValidation = '';
+        if (contract.fields.some((field) => field.afterValidation)) {
+            const fns = contract.fields.filter(
+                (field) => field.afterValidation,
+            );
+            if (fns.length > 0) {
+                afterValidation +=
+                    '\n\n    public override afterValidation(item: this){\n';
+
+                fns.map((fn) => {
+                    const cleanedTransform = fn.afterValidation
+                        .toString()
+                        .replace(/_([a-zA-Z]+)/g, ' $1');
+
+                    afterValidation += `        item.${fn.propertyKey} = (${cleanedTransform}).call(this, item.${fn.propertyKey});\n`;
+                });
+
+                afterValidation += '        return item;\n';
+                afterValidation += '    }\n';
+            }
+        }
+
         const modelTemplate = `/**
     **********************************************
     This script was generated automatically by CMMV.
@@ -93,7 +115,7 @@ ${contract.fields?.map((field: any) => this.generateClassField(field)).join('\n\
 
     public toString(){
         return ${modelName}FastSchema(this);
-    }
+    }${afterValidation}
 }
 
 // Schema
@@ -174,12 +196,16 @@ ${this.generateDTOs(contract)}
             (field: any) => field.protoType === 'date',
         );
 
-        const imports = ['Expose', 'instanceToPlain', 'plainToInstance'];
+        const imports = [
+            'Expose',
+            'instanceToPlain',
+            'plainToInstance',
+            'Type',
+        ];
 
         if (hasExclude || hasTransform || hasType) {
             if (hasExclude) imports.push('Exclude');
             if (hasTransform) imports.push('Transform');
-            if (hasType) imports.push('Type');
         }
 
         importStatements.push(
@@ -285,26 +311,6 @@ import {
 
         if (field.nullable === false) decorators.push(`    @IsNotEmpty()`);
 
-        if (field.transform) {
-            const cleanedTransform = field.transform
-                .toString()
-                .replace(/_([a-zA-Z]+)/g, ' $1');
-
-            decorators.push(
-                `    @Transform(${cleanedTransform}, { toClassOnly: true })`,
-            );
-        }
-
-        if (field.toPlain) {
-            const cleanedToPlain = field.toPlain
-                .toString()
-                .replace(/_([a-zA-Z]+)/g, ' $1');
-
-            decorators.push(
-                `    @Transform(${cleanedToPlain}, { toPlainOnly: true })`,
-            );
-        }
-
         if (field.protoType === 'date')
             decorators.push(`    @Type(() => Date)`);
 
@@ -386,26 +392,49 @@ import {
                     : `${fieldType}`;
 
             if (!field.exclude) {
-                if (optional)
+                if (optional) {
                     decorators.push(`    @ApiPropertyOptional({
         type: ${apiType},
         readOnly: ${field?.readOnly ?? undefined},
         default: ${field.defaultValue ?? undefined}
     })`);
-                else
+                } else {
                     decorators.push(`    @ApiProperty({
         type: ${apiType},
         readOnly: ${field?.readOnly ?? undefined},
         required: true,
         default: ${field.defaultValue ?? undefined}
     })`);
+                }
             } else {
                 decorators.push(`    @ApiHideProperty()`);
+            }
+
+            if (field.transform) {
+                const cleanedTransform = field.transform
+                    .toString()
+                    .replace(/_([a-zA-Z]+)/g, ' $1');
+
+                decorators.push(
+                    `    @Transform(${cleanedTransform}, { toClassOnly: true })`,
+                );
+            }
+
+            if (field.toPlain) {
+                const cleanedToPlain = field.toPlain
+                    .toString()
+                    .replace(/_([a-zA-Z]+)/g, ' $1');
+
+                decorators.push(
+                    `    @Transform(${cleanedToPlain}, { toPlainOnly: true })`,
+                );
             }
         }
 
         if (field.link && field.link.length > 0) {
-            //decorators.push('    @ValidateNested()');
+            decorators.push(
+                `    @Type(() => ${field.entityType.replace('Entity', '')})`,
+            );
             return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${field.propertyKey}${optional}: ${field.entityType.replace('Entity', '')}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null;`;
         } else {
             const fieldType = field.objectType
@@ -421,6 +450,7 @@ import {
             string: 'string',
             boolean: 'boolean',
             bool: 'boolean',
+            number: 'number',
             int: 'number',
             int32: 'number',
             int64: 'number',
@@ -458,6 +488,9 @@ import {
             case 'any':
                 return 'Any';
                 break;
+            case 'int':
+            case 'int32':
+            case 'float':
             case 'number':
                 return 'Number';
                 break;
@@ -571,7 +604,7 @@ import {
 ${Object.entries(contract.messages[key].properties)
     .map(([fieldName, field]: [string, any]) => {
         const fieldType = this.mapToTsType(field.type);
-        return `    ${fieldName}${field.required ? '' : '?'}: ${fieldType}${field.default ? ' = ' + JSON.stringify(field.default) : ''};`;
+        return `    ${fieldName}${field.required ? '' : '?'}: ${fieldType};`;
     })
     .join('\n')}
 }\n\n`;
@@ -591,7 +624,7 @@ ${Object.entries(contract.messages[key].properties)
             ? `    @ApiProperty({
         type: ${apiType},
         required: true,
-        default: ${field.default ?? undefined}
+        default: ${typeof field.default === 'string' ? '"' + field.default + '"' : (field.default ?? undefined)}
     })\n    `
             : '    ';
         return `${apiDocs}${fieldName}${field.required ? '' : '?'}: ${fieldType}${field.default ? ' = ' + JSON.stringify(field.default) : ''};`;

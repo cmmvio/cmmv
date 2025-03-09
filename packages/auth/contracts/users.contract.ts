@@ -51,7 +51,7 @@ export class UserContract extends AbstractContract {
                 message: 'Invalid username',
             },
         ],
-        transform: ({ value }) =>
+        afterValidation: (value) =>
             crypto.createHash('sha1').update(value).digest('hex'),
     })
     username: string;
@@ -72,7 +72,7 @@ export class UserContract extends AbstractContract {
                 message: 'Invalid password',
             },
         ],
-        transform: ({ value }) =>
+        afterValidation: (value) =>
             crypto.createHash('sha256').update(value).digest('hex'),
     })
     password: string;

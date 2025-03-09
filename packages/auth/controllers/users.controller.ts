@@ -1,43 +1,43 @@
 import {
     Controller,
-    Post,
     Body,
     Get,
-    Header,
     Delete,
     Put,
     Param,
     User,
+    RouterSchema,
 } from '@cmmv/http';
 
 import { AuthUsersService } from '../services/users.service';
+
 import { Auth } from '../lib/auth.decorator';
 
 @Controller('auth')
 export class AuthUsersController {
     constructor(private readonly usersService: AuthUsersService) {}
 
-    @Get('user')
+    @Get('user', { exclude: true })
     @Auth()
     async user(@User() user) {
         return user;
     }
 
     /* Block User */
-    @Put('user-block/:userId')
+    @Put('user-block/:userId', { exclude: true })
     @Auth({ rootOnly: true })
     async handlerBlockUser(@Param('userId') userId) {
         return this.usersService.blockUser(userId);
     }
 
-    @Put('user-unblock/:userId')
+    @Put('user-unblock/:userId', { exclude: true })
     @Auth({ rootOnly: true })
     async handlerUnblockUser(@Param('userId') userId) {
         return this.usersService.unblockUser(userId);
     }
 
     /* Groups */
-    @Put('user-assign-to-groups/:userId')
+    @Put('user-assign-to-groups/:userId', { exclude: true })
     @Auth({ rootOnly: true })
     async handlerAssignGroupsToUser(
         @Param('userId') userId,
@@ -46,7 +46,7 @@ export class AuthUsersController {
         return this.usersService.assignGroupsToUser(userId, payload.groups);
     }
 
-    @Delete('user-remove-groups/:userId')
+    @Delete('user-remove-groups/:userId', { exclude: true })
     @Auth({ rootOnly: true })
     async handlerRemoveGroups(
         @Param('userId') userId,

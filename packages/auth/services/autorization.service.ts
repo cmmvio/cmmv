@@ -231,10 +231,8 @@ export class AuthAutorizationService extends AbstractService {
 
         return {
             result: {
-                success: true,
                 token: accessToken,
                 refreshToken,
-                message: 'Login successful',
             },
             user,
         };
@@ -244,8 +242,10 @@ export class AuthAutorizationService extends AbstractService {
         const User = Application.getModel('User');
         const UserEntity = Repository.getEntity('UserEntity');
         //@ts-ignore
-        const newUser = User.fromPartial(payload);
+        const newUser = User.fromPartial(payload) as User;
         const data: any = await this.validate(newUser);
+        console.log(data);
+
         const result = await Repository.insert(UserEntity, {
             username: data.username,
             password: data.password,
@@ -254,13 +254,14 @@ export class AuthAutorizationService extends AbstractService {
             validated: false,
         });
 
-        if (!result.success)
+        if (!result.success) {
             throw new HttpException(
                 'Error trying to register new user',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+        }
 
-        return { success: true, message: 'User registered successfully!' };
+        return { message: 'User registered successfully!' };
     }
 
     public async checkUsernameExists(username: string): Promise<boolean> {
@@ -380,9 +381,7 @@ export class AuthAutorizationService extends AbstractService {
         );
 
         return {
-            success: true,
             token: accessToken,
-            message: 'Refresh successful',
         };
     }
 
@@ -446,7 +445,7 @@ export class AuthAutorizationService extends AbstractService {
     public async assignRoles(
         userId: string,
         rolesInput: string | string[],
-    ): Promise<{ success: boolean; message: string }> {
+    ): Promise<{ message: string }> {
         const UserEntity = Repository.getEntity('UserEntity');
         const rolesToAssign = Array.isArray(rolesInput)
             ? rolesInput
@@ -501,7 +500,7 @@ export class AuthAutorizationService extends AbstractService {
             );
         }
 
-        return { success: true, message: 'Roles assigned successfully' };
+        return { message: 'Roles assigned successfully' };
     }
 
     public async removeRoles(

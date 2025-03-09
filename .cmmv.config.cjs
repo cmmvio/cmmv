@@ -245,5 +245,27 @@ module.exports = {
         servers: [
             { "url": "http://localhost:3000" }
         ],
+        components: {
+            securitySchemes: {
+                BearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT"
+                },
+                OAuth2: {
+                    name: "CMMV OAuth2",
+                    type: "oauth2",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                    flows: {
+                        password: {
+                            authorizationUrl: "/oauth2/authorize",
+                            tokenUrl: "/oauth2/token",
+                            scopes: { "email": "email", "openid": "openid", "profile": "profile" }
+                        }
+                    }
+                }
+            }
+        }
     }
 };

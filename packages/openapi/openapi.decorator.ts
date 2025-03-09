@@ -5,6 +5,8 @@ import {
     IOpenAPISchemaOptions,
     IOpenAPIParameter,
     ParametersType,
+    IOpenAPISecuritySchema,
+    SecuritySchemeType,
 } from './openapi.interface';
 
 /* Controller */
@@ -15,7 +17,16 @@ export function ApiTags(...tags: string[]): MethodDecorator & ClassDecorator {
         descriptor?: TypedPropertyDescriptor<any>,
     ) => {
         if (descriptor) {
+            tags.map((tag) =>
+                OpenAPIRegistry.addHandlerMetadataArray(
+                    target,
+                    key as string,
+                    'tags',
+                    tag,
+                ),
+            );
         } else {
+            //Class
             OpenAPIRegistry.controllerMetadata(target, {
                 tags,
             });
@@ -144,4 +155,78 @@ export function ApiParam(options: IOpenAPIParameter): MethodDecorator {
 
 export function ApiCookie(options: IOpenAPIParameter): MethodDecorator {
     return createParamsAPI(options, 'header');
+}
+
+/* Security */
+function createSecuritySchema(
+    target: object,
+    propertyKey: string | symbol,
+    options: IOpenAPISecuritySchema,
+    type: SecuritySchemeType,
+) {
+    OpenAPIRegistry.addHandlerMetadataArray<IOpenAPISecuritySchema>(
+        target,
+        propertyKey as string,
+        'securitySchemes',
+        {
+            type: type,
+            ...options,
+        },
+    );
+}
+
+function createSecurity(
+    target: object,
+    propertyKey: string | symbol,
+    options: any,
+) {
+    OpenAPIRegistry.addHandlerMetadataArray(
+        target,
+        propertyKey as string,
+        'security',
+        options,
+    );
+}
+
+export function ApiSecurity(
+    roles: string[] | string,
+): MethodDecorator & ClassDecorator {
+    return (
+        target: object,
+        propertyKey?: string | symbol,
+        descriptor?: TypedPropertyDescriptor<any>,
+    ) => {
+        if (descriptor) {
+            createSecurity(
+                target,
+                propertyKey,
+                Array.isArray(roles) ? roles : [roles],
+            );
+        } else {
+            //Class
+            OpenAPIRegistry.controllerMetadata(target, {
+                security: Array.isArray(roles) ? roles : [roles],
+            });
+        }
+    };
+}
+
+export function ApiSecuritySchema(
+    options: IOpenAPISecuritySchema = {},
+    type: SecuritySchemeType,
+): MethodDecorator & ClassDecorator {
+    return (
+        target: object,
+        propertyKey?: string | symbol,
+        descriptor?: TypedPropertyDescriptor<any>,
+    ) => {
+        if (descriptor) {
+            createSecuritySchema(target, propertyKey, options, type);
+        } else {
+            //Class
+            OpenAPIRegistry.appendMetadataObject(target, 'components', {
+                securitySchemes: options,
+            });
+        }
+    };
 }

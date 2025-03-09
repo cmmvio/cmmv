@@ -70,7 +70,7 @@ export class AuthGroupsService extends AbstractService {
             );
         }
 
-        return { success: true, message: 'Group created successfully' };
+        return { message: 'Group created successfully' };
     }
 
     public async updateGroup(groupId: string, payload: Partial<GroupPayload>) {
@@ -97,7 +97,7 @@ export class AuthGroupsService extends AbstractService {
             );
         }
 
-        return { success: true, message: 'Group updated successfully' };
+        return { message: 'Group updated successfully' };
     }
 
     public async deleteGroup(groupId: string) {
@@ -117,7 +117,7 @@ export class AuthGroupsService extends AbstractService {
             );
         }
 
-        return { success: true, message: 'Group deleted successfully' };
+        return { message: 'Group deleted successfully' };
     }
 
     public async assignRolesToGroup(
@@ -145,10 +145,7 @@ export class AuthGroupsService extends AbstractService {
             );
         }
 
-        return {
-            success: true,
-            message: 'Roles assigned to group successfully',
-        };
+        return { message: 'Roles assigned to group successfully' };
     }
 
     public async removeRolesFromGroup(
@@ -180,9 +177,6 @@ export class AuthGroupsService extends AbstractService {
             );
         }
 
-        return {
-            success: true,
-            message: 'Roles removed from group successfully',
-        };
+        return { message: 'Roles removed from group successfully' };
     }
 }

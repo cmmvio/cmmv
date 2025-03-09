@@ -80,6 +80,7 @@ export class Application {
     protected controllers: Array<any> = [];
     protected submodules: Array<Module> = [];
     protected contracts: Array<any> = [];
+    protected static contractsCls: Array<new () => {}> = [];
     protected configs: Array<ConfigSchema> = [];
     protected entities: Array<any> = [];
     protected models: Array<any> = [];
@@ -108,6 +109,7 @@ export class Application {
             this.port = Config.get<number>('server.port') || 3000;
             this.transpilers = settings.transpilers || [];
             this.modules = settings.modules || [];
+            Application.contractsCls = settings.contracts || [];
             this.contracts =
                 settings.contracts?.map(
                     (contractClass) => new contractClass(),
@@ -116,6 +118,7 @@ export class Application {
         } else if (settings && settings.contracts?.length > 0) {
             this.transpilers = (settings && settings.transpilers) || [];
             this.modules = (settings && settings.modules) || [];
+            Application.contractsCls = settings.contracts || [];
             this.contracts =
                 (settings &&
                     settings.contracts?.map(
@@ -249,6 +252,7 @@ export class Application {
         try {
             this.modules = (settings && settings.modules) || [];
             this.transpilers = settings.transpilers || [];
+            Application.contractsCls = settings.contracts || [];
             this.contracts =
                 settings.contracts?.map(
                     (contractClass) => new contractClass(),
@@ -372,6 +376,7 @@ export class Application {
                     this.transpilers.push(...module.getTranspilers());
                     this.controllers.push(...module.getControllers());
                     this.submodules.push(...module.getSubmodules());
+                    Application.contractsCls.push(...module.getContractsCls());
                     this.contracts.push(...module.getContracts());
                     this.entities.push(...module.getEntities());
                     this.models.push(...module.getModels());
@@ -484,6 +489,7 @@ export class Application {
                 );
 
                 const contractStructure = {
+                    contractName: contract.constructor.name,
                     controllerName,
                     subPath,
                     protoPath,
@@ -689,5 +695,11 @@ export let ApplicationModule = new Module("app", {
 
     public static setHTTPAfterRender(cb: Function) {
         Application.appModule.httpAfterRender.push(cb);
+    }
+
+    public static getContract(contractName: string): new () => {} | null {
+        return Application.contractsCls.find(
+            (cls) => cls.name === contractName,
+        );
     }
 }

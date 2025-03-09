@@ -13,18 +13,40 @@ import {
     Delete,
 } from '@cmmv/http';
 
-import { AuthAutorizationService } from '../services/autorization.service';
 import { Auth } from '../lib/auth.decorator';
 
+import {
+    LoginPayload,
+    LoginPayloadSchema,
+    LoginReturnSchema,
+    RegistryPayloadSchema,
+    RegistryReturnSchema,
+    CheckTokenReturnSchema,
+    CheckUsernameReturnSchema,
+    CheckUsernamePayloadSchema,
+    RefreshTokenHeadersSchema,
+    RefreshTokenReturnSchema,
+} from '../lib/auth.interface';
+
+import { AuthAutorizationService } from '../services/autorization.service';
+
 @Controller('auth')
-export class AuthAutorizationController {
+export class AutorizationController {
     constructor(
         private readonly autorizationService: AuthAutorizationService,
     ) {}
 
-    @Post('login')
+    @Post('login', {
+        summary:
+            'Route to login using username and password, requires release and depends on authorization on the server',
+        externalDocs: 'https://cmmv.io/docs/modules/authentication#login',
+        docs: {
+            body: LoginPayloadSchema,
+            return: LoginReturnSchema,
+        },
+    })
     async handlerLogin(
-        @Body() payload,
+        @Body() payload: LoginPayload,
         @Request() req,
         @Response() res,
         @Session() session,
@@ -44,7 +66,16 @@ export class AuthAutorizationController {
         return false;
     }
 
-    @Post('register')
+    @Post('register', {
+        summary:
+            'Route to register a new public user, requires release depends on authorization on the server',
+        externalDocs:
+            'https://cmmv.io/docs/modules/authentication#user-registration',
+        docs: {
+            body: RegistryPayloadSchema,
+            return: RegistryReturnSchema,
+        },
+    })
     async handlerRegister(@Body() payload) {
         const localRegister = Config.get('auth.localRegister', false);
 
@@ -54,13 +85,24 @@ export class AuthAutorizationController {
         return false;
     }
 
-    @Get('check')
+    @Get('check', {
+        summary: 'Check if authentication is still valid',
+        docs: {
+            return: CheckTokenReturnSchema,
+        },
+    })
     @Auth()
     async handlerCheckToken() {
         return { success: true };
     }
 
-    @Post('check-username')
+    @Post('check-username', {
+        summary: 'Checks if the user is already in use',
+        docs: {
+            body: CheckUsernamePayloadSchema,
+            return: CheckUsernameReturnSchema,
+        },
+    })
     async handlerCheckUsername(
         @Body() payload: { username: string },
         @Response() res,
@@ -68,22 +110,30 @@ export class AuthAutorizationController {
         const exists = await this.autorizationService.checkUsernameExists(
             payload.username,
         );
-        res.type('text/json').send(exists.toString());
+        res.type('text/plain').send(exists.toString());
     }
 
-    @Post('refresh')
+    @Post('refresh', {
+        summary: 'Route to refresh authentication token using refresh token',
+        externalDocs:
+            'https://cmmv.io/docs/modules/authentication#refresh-token',
+        docs: {
+            headers: RefreshTokenHeadersSchema,
+            return: RefreshTokenReturnSchema,
+        },
+    })
     async handlerRefreshToken(@Request() req) {
         return this.autorizationService.refreshToken(req);
     }
 
     /* Roles */
-    @Get('roles')
+    @Get('roles', { exclude: true })
     @Auth({ rootOnly: true })
     async handlerGetRoles() {
         return this.autorizationService.getRoles();
     }
 
-    @Put('roles/:userId')
+    @Put('roles/:userId', { exclude: true })
     @Auth({ rootOnly: true })
     async handlerAssignRoles(
         @Param('userId') userId,
@@ -92,7 +142,7 @@ export class AuthAutorizationController {
         return this.autorizationService.assignRoles(userId, payload.roles);
     }
 
-    @Delete('roles/:userId')
+    @Delete('roles/:userId', { exclude: true })
     @Auth({ rootOnly: true })
     async handlerRemoveRoles(
         @Param('userId') userId,

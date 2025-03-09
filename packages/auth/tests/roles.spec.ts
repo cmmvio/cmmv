@@ -68,7 +68,6 @@ describe('AuthAutorizationService - Roles Management', () => {
         const result = await authService.assignRoles('123', ['order:get']);
 
         expect(result).toEqual({
-            success: true,
             message: 'Roles assigned successfully',
         });
     });

@@ -12,7 +12,11 @@ export function Auth(
     rolesOrSettings?: string[] | string | IAuthSettings,
 ): MethodDecorator {
     return (target, propertyKey: string | symbol, descriptor: any) => {
-        const middleware = async (request: any, response: any, next?: any) => {
+        const middlewareAuth = async (
+            request: any,
+            response: any,
+            next?: any,
+        ) => {
             const logger = new Logger('Auth');
 
             const cookieName = Config.get(
@@ -205,8 +209,8 @@ export function Auth(
             Reflect.getMetadata('route_metadata', descriptor.value) || {};
 
         const newField = existingFields?.middleware
-            ? { middleware: [...existingFields?.middleware, middleware] }
-            : { middleware: [middleware] };
+            ? { middleware: [...existingFields?.middleware, middlewareAuth] }
+            : { middleware: [middlewareAuth] };
 
         Reflect.defineMetadata(
             'route_metadata',

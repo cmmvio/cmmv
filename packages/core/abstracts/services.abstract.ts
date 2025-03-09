@@ -46,7 +46,7 @@ export abstract class AbstractService {
         return payload;
     }
 
-    async validate<T>(item: object, partial: boolean = false): Promise<T> {
+    async validate<T>(item: any, partial: boolean = false): Promise<T> {
         const errors = await validate(item, {
             forbidUnknownValues: false,
             skipNullProperties: partial,
@@ -57,7 +57,11 @@ export abstract class AbstractService {
         if (errors.length > 0)
             throw new Error(Object.values(errors[0].constraints).join(', '));
 
+        if (typeof item.afterValidation === 'function')
+            item = item.afterValidation(item);
+
         item = this.removeUndefined(item);
+
         return item as T;
     }
 }

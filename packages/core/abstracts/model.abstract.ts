@@ -34,4 +34,8 @@ export class AbstractModel {
     public static fromEntities(entities: Array<any>): Array<any> {
         return entities.map((item) => this.fromEntity(item));
     }
+
+    public afterValidation(item: this) {
+        return item;
+    }
 }

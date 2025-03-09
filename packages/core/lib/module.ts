@@ -31,6 +31,7 @@ export class Module implements IModule {
     private controllers: Array<any>;
     private transpilers: Array<new () => ITranspile>;
     private submodules: Array<Module>;
+    private contractsCls: Array<new () => {}>;
     private contracts: Array<any>;
     private providers: Array<any>;
     private configs: Array<any>;
@@ -45,6 +46,7 @@ export class Module implements IModule {
         this.configs = options.configs || [];
         this.entities = options.entities || [];
         this.models = options.models || [];
+        this.contractsCls = options.contracts || [];
         this.contracts =
             options.contracts?.map((contractClass) => new contractClass()) ||
             [];
@@ -89,6 +91,10 @@ export class Module implements IModule {
 
     public getContracts(): Array<any> {
         return this.contracts;
+    }
+
+    public getContractsCls(): Array<any> {
+        return this.contractsCls;
     }
 
     public getProviders(): Array<any> {

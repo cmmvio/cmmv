@@ -43,7 +43,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         const renderEngine = Config.get<string>('server.render', 'cmmv');
 
         if (publicDirs.length > 0)
-            publicDirs = publicDirs.map(dir => path.join(process.cwd(), dir));
+            publicDirs = publicDirs.map((dir) => path.join(process.cwd(), dir));
 
         this.application = application;
         this.instance = this.instance || cmmv();
@@ -162,7 +162,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
 
                 if (Array.isArray(headerValue)) {
                     headerValue = headerValue
-                        .map(value => {
+                        .map((value) => {
                             if (headerName === 'Content-Security-Policy')
                                 return value.indexOf('style-src') == -1
                                     ? `${value} "nonce-${res.locals.nonce}"`
@@ -247,7 +247,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
             const prefix = metadata.prefix;
             const routes = metadata.routes;
 
-            routes.forEach(route => {
+            routes.forEach((route) => {
                 let fullPath = `/${prefix}${route.path ? '/' + route.path : ''}`;
                 fullPath = fullPath.replace(/\/\//g, '/');
                 const method = route.method.toLowerCase();
@@ -312,7 +312,6 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                                     status: 200,
                                     processingTime,
                                     result: {
-                                        success: true,
                                         ...result,
                                     },
                                 };
@@ -397,15 +396,11 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                             if (error instanceof HttpException)
                                 statusCode = error.status;
 
-                            const response = ResponseSchema({
+                            const response = JSON.stringify({
                                 status: statusCode,
                                 processingTime,
-                                result: {
-                                    message:
-                                        error.message ||
-                                        'Internal Server Error',
-                                    success: false,
-                                },
+                                message:
+                                    error.message || 'Internal Server Error',
                             });
 
                             if (req.query.debug) {
@@ -444,7 +439,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                                                     middleware(
                                                         req,
                                                         res,
-                                                        err => {
+                                                        (err) => {
                                                             if (err)
                                                                 return reject(
                                                                     err,
@@ -478,7 +473,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
     private buildRouteArgs(req: any, res: any, next: any, params: any[]) {
         const args: any[] = [];
 
-        params?.forEach(param => {
+        params?.forEach((param) => {
             const [paramType, paramName] = param.paramType.split(':');
             switch (paramType) {
                 case 'body':
@@ -535,8 +530,8 @@ export class DefaultAdapter extends AbstractHttpAdapter<
 
             this.instance
                 .listen({ port: parseInt(port, 10), host })
-                .then(server => resolve())
-                .catch(err => reject(err));
+                .then((server) => resolve())
+                .catch((err) => reject(err));
         });
     }
 
@@ -552,7 +547,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         return new Promise(async (resolve, reject) => {
             if (this.connected()) {
                 try {
-                    this.httpServer.close(err => {
+                    this.httpServer.close((err) => {
                         if (err) reject(err);
                         else resolve('');
                     });

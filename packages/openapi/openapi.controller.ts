@@ -6,7 +6,7 @@ import { Controller, Get, Res } from '@cmmv/http';
 
 @Controller('docs')
 export class OpenAPIController {
-    @Get('/openapi.json')
+    @Get('/openapi.json', { exclude: true })
     async getOpenAPISpec(@Res() res): Promise<void> {
         const openAPIPath = path.resolve(
             __dirname,
@@ -17,13 +17,13 @@ export class OpenAPIController {
         );
     }
 
-    @Get('/openapi.yml')
+    @Get('/openapi.yml', { exclude: true })
     async getOpenAPISpecYML(@Res() res): Promise<void> {
         const openAPIPath = path.resolve(__dirname, '../../public/openapi.yml');
         res.type('text/yaml').send(fs.readFileSync(openAPIPath, 'utf-8'));
     }
 
-    @Get()
+    @Get({ exclude: true })
     async handlerIndexDocs() {
         const title = Config.get('openapi.info.title');
 

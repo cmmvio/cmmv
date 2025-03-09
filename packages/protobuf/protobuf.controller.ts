@@ -5,7 +5,7 @@ import { Controller, Get, Param, Res } from '@cmmv/http';
 
 @Controller('proto')
 export class ProtobufController {
-    @Get(':contract')
+    @Get(':contract', { exclude: true })
     async getContract(@Param('contract') contract, @Res() res) {
         const contractFilename = path.resolve(
             process.cwd(),

@@ -53,7 +53,6 @@ describe('AuthService - User Login', () => {
             mockReq,
         );
 
-        expect(result).toHaveProperty('result.success', true);
         expect(result).toHaveProperty('result.token', 'mockedAccessToken');
     });
 

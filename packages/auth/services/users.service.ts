@@ -12,9 +12,7 @@ export class AuthUsersService extends AbstractService {
     }
 
     /* Block */
-    public async blockUser(
-        userId: string,
-    ): Promise<{ success: boolean; message: string }> {
+    public async blockUser(userId: string): Promise<{ message: string }> {
         const UserEntity = Repository.getEntity('UserEntity');
         const user = await Repository.findBy(
             UserEntity,
@@ -40,12 +38,10 @@ export class AuthUsersService extends AbstractService {
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
 
-        return { success: true, message: 'User blocked successfully' };
+        return { message: 'User blocked successfully' };
     }
 
-    public async unblockUser(
-        userId: string,
-    ): Promise<{ success: boolean; message: string }> {
+    public async unblockUser(userId: string): Promise<{ message: string }> {
         const UserEntity = Repository.getEntity('UserEntity');
         const user = await Repository.findBy(
             UserEntity,
@@ -71,7 +67,7 @@ export class AuthUsersService extends AbstractService {
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
 
-        return { success: true, message: 'User unblocked successfully' };
+        return { message: 'User unblocked successfully' };
     }
 
     /* Groups */
@@ -103,7 +99,7 @@ export class AuthUsersService extends AbstractService {
     public async assignGroupsToUser(
         userId: string,
         groupsInput: string | string[],
-    ): Promise<{ success: boolean; message: string }> {
+    ): Promise<{ message: string }> {
         const UserEntity = Repository.getEntity('UserEntity');
         const GroupsEntity = Repository.getEntity('GroupsEntity');
         const user = await Repository.findBy(UserEntity, { id: userId });
@@ -149,10 +145,7 @@ export class AuthUsersService extends AbstractService {
             );
         }
 
-        return {
-            success: true,
-            message: 'Groups assigned to user successfully',
-        };
+        return { message: 'Groups assigned to user successfully' };
     }
 
     public async removeGroupsFromUser(

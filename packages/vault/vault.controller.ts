@@ -8,19 +8,19 @@ import { Auth } from '@cmmv/auth';
 export class VaultController {
     constructor(private readonly vaultService: VaultService) {}
 
-    @Post()
+    @Post({ exclude: true })
     @Auth({ rootOnly: true })
     async handlerInsertPayload(@Body() data: VaultPayloadDTO) {
         return this.vaultService.insert(data.key, data.payload);
     }
 
-    @Get(':key')
+    @Get(':key', { exclude: true })
     @Auth({ rootOnly: true })
     async handlerGetPayload(@Param('key') key) {
         return this.vaultService.get(key);
     }
 
-    @Delete(':key')
+    @Delete(':key', { exclude: true })
     @Auth({ rootOnly: true })
     async handlerDeleteKey(@Param('key') key) {
         return this.vaultService.remove(key);

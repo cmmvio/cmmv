@@ -19,7 +19,7 @@ export class ControllerRegistry {
             const data = this.controllers.get(target);
             this.controllers.set(target, { ...data, prefix });
 
-            data.routes.forEach(route => {
+            data.routes.forEach((route) => {
                 if (route.context)
                     Scope.set(
                         `${route.method}::/${prefix}${route.path ? '/' + route.path : ''}`.toLocaleLowerCase(),
@@ -36,6 +36,7 @@ export class ControllerRegistry {
         handlerName: string,
         context?: any,
         cb?: Function,
+        metadata?: object,
     ) {
         let controller = this.controllers.get(target.constructor);
         const logger = new Logger(target.constructor.name);
@@ -50,7 +51,7 @@ export class ControllerRegistry {
 
         if (controller) {
             const route = controller.routes.find(
-                route => route.handlerName === handlerName,
+                (route) => route.handlerName === handlerName,
             );
 
             if (context) {
@@ -79,6 +80,7 @@ export class ControllerRegistry {
                     context,
                     cb,
                     middlewares: middleWares,
+                    metadata,
                 });
             } else {
                 route.method = method;
@@ -87,6 +89,7 @@ export class ControllerRegistry {
                 route.context = context;
                 route.cb = cb;
                 route.middlewares = middleWares;
+                route.metadata = { ...route.metadata, ...metadata };
             }
         }
     }
@@ -110,7 +113,7 @@ export class ControllerRegistry {
 
         if (controller) {
             let route = controller.routes.find(
-                route => route.handlerName === handlerName,
+                (route) => route.handlerName === handlerName,
             );
 
             if (!route) {
@@ -167,7 +170,7 @@ export class ControllerRegistry {
         if (!controller) return [];
 
         const route = controller.routes.find(
-            route => route.handlerName === handlerName,
+            (route) => route.handlerName === handlerName,
         );
         return route ? route.params : [];
     }

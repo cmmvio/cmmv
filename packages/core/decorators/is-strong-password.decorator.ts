@@ -39,14 +39,12 @@ export function IsStrongPassword(validationOptions?: ValidationOptions) {
                     );
 
                     const hasUpperCase = requireUpperCase
-                        ? /[A-Z]/.test(value)
+                        ? /[A-Z].*/.test(value)
                         : true;
                     const hasLowerCase = requireLowerCase
                         ? /[a-z]/.test(value)
                         : true;
-                    const hasNumber = requireNumber
-                        ? /[0-9]/.test(value)
-                        : true;
+                    const hasNumber = requireNumber ? /\d/.test(value) : true;
                     const hasSpecialChar = requireSpecialChar
                         ? /[!@#$%^&*(),.?":{}|<>]/.test(value)
                         : true;

@@ -11,6 +11,7 @@ function createMethodDecorator(
     method: 'get' | 'post' | 'put' | 'delete' | 'patch',
     path: string,
     cb?: Function,
+    metadata?: RouterMetadata,
 ): MethodDecorator {
     return (target, propertyKey: string | symbol, context?: any) => {
         ControllerRegistry.registerRoute(
@@ -20,6 +21,7 @@ function createMethodDecorator(
             propertyKey as string,
             context.value,
             cb,
+            metadata,
         );
     };
 }
@@ -39,24 +41,143 @@ function createRouteMiddleware(middleware: any, descriptor: any) {
     );
 }
 
-export function Get(path: string = '', cb?: Function): MethodDecorator {
-    return createMethodDecorator('get', path, cb);
+export interface RouterMetadata {
+    contract?: new () => any;
+    summary?: string;
+    schema?: RouterSchema;
+    exposeFilters?: boolean;
+    exclude?: boolean;
+    externalDocs?: string;
+    docs?: {
+        body?: object;
+        headers?: object;
+        return?: object;
+    };
 }
 
-export function Post(path: string = '', cb?: Function): MethodDecorator {
-    return createMethodDecorator('post', path, cb);
+export enum RouterSchema {
+    GetAll,
+    GetByID,
+    GetIn,
+    Raw,
+    Insert,
+    Update,
+    Delete,
+    Import,
+    Export,
 }
 
-export function Put(path: string = '', cb?: Function): MethodDecorator {
-    return createMethodDecorator('put', path, cb);
+export function Get(metadata?: RouterMetadata): MethodDecorator;
+export function Get(path: string, metadata?: RouterMetadata): MethodDecorator;
+export function Get(
+    pathOrMetadata?: string | RouterMetadata,
+    metadata?: RouterMetadata,
+): MethodDecorator {
+    if (typeof pathOrMetadata === 'object')
+        return createMethodDecorator(
+            'get',
+            '',
+            undefined,
+            pathOrMetadata as RouterMetadata,
+        );
+
+    return createMethodDecorator(
+        'get',
+        pathOrMetadata ?? '',
+        undefined,
+        metadata,
+    );
 }
 
-export function Delete(path: string = '', cb?: Function): MethodDecorator {
-    return createMethodDecorator('delete', path, cb);
+export function Post(metadata?: RouterMetadata): MethodDecorator;
+export function Post(path: string, metadata?: RouterMetadata): MethodDecorator;
+export function Post(
+    pathOrMetadata?: string | RouterMetadata,
+    metadata?: RouterMetadata,
+): MethodDecorator {
+    if (typeof pathOrMetadata === 'object')
+        return createMethodDecorator(
+            'post',
+            '',
+            undefined,
+            pathOrMetadata as RouterMetadata,
+        );
+
+    return createMethodDecorator(
+        'post',
+        pathOrMetadata ?? '',
+        undefined,
+        metadata,
+    );
 }
 
-export function Patch(path: string = '', cb?: Function): MethodDecorator {
-    return createMethodDecorator('patch', path, cb);
+export function Put(metadata?: RouterMetadata): MethodDecorator;
+export function Put(path: string, metadata?: RouterMetadata): MethodDecorator;
+export function Put(
+    pathOrMetadata?: string | RouterMetadata,
+    metadata?: RouterMetadata,
+): MethodDecorator {
+    if (typeof pathOrMetadata === 'object')
+        return createMethodDecorator(
+            'put',
+            '',
+            undefined,
+            pathOrMetadata as RouterMetadata,
+        );
+
+    return createMethodDecorator(
+        'put',
+        pathOrMetadata ?? '',
+        undefined,
+        metadata,
+    );
+}
+
+export function Delete(metadata?: RouterMetadata): MethodDecorator;
+export function Delete(
+    path: string,
+    metadata?: RouterMetadata,
+): MethodDecorator;
+export function Delete(
+    pathOrMetadata?: string | RouterMetadata,
+    metadata?: RouterMetadata,
+): MethodDecorator {
+    if (typeof pathOrMetadata === 'object')
+        return createMethodDecorator(
+            'delete',
+            '',
+            undefined,
+            pathOrMetadata as RouterMetadata,
+        );
+
+    return createMethodDecorator(
+        'delete',
+        pathOrMetadata ?? '',
+        undefined,
+        metadata,
+    );
+}
+
+export function Patch(metadata?: RouterMetadata): MethodDecorator;
+export function Patch(path: string, metadata?: RouterMetadata): MethodDecorator;
+export function Patch(
+    pathOrMetadata?: string | RouterMetadata,
+    metadata?: RouterMetadata,
+): MethodDecorator {
+    if (typeof pathOrMetadata === 'object')
+        return createMethodDecorator(
+            'patch',
+            '',
+            undefined,
+            pathOrMetadata as RouterMetadata,
+        );
+
+    return createMethodDecorator(
+        'patch',
+        pathOrMetadata ?? '',
+        undefined,
+        metadata,
+    );
 }
 
 export function Redirect(

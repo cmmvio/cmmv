@@ -5,6 +5,7 @@ import {
 } from '../decorators/contract.decorator';
 
 export class IContract {
+    contractName: string;
     controllerName: string;
     subPath?: string;
     protoPath?: string;
@@ -37,6 +38,7 @@ export class IContractField {
     transform?: Function;
     link?: ContractIndex[];
     resolver?: string;
+    afterValidation?: Function;
 }
 
 export class IContractMessage {

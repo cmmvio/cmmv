@@ -190,7 +190,7 @@ ${contract.services
         ) {
             indexDecorators = [
                 ...indexDecorators,
-                contract.indexs.map((index) => {
+                ...contract.indexs.map((index) => {
                     return `@Index("${index.name}", ${JSON.stringify(index.fields)}${index.options ? `, ${JSON.stringify(index.options)}` : ''})`;
                 }),
             ];

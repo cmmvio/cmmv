@@ -36,6 +36,7 @@ export interface ContractFieldOptions {
     resolver?: string;
     customDecorator?: ContractCustomDecorator;
     readOnly?: boolean;
+    afterValidation?: Function;
 }
 
 export interface ContractCustomDecorator {

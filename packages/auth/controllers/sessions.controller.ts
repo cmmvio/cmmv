@@ -10,7 +10,7 @@ import { Auth } from '../lib/auth.decorator';
 export class AuthSessionsController {
     constructor(private readonly sessionsService: AuthSessionsService) {}
 
-    @Get()
+    @Get({ exclude: true })
     @Auth()
     async user(@Queries() queries: any, @User() user) {
         return this.sessionsService.getSessions(queries, user);

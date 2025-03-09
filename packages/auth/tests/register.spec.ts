@@ -32,7 +32,6 @@ describe('AuthAutorizationService - User Registration', () => {
         });
 
         expect(result).toEqual({
-            success: true,
             message: 'User registered successfully!',
         });
     });

@@ -30,7 +30,7 @@ export interface IOpenAPIObjectType {
 export type SecuritySchemeType = 'apiKey' | 'http' | 'oauth2' | 'openIdConnect';
 
 export interface IOpenAPISecuritySchema {
-    type: SecuritySchemeType;
+    type?: SecuritySchemeType;
     description?: string;
     name?: string;
     in?: string;
