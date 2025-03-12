@@ -6,6 +6,7 @@ export default defineConfig({
     resolve: {
         alias: {
             'fast-json-stringify': require.resolve('fast-json-stringify'),
+            'fast-glob': require.resolve('fast-glob'),
             '@cmmv/auth': path.resolve(__dirname, 'packages/auth'),
             '@cmmv/cache': path.resolve(__dirname, 'packages/cache'),
             '@cmmv/core': path.resolve(__dirname, 'packages/core'),
@@ -21,6 +22,6 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'node',
-        setupFiles: ['reflect-metadata', 'fast-json-stringify'],
+        setupFiles: ['reflect-metadata', 'fast-json-stringify', 'fast-glob'],
     },
 });

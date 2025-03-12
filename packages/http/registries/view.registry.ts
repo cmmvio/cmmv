@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
-import * as fg from 'fast-glob';
+const fg = require('fast-glob');
 
 import { Singleton } from '@cmmv/core';
 

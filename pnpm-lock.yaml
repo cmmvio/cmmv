@@ -35,9 +35,6 @@ importers:
       '@cmmv/server-static':
         specifier: ^0.9.0
         version: 0.9.0
-      '@cmmv/view':
-        specifier: ^0.8.31
-        version: 0.8.31
       '@loskir/styled-qr-code-node':
         specifier: ^1.5.2
         version: 1.5.2(encoding@0.1.13)
@@ -495,9 +492,6 @@ packages:
 
   '@cmmv/swagger@0.5.0':
     resolution: {integrity: sha512-1hqHyPYkmpE8c5X276U4nwxJgUQweLlsIfPogagG3RBsBUh23X0PP0QFcOpDQKr6Wj8xu51qZRJC7wNk1UnDgQ==}
-
-  '@cmmv/view@0.8.31':
-    resolution: {integrity: sha512-ensVXvfEGXxz22pYx3cdgSfjaENcizbGg5ie4G6lj9dMAobe/un/tmT4yYGyT8zLl8KDpr2J6Lgu+CsREqjoJA==}
 
   '@codechecks/client@0.0.50':
     resolution: {integrity: sha512-CP/39x1gIFCsrgUOBwwZ+YsRgOqQARt4jbkOLPe+ZvIj+TRY4c5rvjJ4NCqj1C6qlFdJRnoh5EM4tm/qoSWPAQ==}
@@ -8020,12 +8014,6 @@ snapshots:
       jsonwebtoken: 9.0.2
     transitivePeerDependencies:
       - conventional-commits-filter
-
-  '@cmmv/view@0.8.31':
-    dependencies:
-      fast-glob: 3.3.3
-      html-minifier-terser: 7.2.0
-      uglify-js: 3.19.3
 
   '@codechecks/client@0.0.50(request@2.88.2)(typescript@5.7.3)':
     dependencies:
