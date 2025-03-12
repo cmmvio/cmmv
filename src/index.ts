@@ -26,5 +26,5 @@ Application.create({
         OpenAPIModule,
         IndexModule,
     ],
-    services: [Repository, SchedulingService],
+    providers: [Repository, SchedulingService],
 });
