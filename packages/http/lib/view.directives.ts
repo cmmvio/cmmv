@@ -2,9 +2,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { Config } from '@cmmv/core';
-import { getValueFromKey } from './cmmv.utils';
-import { Directive, Template } from './cmmv.template';
-import { evaluate, evaluateAsync } from './cmmv.eval';
+import { getValueFromKey } from './view.utils';
+import { Directive, Template } from './view.template';
+import { evaluate, evaluateAsync } from './view.eval';
 
 export const ssrLoadData: Directive = async (
     templateText: string,
@@ -143,14 +143,14 @@ async function resolveImport(filename): Promise<string> {
                     .replace('@/', './components/')
                     .replace('@components/', './components/');
 
-                imported.split(',').forEach(async part => {
+                imported.split(',').forEach(async (part) => {
                     const cleanedImport = part.trim();
 
                     if (cleanedImport.startsWith('{')) {
                         const destructured = cleanedImport
                             .replace(/[{}]/g, '')
                             .split(',')
-                            .map(name => `${name.trim()}: ${name.trim()}`)
+                            .map((name) => `${name.trim()}: ${name.trim()}`)
                             .join(', ');
 
                         imports[destructured] = await resolveImport(filename);
@@ -163,7 +163,7 @@ async function resolveImport(filename): Promise<string> {
             });
 
             const componentObjectString = Object.keys(imports)
-                .map(key => `${key}: ${imports[key]}`)
+                .map((key) => `${key}: ${imports[key]}`)
                 .join(', ');
 
             if (scriptContent.includes('export default')) {
@@ -235,14 +235,14 @@ export const extractSetupScript = async (
                     .replace('@/', './components/')
                     .replace('@components/', './components/');
 
-                imported.split(',').forEach(async part => {
+                imported.split(',').forEach(async (part) => {
                     const cleanedImport = part.trim();
 
                     if (cleanedImport.startsWith('{')) {
                         const destructured = cleanedImport
                             .replace(/[{}]/g, '')
                             .split(',')
-                            .map(name => `${name.trim()}: ${name.trim()}`)
+                            .map((name) => `${name.trim()}: ${name.trim()}`)
                             .join(', ');
 
                         imports += `const { ${destructured} } = ${await resolveImport(filename)};\n`;
@@ -308,7 +308,7 @@ async function forSSR(templateText: string, template: Template) {
         const [_, variables] =
             exp.match(/^\s*\(([^)]+)\)\s+in\s+|^\s*([^ ]+)\s+of\s+/) || [];
         const [itemVar, keyVar] = variables
-            ? variables.split(',').map(v => v.trim())
+            ? variables.split(',').map((v) => v.trim())
             : [variables, null];
         const listName = exp.match(/\b(?:in|of)\s+([^\s""]+)/i)?.[1];
         const context = template.getContext();

@@ -7,8 +7,11 @@ import * as fg from 'fast-glob';
 import * as UglifyJS from 'uglify-js';
 import { minify } from 'html-minifier-terser';
 
-import { hasOwnOnlyObject, createNullProtoObjWherePossible } from './utils.cjs';
-import { ViewRegistry } from '../view.registry';
+import {
+    hasOwnOnlyObject,
+    createNullProtoObjWherePossible,
+} from '../templates/utils.cjs';
+import { ViewRegistry } from '../registries/view.registry';
 
 export type Directive = (
     templateText: string,
@@ -152,7 +155,7 @@ export class Template {
         const files = await fg(`${directory}/*.cached.js`);
         const now = Date.now();
 
-        files.forEach(file => {
+        files.forEach((file) => {
             const stats = fs.statSync(file);
             const age = now - stats.mtimeMs;
 
@@ -307,7 +310,7 @@ export class Template {
 
             let jsContent = `// Generated automatically by CMMV\n`;
             jsContent += `(function(global) {
-                try {          
+                try {
                     if(!global.cmmvSetup)
                         global.cmmvSetup = {};
 
@@ -477,14 +480,14 @@ export class Template {
     }
 
     deepMerge(target: any, ...sources: any[]): any {
-        sources.forEach(source => {
+        sources.forEach((source) => {
             if (source instanceof Object && !Array.isArray(source)) {
                 Object.entries(source).forEach(([key, value]) => {
                     if (Array.isArray(value)) {
                         if (!target[key]) target[key] = [];
 
                         if (key === 'meta' || key === 'link') {
-                            value.forEach(item => {
+                            value.forEach((item) => {
                                 if (
                                     !target[key].some((existingItem: any) =>
                                         this.isEqualObject(existingItem, item),
@@ -545,7 +548,7 @@ export class Template {
                     `<\/body>`,
                     `<script nonce="${self.nonce}">
                 (function(global) {
-                    try {          
+                    try {
                         if(!global.cmmvTelemetry)
                             global.cmmvTelemetry = ${
                                 process.env.NODE_ENV === 'dev'

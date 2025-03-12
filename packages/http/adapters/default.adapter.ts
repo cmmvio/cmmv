@@ -21,10 +21,8 @@ import {
     Config,
 } from '@cmmv/core';
 
-import { ControllerRegistry } from './controller.registry';
-
-import { ResponseSchema } from './http.schema';
-import { HttpException } from './http.exception';
+import { ControllerRegistry } from '../registries/controller.registry';
+import { HttpException } from '../lib/http.exception';
 
 export class DefaultAdapter extends AbstractHttpAdapter<
     http.Server | https.Server
@@ -81,7 +79,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
             }
 
             //@ts-ignore
-            const { CMMVRenderer } = await import('@cmmv/view');
+            const { CMMVRenderer } = await import('../lib/view.renderview');
             const render = new CMMVRenderer();
 
             this.instance.set('views', publicDirs);

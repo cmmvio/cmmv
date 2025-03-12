@@ -13,7 +13,6 @@ module.exports = {
         poweredBy: false,
         removePolicyHeaders: false,
         publicDirs: ["public", 'public/views'],
-        render: "@cmmv/view",
         compress: {
             enabled: true,
             options: {

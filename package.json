@@ -153,7 +153,6 @@
 		"@cmmv/helmet": "^0.9.0",
 		"@cmmv/server": "^0.9.0",
 		"@cmmv/server-static": "^0.9.0",
-		"@cmmv/view": "^0.8.31",
 		"@loskir/styled-qr-code-node": "^1.5.2",
 		"@swc-node/core": "^1.13.3",
 		"@swc-node/register": "^1.10.9",

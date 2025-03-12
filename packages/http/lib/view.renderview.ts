@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 
 import { Config } from '@cmmv/core';
-import { Template } from './cmmv.template';
+import { Template } from './view.template';
 
 import {
     sData,
@@ -11,7 +11,7 @@ import {
     sServerData,
     ssrDirectives,
     ssrLoadData,
-} from './cmmv.directives';
+} from './view.directives';
 
 export class CMMVRenderer {
     private cache: Map<string, Function>;

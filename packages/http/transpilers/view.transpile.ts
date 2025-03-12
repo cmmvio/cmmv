@@ -10,7 +10,7 @@ export class ViewTranspile implements ITranspile {
 
     run(): void {
         const content = fs.readFileSync(
-            path.resolve(__dirname, './lib/cmmv.frontend.cjs'),
+            path.resolve(__dirname, '../templates/cmmv.frontend.cjs'),
             'utf-8',
         );
         const outputDir = path.resolve('public/core');
