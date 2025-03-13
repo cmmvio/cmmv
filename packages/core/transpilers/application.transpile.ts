@@ -17,6 +17,7 @@ export class ApplicationTranspile
 
     private generateModel(contract: IContract): void {
         const hasOpenAPI = Module.hasModule('openapi');
+        const hasGraphQL = Module.hasModule('graphql');
         const modelName = `${contract.controllerName}`;
         const modelInterfaceName = `I${modelName}`;
         const modelFileName = `${modelName.toLowerCase()}.model.ts`;
@@ -28,7 +29,10 @@ export class ApplicationTranspile
         const outputFilePath = path.join(outputDir, modelFileName);
         let includeId = '';
         const idApiDecorator = hasOpenAPI
-            ? '    @ApiResponseProperty({ type: String })\n    '
+            ? '@ApiResponseProperty({ type: String }) //OpenAPI\n    '
+            : '    ';
+        const idGraphQLDecorator = hasGraphQL
+            ? '@Field(type => ID) //GraphQL\n    '
             : '    ';
 
         if (
@@ -88,11 +92,12 @@ ${includeId}${contract.fields
             .join('\n')}
 }
 
-//Model${hasOpenAPI ? `\n@ApiSchema({ name: "${modelName}" })` : ''}
+//Model${hasOpenAPI ? `\n@ApiSchema({ name: "${modelName}" })` : ''}${hasGraphQL ? `\n@ObjectType()` : ''}
 export class ${modelName} extends AbstractModel implements ${modelInterfaceName} {
-${includeId === '_id' ? idApiDecorator + '@Expose()\n    @IsOptional()\n' + includeId + '\n' : ''}${idApiDecorator}@Expose({ toClassOnly: true })
+${includeId === '_id' ? idApiDecorator + '@Expose()\n    @IsOptional()\n' + includeId + '\n' : ''}
+    ${idApiDecorator}${idGraphQLDecorator}@Expose({ toClassOnly: true })
     @IsOptional()
-    id: string;
+    readonly id!: string;
 
 ${contract.fields?.map((field: any) => this.generateClassField(field)).join('\n\n')}
 
@@ -158,12 +163,19 @@ ${this.generateDTOs(contract)}
             `import { fastJson, AbstractModel } from "@cmmv/core";`,
         ];
 
-        if (Module.hasModule('openapi'))
+        if (Module.hasModule('openapi')) {
             importStatements.push(`\nimport {
     ApiSchema, ApiProperty,
     ApiPropertyOptional, ApiHideProperty,
     ApiResponseProperty
 } from "@cmmv/openapi";\n`);
+        }
+
+        if (Module.hasModule('graphql')) {
+            importStatements.push(`\nimport {
+    ObjectType, Field, ID, Int, Float
+} from "@cmmv/graphql";\n`);
+        }
 
         if (contract.imports && contract.imports.length > 0) {
             for (const module of contract.imports) {
@@ -299,6 +311,7 @@ import {
 
     private generateClassField(field: any): string {
         const hasOpenAPI = Module.hasModule('openapi');
+        const hasGraphQL = Module.hasModule('graphql');
         const decorators: string[] = [];
 
         if (field.exclude) {
@@ -391,6 +404,7 @@ import {
                     ? `[${fieldType}]`
                     : `${fieldType}`;
 
+            //OpenAPI
             if (!field.exclude) {
                 if (optional) {
                     decorators.push(`    @ApiPropertyOptional({
@@ -410,6 +424,13 @@ import {
                 decorators.push(`    @ApiHideProperty()`);
             }
 
+            //GraphQL
+            if (!field.exclude)
+                decorators.push(
+                    `    @Field(() => ${apiType}, { nullable: ${field.nullable === true ? 'true' : 'false'} })`,
+                );
+
+            //Transforms
             if (field.transform) {
                 const cleanedTransform = field.transform
                     .toString()

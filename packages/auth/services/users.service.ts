@@ -75,24 +75,29 @@ export class AuthUsersService extends AbstractService {
     public static async resolveGroups(user: any) {
         const GroupsEntity = Repository.getEntity('GroupsEntity');
         const Groups: any = Application.getModel('Groups');
-        const groupsToAssign = Array.isArray(user.groups)
+        let groupsToAssign = Array.isArray(user.groups)
             ? user.groups
             : [user.groups];
 
-        const groups = await Repository.findAll(
-            GroupsEntity,
-            Repository.queryBuilder({
-                id: { $in: groupsToAssign },
-            }),
-        );
+        groupsToAssign = groupsToAssign.filter((item) => item);
 
-        let roles = new Set<string>(user.roles ?? []);
-        const groupsModels = Groups.fromEntities(groups.data);
-        groupsModels.map((group) =>
-            group.roles?.map((roleName) => roles.add(roleName)),
-        );
-        user.groups = groupsModels;
-        user.roles = Array.from(roles);
+        if (groupsToAssign.length > 0) {
+            const groups = await Repository.findAll(
+                GroupsEntity,
+                Repository.queryBuilder({
+                    id: { $in: groupsToAssign },
+                }),
+            );
+
+            let roles = new Set<string>(user.roles ?? []);
+            const groupsModels = Groups.fromEntities(groups.data);
+            groupsModels.map((group) =>
+                group.roles?.map((roleName) => roles.add(roleName)),
+            );
+            user.groups = groupsModels;
+            user.roles = Array.from(roles);
+        }
+
         return user;
     }
 

@@ -39,7 +39,7 @@ export class AuthAutorizationService extends AbstractService {
         const clientIP =
             req.ip ||
             req.connection?.remoteAddress ||
-            req.get('x-forwarded-for');
+            req.header['x-forwarded-for'];
         return localIPs.includes(clientIP);
     }
 
@@ -149,7 +149,8 @@ export class AuthAutorizationService extends AbstractService {
         }
 
         const sesssionId = uuidv4();
-        const fingerprint = generateFingerprint(req.req, usernameHashed);
+        const fingerprint = generateFingerprint(req.req || req, usernameHashed);
+        const roles = await this.getGroupsRoles(user);
 
         // Creating JWT token
         const accessToken = jwt.sign(
@@ -161,8 +162,7 @@ export class AuthAutorizationService extends AbstractService {
                 username: encryptJWTData(payload.username, jwtSecret),
                 fingerprint,
                 root: user.root || false,
-                roles: user.roles || [],
-                groups: user.groups || [],
+                roles: roles || [],
             },
             jwtSecret,
             { expiresIn: '15m' },
@@ -222,7 +222,7 @@ export class AuthAutorizationService extends AbstractService {
                 token: accessToken,
                 refreshToken: refreshToken,
                 root: user.root || false,
-                roles: user.roles || [],
+                roles: roles || [],
                 groups: user.groups || [],
             };
 
@@ -281,8 +281,9 @@ export class AuthAutorizationService extends AbstractService {
         }
     }
 
-    public async refreshToken(request: any) {
-        const { authorization } = request.req.headers;
+    public async refreshToken(request: any, ctx?: any) {
+        const { authorization } =
+            request.req?.headers || request.headers || ctx['token'];
 
         if (!authorization) {
             throw new HttpException(
@@ -302,24 +303,32 @@ export class AuthAutorizationService extends AbstractService {
         );
         const UserEntity = Repository.getEntity('UserEntity');
 
-        const token = authorization.split(' ')[1] || null;
+        const token = authorization.startsWith('Bearer')
+            ? authorization.split(' ')[1]
+            : authorization || null;
         const refreshTokenHeader =
-            request.req.headers['refresh-token'] ||
-            request.req.headers['refreshToken'];
+            request.headers['refresh-token'] ||
+            request.headers['refreshToken'] ||
+            request.req?.headers['refresh-token'] ||
+            request.req?.headers['refreshToken'] ||
+            ctx['refreshToken'];
+
         const refreshToken =
             request.cookies?.[refreshCookieName] || refreshTokenHeader;
 
-        if (!refreshToken || !token)
+        if (!refreshToken || !token) {
             throw new HttpException(
                 'Invalid credentials',
                 HttpStatus.UNAUTHORIZED,
             );
+        }
 
-        if (!(await AuthSessionsService.validateRefreshToken(refreshToken)))
+        if (!(await AuthSessionsService.validateRefreshToken(refreshToken))) {
             throw new HttpException(
                 'Invalid refresh token',
                 HttpStatus.UNAUTHORIZED,
             );
+        }
 
         const verifyAsync = promisify(jwt.verify);
         const decoded = (await verifyAsync(refreshToken, jwtSecretRefresh)) as {
@@ -333,11 +342,12 @@ export class AuthAutorizationService extends AbstractService {
             jwtSecret,
         );
 
-        if (!tokenDecoded)
+        if (!tokenDecoded) {
             throw new HttpException(
                 'Invalid access token',
                 HttpStatus.UNAUTHORIZED,
             );
+        }
 
         if (
             tokenDecoded.fingerprint !== decoded.f ||
@@ -362,7 +372,11 @@ export class AuthAutorizationService extends AbstractService {
             .update(tokenDecoded.username)
             .digest('hex');
 
-        const fingerprint = generateFingerprint(request.req, usernameHashed);
+        const fingerprint = generateFingerprint(
+            request.req || request,
+            usernameHashed,
+        );
+        const roles = await this.getGroupsRoles(user);
 
         const accessToken = jwt.sign(
             {
@@ -373,8 +387,7 @@ export class AuthAutorizationService extends AbstractService {
                 username: encryptJWTData(tokenDecoded.username, jwtSecret),
                 fingerprint,
                 root: user.root || false,
-                roles: user.roles || [],
-                groups: user.groups || [],
+                roles: roles || [],
             },
             jwtSecret,
             { expiresIn: '15m' },
@@ -383,6 +396,42 @@ export class AuthAutorizationService extends AbstractService {
         return {
             token: accessToken,
         };
+    }
+
+    public async getGroupsRoles(user: any) {
+        let roles = [];
+
+        if (user.roles) roles = [...user.roles];
+
+        if (user.groups && user.groups.length > 0) {
+            const GroupsEntity = Repository.getEntity('GroupsEntity');
+            const Groups: any = Application.getModel('Groups');
+
+            let groupsToAssign = Array.isArray(user.groups)
+                ? user.groups
+                : [user.groups];
+
+            groupsToAssign = groupsToAssign.filter((item) => item);
+
+            if (groupsToAssign.length > 0) {
+                const groups = await Repository.findAll(
+                    GroupsEntity,
+                    Repository.queryBuilder({
+                        id: { $in: groupsToAssign },
+                    }),
+                );
+
+                const rolesSet = new Set<string>(roles ?? []);
+                const groupsModels = Groups.fromEntities(groups.data);
+                groupsModels.map((group) =>
+                    group.roles?.map((roleName) => rolesSet.add(roleName)),
+                );
+
+                roles = Array.from(rolesSet);
+            }
+        }
+
+        return roles;
     }
 
     /* Roles */

@@ -88,9 +88,11 @@ components:
           type: string
         username:
           type: string
+          readOnly: true
           required: true
         password:
           type: string
+          readOnly: true
           required: true
         provider:
           type: string
@@ -1207,25 +1209,6 @@ paths:
             schema:
               type: object
               properties:
-                username:
-                  type: string
-                  nullable: false
-                  uniqueItems: true
-                  validations: &ref_2
-                    - type: IsString
-                      message: Invalid username
-                    - type: MinLength
-                      value: 4
-                      message: Invalid username
-                    - type: MaxLength
-                      value: 40
-                      message: Invalid username
-                password:
-                  type: string
-                  nullable: false
-                  validations: &ref_3
-                    - type: IsString
-                      message: Invalid password
                 profile:
                   type: string
                   nullable: true
@@ -1345,15 +1328,6 @@ paths:
             schema:
               type: object
               properties:
-                username:
-                  type: string
-                  nullable: false
-                  uniqueItems: true
-                  validations: *ref_2
-                password:
-                  type: string
-                  nullable: false
-                  validations: *ref_3
                 profile:
                   type: string
                   nullable: true

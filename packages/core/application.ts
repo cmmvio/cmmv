@@ -16,6 +16,7 @@ import {
     Config,
     Hooks,
     HooksType,
+    Singleton,
 } from '.';
 
 import {
@@ -52,6 +53,7 @@ export interface IApplicationSettings {
     contracts?: Array<new () => any>;
     services?: Array<any>; //#deprecad
     providers?: Array<any>;
+    resolvers?: Array<any>;
 }
 
 process.on('uncaughtException', (err) => {
@@ -60,6 +62,7 @@ process.on('uncaughtException', (err) => {
 
 export class Application {
     protected logger: Logger = new Logger('Application');
+    public static instance: Application;
 
     public static appModule = {
         controllers: [],
@@ -80,11 +83,13 @@ export class Application {
     protected controllers: Array<any> = [];
     protected submodules: Array<Module> = [];
     protected contracts: Array<any> = [];
-    protected static contractsCls: Array<new () => {}> = [];
     protected configs: Array<ConfigSchema> = [];
     protected entities: Array<any> = [];
     protected models: Array<any> = [];
+    protected resolvers: Array<any> = [];
     public providersMap = new Map<string, any>();
+
+    public static contractsCls: Array<new () => {}> = [];
     public static models = new Map<string, new () => any>();
 
     protected host: string;
@@ -107,18 +112,21 @@ export class Application {
 
             this.host = Config.get<string>('server.host') || '0.0.0.0';
             this.port = Config.get<number>('server.port') || 3000;
+
+            Application.contractsCls = settings.contracts || [];
             this.transpilers = settings.transpilers || [];
             this.modules = settings.modules || [];
-            Application.contractsCls = settings.contracts || [];
+            this.resolvers = settings.resolvers || [];
             this.contracts =
                 settings.contracts?.map(
                     (contractClass) => new contractClass(),
                 ) || [];
             this.initialize(settings, compile);
         } else if (settings && settings.contracts?.length > 0) {
+            Application.contractsCls = settings.contracts || [];
             this.transpilers = (settings && settings.transpilers) || [];
             this.modules = (settings && settings.modules) || [];
-            Application.contractsCls = settings.contracts || [];
+            this.resolvers = settings.resolvers || [];
             this.contracts =
                 (settings &&
                     settings.contracts?.map(
@@ -127,6 +135,8 @@ export class Application {
                 [];
             this.initialize(settings, compile);
         }
+
+        Application.instance = this;
     }
 
     protected async initialize(
@@ -250,9 +260,10 @@ export class Application {
 
     protected async execProcess(settings: IApplicationSettings) {
         try {
+            Application.contractsCls = settings.contracts || [];
             this.modules = (settings && settings.modules) || [];
             this.transpilers = settings.transpilers || [];
-            Application.contractsCls = settings.contracts || [];
+            this.resolvers = settings.resolvers || [];
             this.contracts =
                 settings.contracts?.map(
                     (contractClass) => new contractClass(),
@@ -373,14 +384,16 @@ export class Application {
         if (modules && modules.length > 0) {
             modules.forEach((module) => {
                 if (module) {
+                    Application.contractsCls.push(...module.getContractsCls());
+
                     this.transpilers.push(...module.getTranspilers());
                     this.controllers.push(...module.getControllers());
                     this.submodules.push(...module.getSubmodules());
-                    Application.contractsCls.push(...module.getContractsCls());
                     this.contracts.push(...module.getContracts());
                     this.entities.push(...module.getEntities());
                     this.models.push(...module.getModels());
                     this.configs.push(...module.getConfigsSchemas());
+                    this.resolvers.push(...module.getResolvers());
 
                     module.getProviders().forEach((provider) => {
                         const paramTypes =
@@ -697,9 +710,31 @@ export let ApplicationModule = new Module("app", {
         Application.appModule.httpAfterRender.push(cb);
     }
 
+    public static resolveProvider<T = undefined>(
+        providerCls: new (...args: any) => T,
+    ): T {
+        const paramTypes =
+            Reflect.getMetadata('design:paramtypes', providerCls) || [];
+        const instances = paramTypes.map((paramType: any) =>
+            Application.instance.providersMap.get(paramType.name),
+        );
+        const instance = new providerCls(...instances);
+        return instance;
+    }
+
     public static getContract(contractName: string): new () => {} | null {
         return Application.contractsCls.find(
             (cls) => cls.name === contractName,
+        );
+    }
+
+    public static getResolvers() {
+        return Array.from(new Set(Application.instance.resolvers));
+    }
+
+    public static getResolver(resolverName: string) {
+        return Application.instance.resolvers.filter(
+            (cls) => cls.name === resolverName,
         );
     }
 }

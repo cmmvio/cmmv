@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 import {
     AbstractTranspile,
@@ -18,12 +18,12 @@ export class RepositoryTranspile
         const contracts = Scope.getArray<any>('__contracts');
 
         contracts?.forEach((contract: IContract) => {
-            if (contract.generateEntities) this.generateEntity(contract);
-            if (contract.generateController) this.generateService(contract);
+            if (contract.generateEntities) this.generateEntities(contract);
+            if (contract.generateController) this.generateServices(contract);
         });
     }
 
-    private generateEntity(contract: IContract): void {
+    private generateEntities(contract: IContract): void {
         const entityName = contract.controllerName;
         const modelName = `${entityName}.Model`;
         const entityFileName = `${entityName.toLowerCase()}.entity.ts`;
@@ -67,7 +67,7 @@ ${contract.fields.map((field: any) => this.generateField(field)).join('\n\n')}${
         fs.writeFileSync(outputFilePath, entityTemplate, 'utf8');
     }
 
-    private generateService(contract: IContract): void {
+    private generateServices(contract: IContract): void {
         const telemetry = Config.get<boolean>('app.telemetry');
         const serviceName = `${contract.controllerName}Service`;
         const modelName = `${contract.controllerName}`;
@@ -109,6 +109,11 @@ import {
 } from "@cmmv/repository";
 
 import {
+    IReponseResult,
+    IOperationResult
+} from "@cmmv/http";
+
+import {
     ${modelName}${importsFromModel.join(', \n   ')}
 } from "${this.getImportPath(contract, 'models', modelName.toLowerCase(), '@models')}.model";
 
@@ -119,31 +124,31 @@ import {
 export class ${serviceName}Generated extends AbstractRepositoryService {
     protected schema = new RepositorySchema(${entityName}, ${modelName});
 
-    async getAll(queries?: any, req?: any) {
+    async getAll(queries?: any, req?: any): Promise<IReponseResult<${modelName}>> {
         return await this.schema.getAll(queries, req${findOptions});
     }
 
-    async getIn(inArr: Array<string>) {
+    async getIn(inArr: Array<string>): Promise<IReponseResult<${modelName}>> {
         return await this.schema.getIn(inArr${findOptions});
     }
 
-    async getById(id: string, req?: any) {
+    async getById(id: string): Promise<IReponseResult<${modelName}>> {
         return await this.schema.getById(id${findOptions});
     }
 
-    async insert(payload: Partial<${modelName}>, req?: any) {
+    async insert(payload: Partial<${modelName}>, req?: any): Promise<IOperationResult<${modelName}>> {
         const newItem: any = this.fromPartial(${modelName}, payload, req);
         const validatedData = await this.validate<${modelName}>(newItem);
         return await this.schema.insert(validatedData);
     }
 
-    async update(id: string, payload: Partial<${modelName}>, req?: any) {
+    async update(id: string, payload: Partial<${modelName}>, req?: any): Promise<IOperationResult> {
         const updateItem: any = this.fromPartial(${modelName}, payload, req);
         const validatedData = await this.validate<${modelName}>(updateItem, true);
         return await this.schema.update(id, validatedData);
     }
 
-    async delete(id: string, req?: any) {
+    async delete(id: string): Promise<IOperationResult> {
         return await this.schema.delete(id);
     }
 ${contract.services

@@ -279,6 +279,7 @@ ${contract.services
     as it may be overwritten by the application.
     **********************************************
 **/
+
 import { Application } from "@cmmv/core";
 import { Telemetry } from "@cmmv/core";${extraImports.length > 0 ? '\n' + extraImports.join('\n') : ''}
 
@@ -306,7 +307,7 @@ export class ${controllerName}Generated {
         summary: "Returns ${contract.controllerName} records by filter",
         exposeFilters: true
     })${this.getControllerDecorators({ authRouter, rootOnlyRouter, hasCache, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'get')}
-    async getAll(@Queries() queries: any, @Req() req) {
+    async get(@Queries() queries: any, @Req() req) {
         return this.${serviceName.toLowerCase()}.getAll(queries, req);
     }
 
@@ -315,12 +316,12 @@ export class ${controllerName}Generated {
         schema: RouterSchema.GetByID,
         summary: "Returns ${contract.controllerName} record by ID"
     })${this.getControllerDecorators({ authRouter, rootOnlyRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'get')}
-    async getById(@Param('id') id: string, @Req() req) {
+    async getById(@Param('id') id: string) {
         ${
             hasCache
                 ? `const cacheData = await CacheService.get(\`${cacheKeyPrefix}\$\{id\}\`);
         return (cacheData) ? cacheData : this.${serviceName.toLowerCase()}.getById(id, req);`
-                : `return this.${serviceName.toLowerCase()}.getById(id, req);`
+                : `return this.${serviceName.toLowerCase()}.getById(id);`
         }
     }
 
@@ -329,8 +330,8 @@ export class ${controllerName}Generated {
         schema: RouterSchema.Raw,
         summary: "Return ${contract.controllerName} record by raw ID"
     })${this.getControllerDecorators({ authRouter, rootOnlyRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'get')}
-    async getByIdRaw(@Param('id') id: string, @Req() req) {
-        const result = await this.${serviceName.toLowerCase()}.getById(id, req);
+    async getRaw(@Param('id') id: string): Promise<${contract.controllerName}>{
+        const result = await this.${serviceName.toLowerCase()}.getById(id);
         return ${contract.controllerName}FastSchema(result.data);
     }
 
@@ -359,8 +360,8 @@ export class ${controllerName}Generated {
         schema: RouterSchema.Delete,
         summary: "Delete ${contract.controllerName} by ID"
     })${this.getControllerDecorators({ authRouter, rootOnlyRouter, hasCache: false, contract }, { cacheKeyPrefix, cacheTtl, cacheCompress }, 'delete')}
-    async delete(@Param('id') id: string, @Req() req) {
-        const result = await this.${serviceName.toLowerCase()}.delete(id, req);${hasCache ? `\n        await CacheService.del(\`${cacheKeyPrefix}\${id}\`);\n        await CacheService.del("${cacheKeyPrefix}getAll");` : ''}
+    async delete(@Param('id') id: string) {
+        const result = await this.${serviceName.toLowerCase()}.delete(id);${hasCache ? `\n        await CacheService.del(\`${cacheKeyPrefix}\${id}\`);\n        await CacheService.del("${cacheKeyPrefix}getAll");` : ''}
         return result;
     }
 ${contract.services

@@ -49,6 +49,8 @@
             "@cmmv/testing/*": ["packages/testing/*"],
             "@cmmv/form": ["packages/form"],
             "@cmmv/form/*": ["packages/form/*"],
+            "@cmmv/graphql": ["packages/graphql"],
+            "@cmmv/graphql/*": ["packages/graphql/*"],
             "@cmmv/vault": ["packages/vault"],
             "@cmmv/vault/*": ["packages/vault/*"],
             "@cmmv/openapi": ["packages/openapi"],

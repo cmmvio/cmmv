@@ -12,6 +12,7 @@ export interface IModuleOptions {
     configs?: Array<ConfigSchema>;
     entities?: Array<any>;
     models?: Array<any>;
+    resolvers?: Array<any>;
 }
 
 export interface IModule {
@@ -37,6 +38,7 @@ export class Module implements IModule {
     private configs: Array<any>;
     private entities: Array<any>;
     private models: Array<any>;
+    private resolvers: Array<any>;
 
     constructor(name: string, options: IModuleOptions) {
         this.providers = options.providers || [];
@@ -46,6 +48,7 @@ export class Module implements IModule {
         this.configs = options.configs || [];
         this.entities = options.entities || [];
         this.models = options.models || [];
+        this.resolvers = options.resolvers || [];
         this.contractsCls = options.contracts || [];
         this.contracts =
             options.contracts?.map((contractClass) => new contractClass()) ||
@@ -111,5 +114,9 @@ export class Module implements IModule {
 
     public getModels(): Array<any> {
         return this.models;
+    }
+
+    public getResolvers(): Array<any> {
+        return this.resolvers;
     }
 }

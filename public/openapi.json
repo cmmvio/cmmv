@@ -117,10 +117,12 @@
           },
           "username": {
             "type": "string",
+            "readOnly": true,
             "required": true
           },
           "password": {
             "type": "string",
+            "readOnly": true,
             "required": true
           },
           "provider": {
@@ -1852,37 +1854,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "username": {
-                    "type": "string",
-                    "nullable": false,
-                    "uniqueItems": true,
-                    "validations": [
-                      {
-                        "type": "IsString",
-                        "message": "Invalid username"
-                      },
-                      {
-                        "type": "MinLength",
-                        "value": 4,
-                        "message": "Invalid username"
-                      },
-                      {
-                        "type": "MaxLength",
-                        "value": 40,
-                        "message": "Invalid username"
-                      }
-                    ]
-                  },
-                  "password": {
-                    "type": "string",
-                    "nullable": false,
-                    "validations": [
-                      {
-                        "type": "IsString",
-                        "message": "Invalid password"
-                      }
-                    ]
-                  },
                   "profile": {
                     "type": "string",
                     "nullable": true,
@@ -2068,37 +2039,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "username": {
-                    "type": "string",
-                    "nullable": false,
-                    "uniqueItems": true,
-                    "validations": [
-                      {
-                        "type": "IsString",
-                        "message": "Invalid username"
-                      },
-                      {
-                        "type": "MinLength",
-                        "value": 4,
-                        "message": "Invalid username"
-                      },
-                      {
-                        "type": "MaxLength",
-                        "value": 40,
-                        "message": "Invalid username"
-                      }
-                    ]
-                  },
-                  "password": {
-                    "type": "string",
-                    "nullable": false,
-                    "validations": [
-                      {
-                        "type": "IsString",
-                        "message": "Invalid password"
-                      }
-                    ]
-                  },
                   "profile": {
                     "type": "string",
                     "nullable": true,

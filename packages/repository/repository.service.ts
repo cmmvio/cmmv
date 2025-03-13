@@ -1,6 +1,6 @@
-import * as path from 'path';
+import * as path from 'node:path';
+import { cwd } from 'node:process';
 import * as fg from 'fast-glob';
-import { cwd } from 'process';
 
 import {
     DataSource,
@@ -663,7 +663,7 @@ export class RepositorySchema<Entity, T> {
         if (!result) throw new Error('Unable to return a valid result.');
 
         //@ts-ignore
-        let resultModel = this.model.fromEntity(result.data);
+        let resultModel = this.model.fromEntity(result);
 
         if (options && options.resolvers) {
             const resolvers = Array.isArray(options.resolvers)
@@ -700,7 +700,7 @@ export class RepositorySchema<Entity, T> {
         if (!result.success)
             throw new Error(result.message || 'Insert operation failed');
 
-        return this.toModel(this.model, result.data);
+        return { data: this.toModel(this.model, result.data) };
     }
 
     public async update(id: string, data: any) {

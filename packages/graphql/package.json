@@ -1,0 +1,40 @@
+{
+    "name": "@cmmv/graphql",
+    "version": "0.8.33",
+    "description": "GraphQL module for CMMV",
+    "keywords": [
+        "cmmv",
+        "framework",
+        "graphql",
+        "type-graphql"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cmmvio/cmmv.git"
+    },
+    "author": "Andre Ferreira",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/cmmvio/cmmv/issues"
+    },
+    "homepage": "https://cmmv.io",
+    "dependencies": {
+        "@apollo/server": "^4.11.3",
+        "@cmmv/auth": "^0.8.33",
+        "@cmmv/core": "^0.8.33",
+        "@cmmv/server": "^0.9.1",
+        "graphql": "^16.10.0",
+        "graphql-scalars": "^1.24.1",
+        "graphql-type-json": "^0.3.2",
+        "type-graphql": "2.0.0-rc.2"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "@apollo/protobufjs",
+            "skia-canvas"
+        ]
+    }
+}
