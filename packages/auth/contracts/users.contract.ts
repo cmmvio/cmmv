@@ -35,7 +35,6 @@ export class UserContract extends AbstractContract {
     @ContractField({
         protoType: 'string',
         unique: true,
-        readOnly: true,
         validations: [
             {
                 type: 'IsString',
@@ -59,7 +58,6 @@ export class UserContract extends AbstractContract {
 
     @ContractField({
         protoType: 'string',
-        readOnly: true,
         customDecorator: {
             IsStrongPassword: {
                 import: '@cmmv/core',

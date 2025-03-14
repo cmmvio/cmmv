@@ -14,6 +14,7 @@ export class AuthUsersService extends AbstractService {
     /* Block */
     public async blockUser(userId: string): Promise<{ message: string }> {
         const UserEntity = Repository.getEntity('UserEntity');
+
         const user = await Repository.findBy(
             UserEntity,
             Repository.queryBuilder({ id: userId }),
@@ -22,27 +23,30 @@ export class AuthUsersService extends AbstractService {
         if (!user)
             throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
 
-        if (user.blocked)
+        if (user.blocked) {
             throw new HttpException(
                 'User is already blocked',
                 HttpStatus.BAD_REQUEST,
             );
+        }
 
         const result = await Repository.update(UserEntity, userId, {
             blocked: true,
         });
 
-        if (result <= 0)
+        if (result <= 0) {
             throw new HttpException(
                 'Failed to block user',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+        }
 
         return { message: 'User blocked successfully' };
     }
 
     public async unblockUser(userId: string): Promise<{ message: string }> {
         const UserEntity = Repository.getEntity('UserEntity');
+
         const user = await Repository.findBy(
             UserEntity,
             Repository.queryBuilder({ id: userId }),
@@ -51,21 +55,23 @@ export class AuthUsersService extends AbstractService {
         if (!user)
             throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
 
-        if (!user.blocked)
+        if (!user.blocked) {
             throw new HttpException(
                 'User is already unblocked',
                 HttpStatus.BAD_REQUEST,
             );
+        }
 
         const result = await Repository.update(UserEntity, userId, {
             blocked: false,
         });
 
-        if (result <= 0)
+        if (result <= 0) {
             throw new HttpException(
                 'Failed to unblock user',
                 HttpStatus.INTERNAL_SERVER_ERROR,
             );
+        }
 
         return { message: 'User unblocked successfully' };
     }
@@ -176,6 +182,7 @@ export class AuthUsersService extends AbstractService {
         );
 
         const validGroupIds = validGroups.data.map((group) => group.id);
+
         const invalidGroups = groupsToRemove.filter(
             (groupId) => !validGroupIds.includes(groupId),
         );

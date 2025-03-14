@@ -44,6 +44,7 @@ export class GroupsContract extends AbstractContract {
         objectType: 'string[]',
         protoRepeated: true,
         nullable: true,
+        readOnly: true,
     })
     roles: string[];
 }

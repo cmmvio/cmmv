@@ -1,8 +1,7 @@
 {
     "extends": "../tsconfig.build.json",
     "compilerOptions": {
-        "types": ["node"],
-        "typeRoots": ["./src/types", "./node_modules/@types"]
+        "types": ["node"]
     },
     "references": [{ "path": "./tsconfig.build.json" }]
 }

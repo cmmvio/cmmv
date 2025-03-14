@@ -16,7 +16,6 @@ import {
     Config,
     Hooks,
     HooksType,
-    Singleton,
 } from '.';
 
 import {
@@ -41,7 +40,7 @@ import {
     SUB_PATH_METADATA,
 } from './decorators';
 
-import { ApplicationTranspile } from './transpilers';
+import { ApplicationTranspile, ContractsTranspile } from './transpilers';
 
 export interface IApplicationSettings {
     wsAdapter?: new (appOrHttpServer: any) => AbstractWSAdapter;
@@ -151,6 +150,7 @@ export class Application {
             this.processContracts();
 
             this.transpilers.push(ApplicationTranspile);
+            this.transpilers.push(ContractsTranspile);
 
             if (env === 'dev' || env === 'development' || env === 'build') {
                 if (this.transpilers.length > 0) {
@@ -275,6 +275,7 @@ export class Application {
             this.processContracts();
 
             this.transpilers.push(ApplicationTranspile);
+            this.transpilers.push(ContractsTranspile);
 
             if (this.transpilers.length > 0) {
                 const transpile = new Transpile(this.transpilers);
@@ -616,7 +617,7 @@ import "reflect-metadata";
 
 import {
     Module, ApplicationTranspile,
-    ApplicationConfig
+    ApplicationConfig, ContractsTranspile
 } from "@cmmv/core";
 
 //Controllers
@@ -633,7 +634,10 @@ export let ApplicationModule = new Module("app", {
     providers: [
         ${Application.appModule.providers.map((provider) => provider.name).join(', \n\t\t')}
     ],
-    transpilers: [ApplicationTranspile]
+    transpilers: [
+        ApplicationTranspile,
+        ContractsTranspile
+    ]
 });`;
 
             if (!fs.existsSync(path.dirname(outputPath)))

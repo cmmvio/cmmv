@@ -17,5 +17,10 @@ export const ApplicationConfig: ConfigSchema = {
             type: 'string',
             default: 'src',
         },
+        generateSchema: {
+            required: false,
+            type: 'boolean',
+            default: true,
+        },
     },
 };

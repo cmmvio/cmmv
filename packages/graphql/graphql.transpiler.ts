@@ -95,7 +95,6 @@ export class GraphQLTranspile extends AbstractTranspile implements ITranspile {
 import {
     Resolver, Query, Mutation,
     Authorized, Arg, Args,
-    RecipeNotFoundError,
     ID, Int, Float, Ctx,
     Field, ArgsType, ObjectType,
     PaginationArgs, GraphQLContext,
@@ -122,7 +121,7 @@ ${contract.fields
 @ArgsType()
 class Update${entityName}Input {
     @Field(() => ID)
-    id: ID;
+    id: string;
 
 ${contract.fields
     ?.map((field: any) => this.generateClassField(field))
@@ -133,19 +132,19 @@ ${contract.fields
 @ObjectType()
 class Pagination${entityName}Return {
     @Field(() => Int, {
-        description: "",
+        description: "Total number of records available in the dataset.",
         nullable: false
     })
     count!: number;
 
     @Field(() => [${entityName}], {
-        description: "",
+        description: "List of user records for the current page.",
         nullable: false
     })
     data?: ${entityName}[];
 
     @Field(() => PaginationResponse, {
-        description: "",
+        description: "Pagination metadata, including page information.",
         nullable: false
     })
     pagination!: PaginationResponse;
@@ -164,44 +163,27 @@ export class ${resolverName}Generated {
         @Args() queries: PaginationArgs,
         @Ctx() ctx: GraphQLContext
     ) {
-        const result = await this.${serviceName.toLowerCase()}.getAll(queries, ctx.req);
-
-        if (result === undefined)
-            throw new RecipeNotFoundError();
-
-        return result;
+        return await this.${serviceName.toLowerCase()}.getAll(queries, ctx.req);
     }
 
     @Query(returns => ${entityName})${this.getControllerDecorators({ authRouter, rootOnlyRouter, contract }, 'get')}
-    async ${entityName.toLocaleLowerCase()}ById(@Arg("id") id: ID) {
-        const result = await this.${serviceName.toLowerCase()}.getById(id);
-
-        if (result === undefined)
-            throw new RecipeNotFoundError(id);
-
-        return result.data;
+    async ${entityName.toLocaleLowerCase()}ById(@Arg("id") id: string) {
+        return (await this.${serviceName.toLowerCase()}.getById(id)).data;
     }
 
     @Mutation(returns => ${entityName})${this.getControllerDecorators({ authRouter, rootOnlyRouter, contract }, 'insert')}
-    async create${entityName}(@Args('create${entityName}Data') create${entityName}Data: Create${entityName}Input): Promise<${entityName}> {
-        const result = await this.${serviceName.toLowerCase()}.insert(create${entityName}Data);
-        return result.data;
+    async create${entityName}(@Args() create${entityName}Data: Create${entityName}Input): Promise<${entityName}> {
+        return (await this.${serviceName.toLowerCase()}.insert(create${entityName}Data as Partial<${entityName}>)).data;
     }
 
     @Mutation(returns => Boolean)${this.getControllerDecorators({ authRouter, rootOnlyRouter, contract }, 'update')}
-    async update${entityName}(@Args('update${entityName}Data') update${entityName}Data: Update${entityName}Input): Promise<Boolean> {
-        const result = await this.${serviceName.toLowerCase()}.update(update${entityName}Data.id, update${entityName}Data);
-
-        if (result.affected <= 0)
-            throw new RecipeNotFoundError(update${entityName}Data.id);
-
-        return result.success;
+    async update${entityName}(@Args() update${entityName}Data: Update${entityName}Input): Promise<Boolean> {
+        return (await this.${serviceName.toLowerCase()}.update(update${entityName}Data.id, update${entityName}Data as Partial<${entityName}>)).success;
     }
 
     @Mutation(returns => Boolean)${this.getControllerDecorators({ authRouter, rootOnlyRouter, contract }, 'delete')}
-    async delete${entityName}(@Arg('id') id: ID): Promise<boolean> {
-        const result = await this.${serviceName.toLowerCase()}.delete(id);
-        return result.success;
+    async delete${entityName}(@Arg('id') id: string): Promise<boolean> {
+        return (await this.${serviceName.toLowerCase()}.delete(id)).success;
     }
 }`;
 

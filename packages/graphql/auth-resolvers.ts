@@ -5,13 +5,16 @@ import {
     Field,
     Resolver,
     Args,
+    Arg,
     Query,
     ObjectType,
     Ctx,
     Authorized,
+    ID,
+    Mutation,
 } from 'type-graphql';
 
-import { AuthAutorizationService } from '@cmmv/auth';
+import { AuthAutorizationService, AuthUsersService } from '@cmmv/auth';
 
 import { GraphQLContext } from './graphql.types';
 
@@ -42,12 +45,15 @@ class LoginReturn {
 @Resolver()
 export class AuthResolver {
     private readonly authService: any;
+    private readonly userService: any;
 
     constructor() {
-        if (Module.hasModule('auth'))
+        if (Module.hasModule('auth')) {
             this.authService = Application.resolveProvider(
                 AuthAutorizationService,
             );
+            this.userService = Application.resolveProvider(AuthUsersService);
+        }
     }
 
     @Query((returns) => LoginReturn)
@@ -71,5 +77,17 @@ export class AuthResolver {
             ctx,
         );
         return refreshTokenResult.token;
+    }
+
+    @Mutation((returns) => String)
+    @Authorized({ rootOnly: true })
+    async blockUser(@Arg('id') id: string) {
+        return await this.userService.blockUser(id).message;
+    }
+
+    @Mutation((returns) => String)
+    @Authorized({ rootOnly: true })
+    async unblockUser(@Arg('id') id: string) {
+        return await this.userService.unblockUser(id).message;
     }
 }

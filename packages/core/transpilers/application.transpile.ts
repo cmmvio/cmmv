@@ -312,6 +312,7 @@ import {
     private generateClassField(field: any): string {
         const hasOpenAPI = Module.hasModule('openapi');
         const hasGraphQL = Module.hasModule('graphql');
+        const readOnlySting = field.readOnly ? 'readonly ' : '';
         const decorators: string[] = [];
 
         if (field.exclude) {
@@ -425,10 +426,11 @@ import {
             }
 
             //GraphQL
-            if (!field.exclude)
+            if (!field.exclude && hasGraphQL) {
                 decorators.push(
                     `    @Field(() => ${apiType}, { nullable: ${field.nullable === true ? 'true' : 'false'} })`,
                 );
+            }
 
             //Transforms
             if (field.transform) {
@@ -456,13 +458,13 @@ import {
             decorators.push(
                 `    @Type(() => ${field.entityType.replace('Entity', '')})`,
             );
-            return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${field.propertyKey}${optional}: ${field.entityType.replace('Entity', '')}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null;`;
+            return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${field.entityType.replace('Entity', '')}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null;`;
         } else {
             const fieldType = field.objectType
                 ? field.objectType
                 : this.mapToTsType(field.protoType);
 
-            return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${field.propertyKey}${optional}: ${fieldType}${defaultValueString}`;
+            return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${fieldType}${defaultValueString}`;
         }
     }
 

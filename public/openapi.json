@@ -98,6 +98,7 @@
           },
           "roles": {
             "type": "array",
+            "readOnly": true,
             "default": [],
             "required": false,
             "items": {
@@ -117,12 +118,10 @@
           },
           "username": {
             "type": "string",
-            "readOnly": true,
             "required": true
           },
           "password": {
             "type": "string",
-            "readOnly": true,
             "required": true
           },
           "provider": {
@@ -268,22 +267,27 @@
           },
           "uuid": {
             "type": "string",
+            "readOnly": true,
             "required": true
           },
           "ipAddress": {
             "type": "string",
+            "readOnly": true,
             "required": true
           },
           "device": {
             "type": "string",
+            "readOnly": true,
             "required": false
           },
           "browser": {
             "type": "string",
+            "readOnly": true,
             "required": false
           },
           "os": {
             "type": "string",
+            "readOnly": true,
             "required": false
           },
           "revoked": {
@@ -293,6 +297,7 @@
           },
           "userAgent": {
             "type": "string",
+            "readOnly": true,
             "required": false
           }
         },
@@ -1237,13 +1242,6 @@
                         "message": "Invalid name"
                       }
                     ]
-                  },
-                  "roles": {
-                    "type": "array",
-                    "items": {
-                      "type": "string[]"
-                    },
-                    "default": "[]"
                   }
                 }
               }
@@ -1445,13 +1443,6 @@
                         "message": "Invalid name"
                       }
                     ]
-                  },
-                  "roles": {
-                    "type": "array",
-                    "items": {
-                      "type": "string[]"
-                    },
-                    "default": "[]"
                   }
                 }
               }
@@ -1854,6 +1845,37 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "username": {
+                    "type": "string",
+                    "nullable": false,
+                    "uniqueItems": true,
+                    "validations": [
+                      {
+                        "type": "IsString",
+                        "message": "Invalid username"
+                      },
+                      {
+                        "type": "MinLength",
+                        "value": 4,
+                        "message": "Invalid username"
+                      },
+                      {
+                        "type": "MaxLength",
+                        "value": 40,
+                        "message": "Invalid username"
+                      }
+                    ]
+                  },
+                  "password": {
+                    "type": "string",
+                    "nullable": false,
+                    "validations": [
+                      {
+                        "type": "IsString",
+                        "message": "Invalid password"
+                      }
+                    ]
+                  },
                   "profile": {
                     "type": "string",
                     "nullable": true,
@@ -2039,6 +2061,37 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "username": {
+                    "type": "string",
+                    "nullable": false,
+                    "uniqueItems": true,
+                    "validations": [
+                      {
+                        "type": "IsString",
+                        "message": "Invalid username"
+                      },
+                      {
+                        "type": "MinLength",
+                        "value": 4,
+                        "message": "Invalid username"
+                      },
+                      {
+                        "type": "MaxLength",
+                        "value": 40,
+                        "message": "Invalid username"
+                      }
+                    ]
+                  },
+                  "password": {
+                    "type": "string",
+                    "nullable": false,
+                    "validations": [
+                      {
+                        "type": "IsString",
+                        "message": "Invalid password"
+                      }
+                    ]
+                  },
                   "profile": {
                     "type": "string",
                     "nullable": true,

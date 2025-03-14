@@ -39,6 +39,10 @@ export interface ContractFieldOptions {
     afterValidation?: Function;
 }
 
+export interface ContractMethodOptions {
+    customMethodName?: string;
+}
+
 export interface ContractCustomDecorator {
     [key: string]: ContractCustomOptions;
 }
@@ -144,6 +148,7 @@ export const PROTO_PATH_METADATA = Symbol('proto_path_metadata');
 export const PROTO_PACKAGE_METADATA = Symbol('proto_package_metadata');
 export const DATABASE_TYPE_METADATA = Symbol('database_type_metadata');
 export const FIELD_METADATA = Symbol('contract_field_metadata');
+export const METHOD_METADATA = Symbol('contract_method_metadata');
 export const MESSAGE_METADATA = Symbol('contract_message_metadata');
 export const SERVICE_METADATA = Symbol('contract_service_metadata');
 export const DIRECTMESSAGE_METADATA = Symbol('contract_directmessage_metadata');
@@ -294,6 +299,20 @@ export function ContractField(
         existingFields.push(newField);
 
         Reflect.defineMetadata(FIELD_METADATA, existingFields, target);
+    };
+}
+
+export function ContractMethod(
+    options: ContractMethodOptions,
+): PropertyDecorator {
+    return (target: object, propertyKey: string | symbol) => {
+        const existingMethods =
+            Reflect.getMetadata(METHOD_METADATA, target) || [];
+
+        const newMethod = { propertyKey, ...options };
+        existingMethods.push(newMethod);
+
+        Reflect.defineMetadata(METHOD_METADATA, existingMethods, target);
     };
 }
 

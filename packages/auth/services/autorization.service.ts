@@ -306,12 +306,17 @@ export class AuthAutorizationService extends AbstractService {
         const token = authorization.startsWith('Bearer')
             ? authorization.split(' ')[1]
             : authorization || null;
-        const refreshTokenHeader =
-            request.headers['refresh-token'] ||
-            request.headers['refreshToken'] ||
-            request.req?.headers['refresh-token'] ||
-            request.req?.headers['refreshToken'] ||
-            ctx['refreshToken'];
+
+        let refreshTokenHeader = null;
+
+        try {
+            refreshTokenHeader =
+                request.headers['refresh-token'] ||
+                request.headers['refreshToken'] ||
+                request.req?.headers['refresh-token'] ||
+                request.req?.headers['refreshToken'] ||
+                ctx['refreshToken'];
+        } catch {}
 
         const refreshToken =
             request.cookies?.[refreshCookieName] || refreshTokenHeader;

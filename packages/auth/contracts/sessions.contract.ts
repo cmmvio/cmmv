@@ -18,6 +18,7 @@ export class SessionsContract extends AbstractContract {
         protoType: 'string',
         nullable: false,
         index: true,
+        readOnly: true,
     })
     uuid: string;
 
@@ -27,6 +28,7 @@ export class SessionsContract extends AbstractContract {
         unique: true,
         index: true,
         exclude: true,
+        readOnly: true,
     })
     fingerprint: string;
 
@@ -38,6 +40,7 @@ export class SessionsContract extends AbstractContract {
         nullable: false,
         index: true,
         exclude: true,
+        readOnly: true,
         link: [
             {
                 contract: UserContract,
@@ -52,24 +55,28 @@ export class SessionsContract extends AbstractContract {
     @ContractField({
         protoType: 'string',
         nullable: false,
+        readOnly: true,
     })
     ipAddress: string;
 
     @ContractField({
         protoType: 'string',
         nullable: true,
+        readOnly: true,
     })
     device: string;
 
     @ContractField({
         protoType: 'string',
         nullable: true,
+        readOnly: true,
     })
     browser: string;
 
     @ContractField({
         protoType: 'string',
         nullable: true,
+        readOnly: true,
     })
     os: string;
 
@@ -83,6 +90,7 @@ export class SessionsContract extends AbstractContract {
     @ContractField({
         protoType: 'string',
         nullable: true,
+        readOnly: true,
     })
     userAgent: string;
 
@@ -90,6 +98,7 @@ export class SessionsContract extends AbstractContract {
         protoType: 'string',
         nullable: false,
         exclude: true,
+        readOnly: true,
     })
     refreshToken: string;
 }

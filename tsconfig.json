@@ -77,6 +77,6 @@
             "@g/*": [".generated/*"]
         }
     },
-    "include": ["packages/**/*", "src/**/*.ts"],
+    "include": ["packages/**/*", "src/**/*.ts", ".generated/**/*.ts"],
     "exclude": ["node_modules", "dist", "src/protos", "**/*.spec.ts"]
 }
