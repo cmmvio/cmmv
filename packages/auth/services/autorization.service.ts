@@ -165,7 +165,7 @@ export class AuthAutorizationService extends AbstractService {
                 roles: roles || [],
             },
             jwtSecret,
-            { expiresIn: '15m' },
+            { expiresIn: user.root ? '1d' : '15m' },
         );
 
         const refreshToken = jwt.sign(
@@ -244,7 +244,6 @@ export class AuthAutorizationService extends AbstractService {
         //@ts-ignore
         const newUser = User.fromPartial(payload) as User;
         const data: any = await this.validate(newUser);
-        console.log(data);
 
         const result = await Repository.insert(UserEntity, {
             username: data.username,
@@ -395,7 +394,7 @@ export class AuthAutorizationService extends AbstractService {
                 roles: roles || [],
             },
             jwtSecret,
-            { expiresIn: '15m' },
+            { expiresIn: user.root ? '1d' : '15m' },
         );
 
         return {
