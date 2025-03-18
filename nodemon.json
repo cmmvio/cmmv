@@ -6,8 +6,9 @@
         "src/models", "src/controllers",
         "src/protos", "src/app.module.ts",
         "src/gateways", "src/entities",
-        "src/models/*.ts", "packages/sandbox/*.html",
-        "packages/sandbox/*.css", "packages/sandbox/*.cjs"
+        "src/models/*.ts", "packages/sandbox/public/*.html",
+        "packages/sandbox/public/*.css", "packages/sandbox/public/*.cjs"
     ],
-    "exec": "node -r @swc-node/register ./src/main.ts"
+    "exec": "node -r @swc-node/register ./src/main.ts",
+    "quiet": true
 }

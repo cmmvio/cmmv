@@ -1,3 +1,3 @@
-export * from './sandbox.controller';
-export * from './sandbox.module';
-export * from './sandbox.service';
+export * from './src/sandbox.controller';
+export * from './src/sandbox.module';
+export * from './src/sandbox.service';

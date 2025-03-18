@@ -1,0 +1,35 @@
+<div class="w-full flex text-sm items-center mb-2 justify-center">
+    <div class="flex">
+        <input
+            type="checkbox"
+            class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
+            v-model="hiddenModuleContracts"
+        />
+    </div>
+
+    <div class="flex">Hide module contracts</div>
+</div>
+
+<button
+    class="bg-green-900 hover:bg-green-800 hover:text-white cursor-pointer text-sm p-2 mt-3 px-4 rounded-md w-full flex justify-center gap-x-2"
+    @click="newContract()"
+>
+    <div class="flex">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" fill="currentColor">
+            <path fill-rule="evenodd" d="M12 3.75a.75.75 0 0 1 .75.75v6.75h6.75a.75.75 0 0 1 0 1.5h-6.75v6.75a.75.75 0 0 1-1.5 0v-6.75H4.5a.75.75 0 0 1 0-1.5h6.75V4.5a.75.75 0 0 1 .75-.75Z" clip-rule="evenodd"></path>
+        </svg>
+    </div>
+    <div class="flex">New Contract</div>
+</button>
+
+<button
+    class="bg-blue-900 hover:bg-blue-800 hover:text-white cursor-pointer text-sm p-2 mt-3 px-4 rounded-md w-full flex justify-center gap-x-2"
+    @click="syncApplication()"
+>
+    <div class="flex">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z" clip-rule="evenodd"></path>
+        </svg>
+    </div>
+    <div class="flex">Sync Application</div>
+</button>

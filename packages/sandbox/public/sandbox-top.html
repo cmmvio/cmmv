@@ -1,0 +1,26 @@
+<div class="border-b h-[48px] border-neutral-800 w-full">
+    <div class="h-full flex items-center sticky top-0 z-10 relative">
+        <ul class="flex h-full justify-center">
+            <li
+                v-for="(item, key) in tabs"
+                class="px-4 py-1 select-none cursor-pointer justify-center flex items-center"
+                :class="{'bg-neutral-800': (key === selectedTab)}"
+                @click="selectTab(key)"
+            >{{ item.label }}</li>
+        </ul>
+
+        <div class="absolute right-2 flex gap-x-4">
+            <a href="https://cmmv.io/docs" target="_blank" title="Docs" class="hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24">
+                    <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z"></path>
+                </svg>
+            </a>
+
+            <a href="https://github.com/cmmvio/cmmv" target="_blank" title="Github" class="hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="24">
+                    <path d="M12 0C5.371 0 0 5.371 0 12c0 5.302 3.438 9.8 8.207 11.387.6.111.793-.26.793-.577 0-.286-.011-1.043-.017-2.047-3.338.726-4.042-1.609-4.042-1.609-.546-1.387-1.333-1.757-1.333-1.757-1.089-.745.083-.729.083-.729 1.204.085 1.838 1.236 1.838 1.236 1.07 1.834 2.807 1.305 3.492.998.109-.775.419-1.306.761-1.606-2.666-.304-5.466-1.333-5.466-5.933 0-1.31.469-2.381 1.236-3.221-.124-.305-.536-1.526.117-3.176 0 0 1.008-.322 3.301 1.231.957-.266 1.983-.399 3.003-.404 1.019.005 2.046.138 3.003.404 2.292-1.553 3.299-1.231 3.299-1.231.655 1.65.243 2.871.119 3.176.77.84 1.235 1.911 1.235 3.221 0 4.61-2.803 5.625-5.475 5.922.43.371.812 1.102.812 2.222 0 1.606-.014 2.901-.014 3.293 0 .32.192.694.801.576C20.565 21.795 24 17.299 24 12c0-6.629-5.371-12-12-12z"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>

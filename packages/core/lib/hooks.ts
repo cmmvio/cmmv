@@ -7,6 +7,7 @@ export enum HooksType {
     'onInitialize',
     'onListen',
     'onError',
+    'onHTTPServerInit',
 }
 
 export class Hooks extends Singleton {

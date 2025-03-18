@@ -20,6 +20,13 @@
         "url": "https://github.com/cmmvio/cmmv/issues"
     },
     "homepage": "https://cmmv.io",
+    "files": [
+        "public",
+        "src",
+        "index.js",
+        "package.json",
+        "README.md"
+    ],
     "dependencies": {
         "chokidar": "^4.0.3",
         "ws": "^8.18.1"

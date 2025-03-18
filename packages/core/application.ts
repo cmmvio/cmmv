@@ -225,6 +225,8 @@ export class Application {
                     this.httpAdapter?.use(middleware);
                 });
 
+                await Hooks.execute(HooksType.onHTTPServerInit);
+
                 if (this.wsAdapter)
                     this.wsServer = this.wsAdapter.create(
                         this.httpAdapter,

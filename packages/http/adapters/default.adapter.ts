@@ -53,30 +53,8 @@ export class DefaultAdapter extends AbstractHttpAdapter<
             this.instance.use(compression({ level: 6 }));
 
         if (renderEngine === '@cmmv/view' || renderEngine === 'cmmv') {
-            for (const publicDir of publicDirs) {
-                this.instance.use(
-                    serverStatic(publicDir, {
-                        setHeaders: (res, path) => {
-                            if (path.endsWith('.html')) {
-                                res.setHeader('Cache-Control', 'no-cache');
-                            } else if (
-                                path.endsWith('.vue') ||
-                                path.endsWith('.cmmv')
-                            ) {
-                                res.setHeader(
-                                    'Content-Type',
-                                    'text/javascript',
-                                );
-                            } else {
-                                res.setHeader(
-                                    'Cache-Control',
-                                    'public, max-age=31536000, immutable',
-                                );
-                            }
-                        },
-                    }),
-                );
-            }
+            for (const publicDir of publicDirs)
+                this.instance.use(this.setStaticServer(publicDir));
 
             //@ts-ignore
             const { CMMVRenderer } = await import('../lib/view.renderview');
@@ -124,6 +102,27 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         this.setMiddleware();
         this.registerControllers();
         this.initHttpServer(settings);
+    }
+
+    private setStaticServer(publicDir: string) {
+        return serverStatic(publicDir, {
+            setHeaders: (res, path) => {
+                if (path.endsWith('.html')) {
+                    res.setHeader('Cache-Control', 'no-cache');
+                } else if (
+                    path.endsWith('.vue') ||
+                    path.endsWith('.cmmv') ||
+                    path.endsWith('.cjs')
+                ) {
+                    res.setHeader('Content-Type', 'text/javascript');
+                } else {
+                    res.setHeader(
+                        'Cache-Control',
+                        'public, max-age=31536000, immutable',
+                    );
+                }
+            },
+        });
     }
 
     public initHttpServer(options: any) {
@@ -593,6 +592,24 @@ export class DefaultAdapter extends AbstractHttpAdapter<
             default:
                 this.logger.log(logContent);
                 break;
+        }
+    }
+
+    public setPublicDir(dirs: string | string[]) {
+        const dirArr = typeof dirs === 'string' ? [dirs] : dirs;
+        const currentViews = this.instance.get('views');
+
+        if (
+            Array.isArray(currentViews) &&
+            Array.isArray(dirArr) &&
+            dirArr.length > 0
+        ) {
+            const newList = [...currentViews, ...dirArr];
+
+            for (const publicDir of dirArr)
+                this.instance.use(this.setStaticServer(publicDir));
+
+            this.instance.set('views', newList);
         }
     }
 }

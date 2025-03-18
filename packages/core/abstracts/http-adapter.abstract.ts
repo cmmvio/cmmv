@@ -99,6 +99,16 @@ export abstract class AbstractHttpAdapter<
         return this.instance as T;
     }
 
+    public setPublicDir(dirs: string | string[]) {
+        const dirArr = typeof dirs === 'string' ? [dirs] : dirs;
+        const currentViews = this.instance.get('views');
+
+        if (Array.isArray(currentViews)) {
+            const newList = [...currentViews, ...dirArr];
+            this.instance.set('views', newList);
+        }
+    }
+
     public isJson(result: any): boolean {
         if (typeof result === 'object' && result !== null) return true;
 

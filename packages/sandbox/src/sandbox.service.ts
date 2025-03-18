@@ -4,15 +4,22 @@ import chokidar from 'chokidar';
 
 const { WebSocketServer, WebSocket } = require('ws');
 
-import { Logger, Service, Application } from '@cmmv/core';
+import { Logger, Service, Application, Hook, HooksType } from '@cmmv/core';
+
 import { cwd } from 'node:process';
 
 @Service('sandbox')
 export class SandboxService {
     public static logger: Logger = new Logger('Repository');
 
+    @Hook(HooksType.onHTTPServerInit)
+    public definePublicDir() {
+        Application.instance
+            .getHttpAdapter()
+            .setPublicDir(path.join(__dirname.replace('src', 'public')));
+    }
+
     public static async loadConfig(): Promise<void> {
-        const httpServer = Application.instance.getUnderlyingHttpServer();
         const clients = [];
 
         const wsServer = new WebSocketServer({
@@ -41,12 +48,20 @@ export class SandboxService {
         };
 
         chokidar
-            .watch(['sandbox.client.cjs', 'sandbox.css', 'sandbox.html'], {
-                persistent: true,
-                ignoreInitial: true,
-                cwd: __dirname,
-            })
+            .watch(
+                [
+                    './public/sandbox.client.cjs',
+                    './public/sandbox.css',
+                    './public/*.html',
+                ],
+                {
+                    persistent: true,
+                    ignoreInitial: true,
+                    cwd: __dirname.replace('/src', ''),
+                },
+            )
             .on('change', (filePath) => {
+                this.logger.verbose(`File change ${filePath}`);
                 broadcast({ event: 'change', filePath });
             })
             .on('unlink', (filePath) => {
@@ -60,14 +75,14 @@ export class SandboxService {
 
     public async resolveClientJS() {
         return await fs.readFileSync(
-            path.join(__dirname, 'sandbox.client.cjs'),
+            path.join(__dirname.replace('src', 'public'), 'sandbox.client.cjs'),
             'utf-8',
         );
     }
 
     public async resolveStyle() {
         return await fs.readFileSync(
-            path.join(__dirname, 'sandbox.css'),
+            path.join(__dirname.replace('src', 'public'), 'sandbox.css'),
             'utf-8',
         );
     }

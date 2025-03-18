@@ -1,0 +1,64 @@
+<div
+    class="bg-neutral-900/50 fixed top-0 bottom-0 left-0 right-0 z-40 flex items-center justify-center"
+    style="backdrop-filter: blur(4px);"
+    v-show="modalNewContract"
+>
+    <div class="relative max-w-[700px] m-auto transition duration-200 c-card rounded-lg bg-neutral-900 border-black text-neutral-200 border-neutral-800 border shadow-lg text-center">
+        <div class="border-b border-neutral-800 p-2 relative">
+            <h2>New Contract</h2>
+
+            <div class="absolute top-2 right-2">
+                <button class="cursor-pointer hover:text-white" title="Close" @click="modalConfirm = false">
+                    <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="text-xs p-4 flex-colums w-[420px]">
+            <div class="flex text-xs justify-center mt-2">
+                <div class="w-[150px] flex items-center">Contract Name:</div>
+                <div class="w-[300px] text-left">
+                    {{ `${newContractData.controllerName ?? ''}Contract` }}
+                </div>
+            </div>
+
+            <div class="flex text-xs justify-center mt-2">
+                <div class="w-[150px] flex items-center">Controller Name: <span class="text-red-600 ml-1">*</span></div>
+                <div class="w-[300px] justify-end">
+                    <input
+                        class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
+                        type="text"
+                        placeholder="MyNew"
+                        v-model="newContractData.controllerName"
+                    />
+                </div>
+            </div>
+
+            <div class="flex text-xs justify-center mt-2">
+                <div class="w-[150px] flex items-center">Subpath: </div>
+                <div class="w-[300px] justify-end">
+                    <input
+                        class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
+                        type="text"
+                        placeholder="/path"
+                        v-model="newContractData.subPath"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <button
+                class="bg-green-900 hover:bg-green-800 p-1 px-3 rounded-md select-none cursor-pointer mr-2"
+                @click="createContract()"
+            >Create</button>
+
+            <button
+                class="bg-neutral-800 hover:bg-neutral-700 p-1 px-3 rounded-md select-none cursor-pointer"
+                @click="modalNewContract = false"
+            >Cancel</button>
+        </div>
+    </div>
+</div>

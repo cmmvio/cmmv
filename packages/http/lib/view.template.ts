@@ -58,17 +58,32 @@ export class Template {
 
         while ((match = includeRegex.exec(templateText)) !== null) {
             const includePath = match[1];
-            const resolvedPath = path.resolve(cwd(), includePath);
-            const resolvedPathSimplifly = path.resolve(
-                cwd(),
-                'public',
-                'views',
-                includePath,
-            );
+            let resolvedPath = '';
+            let resolvedPathSimplifly = '';
+
+            if (includePath.includes('@packages')) {
+                resolvedPath = path.resolve(
+                    cwd(),
+                    includePath.replace('@packages', 'packages'),
+                );
+                resolvedPathSimplifly = path.resolve(
+                    cwd(),
+                    includePath.replace('@packages', 'node_modules/@cmmv'),
+                );
+            } else {
+                resolvedPath = path.resolve(cwd(), includePath);
+                resolvedPathSimplifly = path.resolve(
+                    cwd(),
+                    'public',
+                    'views',
+                    includePath,
+                );
+            }
 
             if (
-                !templateCache[resolvedPath] &&
-                !templateCache[resolvedPathSimplifly]
+                (!templateCache[resolvedPath] &&
+                    !templateCache[resolvedPathSimplifly]) ||
+                process.env.NODE_ENV === 'dev'
             ) {
                 if (fs.existsSync(resolvedPath)) {
                     let includeContent = fs.readFileSync(resolvedPath, 'utf-8');
