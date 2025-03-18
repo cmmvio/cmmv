@@ -82,6 +82,37 @@ components:
             type: string
       required:
         - name
+    GroupPayloadDTO:
+      properties:
+        name:
+          type: string
+          required: true
+      required:
+        - name
+    GroupRolesPayloadDTO:
+      properties:
+        roles:
+          type: array
+          required: true
+          items:
+            type: string
+      required:
+        - roles
+    GroupResponseDTO:
+      properties:
+        success:
+          type: boolean
+          required: true
+        message:
+          type: string
+          required: true
+        data:
+          type: object
+          required: true
+      required:
+        - success
+        - message
+        - data
     User:
       properties:
         id:
@@ -193,6 +224,100 @@ components:
       required:
         - success
         - message
+    GetCurrentUserRequestDTO:
+      properties: {}
+      required: []
+    GetCurrentUserResponseDTO:
+      properties:
+        id:
+          type: string
+          required: true
+        username:
+          type: string
+          required: true
+        roles:
+          type: object
+          required: true
+        groups:
+          type: object
+          required: true
+        profile:
+          type: object
+          required: true
+      required:
+        - id
+        - username
+        - roles
+        - groups
+        - profile
+    BlockUserRequestDTO:
+      properties:
+        userId:
+          type: string
+          required: true
+      required:
+        - userId
+    BlockUserResponseDTO:
+      properties:
+        message:
+          type: string
+          required: true
+      required:
+        - message
+    UnblockUserRequestDTO:
+      properties:
+        userId:
+          type: string
+          required: true
+      required:
+        - userId
+    UnblockUserResponseDTO:
+      properties:
+        message:
+          type: string
+          required: true
+      required:
+        - message
+    AssignGroupsToUserRequestDTO:
+      properties:
+        userId:
+          type: string
+          required: true
+        groups:
+          type: object
+          required: true
+      required:
+        - userId
+        - groups
+    AssignGroupsToUserResponseDTO:
+      properties:
+        message:
+          type: string
+          required: true
+      required:
+        - message
+    RemoveGroupsFromUserRequestDTO:
+      properties:
+        userId:
+          type: string
+          required: true
+        groups:
+          type: object
+          required: true
+      required:
+        - userId
+        - groups
+    RemoveGroupsFromUserResponseDTO:
+      properties:
+        success:
+          type: boolean
+          required: true
+        message:
+          type: string
+          required: true
+      required:
+        - success
+        - message
     Sessions:
       properties:
         id:
@@ -230,6 +355,76 @@ components:
         - uuid
         - ipAddress
         - revoked
+    GetSessionsRequestDTO:
+      properties:
+        limit:
+          type: number
+          required: true
+        offset:
+          type: number
+          required: true
+        sortBy:
+          type: string
+          required: true
+        sort:
+          type: string
+          required: true
+      required:
+        - limit
+        - offset
+        - sortBy
+        - sort
+    GetSessionsResponseDTO:
+      properties:
+        data:
+          type: object
+          required: true
+        count:
+          type: number
+          required: true
+        total:
+          type: number
+          required: true
+      required:
+        - data
+        - count
+        - total
+    ValidateSessionRequestDTO:
+      properties:
+        token:
+          type: string
+          required: true
+      required:
+        - token
+    ValidateSessionResponseDTO:
+      properties:
+        valid:
+          type: boolean
+          required: true
+        user:
+          type: object
+          required: true
+      required:
+        - valid
+        - user
+    RevokeSessionRequestDTO:
+      properties:
+        sessionId:
+          type: string
+          required: true
+      required:
+        - sessionId
+    RevokeSessionResponseDTO:
+      properties:
+        success:
+          type: boolean
+          required: true
+        message:
+          type: string
+          required: true
+      required:
+        - success
+        - message
     OAuthClients:
       properties:
         id:
@@ -732,6 +927,55 @@ paths:
           schema:
             type: string
       security: []
+  /sessions/validate:
+    post:
+      tags:
+        - AuthSessions
+      summary: ''
+      externalDocs:
+        url: null
+      responses:
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security: []
+  /sessions/revoke:
+    post:
+      tags:
+        - AuthSessions
+      summary: ''
+      externalDocs:
+        url: null
+      responses:
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security:
+        - BearerAuth: []
   /groups:
     get:
       tags:

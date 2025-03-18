@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as yaml from 'js-yaml';
 
-import { AbstractTranspile, ITranspile, Scope, Config } from '../lib';
+import { AbstractTranspile, ITranspile, Scope, Config, Module } from '../lib';
 
 import { IContract } from '../interfaces/contract.interface';
 
@@ -24,7 +24,18 @@ export class ContractsTranspile
         const outputFilename = path.join(generatedDir, 'schema.json');
 
         if (generateSchema) {
-            let schema: any = { contracts: {} };
+            let schema: any = {
+                contracts: {},
+                modules: {
+                    auth: Module.hasModule('auth'),
+                    graphql: Module.hasModule('graphql'),
+                    rpc: Module.hasModule('protobuf') && Module.hasModule('ws'),
+                    openapi: Module.hasModule('openapi'),
+                    cache: Module.hasModule('cache'),
+                    repository: Module.hasModule('repository'),
+                    vault: Module.hasModule('vault'),
+                },
+            };
 
             for (let key in contracts) {
                 schema.contracts[contracts[key].contractName] = contracts[key];

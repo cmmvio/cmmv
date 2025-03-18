@@ -209,10 +209,12 @@ export class UserContract extends AbstractContract {
         properties: {
             username: {
                 type: 'string',
+                paramType: 'body',
                 required: true,
             },
             password: {
                 type: 'string',
+                paramType: 'body',
                 required: true,
             },
         },
@@ -227,14 +229,17 @@ export class UserContract extends AbstractContract {
         properties: {
             success: {
                 type: 'bool',
+                paramType: 'body',
                 required: true,
             },
             token: {
                 type: 'string',
+                paramType: 'body',
                 required: false,
             },
             message: {
                 type: 'string',
+                paramType: 'body',
                 required: false,
             },
         },
@@ -247,7 +252,7 @@ export class UserContract extends AbstractContract {
 
     @ContractService({
         name: 'Login',
-        path: 'login',
+        path: 'auth/login',
         method: 'POST',
         auth: false,
         functionName: 'login',
@@ -263,14 +268,17 @@ export class UserContract extends AbstractContract {
         properties: {
             username: {
                 type: 'string',
+                paramType: 'body',
                 required: true,
             },
             email: {
                 type: 'string',
+                paramType: 'body',
                 required: true,
             },
             password: {
                 type: 'string',
+                paramType: 'body',
                 required: true,
             },
         },
@@ -286,10 +294,12 @@ export class UserContract extends AbstractContract {
         properties: {
             success: {
                 type: 'bool',
+                paramType: 'body',
                 required: true,
             },
             message: {
                 type: 'string',
+                paramType: 'body',
                 required: false,
             },
         },
@@ -301,7 +311,7 @@ export class UserContract extends AbstractContract {
 
     @ContractService({
         name: 'Register',
-        path: 'register',
+        path: 'auth/register',
         method: 'POST',
         auth: false,
         functionName: 'register',
@@ -310,4 +320,243 @@ export class UserContract extends AbstractContract {
         createBoilerplate: false,
     })
     Register: Function;
+
+    // Current User
+    @ContractMessage({
+        name: 'GetCurrentUserRequest',
+        properties: {},
+    })
+    GetCurrentUserRequest: Record<string, never>;
+
+    @ContractMessage({
+        name: 'GetCurrentUserResponse',
+        properties: {
+            id: {
+                type: 'string',
+                paramType: 'body',
+                required: true,
+            },
+            username: {
+                type: 'string',
+                paramType: 'body',
+                required: true,
+            },
+            roles: {
+                type: 'any',
+                paramType: 'body',
+                required: false,
+            },
+            groups: {
+                type: 'any',
+                paramType: 'body',
+                required: false,
+            },
+            profile: {
+                type: 'any',
+                paramType: 'body',
+                required: false,
+            },
+        },
+    })
+    GetCurrentUserResponse: {
+        id: string;
+        username: string;
+        roles?: any;
+        groups?: any;
+        profile?: any;
+    };
+
+    @ContractService({
+        name: 'GetCurrentUser',
+        path: 'auth/user',
+        method: 'GET',
+        auth: true,
+        functionName: 'user',
+        request: 'GetCurrentUserRequest',
+        response: 'GetCurrentUserResponse',
+        createBoilerplate: false,
+    })
+    GetCurrentUser: Function;
+
+    // Block User
+    @ContractMessage({
+        name: 'BlockUserRequest',
+        properties: {
+            userId: {
+                type: 'string',
+                paramType: 'path',
+                required: true,
+            },
+        },
+    })
+    BlockUserRequest: {
+        userId: string;
+    };
+
+    @ContractMessage({
+        name: 'BlockUserResponse',
+        properties: {
+            message: {
+                type: 'string',
+                paramType: 'body',
+                required: true,
+            },
+        },
+    })
+    BlockUserResponse: {
+        message: string;
+    };
+
+    @ContractService({
+        name: 'BlockUser',
+        path: 'auth/user-block/:userId',
+        method: 'PUT',
+        auth: true,
+        functionName: 'handlerBlockUser',
+        request: 'BlockUserRequest',
+        response: 'BlockUserResponse',
+        createBoilerplate: false,
+    })
+    BlockUser: Function;
+
+    // Unblock User
+    @ContractMessage({
+        name: 'UnblockUserRequest',
+        properties: {
+            userId: {
+                type: 'string',
+                paramType: 'path',
+                required: true,
+            },
+        },
+    })
+    UnblockUserRequest: {
+        userId: string;
+    };
+
+    @ContractMessage({
+        name: 'UnblockUserResponse',
+        properties: {
+            message: {
+                type: 'string',
+                paramType: 'body',
+                required: true,
+            },
+        },
+    })
+    UnblockUserResponse: {
+        message: string;
+    };
+
+    @ContractService({
+        name: 'UnblockUser',
+        path: 'auth/user-unblock/:userId',
+        method: 'PUT',
+        auth: true,
+        functionName: 'handlerUnblockUser',
+        request: 'UnblockUserRequest',
+        response: 'UnblockUserResponse',
+        createBoilerplate: false,
+    })
+    UnblockUser: Function;
+
+    // Assign Groups to User
+    @ContractMessage({
+        name: 'AssignGroupsToUserRequest',
+        properties: {
+            userId: {
+                type: 'string',
+                paramType: 'path',
+                required: true,
+            },
+            groups: {
+                type: 'any',
+                paramType: 'body',
+                required: true,
+            },
+        },
+    })
+    AssignGroupsToUserRequest: {
+        userId: string;
+        groups: string | string[];
+    };
+
+    @ContractMessage({
+        name: 'AssignGroupsToUserResponse',
+        properties: {
+            message: {
+                type: 'string',
+                paramType: 'body',
+                required: true,
+            },
+        },
+    })
+    AssignGroupsToUserResponse: {
+        message: string;
+    };
+
+    @ContractService({
+        name: 'AssignGroupsToUser',
+        path: 'auth/user-assign-to-groups/:userId',
+        method: 'PUT',
+        auth: true,
+        functionName: 'handlerAssignGroupsToUser',
+        request: 'AssignGroupsToUserRequest',
+        response: 'AssignGroupsToUserResponse',
+        createBoilerplate: false,
+    })
+    AssignGroupsToUser: Function;
+
+    // Remove Groups from User
+    @ContractMessage({
+        name: 'RemoveGroupsFromUserRequest',
+        properties: {
+            userId: {
+                type: 'string',
+                paramType: 'path',
+                required: true,
+            },
+            groups: {
+                type: 'any',
+                paramType: 'body',
+                required: true,
+            },
+        },
+    })
+    RemoveGroupsFromUserRequest: {
+        userId: string;
+        groups: string | string[];
+    };
+
+    @ContractMessage({
+        name: 'RemoveGroupsFromUserResponse',
+        properties: {
+            success: {
+                type: 'bool',
+                paramType: 'body',
+                required: true,
+            },
+            message: {
+                type: 'string',
+                paramType: 'body',
+                required: true,
+            },
+        },
+    })
+    RemoveGroupsFromUserResponse: {
+        success: boolean;
+        message: string;
+    };
+
+    @ContractService({
+        name: 'RemoveGroupsFromUser',
+        path: 'auth/user-remove-groups/:userId',
+        method: 'DELETE',
+        auth: true,
+        functionName: 'handlerRemoveGroups',
+        request: 'RemoveGroupsFromUserRequest',
+        response: 'RemoveGroupsFromUserResponse',
+        createBoilerplate: false,
+    })
+    RemoveGroupsFromUser: Function;
 }

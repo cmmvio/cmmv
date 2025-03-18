@@ -6,14 +6,25 @@
         <link rel="icon" href="https://cmmv.io/assets/favicon/favicon.ico">
         <link id="style" rel="stylesheet" href="/sandbox.css" />
         <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <script type="text/javascript" src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <script type="text/javascript" src="https://unpkg.com/vue-router@4.5.0/dist/vue-router.global.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/json.min.js"></script>
     </head>
     <body class="bg-neutral-900 text-neutral-200 overflow-hidden">
         <div id="app" class="flex" v-clock>
-            <!-- Contracts List -->
-            <div class="w-56 h-screen borders border-r border-neutral-800 fixed">
+            <div
+                v-if="sidebarOpen && isMobile"
+                class="fixed inset-0 z-40 lg:hidden"
+                @click="toggleSidebar"
+            ></div>
+
+            <div
+                class="w-56 h-screen border-r border-neutral-800 fixed transition-all duration-300 bg-neutral-900 z-50"
+                :class="{'left-0': sidebarOpen, '-left-56': !sidebarOpen, 'lg:left-0': true}"
+            >
                 <div class="h-[3rem] border-b border-neutral-800 flex items-center px-3 sticky top-0 z-10">
                     <div class="flex">
                         <img src="https://cmmv.io/assets/favicon/android-chrome-192x192.png" width="30" height="30" alt="CMMV Logo" />
@@ -21,10 +32,24 @@
                     <div class="flex ml-2">
                         <h4 class="text-md">CMMV</h4>
                     </div>
+                    <button
+                        class="ml-auto lg:hidden"
+                        @click="toggleSidebar"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
 
                 <div class="p-2 h-[calc(100%-180px)] overflow-auto" v-if="selectedContract">
-                    <input type="text" class="border border-neutral-800 p-1 px-2 w-full rounded-md mb-4" placeholder="Filter" />
+                    <input
+                        type="text"
+                        class="border border-neutral-800 p-1 px-2 w-full rounded-md mb-4 outline-none"
+                        placeholder="Filter"
+                        v-model="contractFilter"
+                        @input="filterContracts"
+                    />
 
                     <div class="flex space-x-3 mb-2 font-normal px-3">
                         <span class="text-sm text-neutral-500 dark:text-neutral-400 w-full">
@@ -42,12 +67,14 @@
                 </div>
             </div>
 
-            <!-- Contracts -->
-            <div class="flex-1 ml-56 overflow-hidden h-screen" v-if="selectedContract">
+            <div
+                class="flex-1 overflow-hidden h-screen transition-all duration-300"
+                :class="{'ml-56': sidebarOpen && !isMobile, 'ml-0': !sidebarOpen || isMobile, 'lg:ml-56': !isMobile}"
+                v-if="selectedContract"
+            >
                 <!-- include("@packages/sandbox/public/sandbox-top.html"); -->
 
                 <div class="overflow-hidden">
-                    <!-- Header -->
                     <div class="flex py-2 px-4 border-b border-neutral-800">
                         <div class="flex mr-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -100,21 +127,28 @@
                         v-show="tabs[selectedTab].label === 'Index'"
                         class="flex-1 p-4 overflow-auto h-[calc(100%-96px)]"
                     >
-                        {{ selectedContract.indexs }}
+                        <!-- include("@packages/sandbox/public/sandbox-indexs.html"); -->
                     </div>
 
                     <div
                         v-show="tabs[selectedTab].label === 'Methods'"
                         class="flex-1 p-4 overflow-auto h-[calc(100%-96px)]"
                     >
-                        {{ selectedContract.services }}
+                        <!-- include("@packages/sandbox/public/sandbox-methods.html"); -->
                     </div>
 
                     <div
                         v-show="tabs[selectedTab].label === 'DTOs'"
                         class="flex-1 p-4 overflow-auto h-[calc(100%-96px)]"
                     >
-                        {{ selectedContract.messages }}
+                        <!-- include("@packages/sandbox/public/sandbox-messages.html"); -->
+                    </div>
+
+                    <div
+                        v-show="tabs[selectedTab].label === 'API'"
+                        class="flex-1 overflow-auto h-[calc(100%-96px)]"
+                    >
+                        <!-- include("@packages/sandbox/public/sandbox-api.html"); -->
                     </div>
 
                     <!-- Schema -->
@@ -132,6 +166,9 @@
 
             <!-- Modal -->
             <!-- include("@packages/sandbox/public/sandbox-modal.html"); -->
+
+            <!-- Auth Modal -->
+            <!-- include("@packages/sandbox/public/sandbox-auth-modal.html"); -->
 
             <!-- New Contract -->
             <!-- include("@packages/sandbox/public/sandbox-newcontract.html"); -->

@@ -1,9 +1,20 @@
 <div class="border-b h-[48px] border-neutral-800 w-full">
     <div class="h-full flex items-center sticky top-0 z-10 relative">
+        <!-- Hamburger button ajustado para ocupar toda altura -->
+        <button
+            class="h-full px-4 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors lg:hidden flex items-center justify-center"
+            @click="toggleSidebar"
+            aria-label="Toggle menu"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+
         <ul class="flex h-full justify-center">
             <li
                 v-for="(item, key) in tabs"
-                class="px-4 py-1 select-none cursor-pointer justify-center flex items-center"
+                class="px-4 py-1 select-none cursor-pointer justify-center flex items-center text-sm"
                 :class="{'bg-neutral-800': (key === selectedTab)}"
                 @click="selectTab(key)"
             >{{ item.label }}</li>

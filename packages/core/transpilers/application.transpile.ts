@@ -400,10 +400,14 @@ import {
                 ? field.modelName
                 : this.mapToTsTypeUpper(field.protoType);
 
-            const apiType =
+            let apiType =
                 field.protoRepeated || field.array
                     ? `[${fieldType}]`
                     : `${fieldType}`;
+
+            if (field.type === 'simpleArray')
+                apiType = `[${this.mapToTsTypeUpper(field.arrayType)}]`;
+            else if (apiType === 'Any') apiType = 'object';
 
             //OpenAPI
             if (!field.exclude) {
@@ -638,10 +642,14 @@ ${Object.entries(contract.messages[key].properties)
         const fieldType = this.mapToTsType(field.type);
         const fieldTypeUpper = this.mapToTsTypeUpper(fieldType);
 
-        const apiType =
+        let apiType =
             field.protoRepeated || field.array
                 ? `[${fieldTypeUpper}]`
                 : `${fieldTypeUpper}`;
+
+        if (field.type === 'simpleArray')
+            apiType = `[${this.mapToTsTypeUpper(field.arrayType)}]`;
+        else if (apiType === 'Any') apiType = 'Object';
 
         const apiDocs = hasOpenAPI
             ? `    @ApiProperty({

@@ -1,5 +1,5 @@
 <button
-    v-for="(contract, key) in schema"
+    v-for="(contract, key) in filteredContracts"
     class="flex items-center cursor-pointer py-1 px-3 text-sm rounded-md text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800/50 w-full py-2"
     :class="{'bg-neutral-800' : selectedContract.controllerName === contract.controllerName }"
     @click="selectContract(key)"
@@ -19,3 +19,10 @@
 
     {{ contract.controllerName }}
 </button>
+
+<div v-if="filteredContracts.length === 0" class="text-center py-3 text-neutral-500 text-sm">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+    No contracts found
+</div>

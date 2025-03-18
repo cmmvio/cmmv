@@ -29,6 +29,7 @@
     ],
     "dependencies": {
         "chokidar": "^4.0.3",
+        "fast-glob": "^3.3.3",
         "ws": "^8.18.1"
     }
 }

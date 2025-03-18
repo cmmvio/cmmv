@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as fg from 'fast-glob';
 import chokidar from 'chokidar';
 
 const { WebSocketServer, WebSocket } = require('ws');
@@ -11,6 +12,7 @@ import { cwd } from 'node:process';
 @Service('sandbox')
 export class SandboxService {
     public static logger: Logger = new Logger('Repository');
+    public static chokidar;
 
     @Hook(HooksType.onHTTPServerInit)
     public definePublicDir() {
@@ -47,25 +49,33 @@ export class SandboxService {
             });
         };
 
-        chokidar
-            .watch(
-                [
-                    './public/sandbox.client.cjs',
-                    './public/sandbox.css',
-                    './public/*.html',
-                ],
-                {
-                    persistent: true,
-                    ignoreInitial: true,
-                    cwd: __dirname.replace('/src', ''),
+        const files = await fg([
+            path.resolve(__dirname, '../public/sandbox.client.cjs'),
+            path.resolve(__dirname, '../public/sandbox.css'),
+            path.resolve(__dirname, '../public/**/*.html'),
+            path.resolve(__dirname, '../public/*.html'),
+        ]);
+
+        SandboxService.chokidar = chokidar
+            .watch(files, {
+                persistent: true,
+                ignoreInitial: true,
+                usePolling: true,
+                binaryInterval: 300,
+                interval: 100,
+                awaitWriteFinish: {
+                    stabilityThreshold: 200,
+                    pollInterval: 100,
                 },
-            )
+            })
             .on('change', (filePath) => {
-                this.logger.verbose(`File change ${filePath}`);
                 broadcast({ event: 'change', filePath });
             })
             .on('unlink', (filePath) => {
                 broadcast({ event: 'unlink', filePath });
+            })
+            .on('error', (error) => {
+                console.error('Erro no Chokidar:', error);
             });
     }
 

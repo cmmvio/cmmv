@@ -1,0 +1,148 @@
+<div class="mb-4 flex">
+    <div class="flex w-[120px]">
+        <button
+            class="text-sm p-1 px-3 rounded-md"
+            :class="[selectedContract.options.moduleContract ? 'bg-neutral-800 text-neutral-400 cursor-not-allowed' : 'bg-green-800 hover:bg-green-700 cursor-pointer']"
+            @click="addMessage()"
+        >
+            New DTO
+        </button>
+    </div>
+</div>
+
+<div
+    v-for="(message, messageKey) in selectedContract.messages"
+    class="mb-4 border w-full border-neutral-800 p-1 rounded-md flex-colum gap-x-4"
+>
+    <div class="flex">
+        <input
+            class="pl-4 h-[42px] w-96 border-neutral-800 focus-none outline-none"
+            type="text"
+            placeholder="DTO Name"
+            title="DTO Name"
+            v-model="message.name"
+            :disabled="selectedContract.options.moduleContract"
+        />
+
+        <div class="flex p-1 border-l border-neutral-800 ml-auto" title="More">
+            <button
+                class="items-center justify-center flex select-none cursor-pointer mr-2 ml-2"
+                @click="toggleMessageOpened(message.name)"
+            >
+                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+
+        <div class="flex p-2 border-l border-neutral-800" title="More">
+            <button
+                class="items-center justify-center flex select-none mt-1 ml-1"
+                :class="[selectedContract.options.moduleContract ? 'text-neutral-600 cursor-not-allowed' : 'text-red-500 cursor-pointer']"
+                @click="removeMessage(message.name, messageKey)"
+                title="Remove Message"
+            >
+                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div
+        class="flex-colums border-t min-h-[200px] flex-1 border-neutral-800 p-4"
+        v-show="isMessageOpened(message.name) ?? false"
+    >
+        <div class="flex justify-between items-center border-b border-neutral-800 mb-2 pb-1 text-neutral-500">
+            <span>Properties</span>
+            <button
+                class="text-sm p-1 px-3 rounded-md bg-blue-800 hover:bg-blue-700 cursor-pointer text-white"
+                @click="addPropertyToMessage(message)"
+                :disabled="selectedContract.options.moduleContract"
+            >
+                Add Property
+            </button>
+        </div>
+
+        <div v-for="(propValue, propKey) in message.properties" class="border-b border-neutral-800 mb-4 pb-4">
+            <div class="flex justify-between mb-2">
+                <div class="text-sm font-medium text-neutral-300">Property Configuration</div>
+                <button
+                    class="p-1 h-[28px] text-red-500 cursor-pointer flex-shrink-0"
+                    @click="removePropertyFromMessage(message, propKey)"
+                    :disabled="selectedContract.options.moduleContract"
+                    title="Remove Property"
+                >
+                    <svg width="14" height="14" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex text-xs justify-center mt-2">
+                <div class="w-[200px] flex items-center">Property Name: </div>
+                <div class="w-[calc(100%-200px)] justify-end">
+                    <input
+                        class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
+                        type="text"
+                        placeholder="Property Name"
+                        :value="propKey"
+                        @input="updatePropertyKey(message, propKey, $event.target.value)"
+                        :disabled="selectedContract.options.moduleContract"
+                    />
+                </div>
+            </div>
+
+            <div class="flex text-xs justify-center mt-2">
+                <div class="w-[200px] flex items-center">Type: </div>
+                <div class="w-[calc(100%-200px)] justify-end">
+                    <select
+                        class="border pl-4 h-[42px] w-full outline-none bg-neutral-900 border-neutral-800"
+                        v-model="propValue.type"
+                        :disabled="selectedContract.options.moduleContract"
+                    >
+                        <option value="string">String</option>
+                        <option value="bool">Boolean</option>
+                        <option value="int">Integer</option>
+                        <option value="float">Float</option>
+                        <option value="bytes">Bytes</option>
+                        <option value="date">Date</option>
+                        <option value="timestamp">Timestamp</option>
+                        <option value="json">JSON</option>
+                        <option value="simpleArray">Simple Array</option>
+                        <option value="bigint">BigInt</option>
+                        <option value="any">Any</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex text-xs justify-center mt-2">
+                <div class="w-[200px] flex items-center">Default Value: </div>
+                <div class="w-[calc(100%-200px)] justify-end">
+                    <input
+                        class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
+                        type="text"
+                        placeholder="Default value (optional)"
+                        v-model="propValue.default"
+                        :disabled="selectedContract.options.moduleContract"
+                    />
+                </div>
+            </div>
+
+            <div class="flex text-xs justify-center mt-2">
+                <div class="w-[200px] flex items-center">Required: </div>
+                <div class="w-[calc(100%-200px)] justify-start">
+                    <input
+                        type="checkbox"
+                        class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
+                        v-model="propValue.required"
+                        title="Required"
+                        :disabled="selectedContract.options.moduleContract"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <div class="p-2 bg-neutral-800 rounded-md mt-4">
+            <pre>{{ JSON.stringify(message, null, 4) }}</pre>
+        </div>
+    </div>
+</div>

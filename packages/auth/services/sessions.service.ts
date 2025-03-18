@@ -17,8 +17,26 @@ import { decryptJWTData } from '../lib/auth.utils';
 
 @Service('auth_sessions')
 export class AuthSessionsService extends AbstractService {
-    public static async validateSession(user: IJWTDecoded): Promise<boolean> {
+    public static async validateSession(
+        user: IJWTDecoded | string,
+    ): Promise<boolean> {
         const SessionsEntity = Repository.getEntity('SessionsEntity');
+
+        if (typeof user === 'string') {
+            try {
+                // Se for uma string, assumimos que é um token JWT
+                const jwtSecret = Config.get<string>('auth.jwtSecret');
+                const verifyAsync = promisify(jwt.verify);
+                const decoded = (await verifyAsync(
+                    user,
+                    jwtSecret,
+                )) as IJWTDecoded;
+                user = decoded;
+            } catch (error) {
+                return false;
+            }
+        }
+
         let userId: any = user.id;
 
         if (Config.get('repository.type') === 'mongodb') {
@@ -31,12 +49,11 @@ export class AuthSessionsService extends AbstractService {
             Repository.queryBuilder({
                 user: userId,
                 fingerprint: user.fingerprint,
+                revoked: false,
             }),
         );
 
-        if (session) return true;
-
-        return false;
+        return !!session;
     }
 
     public static async validateRefreshToken(
@@ -72,6 +89,7 @@ export class AuthSessionsService extends AbstractService {
                     user: userId,
                     fingerprint: decoded.f,
                     refreshToken: refreshTokenHash,
+                    revoked: false,
                 }),
             );
         } catch (e) {
@@ -108,6 +126,7 @@ export class AuthSessionsService extends AbstractService {
                     user: usernameDecoded,
                     fingerprint: decoded.fingerprint,
                     refreshToken: refreshTokenHash,
+                    revoked: false,
                 }),
             );
 
@@ -162,7 +181,7 @@ export class AuthSessionsService extends AbstractService {
 
             if (!result) throw new Error('Failed to update session');
 
-            return;
+            return true;
         }
 
         const newSession = {
@@ -211,6 +230,31 @@ export class AuthSessionsService extends AbstractService {
             ...session,
             data: session.data.map((item) => Sessions.fromEntity(item)),
         };
+    }
+
+    public async revokeSession(sessionId: string, user: IJWTDecoded) {
+        const SessionsEntity = Repository.getEntity('SessionsEntity');
+        let userId: any = user.id;
+
+        if (Config.get('repository.type') === 'mongodb') {
+            const { ObjectId } = await import('mongodb');
+            userId = new ObjectId(userId as string);
+        }
+
+        const result = await Repository.update(
+            SessionsEntity,
+            Repository.queryBuilder({
+                uuid: sessionId,
+                user: userId,
+            }),
+            {
+                revoked: true,
+                updatedAt: new Date(),
+            },
+        );
+
+        if (!result) throw new Error('Failed to revoke session');
+        return true;
     }
 
     private extractDevice(userAgent: string): string {

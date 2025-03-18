@@ -1,0 +1,665 @@
+<div class="flex flex-col h-full overflow-hidden">
+    <div
+        v-if="apiSidebarOpen && isMobile"
+        class="fixed inset-0 z-50 md:hidden"
+        @click="toggleApiSidebar"
+    ></div>
+
+    <div class="flex flex-grow overflow-hidden">
+        <div
+            class="api-sidebar w-[280px] min-w-[280px] max-w-[280px] flex-shrink-0 border-r border-neutral-800 overflow-y-auto transition-all duration-300 bg-neutral-900 z-40 relative"
+            :class="{'left-0': apiSidebarOpen, '-left-[280px]': !apiSidebarOpen, 'md:left-0': true, 'fixed': isMobile, 'h-full': isMobile, 'relative': !isMobile}"
+        >
+            <div class="p-3 border-b border-neutral-800 bg-neutral-950 sticky top-0 flex justify-between items-center">
+                <div class="text-sm font-medium text-neutral-300">API Explorer</div>
+                <button
+                    class="md:hidden"
+                    @click="toggleApiSidebar"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mb-4" v-if="hasController()">
+                <div class="px-3 py-2 text-xs font-semibold text-neutral-400 uppercase bg-neutral-850">
+                    Standard CRUD
+                </div>
+
+                <!-- GET ALL -->
+                <div
+                    class="flex items-center px-3 py-2 hover:bg-neutral-800 cursor-pointer border-l-2 border-transparent transition-colors"
+                    :class="{
+                        'border-l-2 !border-blue-500 bg-neutral-850': selectedEndpoint === 'getAll'
+                    }"
+                    @click="selectEndpoint('getAll')"
+                >
+                    <div class="w-16 text-xs mr-2 px-2 py-1 rounded-sm bg-blue-900 text-white font-mono">GET</div>
+                    <div class="ml-1 text-sm flex-grow">Get All Records</div>
+                    <svg
+                        v-if="selectedContract.auth"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12" height="12"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        :class="isAuthenticated ? 'text-green-400' : 'text-neutral-400'"
+                        title="Auth Required"
+                    >
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+
+                <!-- GET BY ID -->
+                <div
+                    class="flex items-center px-3 py-2 hover:bg-neutral-800 cursor-pointer border-l-2 border-transparent transition-colors"
+                    :class="{
+                        'border-l-2 !border-blue-500 bg-neutral-850': selectedEndpoint === 'getById'
+                    }"
+                    @click="selectEndpoint('getById')"
+                >
+                    <div class="w-16 text-xs mr-2 px-2 py-1 rounded-sm bg-blue-900 text-white font-mono">GET</div>
+                    <div class="ml-1 text-sm flex-grow">Get By Id</div>
+                    <svg
+                        v-if="selectedContract.auth"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12" height="12"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        :class="isAuthenticated ? 'text-green-400' : 'text-neutral-400'"
+                        title="Auth Required"
+                    >
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+
+                <!-- GET IN -->
+                <div
+                    class="flex items-center px-3 py-2 hover:bg-neutral-800 cursor-pointer border-l-2 border-transparent transition-colors"
+                    :class="{
+                        'border-l-2 !border-blue-500 bg-neutral-850': selectedEndpoint === 'getIn'
+                    }"
+                    @click="selectEndpoint('getIn')"
+                >
+                    <div class="w-16 text-xs mr-2 px-2 py-1 rounded-sm bg-blue-900 text-white font-mono">GET</div>
+                    <div class="ml-1 text-sm flex-grow">Get By Multiple Ids</div>
+                    <svg
+                        v-if="selectedContract.auth"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12" height="12"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        :class="isAuthenticated ? 'text-green-400' : 'text-neutral-400'"
+                        title="Auth Required"
+                    >
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+
+                <!-- CREATE -->
+                <div
+                    class="flex items-center px-3 py-2 hover:bg-neutral-800 cursor-pointer border-l-2 border-transparent transition-colors"
+                    :class="{
+                        'border-l-2 !border-blue-500 bg-neutral-850': selectedEndpoint === 'create'
+                    }"
+                    @click="selectEndpoint('create')"
+                >
+                    <div class="w-16 text-xs mr-2 px-2 py-1 rounded-sm bg-green-900 text-white font-mono">POST</div>
+                    <div class="ml-1 text-sm flex-grow">Create Record</div>
+                    <svg
+                        v-if="selectedContract.auth"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12" height="12"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        :class="isAuthenticated ? 'text-green-400' : 'text-neutral-400'"
+                        title="Auth Required"
+                    >
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+
+                <!-- UPDATE -->
+                <div
+                    class="flex items-center px-3 py-2 hover:bg-neutral-800 cursor-pointer border-l-2 border-transparent transition-colors"
+                    :class="{
+                        'border-l-2 !border-blue-500 bg-neutral-850': selectedEndpoint === 'update'
+                    }"
+                    @click="selectEndpoint('update')"
+                >
+                    <div class="w-16 text-xs mr-2 px-2 py-1 rounded-sm bg-yellow-900 text-white font-mono">PUT</div>
+                    <div class="ml-1 text-sm flex-grow">Update Record</div>
+                    <svg
+                        v-if="selectedContract.auth"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12" height="12"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        :class="isAuthenticated ? 'text-green-400' : 'text-neutral-400'"
+                        title="Auth Required"
+                    >
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+
+                <!-- DELETE -->
+                <div
+                    class="flex items-center px-3 py-2 hover:bg-neutral-800 cursor-pointer border-l-2 border-transparent transition-colors"
+                    :class="{
+                        'border-l-2 !border-blue-500 bg-neutral-850': selectedEndpoint === 'delete'
+                    }"
+                    @click="selectEndpoint('delete')"
+                >
+                    <div class="w-16 text-xs mr-2 px-2 py-1 rounded-sm bg-red-900 text-white font-mono">DELETE</div>
+                    <div class="ml-1 text-sm flex-grow">Delete Record</div>
+                    <svg
+                        v-if="selectedContract.auth"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12" height="12"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        :class="isAuthenticated ? 'text-green-400' : 'text-neutral-400'"
+                        title="Auth Required"
+                    >
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div v-if="selectedContract.services && selectedContract.services.length > 0" class="mb-4">
+                <div class="px-3 py-2 text-xs font-semibold text-neutral-400 uppercase bg-neutral-850">
+                    Custom Methods
+                </div>
+
+                <div
+                    v-for="(service, index) in selectedContract.services"
+                    :key="index"
+                    class="flex items-center px-3 py-2 hover:bg-neutral-800 cursor-pointer border-l-2 border-transparent transition-colors"
+                    :class="{'border-l-2 !border-blue-500 bg-neutral-850': selectedEndpoint === 'custom_' + index}"
+                    @click="selectEndpoint('custom_' + index)"
+                >
+                    <div
+                        class="w-16 text-xs mr-2 px-2 py-1 rounded-sm text-white font-mono"
+                        :class="{
+                            'bg-blue-900': service.method === 'GET',
+                            'bg-green-900': service.method === 'POST',
+                            'bg-yellow-900': service.method === 'PUT',
+                            'bg-red-900': service.method === 'DELETE'
+                        }"
+                    >{{ service.method }}</div>
+                    <div class="ml-1 text-sm flex-grow">{{ service.name }}</div>
+                    <svg
+                        v-if="service.auth"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12" height="12"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        :class="isAuthenticated ? 'text-green-400' : 'text-neutral-400'"
+                        title="Auth Required"
+                    >
+                        <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div v-if="(!hasController() && (!selectedContract.services || selectedContract.services.length === 0))" class="p-4 text-center text-neutral-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p>No routes implemented in this contract.</p>
+                <p class="text-xs mt-2">Create a controller or add custom methods to test API endpoints.</p>
+            </div>
+        </div>
+
+        <div
+            class="flex-grow overflow-auto transition-all duration-300"
+            :class="{'md:ml-0': true, 'ml-0': !apiSidebarOpen || isMobile, 'ml-[280px]': apiSidebarOpen && !isMobile}"
+        >
+            <div class="h-full flex flex-col">
+                <div v-if="!selectedEndpoint" class="flex-grow flex items-center justify-center text-neutral-500">
+                    <div class="text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <p>Select an endpoint from the sidebar to test</p>
+                    </div>
+                </div>
+
+                <div v-else class="flex flex-col h-full">
+                    <!-- Tab selector for Request/Response -->
+                    <div class="border-b border-neutral-800">
+                        <div class="flex items-center h-[40px]">
+                            <button
+                                class="h-full px-4 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors md:hidden flex items-center justify-center"
+                                @click="toggleApiSidebar"
+                                aria-label="Toggle API menu"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+
+                            <!-- Main tabs: Request/Response -->
+                            <button
+                                class="h-full px-4 py-2 text-sm"
+                                :class="mainTab === 'request' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400'"
+                                @click="mainTab = 'request'"
+                            >Request</button>
+
+                            <button
+                                class="h-full px-4 py-2 text-sm"
+                                :class="mainTab === 'response' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400'"
+                                @click="mainTab = 'response'"
+                            >Response</button>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border-b border-neutral-800 bg-neutral-900">
+                        <div class="flex items-center">
+                            <button
+                                class="flex items-center px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-md mr-3"
+                                @click="toggleAuthModal"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                                    :class="isAuthenticated ? 'text-green-400' : 'text-yellow-400'"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <span class="text-xs">{{ isAuthenticated ? 'Authenticated' : 'Authenticate' }}</span>
+                            </button>
+
+                            <div
+                                class="text-xs px-3 py-1.5 rounded-md text-white font-mono font-bold mr-2"
+                                :class="{
+                                    'bg-blue-800': getCurrentMethod() === 'GET',
+                                    'bg-green-800': getCurrentMethod() === 'POST',
+                                    'bg-yellow-800': getCurrentMethod() === 'PUT',
+                                    'bg-red-800': getCurrentMethod() === 'DELETE'
+                                }"
+                            >{{ getCurrentMethod() }}</div>
+
+                            <div class="flex items-center flex-grow">
+                                <div class="text-xs text-neutral-400 mr-2">URL:</div>
+                                <input
+                                    type="text"
+                                    class="text-xs font-mono bg-neutral-800 p-1.5 rounded-md flex-grow border border-neutral-700 focus:border-blue-500 outline-none"
+                                    v-model="fullRequestUrl"
+                                    placeholder="Enter request URL"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow flex flex-col overflow-hidden">
+
+
+                        <!-- Request Tab Content -->
+                        <div v-if="mainTab === 'request'" class="flex-grow flex flex-col overflow-hidden">
+                            <!-- Request Sub-tabs: Params, Body, Headers -->
+                            <div class="border-b border-neutral-800">
+                                <div class="flex items-center h-[40px]">
+                                    <button
+                                        v-if="pathParams.length > 0 || queryParams.length > 0"
+                                        class="h-full px-4 py-2 text-sm"
+                                        :class="requestTab === 'params' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400'"
+                                        @click="requestTab = 'params'"
+                                    >Params</button>
+
+                                    <button
+                                        v-if="bodyParams.length > 0"
+                                        class="px-4 py-2 text-sm"
+                                        :class="requestTab === 'body' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400'"
+                                        @click="requestTab = 'body'"
+                                    >Body</button>
+
+                                    <button
+                                        class="px-4 py-2 text-sm"
+                                        :class="requestTab === 'headers' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400'"
+                                        @click="requestTab = 'headers'"
+                                    >Headers</button>
+                                </div>
+                            </div>
+
+                            <!-- Request Tab Content -->
+                            <div class="p-4 overflow-auto flex-grow">
+                                <!-- Path and Query Params Tab -->
+                                <div v-if="requestTab === 'params'">
+                                    <!-- Path parameters section -->
+                                    <div v-if="pathParams && pathParams.length > 0" class="mb-6">
+                                        <div class="text-sm font-medium mb-2 flex items-center">
+                                            <span class="mr-2">Path Parameters</span>
+                                        </div>
+                                        <div v-for="param in pathParams" :key="param.name" class="mb-2">
+                                            <div class="text-xs text-neutral-400 mb-1">{{ param.name }}</div>
+                                            <input
+                                                type="text"
+                                                :placeholder="`Enter ${param.name} value`"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
+                                                v-model="paramValues[param.name]"
+                                                @input="updateFullRequestUrl"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Query parameters section -->
+                                    <div v-if="queryParams && queryParams.length > 0" class="mb-6">
+                                        <div class="text-sm font-medium mb-2 flex items-center">
+                                            <span class="mr-2">Query Parameters</span>
+                                        </div>
+
+                                        <div v-for="param in queryParams" :key="param.name" class="mb-2">
+                                            <div class="text-xs text-neutral-400 mb-1">{{ param.name }}</div>
+
+                                            <input
+                                                v-if="['string', 'text', 'uuid'].includes(param.type)"
+                                                type="text"
+                                                :placeholder="`Enter ${param.name}`"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
+                                                v-model="queryParamValues[param.name]"
+                                                @input="updateFullRequestUrl"
+                                            />
+
+                                            <input
+                                                v-else-if="['int', 'int32', 'int64', 'float', 'double', 'bigint'].includes(param.type)"
+                                                type="number"
+                                                :placeholder="`Enter ${param.name}`"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
+                                                v-model.number="queryParamValues[param.name]"
+                                                @input="updateFullRequestUrl"
+                                            />
+
+                                            <select
+                                                v-else-if="param.name === 'sort'"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
+                                                v-model="queryParamValues[param.name]"
+                                                @change="updateFullRequestUrl"
+                                            >
+                                                <option value="">Select sort direction</option>
+                                                <option value="asc">Ascending</option>
+                                                <option value="desc">Descending</option>
+                                            </select>
+
+                                            <textarea
+                                                v-else-if="param.type === 'json' || param.name === 'filters'"
+                                                placeholder='{"field": "value"}'
+                                                rows="3"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm font-mono"
+                                                v-model="queryParamValues[param.name]"
+                                                @input="updateFullRequestUrl"
+                                            ></textarea>
+
+                                            <input
+                                                v-else
+                                                type="text"
+                                                :placeholder="`Enter ${param.name}`"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
+                                                v-model="queryParamValues[param.name]"
+                                                @input="updateFullRequestUrl"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Empty state for params tab -->
+                                    <div v-if="(!pathParams || pathParams.length === 0) && (!queryParams || queryParams.length === 0)" class="text-center text-sm text-neutral-400 py-8">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p>Nenhum parâmetro de path ou query disponível para este endpoint</p>
+                                    </div>
+                                </div>
+
+                                <!-- Body Tab -->
+                                <div v-if="requestTab === 'body'">
+                                    <div v-if="bodyParams && bodyParams.length > 0">
+                                        <div class="mb-3 flex justify-between">
+                                            <div class="text-sm font-medium">Request Body</div>
+                                            <div>
+                                                <button
+                                                    @click="clearRequestBody"
+                                                    class="text-xs px-2 py-1 bg-neutral-700 hover:bg-neutral-600 rounded-md"
+                                                >
+                                                    Clear
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div v-for="param in bodyParams" :key="param.name" class="mb-3">
+                                            <div class="text-xs text-neutral-400 mb-1 flex items-center">
+                                                {{ param.name }}
+                                                <span v-if="param.required" class="ml-1 text-red-400">*</span>
+                                            </div>
+
+                                            <input
+                                                v-if="['string', 'text', 'uuid'].includes(param.type)"
+                                                type="text"
+                                                v-model="requestFormData[param.name]"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
+                                            />
+
+                                            <input
+                                                v-else-if="['int', 'int32', 'int64', 'float', 'double', 'bigint'].includes(param.type)"
+                                                type="number"
+                                                v-model.number="requestFormData[param.name]"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
+                                            />
+
+                                            <div v-else-if="['boolean', 'bool'].includes(param.type)" class="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    v-model="requestFormData[param.name]"
+                                                    class="mr-2 h-4 w-4"
+                                                />
+                                                <label class="text-sm">{{ requestFormData[param.name] ? 'True' : 'False' }}</label>
+                                            </div>
+
+                                            <textarea
+                                                v-else-if="param.type === 'json' || param.type === 'any'"
+                                                v-model="requestFormData[param.name]"
+                                                rows="3"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm font-mono"
+                                            ></textarea>
+
+                                            <input
+                                                v-else-if="param.type === 'date'"
+                                                type="date"
+                                                v-model="requestFormData[param.name]"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
+                                            />
+
+                                            <input
+                                                v-else
+                                                type="text"
+                                                v-model="requestFormData[param.name]"
+                                                class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div v-else class="text-center text-sm text-neutral-400 py-8">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p>Este método não aceita parâmetros no corpo da requisição</p>
+                                    </div>
+                                </div>
+
+                                <!-- Headers Tab -->
+                                <div v-if="requestTab === 'headers'">
+                                    <!-- Header parameters from DTO -->
+                                    <div v-if="headerParams && headerParams.length > 0" class="mb-6">
+                                        <div class="text-sm font-medium mb-3">Header Parameters</div>
+                                        <div v-for="param in headerParams" :key="param.name" class="mb-2 flex">
+                                            <div class="w-1/3 px-3 py-2 bg-neutral-800 rounded-l-md text-sm border border-neutral-700">
+                                                {{ param.name }}
+                                            </div>
+                                            <input
+                                                type="text"
+                                                v-model="headerParamValues[param.name]"
+                                                class="flex-grow px-3 py-2 bg-neutral-800 rounded-r-md text-sm border-l-0 border border-neutral-700"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <div class="text-sm font-medium mb-3">Custom Headers</div>
+                                        <div class="flex mb-3">
+                                            <select
+                                                v-model="newHeader.name"
+                                                class="w-1/3 px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-l-md text-sm"
+                                            >
+                                                <option value="" disabled>Selecione um header</option>
+                                                <option value="Accept">Accept</option>
+                                                <option value="Accept-Language">Accept-Language</option>
+                                                <option value="Authorization">Authorization</option>
+                                                <option value="Cache-Control">Cache-Control</option>
+                                                <option value="Content-Type">Content-Type</option>
+                                                <option value="User-Agent">User-Agent</option>
+                                                <option value="X-Requested-With">X-Requested-With</option>
+                                                <option value="X-API-Key">X-API-Key</option>
+                                                <option value="Origin">Origin</option>
+                                                <option value="Referer">Referer</option>
+                                                <option value="Cookie">Cookie</option>
+                                                <option value="Custom">Custom...</option>
+                                            </select>
+
+                                            <input
+                                                v-if="newHeader.name === 'Custom'"
+                                                type="text"
+                                                placeholder="Custom header name"
+                                                v-model="newHeader.customName"
+                                                class="w-1/3 px-3 py-2 bg-neutral-800 border-y border-neutral-700 text-sm"
+                                            />
+
+                                            <input
+                                                type="text"
+                                                placeholder="Header value"
+                                                class="flex-grow px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-r-md text-sm"
+                                                :class="{'border-l-0': newHeader.name !== 'Custom'}"
+                                                v-model="newHeader.value"
+                                            />
+
+                                            <button
+                                                @click="addHeader"
+                                                class="ml-2 px-3 py-1.5 bg-blue-700 text-white rounded-md text-xs"
+                                            >Add</button>
+                                        </div>
+
+                                        <div v-if="headers.length > 0">
+                                            <div v-for="(header, index) in headers" :key="index" class="flex items-center mb-2">
+                                                <div class="w-1/3 px-3 py-2 bg-neutral-800 rounded-l-md text-sm border border-neutral-700">
+                                                    {{ header.name }}
+                                                </div>
+                                                <div class="flex-grow px-3 py-2 bg-neutral-800 rounded-r-md text-sm border-l-0 border border-neutral-700 flex items-center">
+                                                    <div class="flex-grow truncate">{{ header.value }}</div>
+                                                    <button
+                                                        @click="removeHeader(index)"
+                                                        class="ml-2 text-red-400 hover:text-red-300"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div v-else class="text-sm text-neutral-400 text-center py-4">
+                                            Nenhum header customizado adicionado
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Send Request Button -->
+                            <div class="p-4 border-t border-neutral-800 bg-neutral-900">
+                                <div class="flex items-center justify-between">
+                                    <button
+                                        @click="sendRequest"
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md"
+                                    >Send Request</button>
+
+                                    <div v-if="requestStatus" class="flex items-center">
+                                        <div class="text-xs mr-2">Status:</div>
+                                        <div
+                                            class="text-xs px-2 py-1 rounded-md font-medium"
+                                            :class="requestStatus.type === 'success' ? 'bg-green-900 text-green-100' : 'bg-red-900 text-red-100'"
+                                        >{{ requestStatus.message }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Response Tab Content -->
+                        <div v-if="mainTab === 'response'" class="flex-grow flex flex-col overflow-hidden">
+                            <div class="flex justify-between items-center p-3 bg-neutral-850 border-b border-neutral-700">
+                                <div class="font-medium text-sm">Response</div>
+                                <div class="flex items-center">
+                                    <div
+                                        v-if="showResponse"
+                                        class="text-xs px-2 py-1 rounded-md mr-2"
+                                        :class="responseStatus >= 200 && responseStatus < 300 ? 'bg-green-900 text-green-100' : 'bg-red-900 text-red-100'"
+                                    >{{ responseStatus }}</div>
+                                    <div v-if="showResponse" class="text-xs text-neutral-400">{{ responseTime }} ms</div>
+                                    <button
+                                        v-if="showResponse"
+                                        @click="copyResponseToClipboard"
+                                        class="ml-3 text-xs px-2 py-1 bg-neutral-700 hover:bg-neutral-600 rounded-md flex items-center group"
+                                        :title="copyStatus ? 'Copied!' : 'Copy to clipboard'"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                        </svg>
+                                        <span>{{ copyStatus ? 'Copied!' : 'Copy' }}</span>
+                                    </button>
+                                    <button
+                                        v-if="showResponse"
+                                        @click="clearResponse"
+                                        class="ml-2 text-xs px-2 py-1 bg-neutral-700 hover:bg-neutral-600 rounded-md"
+                                    >
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-neutral-800 overflow-auto flex-grow">
+                                <div v-if="!showResponse" class="flex items-center justify-center h-full text-neutral-500">
+                                    <div class="text-center p-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                        </svg>
+                                        <p>Envie uma requisição para ver a resposta</p>
+                                    </div>
+                                </div>
+                                <pre v-else id="responseOutput" class="p-4 text-sm font-mono" v-html="formattedResponse"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Remover os estilos relacionados ao redimensionamento */
+    /* Manter apenas estilos essenciais */
+
+    /* Remover esses estilos */
+    /*
+    body.resizing * {
+        cursor: col-resize !important;
+    }
+
+    body.resizing .api-sidebar {
+        transition: none !important;
+    }
+
+    body.no-select {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+    */
+
+    /* Outros estilos não relacionados ao resize podem permanecer */
+</style>

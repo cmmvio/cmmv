@@ -121,6 +121,8 @@ export interface ContractMessageProperty {
         | 'simpleArray'
         | 'bigint'
         | 'any';
+    paramType: 'query' | 'body' | 'path' | 'header';
+    arrayType?: string;
     required: boolean;
     default?: string;
 }
