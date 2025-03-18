@@ -1,0 +1,27 @@
+{
+    "name": "@cmmv/sandbox",
+    "version": "0.8.36",
+    "description": "Sandbox for creating contracts in visual mode",
+    "keywords": [
+        "cmmv",
+        "framework",
+        "sandbox"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cmmvio/cmmv.git"
+    },
+    "author": "Andre Ferreira",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/cmmvio/cmmv/issues"
+    },
+    "homepage": "https://cmmv.io",
+    "dependencies": {
+        "chokidar": "^4.0.3",
+        "ws": "^8.18.1"
+    }
+}

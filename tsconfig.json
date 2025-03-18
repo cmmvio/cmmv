@@ -55,6 +55,8 @@
             "@cmmv/vault/*": ["packages/vault/*"],
             "@cmmv/openapi": ["packages/openapi"],
             "@cmmv/openapi/*": ["packages/openapi/*"],
+            "@cmmv/sandbox": ["packages/sandbox"],
+            "@cmmv/sandbox/*": ["packages/sandbox/*"],
             "@models": ["src/models"],
             "@models/*": ["src/models/*", ".generated/models/*"],
             "@modules": ["src/modules"],

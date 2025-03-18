@@ -29,6 +29,7 @@
         { "path": "./openapi/tsconfig.build.json" },
         { "path": "./protobuf/tsconfig.build.json" },
         { "path": "./repository/tsconfig.build.json" },
+        { "path": "./sandbox/tsconfig.build.json" },
         { "path": "./scheduling/tsconfig.build.json" },
         { "path": "./testing/tsconfig.build.json" },
         { "path": "./vault/tsconfig.build.json" },
