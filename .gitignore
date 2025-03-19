@@ -51,3 +51,12 @@ newrelic.js
 # CMMV
 .generated
 .generated/*
+/src/contracts/*
+/src/resolvers/*
+/src/entities/*
+/src/models/*
+/src/controllers/*
+/src/gateways/*
+/src/protos/*
+/src/services/*
+

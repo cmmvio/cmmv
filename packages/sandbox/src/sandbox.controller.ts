@@ -49,4 +49,9 @@ export class SanboxController {
         Compile.getInstance().compileSchema(schema, schemaFilename);
         return 'ok';
     }
+
+    /*@Post('generate')
+    async handlerGenerate(@Body() prompt: string) {
+        return await this.sandboxService.generateContractFromAI(prompt);
+    }*/
 }

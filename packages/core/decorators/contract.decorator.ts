@@ -76,6 +76,7 @@ export interface ContractExtraOptions {
     databaseSchemaName?: string;
     databaseTimestamps?: boolean;
     databaseUserAction?: boolean;
+    databaseFakeDelete?: boolean;
     tags?: string | string[];
     description?: string;
 }
