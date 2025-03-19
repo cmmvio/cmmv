@@ -18,6 +18,13 @@ export class SanboxController {
         );
     }
 
+    @Get('graphql.js', { exclude: true })
+    async handlerClientGraphQL(@Response() res) {
+        res.contentType('text/javascript').send(
+            await this.sandboxService.resolveClientGraphQL(),
+        );
+    }
+
     @Get('schema', { exclude: true })
     async handlerSchema() {
         return await this.sandboxService.resolveShema();

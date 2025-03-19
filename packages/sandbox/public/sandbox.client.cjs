@@ -24,7 +24,8 @@ createApp({
                 { label: "DTOs", active: false },
                 { label: "Methods", active: false },
                 { label: "Schema", active: false },
-                { label: "API", active: false }
+                { label: "API", active: false },
+                { label: "GraphQL", active: false }
             ],
             protoTypes: {
                 "int32": { key: "int32", label: "Integer (Int32)"},
@@ -119,7 +120,8 @@ createApp({
             mainTab: 'request',
             copyStatus: false,
             contractFilter: '',
-            filteredContracts: {}
+            filteredContracts: {},
+            graphql: null
         }
     },
 
@@ -185,6 +187,10 @@ createApp({
 
         // Inicializar o filteredContracts
         this.filteredContracts = this.schema;
+
+        this.graphql = useGraphQLExplorer();
+        this.graphql.fetchSchema();
+        this.graphql.initQueryEditor();
     },
 
     beforeUnmount() {

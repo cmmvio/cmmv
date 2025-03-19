@@ -90,6 +90,16 @@ export class SandboxService {
         );
     }
 
+    public async resolveClientGraphQL() {
+        return await fs.readFileSync(
+            path.join(
+                __dirname.replace('src', 'public'),
+                'sandbox-graphql.client.cjs',
+            ),
+            'utf-8',
+        );
+    }
+
     public async resolveStyle() {
         return await fs.readFileSync(
             path.join(__dirname.replace('src', 'public'), 'sandbox.css'),

@@ -1,4 +1,4 @@
-<div class="flex flex-col h-full overflow-hidden">
+<div class="flex flex-col h-full overflow-hidden" v-if="hasController() || (selectedContract.services && selectedContract.services.length > 0)">
     <div
         v-if="apiSidebarOpen && isMobile"
         class="fixed inset-0 z-50 md:hidden"
@@ -212,6 +212,7 @@
         </div>
 
         <div
+            v-if="hasController() || (selectedContract.services && selectedContract.services.length > 0)"
             class="flex-grow overflow-auto transition-all duration-300"
             :class="{'md:ml-0': true, 'ml-0': !apiSidebarOpen || isMobile, 'ml-[280px]': apiSidebarOpen && !isMobile}"
         >
@@ -226,7 +227,6 @@
                 </div>
 
                 <div v-else class="flex flex-col h-full">
-                    <!-- Tab selector for Request/Response -->
                     <div class="border-b border-neutral-800">
                         <div class="flex items-center h-[40px]">
                             <button
@@ -239,18 +239,9 @@
                                 </svg>
                             </button>
 
-                            <!-- Main tabs: Request/Response -->
-                            <button
-                                class="h-full px-4 py-2 text-sm"
-                                :class="mainTab === 'request' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400'"
-                                @click="mainTab = 'request'"
-                            >Request</button>
-
-                            <button
-                                class="h-full px-4 py-2 text-sm"
-                                :class="mainTab === 'response' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400'"
-                                @click="mainTab = 'response'"
-                            >Response</button>
+                            <div class="h-full px-4 py-2 text-sm font-medium text-neutral-300">
+                                API Request / Response
+                            </div>
                         </div>
                     </div>
 
@@ -290,12 +281,8 @@
                         </div>
                     </div>
 
-                    <div class="flex-grow flex flex-col overflow-hidden">
-
-
-                        <!-- Request Tab Content -->
-                        <div v-if="mainTab === 'request'" class="flex-grow flex flex-col overflow-hidden">
-                            <!-- Request Sub-tabs: Params, Body, Headers -->
+                    <div class="flex-grow flex overflow-hidden">
+                        <div class="w-1/2 flex-shrink-0 flex flex-col border-r border-neutral-800 overflow-hidden">
                             <div class="border-b border-neutral-800">
                                 <div class="flex items-center h-[40px]">
                                     <button
@@ -320,11 +307,8 @@
                                 </div>
                             </div>
 
-                            <!-- Request Tab Content -->
                             <div class="p-4 overflow-auto flex-grow">
-                                <!-- Path and Query Params Tab -->
                                 <div v-if="requestTab === 'params'">
-                                    <!-- Path parameters section -->
                                     <div v-if="pathParams && pathParams.length > 0" class="mb-6">
                                         <div class="text-sm font-medium mb-2 flex items-center">
                                             <span class="mr-2">Path Parameters</span>
@@ -341,7 +325,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Query parameters section -->
                                     <div v-if="queryParams && queryParams.length > 0" class="mb-6">
                                         <div class="text-sm font-medium mb-2 flex items-center">
                                             <span class="mr-2">Query Parameters</span>
@@ -399,7 +382,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Empty state for params tab -->
                                     <div v-if="(!pathParams || pathParams.length === 0) && (!queryParams || queryParams.length === 0)" class="text-center text-sm text-neutral-400 py-8">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -408,7 +390,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Body Tab -->
                                 <div v-if="requestTab === 'body'">
                                     <div v-if="bodyParams && bodyParams.length > 0">
                                         <div class="mb-3 flex justify-between">
@@ -483,9 +464,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Headers Tab -->
                                 <div v-if="requestTab === 'headers'">
-                                    <!-- Header parameters from DTO -->
                                     <div v-if="headerParams && headerParams.length > 0" class="mb-6">
                                         <div class="text-sm font-medium mb-3">Header Parameters</div>
                                         <div v-for="param in headerParams" :key="param.name" class="mb-2 flex">
@@ -570,7 +549,6 @@
                                 </div>
                             </div>
 
-                            <!-- Send Request Button -->
                             <div class="p-4 border-t border-neutral-800 bg-neutral-900">
                                 <div class="flex items-center justify-between">
                                     <button
@@ -589,9 +567,8 @@
                             </div>
                         </div>
 
-                        <!-- Response Tab Content -->
-                        <div v-if="mainTab === 'response'" class="flex-grow flex flex-col overflow-hidden">
-                            <div class="flex justify-between items-center p-3 bg-neutral-850 border-b border-neutral-700">
+                        <div class="w-1/2 flex-shrink-0 flex flex-col overflow-hidden">
+                            <div class="h-[40px] flex justify-between items-center p-3 bg-neutral-850 border-b border-neutral-700">
                                 <div class="font-medium text-sm">Response</div>
                                 <div class="flex items-center">
                                     <div
@@ -626,7 +603,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                         </svg>
-                                        <p>Envie uma requisição para ver a resposta</p>
+                                        <p>Send a request to see the response</p>
                                     </div>
                                 </div>
                                 <pre v-else id="responseOutput" class="p-4 text-sm font-mono" v-html="formattedResponse"></pre>
@@ -635,6 +612,26 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div
+    v-else
+    class="flex flex-col h-full items-center justify-center text-neutral-400"
+>
+    <div class="text-center p-8 max-w-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-xl font-medium mb-2">No API Routes Available</h3>
+        <p class="mb-4">This contract does not have any implemented API endpoints.</p>
+        <div class="text-sm bg-neutral-800 p-4 rounded-md mx-auto text-left">
+            <p class="mb-2"><span class="font-semibold">To create API endpoints:</span></p>
+            <ol class="list-decimal pl-5 space-y-1">
+                <li>Enable <span class="text-blue-400 font-mono">generateController</span> in the Options tab, or</li>
+                <li>Add custom methods in the Methods tab</li>
+            </ol>
         </div>
     </div>
 </div>

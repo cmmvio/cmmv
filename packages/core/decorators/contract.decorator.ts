@@ -95,6 +95,7 @@ export interface ContractOptions {
     cache?: CacheOptions;
     index?: ContractIndex[];
     options?: ContractExtraOptions;
+    expose?: boolean;
     viewForm?: new () => any;
     viewPage?: new () => any;
 }

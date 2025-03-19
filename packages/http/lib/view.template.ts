@@ -193,14 +193,14 @@ export class Template {
         const minifyHtml = Config.get<boolean>('view.minifyHTML') || true;
         if (!minifyHtml) return html;
 
-        return minify(html, {
+        return html /* minify(html, {
             removeAttributeQuotes: true,
             collapseWhitespace: true,
             removeComments: true,
             minifyCSS: true,
             minifyJS: true,
             removeEmptyAttributes: true,
-        });
+        })*/;
     }
 
     async processSetup(result) {

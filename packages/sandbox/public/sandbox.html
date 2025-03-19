@@ -151,6 +151,13 @@
                         <!-- include("@packages/sandbox/public/sandbox-api.html"); -->
                     </div>
 
+                    <div
+                        v-show="tabs[selectedTab].label === 'GraphQL'"
+                        class="flex-1 overflow-auto h-[calc(100%-96px)]"
+                    >
+                        <!-- include("@packages/sandbox/public/sandbox-graphql.html"); -->
+                    </div>
+
                     <!-- Schema -->
                     <div
                         v-show="tabs[selectedTab].label === 'Schema'"
@@ -177,6 +184,8 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/loader.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.nls.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/editor/editor.main.js"></script>
+        <script type="text/javascript" src="/sandbox/graphql.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/client.js"></script>
+
     </body>
 </html>

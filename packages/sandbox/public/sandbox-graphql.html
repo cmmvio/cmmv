@@ -1,0 +1,987 @@
+<div class="flex flex-col h-full overflow-hidden" v-if="graphql">
+    <!-- Loading overlay -->
+    <div
+        v-if="graphql.schema.loading"
+        class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+        <div class="text-white text-center">
+            <svg
+                class="animate-spin h-10 w-10 mx-auto mb-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+            >
+                <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                ></circle>
+                <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+            </svg>
+            <p>Loading GraphQL schema...</p>
+        </div>
+    </div>
+
+    <!-- Schema Error Message -->
+    <div
+        v-if="graphql.schema.error && !graphql.schema.loading"
+        class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+        <div class="bg-gray-800 p-6 rounded-lg max-w-lg text-center">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-12 w-12 text-red-500 mx-auto mb-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+            >
+                <path
+                    fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                />
+            </svg>
+            <h3 class="text-red-400 text-lg font-semibold mb-2">
+                Error loading GraphQL schema
+            </h3>
+            <p class="text-gray-300 mb-4">{{ graphql.schema.error }}</p>
+            <button
+                @click="graphql.fetchSchema"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+            >
+                Try Again
+            </button>
+        </div>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div
+        v-if="authModalOpen"
+        class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+        <div
+            class="bg-neutral-900 p-6 rounded-lg max-w-md w-full border border-neutral-700"
+        >
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-white">Authentication</h3>
+                <button
+                    @click="authModalOpen = false"
+                    class="text-neutral-400 hover:text-white"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mb-4">
+                <label
+                    for="auth-token"
+                    class="block text-sm font-medium text-neutral-300 mb-1"
+                    >Auth Token</label
+                >
+                <textarea
+                    id="auth-token"
+                    v-model="authToken"
+                    rows="3"
+                    class="w-full p-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm text-white font-mono"
+                    placeholder="Enter your JWT or auth token here"
+                ></textarea>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button
+                    @click="clearAuthToken"
+                    class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm"
+                >
+                    Clear Token
+                </button>
+                <button
+                    @click="saveAuthToken"
+                    class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm"
+                >
+                    Save Token
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GraphQL Explorer Container -->
+    <div class="flex h-full" v-if="graphql.schema.data">
+        <!-- Left Sidebar -->
+        <div
+            class="w-64 border-r border-neutral-800 bg-neutral-900 overflow-y-auto flex-shrink-0"
+        >
+            <div
+                class="p-3 border-b border-neutral-800 bg-neutral-950 sticky top-0 flex justify-between items-center"
+            >
+                <div class="text-sm font-medium text-neutral-300">
+                    GraphQL Explorer
+                </div>
+                <button
+                    @click="graphql.fetchSchema"
+                    class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded"
+                    title="Reload schema"
+                >
+                    Reload
+                </button>
+            </div>
+
+            <!-- Operation Type Selector (Queries/Mutations/Subscriptions) -->
+            <div class="border-b border-neutral-800">
+                <div class="flex">
+                    <button
+                        @click="graphql.ui.selectedOperation = 'query'"
+                        :class="[
+              'flex-1 h-full px-4 py-2 text-sm',
+              graphql.ui.selectedOperation === 'query' ?
+                'border-b-2 border-blue-500 text-blue-400' :
+                'text-neutral-400 hover:bg-neutral-800'
+            ]"
+                    >
+                        Queries
+                    </button>
+                    <button
+                        @click="graphql.ui.selectedOperation = 'mutation'"
+                        :class="[
+              'flex-1 h-full px-4 py-2 text-sm',
+              graphql.ui.selectedOperation === 'mutation' ?
+                'border-b-2 border-blue-500 text-blue-400' :
+                'text-neutral-400 hover:bg-neutral-800'
+            ]"
+                        v-if="graphql.schema.mutationTypes.length"
+                    >
+                        Mutations
+                    </button>
+                    <button
+                        @click="graphql.ui.selectedOperation = 'subscription'"
+                        :class="[
+              'flex-1 h-full px-4 py-2 text-sm',
+              graphql.ui.selectedOperation === 'subscription' ?
+                'border-b-2 border-blue-500 text-blue-400' :
+                'text-neutral-400 hover:bg-neutral-800'
+            ]"
+                        v-if="graphql.schema.subscriptionTypes.length"
+                    >
+                        Subscriptions
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Search -->
+            <div class="p-3 border-b border-neutral-800">
+                <input
+                    type="text"
+                    v-model="graphql.ui.schemaFilter"
+                    placeholder="Filter operations..."
+                    class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
+                />
+            </div>
+
+            <!-- Operations and Field List -->
+            <div class="p-3">
+                <!-- Query Operations List (when no operation is selected) -->
+                <div v-if="!graphql.ui.selectedField" class="mb-2">
+                    <template v-if="graphql.ui.selectedOperation === 'query'">
+                        <div
+                            v-for="field in graphql.schema.queryTypes"
+                            :key="field.name"
+                            @click="graphql.selectOperation(field)"
+                            class="px-3 py-2 hover:bg-neutral-800 cursor-pointer rounded mb-1 flex items-center justify-between"
+                        >
+                            <span class="text-sm text-neutral-300"
+                                >{{ field.name }}</span
+                            >
+                            <span class="text-xs text-neutral-500"
+                                >{{ graphql.getTypeName(field.type) }}</span
+                            >
+                        </div>
+                    </template>
+
+                    <template
+                        v-if="graphql.ui.selectedOperation === 'mutation'"
+                    >
+                        <div
+                            v-for="field in graphql.schema.mutationTypes"
+                            :key="field.name"
+                            @click="graphql.selectOperation(field)"
+                            class="px-3 py-2 hover:bg-neutral-800 cursor-pointer rounded mb-1 flex items-center justify-between"
+                        >
+                            <span class="text-sm text-neutral-300"
+                                >{{ field.name }}</span
+                            >
+                            <span class="text-xs text-neutral-500"
+                                >{{ graphql.getTypeName(field.type) }}</span
+                            >
+                        </div>
+                    </template>
+
+                    <template
+                        v-if="graphql.ui.selectedOperation === 'subscription'"
+                    >
+                        <div
+                            v-for="field in graphql.schema.subscriptionTypes"
+                            :key="field.name"
+                            @click="graphql.selectOperation(field)"
+                            class="px-3 py-2 hover:bg-neutral-800 cursor-pointer rounded mb-1 flex items-center justify-between"
+                        >
+                            <span class="text-sm text-neutral-300"
+                                >{{ field.name }}</span
+                            >
+                            <span class="text-xs text-neutral-500"
+                                >{{ graphql.getTypeName(field.type) }}</span
+                            >
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Fields Explorer (when an operation is selected) -->
+                <div v-if="graphql.ui.selectedField">
+                    <!-- Breadcrumb de navegação -->
+                    <div class="mb-3 px-2 flex items-center overflow-x-auto whitespace-nowrap">
+                        <!-- Root link -->
+                        <button
+                            @click="graphql.navigateBack(-1)"
+                            class="flex items-center text-xs text-neutral-500 hover:text-neutral-300 mr-1"
+                        >
+                            <span>Root</span>
+                        </button>
+
+                        <!-- Separador -->
+                        <span class="text-neutral-600 mx-1">/</span>
+
+                        <!-- Operação principal (primeira na navegação) -->
+                        <button
+                            v-if="graphql.selection.navigationPath.length > 0"
+                            @click="graphql.navigateBack(0)"
+                            class="flex items-center text-xs text-neutral-500 hover:text-neutral-300 mr-1"
+                        >
+                            <span>Query</span>
+                        </button>
+
+                        <!-- Iteração pelos itens da navegação -->
+                        <template v-for="(item, index) in graphql.selection.navigationPath" :key="index">
+                            <!-- Separador -->
+                            <span class="text-neutral-600 mx-1">/</span>
+
+                            <!-- Item do breadcrumb -->
+                            <button
+                                @click="graphql.navigateBack(index)"
+                                class="flex items-center text-xs"
+                                :class="index === graphql.selection.navigationPath.length - 1 ?
+                                       'text-blue-400 font-medium' : 'text-neutral-500 hover:text-neutral-300'"
+                            >
+                                <span>{{ item.field }}</span>
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Info do campo atual (só mostrar se não estiver no breadcrumb) -->
+                    <div v-if="graphql.selection.navigationPath.length === 0" class="mb-3 flex items-center">
+                        <button
+                            @click="graphql.clearSelectedField"
+                            class="mr-2 text-neutral-400 hover:text-neutral-300"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                        </button>
+                        <div class="text-sm font-medium text-neutral-300">
+                            {{ graphql.ui.selectedField.name }}<span class="text-neutral-500 ml-1">: {{ graphql.getTypeName(graphql.ui.selectedField.type) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Argumentos disponíveis -->
+                    <div
+                        v-if="graphql.ui.selectedField && graphql.ui.selectedField.args && graphql.ui.selectedField.args.length && graphql.selection.navigationPath.length === 0"
+                        class="mb-4"
+                    >
+                        <div class="flex space-x-3 mb-2 font-normal">
+                            <span class="text-sm text-neutral-500 dark:text-neutral-400 w-full">
+                                <div class="flex flex-col space-y-2 uppercase font-mono">
+                                    <span>ARGUMENTS</span>
+                                </div>
+                            </span>
+                        </div>
+
+                        <div
+                            v-for="arg in graphql.ui.selectedField.args"
+                            :key="arg.name"
+                            class="flex items-center mb-1.5 px-2 py-1.5 text-sm"
+                        >
+                            <div
+                                class="w-4 h-4 mr-2 flex items-center justify-center cursor-pointer"
+                                @click="graphql.toggleArgument(arg.name)"
+                            >
+                                <div
+                                    class="w-3.5 h-3.5 rounded border border-neutral-600 flex items-center justify-center"
+                                    :class="{'bg-blue-600 border-blue-600': graphql.isArgumentSelected(arg.name)}"
+                                >
+                                    <svg
+                                        v-if="graphql.isArgumentSelected(arg.name)"
+                                        class="w-2.5 h-2.5 text-white"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M5 13L9 17L19 7"
+                                            stroke="currentColor"
+                                            stroke-width="3"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                            <span class="text-neutral-300">{{ arg.name }}:</span>
+                            <span
+                                class="ml-1 text-neutral-400 cursor-pointer hover:underline"
+                                @click="graphql.selectType(graphql.getNestedType(arg.type))"
+                            >
+                                {{ graphql.getTypeName(arg.type) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Lista de campos -->
+                    <div v-if="graphql.ui.selectedType && graphql.ui.selectedType.fields">
+                        <div class="flex space-x-3 mb-2 font-normal">
+                            <span class="text-sm text-neutral-500 dark:text-neutral-400 w-full">
+                                <div class="flex flex-col space-y-2 uppercase font-mono">
+                                    <span>FIELDS</span>
+                                </div>
+                            </span>
+                        </div>
+
+                        <div
+                            v-for="field in graphql.ui.selectedType.fields"
+                            :key="field.name"
+                            class="flex items-center px-2 py-1.5 hover:bg-neutral-800 cursor-pointer rounded mb-0.5"
+                            @click="graphql.toggleField(field.name)"
+                        >
+                            <!-- Checkbox estilizado -->
+                            <div class="w-4 h-4 mr-2 flex items-center justify-center">
+                                <div
+                                    class="w-3.5 h-3.5 rounded border border-neutral-600 flex items-center justify-center"
+                                    :class="{'bg-blue-600 border-blue-600': graphql.isFieldInCurrentPath(field.name)}"
+                                >
+                                    <svg
+                                        v-if="graphql.isFieldInCurrentPath(field.name)"
+                                        class="w-2.5 h-2.5 text-white"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M5 13L9 17L19 7"
+                                            stroke="currentColor"
+                                            stroke-width="3"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- Nome do campo -->
+                            <span class="text-sm text-neutral-300">{{ field.name }}</span>
+
+                            <!-- Indicador de tipo com parênteses para campos que aceitam argumentos -->
+                            <div class="flex items-center ml-auto">
+                                <!-- Ícone para entrar em tipos de objeto -->
+                                <button
+                                    v-if="graphql.getNestedType(field.type) &&
+                                         graphql.getNestedType(field.type).kind !== 'SCALAR' &&
+                                         graphql.getNestedType(field.type).kind !== 'ENUM' &&
+                                         graphql.getNestedType(field.type).fields &&
+                                         graphql.getNestedType(field.type).fields.length > 0"
+                                    @click.stop="graphql.selectField(field)"
+                                    class="text-xs text-neutral-500 mr-1 px-1 py-0.5 hover:bg-neutral-700 rounded"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+
+                                <span
+                                    v-if="field.args && field.args.length"
+                                    class="text-xs text-neutral-500 mr-1 cursor-pointer hover:text-neutral-400"
+                                    @click.stop="graphql.selectField(field)"
+                                >
+                                    (...)
+                                </span>
+                                <span class="text-xs text-neutral-500">{{ graphql.getTypeName(field.type) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col w-[calc(100%-256px)]">
+            <!-- Top Bar with Endpoint, Auth and Action Buttons -->
+            <div class="bg-neutral-900 p-3 flex items-center justify-between">
+                <div class="flex items-center">
+                    <!-- Authentication Button -->
+                    <button
+                        @click="toggleAuthModal"
+                        class="flex items-center px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-md mr-3"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 mr-1"
+                            :class="isAuthenticated ? 'text-green-400' : 'text-yellow-400'"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            />
+                        </svg>
+                        <span class="text-xs"
+                            >{{ isAuthenticated ? 'Authenticated' :
+                            'Authenticate' }}</span
+                        >
+                    </button>
+
+                    <div class="text-sm text-neutral-400 mr-2">Endpoint:</div>
+                    <input
+                        type="text"
+                        v-model="graphql.endpoint"
+                        class="px-3 py-1.5 bg-neutral-800 border border-neutral-700 rounded text-sm w-64"
+                        placeholder="http://localhost:4000/graphql"
+                    />
+                </div>
+                <div class="flex items-center">
+                    <button
+                        @click="graphql.executeQuery"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center"
+                        :disabled="graphql.editor.loading"
+                    >
+                        <svg
+                            v-if="graphql.editor.loading"
+                            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                        </svg>
+                        <span v-if="graphql.editor.loading">Running...</span>
+                        <span v-else>Execute Query</span>
+                    </button>
+                    <button
+                        @click="graphql.prettifyQuery"
+                        class="ml-2 px-3 py-2 bg-neutral-700 hover:bg-neutral-600 text-neutral-300 rounded-md text-sm"
+                    >
+                        Format
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area with Query and Response -->
+            <div
+                class="flex-1 flex overflow-hidden border-t border-neutral-800"
+            >
+                <!-- Left Panel: Query Editor and Variables -->
+                <div
+                    class="w-1/2 flex-shrink-0 flex flex-col overflow-hidden border-r border-neutral-900"
+                >
+                    <!-- Tabs for Query/Headers/Docs -->
+                    <div class="flex h-[44px]">
+                        <button
+                            class="h-[40px] px-4 py-2 text-sm"
+                            :class="graphql.ui.activeTab === 'query' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400'"
+                            @click="graphql.ui.activeTab = 'query'"
+                        >
+                            Query
+                        </button>
+
+                        <button
+                            class="h-[40px] px-4 py-2 text-sm"
+                            :class="graphql.ui.activeTab === 'headers' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400'"
+                            @click="graphql.ui.activeTab = 'headers'"
+                        >
+                            Headers
+                        </button>
+
+                        <button
+                            class="h-[40px] px-4 py-2 text-sm"
+                            :class="graphql.ui.activeTab === 'docs' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400'"
+                            @click="graphql.ui.activeTab = 'docs'"
+                        >
+                            Docs
+                        </button>
+                    </div>
+
+                    <!-- Query Editor -->
+                    <div
+                        class="flex-1 overflow-hidden flex flex-col"
+                        v-show="graphql.ui.activeTab === 'query'"
+                    >
+                        <div class="flex-1 overflow-hidden">
+                            <div id="graphqlQueryEditor" class="w-full h-full" style="min-height: 300px;"></div>
+                        </div>
+
+                        <!-- Variables Editor -->
+                        <div
+                            class="p-3 border-t border-neutral-800 bg-neutral-850"
+                        >
+                            <div
+                                class="text-xs font-medium text-neutral-400 mb-2"
+                            >
+                                Variables
+                            </div>
+                            <textarea
+                                v-model="graphql.editor.variables"
+                                class="w-full h-40 p-3 bg-neutral-800 text-neutral-200 font-mono resize-none rounded border border-neutral-700 focus:outline-none focus:border-blue-500"
+                                spellcheck="false"
+                                placeholder='{"variableName": "value"}'
+                            ></textarea>
+                            <div class="mt-2 flex justify-end">
+                                <button
+                                    @click="graphql.prettifyVariables"
+                                    class="px-2 py-1 bg-neutral-700 hover:bg-neutral-600 text-neutral-300 rounded text-xs"
+                                >
+                                    Format JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Headers Editor -->
+                    <div
+                        class="flex-1 overflow-hidden"
+                        v-if="graphql.ui.activeTab === 'headers'"
+                    >
+                        <textarea
+                            v-model="graphql.editor.headers"
+                            class="w-full h-full p-4 bg-neutral-800 text-neutral-200 font-mono resize-none focus:outline-none"
+                            spellcheck="false"
+                            placeholder='{"Authorization": "Bearer token", "Content-Type": "application/json"}'
+                        ></textarea>
+                    </div>
+
+                    <!-- Documentation Panel -->
+                    <div
+                        class="flex-1 overflow-auto p-4"
+                        v-if="graphql.ui.activeTab === 'docs'"
+                    >
+                        <div v-if="graphql.ui.selectedType">
+                            <h3 class="text-lg font-semibold text-white mb-2">
+                                {{ graphql.ui.selectedType.name }}
+                            </h3>
+
+                            <p
+                                v-if="graphql.ui.selectedType.description"
+                                class="text-neutral-400 mb-4"
+                            >
+                                {{ graphql.ui.selectedType.description }}
+                            </p>
+
+                            <div
+                                v-if="graphql.ui.selectedType.fields && graphql.ui.selectedType.fields.length"
+                                class="mt-4"
+                            >
+                                <h4
+                                    class="text-sm font-semibold text-neutral-300 mb-2 border-b border-neutral-700 pb-1"
+                                >
+                                    Fields
+                                </h4>
+
+                                <div
+                                    v-for="field in graphql.ui.selectedType.fields"
+                                    :key="field.name"
+                                    class="mb-3"
+                                >
+                                    <div class="flex items-start">
+                                        <button
+                                            @click="graphql.addFieldToQuery(graphql.ui.selectedType.name, field.name)"
+                                            class="text-blue-400 font-mono text-sm hover:underline cursor-pointer"
+                                        >
+                                            {{ field.name }}
+                                        </button>
+
+                                        <span
+                                            v-if="field.args && field.args.length"
+                                            class="text-neutral-500 font-mono text-sm"
+                                        >
+                                            (
+                                            <span
+                                                v-for="(arg, i) in field.args"
+                                                :key="arg.name"
+                                            >
+                                                {{ arg.name }}:
+                                                <a
+                                                    @click="graphql.selectType(graphql.getNestedType(arg.type))"
+                                                    class="text-green-400 hover:underline cursor-pointer"
+                                                    >{{
+                                                    graphql.getTypeName(arg.type)
+                                                    }}</a
+                                                >{{ i < field.args.length - 1 ?
+                                                ', ' : '' }}
+                                            </span>
+                                            )
+                                        </span>
+
+                                        <span
+                                            class="text-neutral-500 font-mono text-sm mx-1"
+                                            >:</span
+                                        >
+
+                                        <a
+                                            @click="graphql.selectType(graphql.getNestedType(field.type))"
+                                            class="text-green-400 hover:underline cursor-pointer text-sm font-mono"
+                                        >
+                                            {{ graphql.getTypeName(field.type)
+                                            }}
+                                        </a>
+                                    </div>
+
+                                    <div
+                                        v-if="field.description"
+                                        class="text-neutral-500 text-sm mt-1 ml-2"
+                                    >
+                                        {{ field.description }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="graphql.ui.selectedType.inputFields && graphql.ui.selectedType.inputFields.length"
+                                class="mt-4"
+                            >
+                                <h4
+                                    class="text-sm font-semibold text-neutral-300 mb-2 border-b border-neutral-700 pb-1"
+                                >
+                                    Input Fields
+                                </h4>
+
+                                <div
+                                    v-for="field in graphql.ui.selectedType.inputFields"
+                                    :key="field.name"
+                                    class="mb-3"
+                                >
+                                    <div class="flex items-center">
+                                        <span
+                                            class="text-blue-400 font-mono text-sm"
+                                            >{{ field.name }}</span
+                                        >
+                                        <span
+                                            class="text-neutral-500 font-mono text-sm mx-1"
+                                            >:</span
+                                        >
+                                        <a
+                                            @click="graphql.selectType(graphql.getNestedType(field.type))"
+                                            class="text-green-400 hover:underline cursor-pointer text-sm font-mono"
+                                        >
+                                            {{ graphql.getTypeName(field.type)
+                                            }}
+                                        </a>
+                                    </div>
+
+                                    <div
+                                        v-if="field.description"
+                                        class="text-neutral-500 text-sm mt-1 ml-2"
+                                    >
+                                        {{ field.description }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="graphql.ui.selectedType.enumValues && graphql.ui.selectedType.enumValues.length"
+                                class="mt-4"
+                            >
+                                <h4
+                                    class="text-sm font-semibold text-neutral-300 mb-2 border-b border-neutral-700 pb-1"
+                                >
+                                    Enum Values
+                                </h4>
+
+                                <div
+                                    v-for="value in graphql.ui.selectedType.enumValues"
+                                    :key="value.name"
+                                    class="mb-2"
+                                >
+                                    <div
+                                        class="text-purple-400 font-mono text-sm"
+                                    >
+                                        {{ value.name }}
+                                    </div>
+
+                                    <div
+                                        v-if="value.description"
+                                        class="text-neutral-500 text-sm mt-1 ml-2"
+                                    >
+                                        {{ value.description }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            v-else
+                            class="flex items-center justify-center h-full text-neutral-500"
+                        >
+                            <div class="text-center">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-12 w-12 mx-auto mb-3"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.5"
+                                        d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
+                                </svg>
+                                <p>Select a type to view documentation</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Response -->
+                <div class="w-1/2 flex-shrink-0 flex flex-col overflow-hidden">
+                    <!-- Cabeçalho da Response - com background e borda para corresponder ao painel esquerdo -->
+                    <div
+                        class="h-[44px] bg-neutral-900 flex items-center justify-between px-4 border-b border-neutral-800"
+                    >
+                        <h3 class="text-sm font-medium text-neutral-300">
+                            Response
+                        </h3>
+
+                        <div class="flex items-center">
+                            <span
+                                v-if="graphql.editor.responseStatus"
+                                class="text-xs px-2 py-1 rounded mr-2"
+                                :class="{
+                'bg-green-900 text-green-200': graphql.editor.responseStatus >= 200 && graphql.editor.responseStatus < 300,
+                'bg-red-900 text-red-200': graphql.editor.responseStatus >= 400
+              }"
+                            >
+                                {{ graphql.editor.responseStatus }}
+                            </span>
+
+                            <span
+                                v-if="graphql.editor.responseTime !== null"
+                                class="text-xs text-neutral-400 mr-2"
+                            >
+                                {{ graphql.editor.responseTime }}ms
+                            </span>
+
+                            <button
+                                v-if="graphql.editor.response"
+                                @click="graphql.copyResponse"
+                                class="text-xs px-2 py-1 bg-neutral-700 hover:bg-neutral-600 text-neutral-300 rounded"
+                            >
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-auto bg-neutral-800">
+                        <pre
+                            v-if="graphql.editor.response"
+                            class="p-4 font-mono text-sm break-words"
+                            v-html="graphql.formattedResponse"
+                        ></pre>
+
+                        <div
+                            v-else
+                            class="flex items-center justify-center h-full text-neutral-500"
+                        >
+                            <div class="text-center">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-12 w-12 mx-auto mb-3"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.5"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    />
+                                </svg>
+                                <p>Run a query to see results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Notification -->
+    <div
+        v-if="graphql.editor.error"
+        class="absolute bottom-4 right-4 bg-red-900 text-white p-4 rounded-lg shadow-lg max-w-md"
+    >
+        <div class="flex">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 mr-2 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+            </svg>
+            <div>
+                <h4 class="font-medium mb-1">Query Error</h4>
+                <p class="text-sm text-red-200">{{ graphql.editor.error }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add authentication script
+    document.addEventListener('DOMContentLoaded', function () {
+        // Make these variables available to Vue
+        if (window.app) {
+            app.authModalOpen = false;
+            app.authToken = localStorage.getItem('token') || '';
+            app.isAuthenticated = !!localStorage.getItem('token');
+
+            // Add methods
+            app.toggleAuthModal = function () {
+                this.authModalOpen = !this.authModalOpen;
+                this.authToken = localStorage.getItem('token') || '';
+            };
+
+            app.saveAuthToken = function () {
+                if (this.authToken.trim()) {
+                    localStorage.setItem('token', this.authToken.trim());
+                    this.isAuthenticated = true;
+                    this.authModalOpen = false;
+                    // Reload schema with new token
+                    this.graphql.fetchSchema();
+                }
+            };
+
+            app.clearAuthToken = function () {
+                localStorage.removeItem('token');
+                this.authToken = '';
+                this.isAuthenticated = false;
+                // Reload schema without token
+                this.graphql.fetchSchema();
+            };
+        }
+    });
+</script>
+
+<style>
+    /* Custom scrollbar for code elements */
+    pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-family:
+            'Fira Code', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono',
+            monospace;
+        line-height: 1.5;
+        color: #e2e8f0;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Styles for highlighted JSON */
+    pre .hljs-string {
+        color: #89ddff;
+    }
+    pre .hljs-number {
+        color: #f78c6c;
+    }
+    pre .hljs-boolean {
+        color: #ff9cac;
+    }
+    pre .hljs-null {
+        color: #78909c;
+    }
+    pre .hljs-punctuation {
+        color: #89ddff;
+    }
+    pre .hljs-property {
+        color: #c792ea;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #1f2937;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #4b5563;
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280;
+    }
+
+    /* Inputs and textareas */
+    textarea,
+    input {
+        font-family:
+            'Fira Code', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono',
+            monospace;
+    }
+
+    textarea:focus,
+    input:focus {
+        outline: none;
+        border-color: #60a5fa;
+    }
+</style>
