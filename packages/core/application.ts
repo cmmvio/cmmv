@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { cwd } from 'node:process';
 import * as fg from 'fast-glob';
 import * as Terser from 'terser';
 
@@ -38,6 +39,7 @@ import {
     CONTROLLER_VIEWFORM,
     CONTROLLER_VIEWPAGE,
     SUB_PATH_METADATA,
+    PUBLIC_METADATA,
 } from './decorators';
 
 import { ApplicationTranspile, ContractsTranspile } from './transpilers';
@@ -147,6 +149,7 @@ export class Application {
             const env = Config.get<string>('env', process.env.NODE_ENV);
             this.loadModules(this.modules);
             await Config.validateConfigs(this.configs);
+            await this.getPublicContracts();
             this.processContracts();
 
             this.transpilers.push(ApplicationTranspile);
@@ -274,6 +277,7 @@ export class Application {
             await Hooks.execute(HooksType.onPreInitialize);
             this.loadModules(this.modules);
             await Config.validateConfigs(this.configs);
+            await this.getPublicContracts();
             this.processContracts();
 
             this.transpilers.push(ApplicationTranspile);
@@ -433,6 +437,11 @@ export class Application {
                 const target = contract.constructor || contract;
                 const prototype = target.prototype || contract.prototype;
 
+                const isPublic = Reflect.getMetadata(
+                    PUBLIC_METADATA,
+                    contract.constructor,
+                );
+
                 const controllerName = Reflect.getMetadata(
                     CONTROLLER_NAME_METADATA,
                     contract.constructor,
@@ -505,6 +514,7 @@ export class Application {
                 );
 
                 const contractStructure = {
+                    isPublic,
                     contractName: contract.constructor.name,
                     controllerName,
                     subPath,
@@ -572,6 +582,29 @@ export class Application {
             fs.mkdirSync(outputDir, { recursive: true });
 
         return outputDir;
+    }
+
+    protected async getPublicContracts() {
+        const contracts = await fg([
+            path.join(cwd(), 'src', 'contract', '**', '*.ts'),
+            path.join(cwd(), 'src', 'contract', '*.ts'),
+        ]);
+
+        for (const contract of contracts) {
+            const contractContent = await import(contract);
+
+            for (const key in contractContent) {
+                if (key.includes('Contract')) {
+                    const instance = new contractContent[key]();
+                    const isPublic = Reflect.getMetadata(
+                        PUBLIC_METADATA,
+                        instance.constructor,
+                    );
+
+                    if (isPublic === true) this.contracts.push(instance);
+                }
+            }
+        }
     }
 
     public static awaitModule(moduleName: string, cb: Function, context: any) {

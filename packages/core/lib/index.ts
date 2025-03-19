@@ -6,3 +6,4 @@ export * from './resolvers';
 export * from './scope';
 export * from './telemetry';
 export * from './transpile';
+export * from './compile';

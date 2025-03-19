@@ -96,6 +96,7 @@ export interface ContractOptions {
     index?: ContractIndex[];
     options?: ContractExtraOptions;
     expose?: boolean;
+    isPublic?: boolean;
     viewForm?: new () => any;
     viewPage?: new () => any;
 }
@@ -121,8 +122,13 @@ export interface ContractMessageProperty {
         | 'json'
         | 'simpleArray'
         | 'bigint'
-        | 'any';
-    paramType: 'query' | 'body' | 'path' | 'header';
+        | 'any'
+        | 'enum'
+        | 'int32'
+        | 'int64'
+        | 'float'
+        | 'double';
+    paramType?: 'query' | 'body' | 'path' | 'header';
     arrayType?: string;
     required: boolean;
     default?: string;
@@ -135,15 +141,18 @@ export interface ContractOptionsMessage {
 
 export interface ContractOptionsService {
     path: string;
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS';
     name: string;
     request: string;
     response: string;
     auth?: boolean;
     createBoilerplate?: boolean;
     functionName: string;
+    cache?: CacheOptions;
+    rootOnly?: boolean;
 }
 
+export const PUBLIC_METADATA = Symbol('public_metadata');
 export const CONTRACT_WATERMARK = Symbol('contract_watermark');
 export const CONTROLLER_NAME_METADATA = Symbol('controller_name_metadata');
 export const SUB_PATH_METADATA = Symbol('sub_path_metadata');
@@ -182,6 +191,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
     if (options?.viewPage && !isValidClass(options.viewPage))
         throw new Error(`Invalid viewPage provided: ${options.viewPage}`);
 
+    const defaultIsPublic = false;
     const defaultControllerName = 'DefaultContract';
     const defaultSubPath = '';
     const defaultProtoPath = 'contract.proto';
@@ -200,6 +210,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
     const defaultViewPage = null;
 
     const [
+        isPublic,
         controllerName,
         subPath,
         protoPath,
@@ -218,6 +229,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
         viewPage,
     ] = !options
         ? [
+              defaultIsPublic,
               defaultControllerName,
               defaultSubPath,
               defaultProtoPath,
@@ -236,6 +248,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
               defaultViewPage,
           ]
         : [
+              options.isPublic ?? defaultIsPublic,
               options.controllerName || defaultControllerName,
               options.subPath || defaultSubPath,
               options.protoPath || defaultProtoPath,
@@ -255,6 +268,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
           ];
 
     return (target: object) => {
+        Reflect.defineMetadata(PUBLIC_METADATA, isPublic, target);
         Reflect.defineMetadata(CONTRACT_WATERMARK, true, target);
         Reflect.defineMetadata(
             CONTROLLER_NAME_METADATA,

@@ -1,4 +1,9 @@
-import { Controller, Get, Response } from '@cmmv/http';
+import * as path from 'node:path';
+import { cwd } from 'node:process';
+
+import { Controller, Get, Post, Response, Body } from '@cmmv/http';
+
+import { Compile, IContract } from '@cmmv/core';
 
 import { SandboxService } from './sandbox.service';
 
@@ -28,5 +33,20 @@ export class SanboxController {
     @Get('schema', { exclude: true })
     async handlerSchema() {
         return await this.sandboxService.resolveShema();
+    }
+
+    @Post('compile')
+    async heandlerCompile(@Body() schema: IContract) {
+        const filanameRaw = schema.contractName
+            .toLowerCase()
+            .replace('contract', '.contract');
+        const schemaFilename = path.join(
+            cwd(),
+            'src',
+            'contract',
+            filanameRaw + '.ts',
+        );
+        Compile.getInstance().compileSchema(schema, schemaFilename);
+        return 'ok';
     }
 }

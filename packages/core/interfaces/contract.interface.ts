@@ -2,9 +2,14 @@ import {
     CacheOptions,
     ContractIndex,
     ContractExtraOptions,
+    ContractCustomDecorator,
+    ContractIndexOptions,
+    ContractMessageProperty,
+    ContractLink,
 } from '../decorators/contract.decorator';
 
 export class IContract {
+    isPublic?: boolean;
     contractName: string;
     controllerName: string;
     subPath?: string;
@@ -33,25 +38,41 @@ export class IContract {
 export class IContractField {
     propertyKey: string;
     protoType: string;
+    protoRepeated?: boolean; //deprecated
+    array?: boolean;
+    defaultValue?: any;
+    index?: boolean;
     unique?: boolean;
-    validations?: Array<any>;
+    exclude?: boolean;
+    nullable?: boolean;
+    toClassOnly?: boolean;
+    toPlainOnly?: boolean;
     transform?: Function;
-    link?: ContractIndex[];
+    toObject?: Function;
+    toPlain?: Function;
+    objectType?: string;
+    entityType?: string;
+    entityNullable?: boolean;
+    modelName?: string;
+    validations?: Array<any>;
+    link?: ContractLink[];
     resolver?: string;
+    customDecorator?: ContractCustomDecorator;
+    readOnly?: boolean;
     afterValidation?: Function;
 }
 
 export class IContractMessage {
     propertyKey: string;
     name: string;
-    properties: Object;
+    properties: Record<string, ContractMessageProperty>;
 }
 
 export class IContractService {
     propertyKey: string;
     name: string;
     path: string;
-    method: string;
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS';
     auth?: boolean;
     rootOnly?: boolean;
     cache?: CacheOptions;
@@ -64,4 +85,5 @@ export class IContractService {
 export class IContractIndex {
     name: string;
     fields: Array<any>;
+    options?: ContractIndexOptions;
 }

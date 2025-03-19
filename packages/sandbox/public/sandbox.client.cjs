@@ -1,5 +1,6 @@
 const { createApp } = Vue;
 let schemaEditor;
+let schemaChangeTimer = null;
 
 createApp({
     data() {
@@ -121,7 +122,13 @@ createApp({
             copyStatus: false,
             contractFilter: '',
             filteredContracts: {},
-            graphql: null
+            graphql: null,
+            syncModalOpen: false,
+            syncInProgress: false,
+            syncProgress: 0,
+            contractsToSync: [],
+            ignoreContractChanges: false,
+            recentlySyncedContracts: new Set()
         }
     },
 
@@ -164,6 +171,10 @@ createApp({
                 // Se falhar em parsear como JSON, retornar como texto simples
                 return this.escapeHtml(this.responseText);
             }
+        },
+
+        completedCount() {
+            return this.contractsToSync.filter(c => c.state === 'completed').length;
         }
     },
 
@@ -199,9 +210,21 @@ createApp({
 
     watch: {
         schema: {
-            handler(newSchema) {
+            async handler(newSchema, oldSchema) {
                 localStorage.setItem("schema", JSON.stringify(newSchema));
                 this.filterContracts();
+
+                if (this.ignoreContractChanges) {
+                    return;
+                }
+
+                if (schemaChangeTimer) clearTimeout(schemaChangeTimer);
+
+                schemaChangeTimer = setTimeout(async () => {
+                    if (oldSchema) {
+                        await this.detectAndMarkChangedContracts(newSchema);
+                    }
+                }, 300);
             },
             deep: true
         },
@@ -303,6 +326,9 @@ createApp({
             this.migrateIndexes();
             this.migrateMessages();
             this.migrateServices();
+
+            // Verificar alterações nos contratos após carregá-los
+            await this.checkContractsForChanges();
         },
 
         async refreshSchema(){
@@ -321,7 +347,13 @@ createApp({
             this.updateSchemaEditor();
         },
 
-        selectContract(key){
+        async selectContract(key){
+            // Verificar se o contrato atual foi modificado
+            if (this.selectedContract) {
+                await this.updateContractSyncStatus(Object.keys(this.schema).find(k =>
+                    this.schema[k].contractName === this.selectedContract.contractName));
+            }
+
             this.selectedContract = this.schema[key];
             localStorage.setItem('selectedContract', key);
             this.opened = [];
@@ -520,7 +552,8 @@ createApp({
             message.properties[newPropKey] = {
                 type: 'string',
                 required: false,
-                default: ''
+                default: '',
+                paramType: 'query'
             };
         },
 
@@ -556,17 +589,24 @@ createApp({
             message.properties = updatedProperties;
         },
 
-        addField(){
-            if(!this.selectedContract.options.moduleContract){
+        addField() {
+            if (!this.selectedContract.options.moduleContract) {
                 this.selectedContract.fields.push({
                     protoType: 'boolean',
                     propertyKey: "newfield"
                 });
+
+                // Marcar contrato como não sincronizado
+                const key = Object.keys(this.schema).find(k =>
+                    this.schema[k].contractName === this.selectedContract.contractName);
+                if (key) {
+                    this.updateContractSyncStatus(key);
+                }
             }
         },
 
-        removeField(key, fieldKey){
-            if(!this.selectedContract.options.moduleContract){
+        removeField(key, fieldKey) {
+            if (!this.selectedContract.options.moduleContract) {
                 this.modalContent = {
                     title: `Do want to remove the field '${key}'?`,
                     content: `By performing this action you will permanently remove the field and this will have repercussions throughout the application.`,
@@ -575,10 +615,17 @@ createApp({
                         const fields = this.selectedContract.fields.filter((field) => field.propertyKey !== key);
                         this.selectedContract.fields = fields;
                         this.modalConfirm = false;
+
+                        // Marcar contrato como não sincronizado
+                        const contractKey = Object.keys(this.schema).find(k =>
+                            this.schema[k].contractName === this.selectedContract.contractName);
+                        if (contractKey) {
+                            this.updateContractSyncStatus(contractKey);
+                        }
                     }
                 }
 
-                this.modalConfirm = true
+                this.modalConfirm = true;
             }
         },
 
@@ -1566,6 +1613,320 @@ createApp({
             }
 
             this.filteredContracts = filtered;
+        },
+
+        getUnsyncedContracts() {
+            const unsyncedContracts = [];
+
+            for (const key in this.schema) {
+                const contract = this.schema[key];
+
+                if (!contract.sync &&
+                    !contract.options?.moduleContract) {
+                    unsyncedContracts.push({
+                        key: key,
+                        name: contract.contractName || key,
+                        status: 'Modified',
+                        state: 'pending'
+                    });
+                }
+            }
+
+            return unsyncedContracts;
+        },
+
+        openSyncModal() {
+            this.contractsToSync = this.getUnsyncedContracts();
+            this.syncInProgress = false;
+            this.syncProgress = 0;
+            this.syncModalOpen = true;
+        },
+
+        async startSyncProcess() {
+            if (this.contractsToSync.length === 0) return;
+
+            this.ignoreContractChanges = true;
+            this.recentlySyncedContracts.clear();
+
+            this.syncInProgress = true;
+            this.syncProgress = 0;
+
+            this.contractsToSync.forEach(contract => {
+                contract.state = 'pending';
+            });
+
+            let index = 0;
+            const processNextContract = async () => {
+                if (index < this.contractsToSync.length) {
+                    const contract = this.contractsToSync[index];
+                    contract.state = 'processing';
+
+                    try {
+                        const contractData = this.schema[contract.key];
+
+                        const response = await fetch('/sandbox/compile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(contractData)
+                        });
+
+                        if (response.ok) {
+                            contract.state = 'completed';
+
+                            if (this.schema[contract.key]) {
+                                this.recentlySyncedContracts.add(contract.key);
+                                this.schema[contract.key].sync = true;
+
+                                const newHash = await this.generateContractHash(this.schema[contract.key]);
+                                const hashes = this.loadContractHashes();
+                                hashes[contract.key] = newHash;
+                                this.saveContractHashes(hashes);
+                            }
+                        } else {
+                            const errorData = await response.json();
+                            console.error(`Erro ao compilar contrato ${contract.name}:`, errorData);
+                            contract.state = 'error';
+                            contract.error = errorData.message || 'Unknown error during compilation';
+                        }
+                    } catch (error) {
+                        console.error(`Erro ao sincronizar contrato ${contract.name}:`, error);
+                        contract.state = 'error';
+                        contract.error = error.message || 'Network error during synchronization';
+                    }
+
+                    this.syncProgress = Math.round(((index + 1) / this.contractsToSync.length) * 100);
+                    index++;
+
+                    await processNextContract();
+                } else {
+                    const hasErrors = this.contractsToSync.some(c => c.state === 'error');
+                    localStorage.setItem("schema", JSON.stringify(this.schema));
+
+                    this.syncInProgress = false;
+                    this.syncModalOpen = false;
+
+                    setTimeout(() => {
+                        this.ignoreContractChanges = false;
+                    }, 500);
+                }
+            };
+
+            await processNextContract();
+        },
+
+        generateContractHash(contract) {
+            try {
+                const contractCopy = JSON.parse(JSON.stringify(contract));
+
+                delete contractCopy.sync;
+                delete contractCopy._tempId;
+                delete contractCopy._lastUpdated;
+
+                this.normalizeValues(contractCopy);
+
+                const orderedContract = this.sortObjectKeys(contractCopy);
+
+                const contractString = JSON.stringify(orderedContract, (key, value) => {
+                    if (value instanceof Date)
+                        return value.toISOString();
+
+                    if (typeof value === 'number' && !isFinite(value))
+                        return `"__NON_SERIALIZABLE_${value.toString()}__"`;
+
+                    return value;
+                });
+
+                return this.sha256(contractString);
+            } catch (error) {
+                console.error('Erro ao gerar hash do contrato:', error);
+                return this.simpleSha256(JSON.stringify(contract));
+            }
+        },
+
+        normalizeValues(obj) {
+            if (!obj || typeof obj !== 'object') return;
+
+            if (Array.isArray(obj)) {
+                obj.forEach(item => this.normalizeValues(item));
+                return;
+            }
+
+            for (const key in obj) {
+                if (obj[key] === undefined) {
+                    obj[key] = null;
+                } else if (obj[key] === '') {
+                    // Manter strings vazias
+                } else if (obj[key] === 0 || obj[key] === false) {
+                    // Manter zeros e falsos
+                } else if (!obj[key] && obj[key] !== 0 && obj[key] !== false) {
+                    // Normalizar outros valores "falsy" para null
+                    obj[key] = null;
+                } else if (typeof obj[key] === 'object') {
+                    this.normalizeValues(obj[key]);
+                }
+            }
+        },
+
+        sortObjectKeys(obj) {
+            if (obj === null || typeof obj !== 'object')
+                return obj;
+
+            if (Array.isArray(obj))
+                return obj.map(item => this.sortObjectKeys(item));
+
+            const sortedObj = {};
+
+            Object.keys(obj).sort().forEach(key => {
+                sortedObj[key] = this.sortObjectKeys(obj[key]);
+            });
+
+            return sortedObj;
+        },
+
+        async sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        },
+
+        simpleSha256(str) {
+            let hash = 0;
+            if (str.length === 0) return hash.toString(16);
+
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+
+            return Math.abs(hash).toString(16);
+        },
+
+        loadContractHashes() {
+            try {
+                const storedHashes = localStorage.getItem('contractHashes');
+                return storedHashes ? JSON.parse(storedHashes) : {};
+            } catch (e) {
+                console.error('Erro ao carregar hashes dos contratos:', e);
+                return {};
+            }
+        },
+
+        saveContractHashes(hashes) {
+            try {
+                localStorage.setItem('contractHashes', JSON.stringify(hashes));
+            } catch (e) {
+                console.error('Erro ao salvar hashes dos contratos:', e);
+            }
+        },
+
+        async detectAndMarkChangedContracts(schema) {
+            try {
+                const storedHashes = this.loadContractHashes();
+                const updatedContracts = [];
+
+                for (const key in schema) {
+                    if (schema[key].options?.moduleContract)
+                        continue;
+
+                    const newHash = await this.generateContractHash(schema[key]);
+
+                    if (storedHashes[key] && storedHashes[key] !== newHash) {
+                        console.log(`Contrato alterado: ${key}`);
+                        schema[key].sync = false;
+                        updatedContracts.push(key);
+                        storedHashes[key] = newHash;
+                    }
+                    else if (!storedHashes[key]) {
+                        console.log(`Novo contrato: ${key}`);
+                        schema[key].sync = false;
+                        updatedContracts.push(key);
+                        storedHashes[key] = newHash;
+                    }
+                }
+
+                if (updatedContracts.length > 0)
+                    this.saveContractHashes(storedHashes);
+
+                return updatedContracts;
+            } catch (error) {
+                console.error('Erro ao detectar alterações nos contratos:', error);
+                return [];
+            }
+        },
+
+        async updateContractSyncStatus(key) {
+            if (!this.schema[key]) return;
+
+            try {
+                const contract = this.schema[key];
+                const oldHash = this.loadContractHashes()[key];
+                const newHash = await this.generateContractHash(contract);
+
+                if (oldHash !== newHash) {
+                    contract.sync = false;
+
+                    const hashes = this.loadContractHashes();
+                    hashes[key] = newHash;
+                    this.saveContractHashes(hashes);
+                    this.schemaToLocalStorege();
+
+                    console.log(`Contrato ${key} marcado como não sincronizado`);
+                    return true;
+                }
+            } catch (e) {
+                console.error(`Erro ao atualizar status de sincronização do contrato ${key}:`, e);
+            }
+
+            return false;
+        },
+
+        async checkContractsForChanges() {
+            try {
+                const contractHashes = this.loadContractHashes();
+                const currentHashes = {};
+                let hasChanges = false;
+
+                for (const [key, contract] of Object.entries(this.schema)) {
+                    try {
+                        if (contract.options?.moduleContract)
+                            continue;
+
+                        const currentHash = await this.generateContractHash(contract);
+                        currentHashes[key] = currentHash;
+
+                        if (contractHashes[key] && contractHashes[key] !== currentHash) {
+                            console.log(`Contrato ${key} foi modificado`);
+                            contract.sync = false;
+                            hasChanges = true;
+                        }
+                        else if (!contractHashes[key]) {
+                            console.log(`Novo contrato detectado: ${key}`);
+                            contract.sync = false;
+                            hasChanges = true;
+                        }
+                    } catch (e) {
+                        console.error(`Erro ao verificar mudanças no contrato ${key}:`, e);
+                    }
+                }
+
+                this.saveContractHashes(currentHashes);
+
+                if (hasChanges) {
+                    this.ignoreContractChanges = true;
+                    this.schemaToLocalStorege();
+                    setTimeout(() => {
+                        this.ignoreContractChanges = false;
+                    }, 500);
+                }
+
+                return hasChanges;
+            } catch (e) {
+                console.error('Erro ao verificar mudanças nos contratos:', e);
+                return false;
+            }
         }
     }
 }).mount('#app')

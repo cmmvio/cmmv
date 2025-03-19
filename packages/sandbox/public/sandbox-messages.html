@@ -115,6 +115,22 @@
             </div>
 
             <div class="flex text-xs justify-center mt-2">
+                <div class="w-[200px] flex items-center">Parameter Type: </div>
+                <div class="w-[calc(100%-200px)] justify-end">
+                    <select
+                        class="border pl-4 h-[42px] w-full outline-none bg-neutral-900 border-neutral-800"
+                        v-model="propValue.paramType"
+                        :disabled="selectedContract.options.moduleContract"
+                    >
+                        <option value="query">Query</option>
+                        <option value="body">Body</option>
+                        <option value="path">Path</option>
+                        <option value="header">Header</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex text-xs justify-center mt-2">
                 <div class="w-[200px] flex items-center">Default Value: </div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input

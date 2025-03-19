@@ -663,6 +663,34 @@ components:
         - iv
         - tag
         - ephemeral
+    I18NCountries:
+      properties:
+        id:
+          readOnly: true
+          type: string
+        name:
+          type: string
+          required: false
+        iso:
+          type: string
+          required: false
+        alpha3:
+          type: string
+          required: true
+        numeric:
+          type: number
+          required: true
+        ddi:
+          type: string
+          required: true
+        phoneMask:
+          type: string
+          required: true
+      required:
+        - alpha3
+        - numeric
+        - ddi
+        - phoneMask
     Catch:
       properties:
         status:
@@ -976,6 +1004,22 @@ paths:
       parameters: []
       security:
         - BearerAuth: []
+  /sandbox/compile:
+    post:
+      tags:
+        - Sanbox
+      summary: ''
+      externalDocs:
+        url: null
+      responses:
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security: []
   /groups:
     get:
       tags:
@@ -1703,6 +1747,221 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+  /i18n/countries:
+    get:
+      tags:
+        - I18NCountries
+      summary: Returns I18NCountries records by filter
+      externalDocs:
+        url: null
+      responses:
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security:
+        - BearerAuth: []
+    post:
+      tags:
+        - I18NCountries
+      summary: Insert new I18NCountries
+      externalDocs:
+        url: null
+      responses:
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security:
+        - BearerAuth: []
+  /i18n/countries/{id}:
+    get:
+      tags:
+        - I18NCountries
+      summary: Returns I18NCountries record by ID
+      externalDocs:
+        url: null
+      responses:
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+    put:
+      tags:
+        - I18NCountries
+      summary: Update I18NCountries by ID
+      externalDocs:
+        url: null
+      responses:
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+    delete:
+      tags:
+        - I18NCountries
+      summary: Delete I18NCountries by ID
+      externalDocs:
+        url: null
+      responses:
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+  /i18n/countries/{id}/raw:
+    get:
+      tags:
+        - I18NCountries
+      summary: Return I18NCountries record by raw ID
+      externalDocs:
+        url: null
+      responses:
         '401':
           description: >-
             Unauthorized: The client must authenticate itself to get the

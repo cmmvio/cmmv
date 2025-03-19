@@ -1,11 +1,23 @@
-<div v-show="loading" class="loading flex z-60">
-    <div class="flex pr-2 pt-0.5">
-        <svg fill="currentColor" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="padding: 1px;">
-            <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z">
-                <animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"></animateTransform>
-            </path>
-        </svg>
-    </div>
+<div
+    v-show="loading"
+    class="bg-neutral-900/50 fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center"
+    style="backdrop-filter: blur(4px);"
+>
+    <div class="relative max-w-[400px] w-full m-auto transition duration-200 c-card rounded-lg bg-neutral-900 border-black text-neutral-200 border-neutral-800 border shadow-lg text-center p-6">
+        <div class="flex flex-col items-center justify-center">
+            <div class="animate-spin mb-4">
+                <svg fill="currentColor" width="32" height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z">
+                        <animateTransform attributeName="transform" type="rotate" dur="0.75s" values="0 12 12;360 12 12" repeatCount="indefinite"></animateTransform>
+                    </path>
+                </svg>
+            </div>
 
-    <div class="text-sm">Loading...</div>
+            <div class="text-lg font-medium mb-2">Connection Lost</div>
+
+            <div class="text-neutral-400 text-sm">
+                Connection to the server was lost. Waiting for the application to respond...
+            </div>
+        </div>
+    </div>
 </div>

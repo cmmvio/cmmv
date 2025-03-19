@@ -2,6 +2,30 @@
     v-show="tabs[selectedTab].label === 'Options'"
     class="flex-1 p-4 overflow-auto h-[calc(100%-96px)]"
 >
+    <div class="flex text-xs justify-center mt-2 mb-2">
+        <div class="w-full">
+            <div class="mb-4 bg-blue-900/30 border border-blue-800 text-blue-200 p-3 rounded-md text-sm">
+                <div class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <div class="flex items-center">
+                            <p class="font-medium mb-1">Public Contract</p>
+                            <input
+                                type="checkbox"
+                                class="ml-3 w-3 h-3 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
+                                :disabled="selectedContract.options.moduleContract"
+                                v-model="selectedContract.isPublic"
+                            />
+                        </div>
+                        <p>By enabling this option, you define that the application should automatically include this contract in the loading pipeline. This will cause controllers, gateways, GraphQL endpoints, and derivatives to be generated based on this schema and become public on the next application restart.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="flex border-b border-neutral-800 mb-4 pb-1 text-neutral-500">
         General
     </div>
