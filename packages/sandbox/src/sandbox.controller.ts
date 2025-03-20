@@ -14,7 +14,9 @@ export class SanboxController {
 
     @Get({ exclude: true })
     async handlerIndex(@Response() res) {
-        return res.render('sandbox');
+        return res.render('sandbox', {
+            wsPort: this.sandboxService.getWebSocketPort(),
+        });
     }
 
     @Get('client.js', { exclude: true })

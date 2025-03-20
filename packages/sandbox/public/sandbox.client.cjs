@@ -264,7 +264,8 @@ createApp({
 
     methods: {
         connectWebSocket(reload = false) {
-            this.socket = new WebSocket("ws://localhost:4200");
+            const port = document.querySelector("#wsPort").getAttribute("wsPort");
+            this.socket = new WebSocket(`ws://localhost:${port}`);
 
             this.socket.addEventListener("message", (message) => {
                 const messageData = JSON.parse(message.data);

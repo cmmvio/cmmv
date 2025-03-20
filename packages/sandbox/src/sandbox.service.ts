@@ -20,7 +20,7 @@ import { cwd } from 'node:process';
 export class SandboxService {
     public static logger: Logger = new Logger('Repository');
     public static chokidar;
-
+    public static port: number;
     @Hook(HooksType.onHTTPServerInit)
     public definePublicDir() {
         Application.instance
@@ -30,9 +30,11 @@ export class SandboxService {
 
     public static async loadConfig(): Promise<void> {
         const clients = [];
+        const port = Math.floor(Math.random() * (60000 - 50000) + 50000);
+        SandboxService.port = port;
 
         const wsServer = new WebSocketServer({
-            port: 4200,
+            port,
             perMessageDeflate: {
                 zlibDeflateOptions: {
                     chunkSize: 1024,
@@ -91,6 +93,10 @@ export class SandboxService {
             path.join(__dirname.replace('src', 'public'), 'sandbox.css'),
             'utf-8',
         );
+    }
+
+    public getWebSocketPort() {
+        return SandboxService.port;
     }
 
     /*public async generateContractFromAI(prompt: string) {
