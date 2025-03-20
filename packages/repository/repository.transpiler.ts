@@ -122,7 +122,13 @@ import {
 } from "${this.getImportPath(contract, 'entities', modelName.toLowerCase(), '@entities')}.entity";
 
 export class ${serviceName}Generated extends AbstractRepositoryService {
-    protected schema = new RepositorySchema(${entityName}, ${modelName});
+    protected schema = new RepositorySchema(
+        ${entityName},
+        ${modelName},
+        ${contract.options?.databaseFakeDelete ? 'true' : 'false'},
+        ${contract.options?.databaseTimestamps ? 'true' : 'false'},
+        ${contract.options?.databaseUserAction ? 'true' : 'false'}
+    );
 
     async getAll(queries?: any, req?: any): Promise<IReponseResult<${modelName}>> {
         return await this.schema.getAll(queries, req${findOptions});
@@ -200,6 +206,11 @@ ${contract.services
                 }),
             ];
         }
+
+        if (contract.options?.databaseFakeDelete)
+            indexDecorators.push(
+                `@Index("idx_${entityName.toLowerCase()}_deleted", ["deleted"])`,
+            );
 
         return indexDecorators.join('\n');
     }
@@ -380,6 +391,22 @@ ${contract.services
     @ManyToOne(() => UserEntity, { nullable: true })
     ${Config.get('repository.type') === 'mongodb' ? '@ObjectIdColumn({ nullable: true })' : '@Column({ type: "varchar", nullable: true })'}
     userLastUpdate: ${Config.get('repository.type') === 'mongodb' ? 'ObjectId' : 'string'};`;
+        }
+
+        if (contract.options?.databaseFakeDelete) {
+            extraFields += `
+    @Column({
+        type: "boolean",
+        default: false
+    })
+    deleted: boolean;
+
+    @Column({
+        type: "${isSQLite ? 'datetime' : 'timestamp'}",
+        nullable: true
+    })
+    deletedAt: Date;
+    `;
         }
 
         return extraFields ? `\n${extraFields}` : '';

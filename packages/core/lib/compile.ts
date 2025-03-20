@@ -240,6 +240,9 @@ export class Compile {
             if (schema.options.databaseUserAction !== undefined)
                 decorator += `        databaseUserAction: ${schema.options.databaseUserAction},\n`;
 
+            if (schema.options.databaseFakeDelete !== undefined)
+                decorator += `        databaseFakeDelete: ${schema.options.databaseFakeDelete},\n`;
+
             if (schema.options.description)
                 decorator += `        description: '${schema.options.description}',\n`;
 

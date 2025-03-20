@@ -575,9 +575,14 @@ export class RepositorySchema<Entity, T> {
     constructor(
         private readonly entity: new () => Entity,
         private readonly model: T,
+        private readonly fakeDelete: boolean = false,
+        private readonly timestamps: boolean = false,
+        private readonly userAction: boolean = false,
     ) {}
 
     public async getAll(queries?: any, req?: any, options?: IFindOptions) {
+        if (this.fakeDelete) queries.deleted = false;
+
         let result = await Repository.findAll(this.entity, queries);
 
         if (Config.get('repository.type') === 'mongodb')
@@ -597,11 +602,12 @@ export class RepositorySchema<Entity, T> {
                 : [options.resolvers];
             for (let keyResolver in resolvers) {
                 if (Resolvers.has(resolvers[keyResolver])) {
-                    for (let key in resultModels)
+                    for (let key in resultModels) {
                         resultModels[key] = await Resolvers.execute(
                             resolvers[keyResolver],
                             resultModels[key],
                         );
+                    }
                 }
             }
         }
@@ -615,13 +621,20 @@ export class RepositorySchema<Entity, T> {
 
     public async getIn(inArr: Array<any>, options?: IFindOptions) {
         const inToAssign = Array.isArray(inArr) ? inArr : [inArr];
+        let query = {};
 
-        const result = await Repository.findAll(
-            this.entity,
-            Repository.queryBuilder({
+        if (this.fakeDelete) {
+            query = Repository.queryBuilder({
                 id: { $in: inToAssign },
-            }),
-        );
+                deleted: false,
+            });
+        } else {
+            query = Repository.queryBuilder({
+                id: { $in: inToAssign },
+            });
+        }
+
+        const result = await Repository.findAll(this.entity, query);
 
         let resultModels =
             result && result.data.length > 0
@@ -635,11 +648,12 @@ export class RepositorySchema<Entity, T> {
                 : [options.resolvers];
             for (let keyResolver in resolvers) {
                 if (Resolvers.has(resolvers[keyResolver])) {
-                    for (let key in resultModels)
+                    for (let key in resultModels) {
                         resultModels[key] = await Resolvers.execute(
                             resolvers[keyResolver],
                             resultModels[key],
                         );
+                    }
                 }
             }
         }
@@ -652,10 +666,13 @@ export class RepositorySchema<Entity, T> {
     }
 
     public async getById(id, options?: IFindOptions) {
-        let result = await Repository.findBy(
-            this.entity,
-            Repository.queryBuilder({ id }),
-        );
+        let query = {};
+
+        if (this.fakeDelete)
+            query = Repository.queryBuilder({ id, deleted: false });
+        else query = Repository.queryBuilder({ id });
+
+        let result = await Repository.findBy(this.entity, query);
 
         if (Config.get('repository.type') === 'mongodb')
             result = this.fixIds(result);
@@ -704,23 +721,52 @@ export class RepositorySchema<Entity, T> {
     }
 
     public async update(id: string, data: any) {
-        const result = await Repository.update(
-            this.entity,
-            Repository.queryBuilder({ id }),
-            {
-                ...data,
-                updatedAt: new Date(),
-            },
-        );
+        if (data.deleted) delete data.deleted;
+
+        let result = 0;
+
+        let dataToUpdate = this.timestamps
+            ? {
+                  ...data,
+                  updatedAt: new Date(),
+              }
+            : data;
+
+        if (this.fakeDelete) {
+            result = await Repository.update(
+                this.entity,
+                Repository.queryBuilder({ id, deleted: false }),
+                dataToUpdate,
+            );
+        } else {
+            result = await Repository.update(
+                this.entity,
+                Repository.queryBuilder({ id }),
+                dataToUpdate,
+            );
+        }
 
         return { success: result > 0, affected: result };
     }
 
     public async delete(id: string) {
-        const result = await Repository.delete(
-            this.entity,
-            Repository.queryBuilder({ id }),
-        );
+        let result = 0;
+
+        if (this.fakeDelete) {
+            result = await Repository.update(
+                this.entity,
+                Repository.queryBuilder({ id }),
+                {
+                    deleted: true,
+                    deletedAt: new Date(),
+                },
+            );
+        } else {
+            result = await Repository.delete(
+                this.entity,
+                Repository.queryBuilder({ id }),
+            );
+        }
 
         return { success: result > 0, affected: result };
     }
