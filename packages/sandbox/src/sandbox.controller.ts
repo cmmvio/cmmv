@@ -2,7 +2,15 @@ import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { cwd } from 'node:process';
 
-import { Controller, Get, Post, Response, Body } from '@cmmv/http';
+import {
+    Controller,
+    Get,
+    Post,
+    Response,
+    Body,
+    Delete,
+    Param,
+} from '@cmmv/http';
 
 import { Compile, IContract } from '@cmmv/core';
 
@@ -68,8 +76,9 @@ export class SanboxController {
         return 'ok';
     }
 
-    /*@Post('generate')
-    async handlerGenerate(@Body() prompt: string) {
-        return await this.sandboxService.generateContractFromAI(prompt);
-    }*/
+    @Delete(':contractName')
+    async handlerDelete(@Param('contractName') contractName: string) {
+        await this.sandboxService.deleteContract(contractName);
+        return 'ok';
+    }
 }

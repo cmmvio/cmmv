@@ -595,6 +595,8 @@ export class Application {
 
             for (const key in contractContent) {
                 if (key.includes('Contract')) {
+                    Application.contractsCls.push(contractContent[key]);
+
                     const instance = new contractContent[key]();
                     const isPublic = Reflect.getMetadata(
                         PUBLIC_METADATA,

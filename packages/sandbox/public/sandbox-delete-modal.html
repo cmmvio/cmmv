@@ -1,0 +1,67 @@
+<div
+    class="bg-neutral-900/50 fixed top-0 bottom-0 left-0 right-0 z-40 flex items-center justify-center"
+    style="backdrop-filter: blur(4px);"
+    v-show="modalDeleteContract"
+    v-if="selectedContract"
+>
+    <div class="relative max-w-[500px] w-full m-auto transition duration-200 c-card rounded-lg bg-neutral-900 border-black text-neutral-200 border-neutral-800 border shadow-lg">
+        <div class="border-b border-neutral-800 p-4 relative">
+            <h2 class="text-xl font-medium text-red-400">Delete Contract</h2>
+
+            <div class="absolute top-4 right-4">
+                <button class="cursor-pointer hover:text-white" title="Close" @click="modalDeleteContract = false">
+                    <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4">
+            <div class="mb-4 bg-red-900/30 border border-red-800 text-red-200 p-3 rounded-md text-sm">
+                <div class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div>
+                        <p class="font-medium mb-1">This action cannot be undone.</p>
+                        <p>This will permanently delete the <strong>{{ selectedContract.contractName }}</strong> contract, including all associated implementations, services, and database models.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 mb-4">
+                <label class="block text-sm font-medium text-neutral-300 mb-2">
+                    Please type <span class="font-bold text-red-400">{{ selectedContract.contractName }}</span> to confirm:
+                </label>
+                <input
+                    type="text"
+                    v-model="confirmContractName"
+                    class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-neutral-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="Enter contract name"
+                >
+            </div>
+
+            <div class="flex items-center justify-end space-x-3">
+                <button
+                    class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-md transition-colors duration-200"
+                    @click="modalDeleteContract = false"
+                >
+                    Cancel
+                </button>
+                <button
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 flex items-center"
+                    :disabled="confirmContractName !== selectedContract.contractName"
+                    :class="{ 'opacity-50 cursor-not-allowed': confirmContractName !== selectedContract.contractName }"
+                    @click="deleteContract()"
+                >
+                    <svg v-if="isDeleting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Delete this contract
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

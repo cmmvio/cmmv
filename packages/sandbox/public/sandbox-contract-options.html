@@ -308,4 +308,23 @@
             Adds a deleted field, filters to facilitate data recovery.
         </div>
     </div>
+
+    <div class="flex flex-col text-xs mb-4 mt-8" v-if="selectedContract && !selectedContract.options.moduleContract">
+        <div class="mb-4 bg-red-900/30 border border-red-800 text-red-200 p-3 rounded-md text-sm">
+            <div class="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                    <p class="font-medium mb-1">Warning!</p>
+                    <p>Deleting this contract will remove all implementations generated from it, including REST API endpoints, GraphQL schema, RPC services, database models, and any other derived components. This action cannot be undone.</p>
+                </div>
+            </div>
+        </div>
+
+        <button
+            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md w-fit transition-colors duration-200"
+            @click="confirmDeleteContract()"
+        >Delete Contract</button>
+    </div>
 </div>

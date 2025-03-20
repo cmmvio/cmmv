@@ -128,7 +128,10 @@ createApp({
             syncProgress: 0,
             contractsToSync: [],
             ignoreContractChanges: false,
-            recentlySyncedContracts: new Set()
+            recentlySyncedContracts: new Set(),
+            modalDeleteContract: false,
+            confirmContractName: '',
+            isDeleting: false
         }
     },
 
@@ -1927,6 +1930,64 @@ createApp({
             } catch (e) {
                 console.error('Erro ao verificar mudanças nos contratos:', e);
                 return false;
+            }
+        },
+
+        confirmDeleteContract() {
+            this.confirmContractName = '';
+            this.modalDeleteContract = true;
+        },
+
+        async deleteContract() {
+            if (this.confirmContractName !== this.selectedContract.contractName) {
+                return;
+            }
+
+            try {
+                this.isDeleting = true;
+
+                // Find the contract key
+                const contractKey = Object.keys(this.schema).find(
+                    key => this.schema[key].contractName === this.selectedContract.contractName
+                );
+
+                if (!contractKey) {
+                    throw new Error('Contract not found');
+                }
+
+                const response = await fetch(`/sandbox/${encodeURIComponent(this.selectedContract.contractName)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                }).then();
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to delete contract');
+                }
+
+                // Remove contract from schema
+                delete this.schema[contractKey];
+
+                // Save schema to localStorage
+                this.schemaToLocalStorege();
+
+                // Select another contract if available
+                const remainingContracts = Object.keys(this.schema);
+                if (remainingContracts.length > 0) {
+                    this.selectContract(remainingContracts[0]);
+                } else {
+                    this.selectedContract = null;
+                }
+
+                // Close modal
+                this.modalDeleteContract = false;
+            } catch (error) {
+                console.error('Error deleting contract:', error);
+                alert(`Failed to delete contract: ${error.message}`);
+            } finally {
+                this.isDeleting = false;
             }
         }
     }

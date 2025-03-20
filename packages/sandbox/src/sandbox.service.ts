@@ -12,6 +12,9 @@ import {
     Hook,
     HooksType,
     Config,
+    SUB_PATH_METADATA,
+    PUBLIC_METADATA,
+    CONTROLLER_NAME_METADATA,
 } from '@cmmv/core';
 
 import { cwd } from 'node:process';
@@ -21,6 +24,7 @@ export class SandboxService {
     public static logger: Logger = new Logger('Repository');
     public static chokidar;
     public static port: number;
+
     @Hook(HooksType.onHTTPServerInit)
     public definePublicDir() {
         Application.instance
@@ -100,118 +104,141 @@ export class SandboxService {
         return SandboxService.port;
     }
 
-    /*public async generateContractFromAI(prompt: string) {
-        try {
-            const TransformersApi = Function('return import("@xenova/transformers")')();
-            const { pipeline } = await TransformersApi;
-            const generationPipeline = await pipeline('text-generation', 'Xenova/distilgpt2');
+    public async deleteContract(contractName: string) {
+        const contract = Application.getContract(contractName);
 
-            const enhancedPrompt = `Generate JSON schemas for a CMMV application based on this description: "${prompt}".
-Format the output as a valid JSON with contracts structure. Include appropriate fields, messages and services.
-Example format:
-{
-  "contracts": [
-    {
-      "contractName": "Entity",
-      "controllerName": "EntityController",
-      "fields": [
-        {"propertyKey": "id", "protoType": "string"},
-        {"propertyKey": "name", "protoType": "string"}
-      ],
-      "messages": [],
-      "services": []
-    }
-  ]
-}`;
+        if (contract) {
+            const instance = new contract();
 
-            // Generate text using the model
-            const result = await generationPipeline(enhancedPrompt, {
-                max_new_tokens: 500,
-                temperature: 0.7,
-                num_return_sequences: 1,
+            const isPublic = Reflect.getMetadata(
+                PUBLIC_METADATA,
+                instance.constructor,
+            );
+
+            console.log(isPublic);
+
+            if (!isPublic)
+                return { success: false, message: 'Contract is not public' };
+
+            const subPath = Reflect.getMetadata(
+                SUB_PATH_METADATA,
+                instance.constructor,
+            );
+
+            const controllerName = Reflect.getMetadata(
+                CONTROLLER_NAME_METADATA,
+                instance.constructor,
+            );
+
+            const contractPath = subPath
+                ? path.join(
+                      cwd(),
+                      'src',
+                      'contract',
+                      subPath,
+                      `${controllerName.toLowerCase()}.contract.ts`,
+                  )
+                : path.join(
+                      cwd(),
+                      'src',
+                      'contract',
+                      `${controllerName.toLowerCase()}.contract.ts`,
+                  );
+
+            if (fs.existsSync(contractPath)) await fs.unlinkSync(contractPath);
+
+            const contractFiles = [
+                path.join(
+                    cwd(),
+                    'src',
+                    'controllers',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.controller.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    '.generated',
+                    'controllers',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.controller.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    'src',
+                    'entities',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.entity.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    '.generated',
+                    'entities',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.entity.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    'src',
+                    'gateways',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.gateway.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    '.generated',
+                    'gateways',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.gateway.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    'src',
+                    'resolvers',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.resolver.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    '.generated',
+                    'resolvers',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.resolver.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    'src',
+                    'models',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.model.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    '.generated',
+                    'models',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.model.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    'src',
+                    'services',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.service.ts`,
+                ),
+                path.join(
+                    cwd(),
+                    '.generated',
+                    'services',
+                    subPath ? subPath : '',
+                    `${controllerName.toLowerCase()}.service.ts`,
+                ),
+            ];
+
+            contractFiles.forEach(async (file) => {
+                if (fs.existsSync(file)) await fs.unlinkSync(file);
             });
-
-            const generatedText = result[0].generated_text;
-            const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
-
-            if (!jsonMatch)
-                throw new Error('Generated text does not contain valid JSON');
-
-            return {
-                jsonMatch
-            };
-        } catch (error) {
-            SandboxService.logger.error(`Error generating contracts from AI: ${error.message}`);
-
-            // Fallback to rule-based generation if AI generation fails
-            try {
-                const contractsData = await this.analyzePromptAndGenerateContracts(prompt);
-                return {
-                    success: true,
-                    warning: "AI generation failed, using rule-based generation instead.",
-                    contracts: contractsData
-                };
-            } catch (fallbackError) {
-                return {
-                    success: false,
-                    error: `AI generation failed: ${error.message}. Fallback also failed: ${fallbackError.message}`,
-                    contracts: []
-                };
-            }
         }
+
+        return { success: true, message: 'Contract deleted successfully' };
     }
-
-    private async analyzePromptAndGenerateContracts(prompt: string): Promise<IContract[]> {
-        const promptLower = prompt.toLowerCase();
-        const entityKeywords = promptLower.match(/\b(\w+)\b/g) || [];
-
-        const commonWords = ['generate', 'create', 'for', 'with', 'and', 'the', 'a', 'an', 'contracts', 'contract', 'model', 'models'];
-        const potentialEntities = entityKeywords
-            .filter(word => !commonWords.includes(word) && word.length > 3)
-            .filter((value, index, self) => self.indexOf(value) === index);
-
-        return potentialEntities.map(entity => this.generateContractTemplate(entity));
-    }
-
-    private generateContractTemplate(entityName: string): IContract {
-        const capitalizedName = entityName.charAt(0).toUpperCase() + entityName.slice(1);
-
-        const contract: IContract = {
-            isPublic: true,
-            contractName: capitalizedName,
-            controllerName: `${capitalizedName}Controller`,
-            subPath: '',
-            fields: [
-                {
-                    propertyKey: 'id',
-                    protoType: 'string',
-                    unique: true,
-                    index: true
-                },
-                {
-                    propertyKey: 'name',
-                    protoType: 'string'
-                },
-                {
-                    propertyKey: 'description',
-                    protoType: 'string'
-                }
-            ],
-            messages: [],
-            services: [],
-            directMessage: false,
-            generateController: true,
-            generateEntities: true,
-            auth: false,
-            rootOnly: false,
-            options: {
-                description: `Generated ${capitalizedName} contract`,
-                databaseSchemaName: entityName.toLowerCase(),
-                databaseTimestamps: true,
-                databaseUserAction: true
-            }
-        };
-
-        return contract;
-    }*/
 }
