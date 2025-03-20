@@ -11,7 +11,7 @@ import {
     Application,
     Hook,
     HooksType,
-    IContract,
+    Config,
 } from '@cmmv/core';
 
 import { cwd } from 'node:process';
@@ -30,7 +30,8 @@ export class SandboxService {
 
     public static async loadConfig(): Promise<void> {
         const clients = [];
-        const port = Math.floor(Math.random() * (60000 - 50000) + 50000);
+        const portDefault = 59885;
+        const port = Config.get<number>('sandbox.port', portDefault);
         SandboxService.port = port;
 
         const wsServer = new WebSocketServer({
