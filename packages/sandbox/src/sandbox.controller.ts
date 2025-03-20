@@ -1,4 +1,5 @@
 import * as path from 'node:path';
+import * as fs from 'node:fs';
 import { cwd } from 'node:process';
 
 import { Controller, Get, Post, Response, Body } from '@cmmv/http';
@@ -19,20 +20,35 @@ export class SanboxController {
     @Get('client.js', { exclude: true })
     async handlerClientJavascript(@Response() res) {
         res.contentType('text/javascript').send(
-            await this.sandboxService.resolveClientJS(),
+            await fs.readFileSync(
+                path.join(
+                    __dirname.replace('src', 'public'),
+                    'sandbox.client.cjs',
+                ),
+                'utf-8',
+            ),
         );
     }
 
     @Get('graphql.js', { exclude: true })
     async handlerClientGraphQL(@Response() res) {
         res.contentType('text/javascript').send(
-            await this.sandboxService.resolveClientGraphQL(),
+            await fs.readFileSync(
+                path.join(
+                    __dirname.replace('src', 'public'),
+                    'sandbox-graphql.client.cjs',
+                ),
+                'utf-8',
+            ),
         );
     }
 
     @Get('schema', { exclude: true })
     async handlerSchema() {
-        return await this.sandboxService.resolveShema();
+        const schemaFilename = path.join(cwd(), '.generated', 'schema.json');
+        return fs.existsSync(schemaFilename)
+            ? JSON.parse(await fs.readFileSync(schemaFilename, 'utf-8'))
+            : {};
     }
 
     @Post('compile')

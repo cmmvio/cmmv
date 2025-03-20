@@ -86,39 +86,11 @@ export class SandboxService {
             });
     }
 
-    public resolveIndex() {
-        return fs.readFileSync(path.join(__dirname, 'sandbox.html'), 'utf-8');
-    }
-
-    public async resolveClientJS() {
-        return await fs.readFileSync(
-            path.join(__dirname.replace('src', 'public'), 'sandbox.client.cjs'),
-            'utf-8',
-        );
-    }
-
-    public async resolveClientGraphQL() {
-        return await fs.readFileSync(
-            path.join(
-                __dirname.replace('src', 'public'),
-                'sandbox-graphql.client.cjs',
-            ),
-            'utf-8',
-        );
-    }
-
     public async resolveStyle() {
         return await fs.readFileSync(
             path.join(__dirname.replace('src', 'public'), 'sandbox.css'),
             'utf-8',
         );
-    }
-
-    public async resolveShema() {
-        const schemaFilename = path.join(cwd(), '.generated', 'schema.json');
-        return fs.existsSync(schemaFilename)
-            ? JSON.parse(await fs.readFileSync(schemaFilename, 'utf-8'))
-            : {};
     }
 
     /*public async generateContractFromAI(prompt: string) {

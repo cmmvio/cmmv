@@ -78,16 +78,18 @@ export const sServerData: Directive = (
 
 // I18n
 function loadLocaleFile(locale: string): Record<string, string> {
-    const localePath = path.resolve(
-        process.cwd(),
-        Config.get<string>('i18n.localeFiles'),
-        `${locale}.json`,
-    );
+    try {
+        const localePath = path.resolve(
+            process.cwd(),
+            Config.get<string>('i18n.localeFiles'),
+            `${locale}.json`,
+        );
 
-    if (fs.existsSync(localePath)) {
-        const fileContent = fs.readFileSync(localePath, 'utf-8');
-        return JSON.parse(fileContent);
-    }
+        if (fs.existsSync(localePath)) {
+            const fileContent = fs.readFileSync(localePath, 'utf-8');
+            return JSON.parse(fileContent);
+        }
+    } catch {}
 
     return {};
 }
