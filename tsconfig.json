@@ -26,6 +26,7 @@
         "noImplicitThis": true,
         "useDefineForClassFields": true,
         "allowJs": false,
+        "strict": true,
         "lib": ["esnext", "dom"],
         "types": ["node"],
         "paths": {

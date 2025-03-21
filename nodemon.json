@@ -2,13 +2,12 @@
     "watch": ["src", "packages"],
     "ext": "ts,js,cjs",
     "ignore": [
-        "src/**/*.spec.ts", "src/services",
-        "src/models", "src/controllers",
-        "src/protos", "src/app.module.ts",
+        ".generated", "src/**/*.spec.ts", "src/services",
+        "src/models", "src/controllers", "src/protos", "src/app.module.ts",
         "src/gateways", "src/entities",
         "src/models/*.ts", "packages/sandbox/public/*.html",
         "packages/sandbox/public/*.css", "packages/sandbox/public/*.cjs",
-        "src/contracts", "src/resolvers"
+        "src/contracts", "src/resolvers", "src/migrations"
     ],
     "exec": "node -r @swc-node/register ./src/main.ts",
     "quiet": true

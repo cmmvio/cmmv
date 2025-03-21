@@ -32,16 +32,35 @@ export class Repository extends Singleton {
     public static entities = new Map<string, any>();
     public dataSource: DataSource;
 
+    /**
+     * Load the repository configuration and initialize the database connection
+     * @returns Promise<void>
+     */
     public static async loadConfig(): Promise<void> {
         const instance = Repository.getInstance();
         const config = Config.get('repository');
 
         const sourceDir = Config.get<string>('app.sourceDir', 'src');
+        const migrations = Config.get<boolean>('repository.migrations', true);
+        const migrationsDir = Config.get<string>(
+            'repository.migrationsDir',
+            path.join(cwd(), 'src', 'migrations'),
+        );
+
         const entitiesDir = path.join(cwd(), sourceDir, 'entities');
         const entitiesGeneratedDir = path.join(cwd(), '.generated', 'entities');
+        const migrationsGeneratedDir = path.join(
+            cwd(),
+            '.generated',
+            'migrations',
+        );
         const entityFiles = await fg([
             `${entitiesDir}/**/*.entity.ts`,
             `${entitiesGeneratedDir}/**/*.entity.ts`,
+        ]);
+        const migrationFiles = await fg([
+            `${migrationsDir}/**/*.ts`,
+            `${migrationsGeneratedDir}/**/*.ts`,
         ]);
 
         const entities = await Promise.all(
@@ -57,14 +76,68 @@ export class Repository extends Singleton {
             }),
         );
 
-        const AppDataSource = new DataSource({
-            ...config,
-            entities,
-        });
+        try {
+            const AppDataSource = new DataSource({
+                ...config,
+                entities,
+                migrations: migrations ? migrationFiles : [],
+            });
 
-        instance.dataSource = await AppDataSource.initialize();
+            instance.dataSource = await AppDataSource.initialize();
+        } catch (error) {
+            this.logger.error('Database connection error:', error);
+
+            const AppDataSource = new DataSource({
+                ...config,
+                entities,
+                migrations: migrations ? migrationFiles : [],
+                synchronize: false,
+            });
+
+            instance.dataSource = await AppDataSource.initialize();
+        }
     }
 
+    /**
+     * Get the data source instance
+     * @returns DataSource
+     */
+    public static getDataSource() {
+        Config.loadConfig();
+        const config = Config.get('repository');
+
+        const sourceDir = Config.get<string>('app.sourceDir', 'src');
+        const entitiesDir = path.join(cwd(), sourceDir, 'entities');
+        const entitiesGeneratedDir = path.join(cwd(), '.generated', 'entities');
+        const migrationsDir = path.join(cwd(), sourceDir, 'migrations');
+        const migrationsGeneratedDir = path.join(
+            cwd(),
+            '.generated',
+            'migrations',
+        );
+        const entityFiles = fg.sync([
+            `${entitiesDir}/**/*.entity.ts`,
+            `${entitiesGeneratedDir}/**/*.entity.ts`,
+        ]);
+        const migrationFiles = fg.sync([
+            `${migrationsDir}/**/*.ts`,
+            `${migrationsGeneratedDir}/**/*.ts`,
+        ]);
+
+        const AppDataSource = new DataSource({
+            ...config,
+            entities: entityFiles,
+            migrations: migrationFiles,
+            synchronize: false,
+        });
+
+        return AppDataSource;
+    }
+
+    /**
+     * Generate a MongoDB connection URL
+     * @returns string
+     */
     public static generateMongoUrl(): string {
         const config = Config.get('repository');
 
@@ -93,6 +166,11 @@ export class Repository extends Singleton {
         return `${protocol}://${host}${port}${database}${authSource}${replicaSet}`;
     }
 
+    /**
+     * Get a repository instance for a given entity
+     * @param entity - The entity type
+     * @returns TypeORMRepository<Entity>
+     */
     private static getRepository<Entity>(
         entity: new () => Entity,
     ): TypeORMRepository<Entity> {
@@ -100,10 +178,19 @@ export class Repository extends Singleton {
         return instance.dataSource.getRepository(entity);
     }
 
+    /**
+     * Get the ID field for the repository
+     * @returns string
+     */
     private static getIdField(): string {
         return Config.get('repository.type') === 'mongodb' ? '_id' : 'id';
     }
 
+    /**
+     * Fix the ID for the repository
+     * @param id - The ID to fix
+     * @returns ObjectId | string
+     */
     private static fixId(id: string | ObjectId): ObjectId | string {
         if (typeof id === 'string')
             return Config.get('repository.type') === 'mongodb'
@@ -115,6 +202,11 @@ export class Repository extends Singleton {
                 : id.toString();
     }
 
+    /**
+     * Fix the ID for the repository
+     * @param value - The value to fix
+     * @returns ObjectId | string
+     */
     public static fixObjectIds(value: any): any {
         const isMongoDB = Config.get('repository.type') === 'mongodb';
 
@@ -133,6 +225,11 @@ export class Repository extends Singleton {
         return value;
     }
 
+    /**
+     * Escape a string for the repository
+     * @param str - The string to escape
+     * @returns string
+     */
     private static escape(str: any): string {
         if (typeof str !== 'string') return str;
 
@@ -147,12 +244,22 @@ export class Repository extends Singleton {
             .replace(/\//g, '\\/');
     }
 
+    /**
+     * Get an entity for the repository
+     * @param name - The name of the entity
+     * @returns new () => any | null
+     */
     public static getEntity(name: string): new () => any | null {
         if (Repository.entities.has(name)) return Repository.entities.get(name);
 
         throw new Error(`Could not load entity '${name}'`);
     }
 
+    /**
+     * Query builder for the repository
+     * @param payload - The payload to query
+     * @returns FindOptionsWhere<Entity>
+     */
     public static queryBuilder<Entity>(
         payload: object,
     ): FindOptionsWhere<Entity> {
@@ -175,6 +282,13 @@ export class Repository extends Singleton {
         return query as FindOptionsWhere<Entity>;
     }
 
+    /**
+     * Find a single entity by criteria
+     * @param entity - The entity type
+     * @param criteria - The criteria to find the entity by
+     * @param options - The options to find the entity by
+     * @returns Entity | null
+     */
     public static async findBy<Entity>(
         entity: new () => Entity,
         criteria: FindOptionsWhere<Entity>,
@@ -196,6 +310,14 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Find all entities by criteria
+     * @param entity - The entity type
+     * @param queries - The queries to find the entities by
+     * @param relations - The relations to find the entities by
+     * @param options - The options to find the entities by
+     * @returns IFindResponse | null
+     */
     public static async findAll<Entity>(
         entity: new () => Entity,
         queries?: any,
@@ -273,6 +395,12 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Insert an entity into the repository
+     * @param entity - The entity type
+     * @param data - The data to insert
+     * @returns IInsertResponse
+     */
     public static async insert<Entity>(
         entity: new () => Entity,
         data: DeepPartial<Entity>,
@@ -286,6 +414,13 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Insert an entity into the repository if it does not exist
+     * @param entity - The entity type
+     * @param data - The data to insert
+     * @param fieldFilter - The field to filter by
+     * @returns boolean
+     */
     public static async insertIfNotExists<Entity>(
         entity: new () => Entity,
         data: DeepPartial<Entity>,
@@ -306,6 +441,13 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Update an entity in the repository
+     * @param entity - The entity type
+     * @param id - The ID of the entity
+     * @param data - The data to update
+     * @returns number
+     */
     public static async update<Entity>(
         entity: new () => Entity,
         id: any,
@@ -321,6 +463,13 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Update an entity in the repository by criteria
+     * @param entity - The entity type
+     * @param criteria - The criteria to update the entity by
+     * @param data - The data to update
+     * @returns boolean
+     */
     public static async updateOne<Entity>(
         entity: new () => Entity,
         criteria: FindOptionsWhere<Entity>,
@@ -342,6 +491,13 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Update an entity in the repository by ID
+     * @param entity - The entity type
+     * @param id - The ID of the entity
+     * @param data - The data to update
+     * @returns boolean
+     */
     public static async updateById<Entity>(
         entity: new () => Entity,
         id: any,
@@ -371,6 +527,12 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Delete an entity from the repository
+     * @param entity - The entity type
+     * @param id - The ID of the entity
+     * @returns number
+     */
     public static async delete<Entity>(
         entity: new () => Entity,
         id: any,
@@ -384,6 +546,12 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Check if an entity exists in the repository
+     * @param entity - The entity type
+     * @param criteria - The criteria to check if the entity exists by
+     * @returns boolean
+     */
     public static async exists<Entity>(
         entity: new () => Entity,
         criteria: FindOptionsWhere<Entity>,
@@ -404,6 +572,10 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * List all databases
+     * @returns { databases: string[] }
+     */
     public static async listDatabases(): Promise<{ databases: string[] }> {
         const instance = this.getInstance();
         const type = Config.get('repository.type');
@@ -426,6 +598,11 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * List all tables in a database
+     * @param database - The database to list the tables from
+     * @returns { tables: string[] }
+     */
     public static async listTables(
         database: string,
     ): Promise<{ tables: string[] }> {
@@ -469,6 +646,11 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * List all indexes for a table
+     * @param table - The table to list the indexes from
+     * @returns any[]
+     */
     public static async listIndexes(table: string): Promise<any[]> {
         try {
             const queryRunner =
@@ -484,6 +666,12 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Create a table in the repository
+     * @param tableName - The name of the table to create
+     * @param columns - The columns to create in the table
+     * @returns boolean
+     */
     public static async createTable(
         tableName: string,
         columns: any[],
@@ -507,6 +695,13 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Update an index in the repository
+     * @param table - The table to update the index on
+     * @param indexName - The name of the index to update
+     * @param newIndexDefinition - The new index definition
+     * @returns boolean
+     */
     public static async updateIndex(
         table: string,
         indexName: string,
@@ -537,6 +732,12 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * Remove an index from a table
+     * @param table - The table to remove the index from
+     * @param indexName - The name of the index to remove
+     * @returns boolean
+     */
     public static async removeIndex(
         table: string,
         indexName: string,
@@ -555,6 +756,11 @@ export class Repository extends Singleton {
         }
     }
 
+    /**
+     * List all fields for a table
+     * @param table - The table to list the fields from
+     * @returns any[]
+     */
     public static async listFields(table: string): Promise<any[]> {
         try {
             const queryRunner =
@@ -572,6 +778,14 @@ export class Repository extends Singleton {
 }
 
 export class RepositorySchema<Entity, T> {
+    /**
+     * Constructor for the RepositorySchema class
+     * @param entity - The entity type
+     * @param model - The model type
+     * @param fakeDelete - Whether to fake delete entities
+     * @param timestamps - Whether to include timestamps in entities
+     * @param userAction - Whether to include user action in entities
+     */
     constructor(
         private readonly entity: new () => Entity,
         private readonly model: T,
@@ -580,6 +794,13 @@ export class RepositorySchema<Entity, T> {
         private readonly userAction: boolean = false,
     ) {}
 
+    /**
+     * Get all entities
+     * @param queries - The queries to get the entities by
+     * @param req - The request object
+     * @param options - The options to get the entities by
+     * @returns IFindResponse
+     */
     public async getAll(queries?: any, req?: any, options?: IFindOptions) {
         if (this.fakeDelete) queries.deleted = false;
 
@@ -619,6 +840,12 @@ export class RepositorySchema<Entity, T> {
         };
     }
 
+    /**
+     * Get entities by in array
+     * @param inArr - The in array
+     * @param options - The options to get the entities by
+     * @returns IFindResponse
+     */
     public async getIn(inArr: Array<any>, options?: IFindOptions) {
         const inToAssign = Array.isArray(inArr) ? inArr : [inArr];
         let query = {};
@@ -665,6 +892,12 @@ export class RepositorySchema<Entity, T> {
         };
     }
 
+    /**
+     * Get an entity by ID
+     * @param id - The ID of the entity
+     * @param options - The options to get the entity by
+     * @returns IFindResponse
+     */
     public async getById(id, options?: IFindOptions) {
         let query = {};
 
@@ -711,6 +944,11 @@ export class RepositorySchema<Entity, T> {
         };
     }
 
+    /**
+     * Insert an entity into the repository
+     * @param data - The data to insert
+     * @returns any
+     */
     public async insert(data: any): Promise<any> {
         const result: any = await Repository.insert<Entity>(this.entity, data);
 
@@ -720,6 +958,12 @@ export class RepositorySchema<Entity, T> {
         return { data: this.toModel(this.model, result.data) };
     }
 
+    /**
+     * Update an entity in the repository
+     * @param id - The ID of the entity
+     * @param data - The data to update
+     * @returns number
+     */
     public async update(id: string, data: any) {
         if (data.deleted) delete data.deleted;
 
@@ -749,6 +993,11 @@ export class RepositorySchema<Entity, T> {
         return { success: result > 0, affected: result };
     }
 
+    /**
+     * Delete an entity from the repository
+     * @param id - The ID of the entity
+     * @returns { success: boolean, affected: number }
+     */
     public async delete(id: string) {
         let result = 0;
 
@@ -771,6 +1020,12 @@ export class RepositorySchema<Entity, T> {
         return { success: result > 0, affected: result };
     }
 
+    /**
+     * Fix the IDs for the repository
+     * @param item - The item to fix the IDs for
+     * @param subtree - Whether to fix the IDs for a subtree
+     * @returns any
+     */
     protected fixIds(item: any, subtree: boolean = false) {
         if (item && typeof item === 'object') {
             if (item._id) {
@@ -794,12 +1049,25 @@ export class RepositorySchema<Entity, T> {
         return item;
     }
 
+    /**
+     * Convert a partial model to a full model
+     * @param model - The model to convert
+     * @param data - The data to convert
+     * @param req - The request object
+     * @returns any
+     */
     protected fromPartial(model: any, data: any, req: any) {
         if (model && model.fromPartial)
             return this.extraData(model?.fromPartial(data), req);
         else return data;
     }
 
+    /**
+     * Convert a data object to a model
+     * @param model - The model to convert
+     * @param data - The data to convert
+     * @returns any
+     */
     protected toModel(model: any, data: any) {
         const dataFixed =
             Config.get('repository.type') === 'mongodb'
@@ -811,6 +1079,12 @@ export class RepositorySchema<Entity, T> {
             : dataFixed;
     }
 
+    /**
+     * Extra data from the request
+     * @param newItem - The new item
+     * @param req - The request object
+     * @returns any
+     */
     protected extraData(newItem: any, req: any) {
         const userId: string = req?.user?.id;
 

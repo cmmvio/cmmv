@@ -484,7 +484,7 @@
                                         <div class="flex mb-3">
                                             <select
                                                 v-model="newHeader.name"
-                                                class="w-1/3 px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-l-md text-sm"
+                                                class="w-1/3 px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-l-md text-xs"
                                             >
                                                 <option value="" disabled>Selecione um header</option>
                                                 <option value="Accept">Accept</option>
@@ -525,10 +525,10 @@
 
                                         <div v-if="headers.length > 0">
                                             <div v-for="(header, index) in headers" :key="index" class="flex items-center mb-2">
-                                                <div class="w-1/3 px-3 py-2 bg-neutral-800 rounded-l-md text-sm border border-neutral-700">
+                                                <div class="w-1/3 px-3 py-2 bg-neutral-800 rounded-l-md text-sm border border-neutral-700 text-xs h-[36px]">
                                                     {{ header.name }}
                                                 </div>
-                                                <div class="flex-grow px-3 py-2 bg-neutral-800 rounded-r-md text-sm border-l-0 border border-neutral-700 flex items-center">
+                                                <div class="flex-grow px-3 py-2 bg-neutral-800 rounded-r-md text-sm border-l-0 border border-neutral-700 flex items-center text-xs h-[36px]">
                                                     <div class="flex-grow truncate">{{ header.value }}</div>
                                                     <button
                                                         @click="removeHeader(index)"
@@ -553,7 +553,7 @@
                                 <div class="flex items-center justify-between">
                                     <button
                                         @click="sendRequest"
-                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md"
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md text-xs h-[36px]"
                                     >Send Request</button>
 
                                     <div v-if="requestStatus" class="flex items-center">

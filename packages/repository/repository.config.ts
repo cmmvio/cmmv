@@ -30,5 +30,15 @@ export const RepositoryConfig: ConfigSchema = {
             type: 'boolean',
             default: true,
         },
+        migrations: {
+            required: false,
+            type: 'boolean',
+            default: true,
+        },
+        migrationsDir: {
+            required: false,
+            type: 'string',
+            default: './src/migrations',
+        },
     },
 };

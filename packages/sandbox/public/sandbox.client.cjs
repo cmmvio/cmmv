@@ -26,7 +26,8 @@ createApp({
                 { label: "Methods", active: false },
                 { label: "Schema", active: false },
                 { label: "API", active: false },
-                { label: "GraphQL", active: false }
+                { label: "GraphQL", active: false },
+                { label: "Data", active: false },
             ],
             protoTypes: {
                 "int32": { key: "int32", label: "Integer (Int32)"},
@@ -55,10 +56,88 @@ createApp({
                 "number": { key: "number", label: "Number (Alias)", alias: true },
             },
             validationsTypes: {
-                "IsString": { key: "IsString", label: "Is String"},
-                "MinLength": { key: "MinLength", label: "Min Length"},
-                "MaxLength": { key: "MaxLength", label: "Max Length"},
-                "IsStrongPassword": { key: "IsStrongPassword", label: "Strong Password"},
+                // String validations
+                "IsString": { key: "IsString", label: "Is String" },
+                "MinLength": { key: "MinLength", label: "Min Length" },
+                "MaxLength": { key: "MaxLength", label: "Max Length" },
+                "Length": { key: "Length", label: "Length" },
+                "Matches": { key: "Matches", label: "Matches Regex" },
+                "IsEmail": { key: "IsEmail", label: "Is Email" },
+                "IsUUID": { key: "IsUUID", label: "Is UUID" },
+                "IsAlpha": { key: "IsAlpha", label: "Is Alpha" },
+                "IsAlphanumeric": { key: "IsAlphanumeric", label: "Is Alphanumeric" },
+                "IsUrl": { key: "IsUrl", label: "Is URL" },
+                "IsStrongPassword": { key: "IsStrongPassword", label: "Strong Password" },
+                "IsFQDN": { key: "IsFQDN", label: "Is FQDN" },
+                "IsHexColor": { key: "IsHexColor", label: "Is Hex Color" },
+                "IsLowercase": { key: "IsLowercase", label: "Is Lowercase" },
+                "IsUppercase": { key: "IsUppercase", label: "Is Uppercase" },
+
+                // Number validations
+                "IsNumber": { key: "IsNumber", label: "Is Number" },
+                "IsInt": { key: "IsInt", label: "Is Integer" },
+                "IsPositive": { key: "IsPositive", label: "Is Positive" },
+                "IsNegative": { key: "IsNegative", label: "Is Negative" },
+                "Min": { key: "Min", label: "Min Value" },
+                "Max": { key: "Max", label: "Max Value" },
+                "IsDecimal": { key: "IsDecimal", label: "Is Decimal" },
+                "IsDivisibleBy": { key: "IsDivisibleBy", label: "Is Divisible By" },
+
+                // Date validations
+                "IsDate": { key: "IsDate", label: "Is Date" },
+                "IsISO8601": { key: "IsISO8601", label: "Is ISO 8601 Date" },
+                "MinDate": { key: "MinDate", label: "Min Date" },
+                "MaxDate": { key: "MaxDate", label: "Max Date" },
+
+                // Array validations
+                "IsArray": { key: "IsArray", label: "Is Array" },
+                "ArrayMinSize": { key: "ArrayMinSize", label: "Array Min Size" },
+                "ArrayMaxSize": { key: "ArrayMaxSize", label: "Array Max Size" },
+                "ArrayContains": { key: "ArrayContains", label: "Array Contains" },
+                "ArrayNotContains": { key: "ArrayNotContains", label: "Array Not Contains" },
+                "ArrayUnique": { key: "ArrayUnique", label: "Array Unique" },
+
+                // Object validations
+                "IsObject": { key: "IsObject", label: "Is Object" },
+                "IsJSON": { key: "IsJSON", label: "Is JSON" },
+                "IsMongoId": { key: "IsMongoId", label: "Is Mongo ID" },
+                "ValidateNested": { key: "ValidateNested", label: "Validate Nested" },
+                "IsInstance": { key: "IsInstance", label: "Is Instance" },
+
+                // Boolean validations
+                "IsBoolean": { key: "IsBoolean", label: "Is Boolean" },
+
+                // Special validations
+                "Equals": { key: "Equals", label: "Equals" },
+                "NotEquals": { key: "NotEquals", label: "Not Equals" },
+                "IsEmpty": { key: "IsEmpty", label: "Is Empty" },
+                "IsNotEmpty": { key: "IsNotEmpty", label: "Is Not Empty" },
+                "IsDefined": { key: "IsDefined", label: "Is Defined" },
+                "IsOptional": { key: "IsOptional", label: "Is Optional" },
+
+                // Network validations
+                "IsIP": { key: "IsIP", label: "Is IP Address" },
+                "IsMACAddress": { key: "IsMACAddress", label: "Is MAC Address" },
+                "IsPort": { key: "IsPort", label: "Is Port" },
+
+                // Misc validations
+                "IsEnum": { key: "IsEnum", label: "Is Enum" },
+                "IsLatitude": { key: "IsLatitude", label: "Is Latitude" },
+                "IsLongitude": { key: "IsLongitude", label: "Is Longitude" },
+                "IsPostalCode": { key: "IsPostalCode", label: "Is Postal Code" },
+                "IsMilitaryTime": { key: "IsMilitaryTime", label: "Is Military Time" },
+                "IsTimeZone": { key: "IsTimeZone", label: "Is Time Zone" },
+                "IsISRC": { key: "IsISRC", label: "Is ISRC" },
+                "IsDataURI": { key: "IsDataURI", label: "Is Data URI" },
+                "IsBase64": { key: "IsBase64", label: "Is Base64" },
+                "IsJWT": { key: "IsJWT", label: "Is JWT" },
+                "IsBtcAddress": { key: "IsBtcAddress", label: "Is BTC Address" },
+                "IsEthereumAddress": { key: "IsEthereumAddress", label: "Is Ethereum Address" },
+                "IsCreditCard": { key: "IsCreditCard", label: "Is Credit Card" },
+                "IsISBN": { key: "IsISBN", label: "Is ISBN" },
+                "IsLocale": { key: "IsLocale", label: "Is Locale" },
+                "IsMimeType": { key: "IsMimeType", label: "Is MIME Type" },
+                "IsSemVer": { key: "IsSemVer", label: "Is SemVer" }
             },
             opened: [],
             openedIndexes: {},
@@ -123,6 +202,7 @@ createApp({
             contractFilter: '',
             filteredContracts: {},
             graphql: null,
+            dataTable: null,
             syncModalOpen: false,
             syncInProgress: false,
             syncProgress: 0,
@@ -131,7 +211,10 @@ createApp({
             recentlySyncedContracts: new Set(),
             modalDeleteContract: false,
             confirmContractName: '',
-            isDeleting: false
+            isDeleting: false,
+            tabDropdownOpen: false,
+            canScrollLeft: false,
+            canScrollRight: false
         }
     },
 
@@ -196,6 +279,7 @@ createApp({
 
         this.checkScreenSize();
         window.addEventListener('resize', this.checkScreenSize);
+        window.addEventListener('resize', this.checkTabOverflow);
 
         this.loadAuthDataFromStorage();
 
@@ -205,10 +289,23 @@ createApp({
         this.graphql = useGraphQLExplorer();
         this.graphql.fetchSchema();
         this.graphql.initQueryEditor();
+
+        this.dataTable = useDataTable();
+        this.dataTable.init(this.selectedContract);
+
+        // Initialize tab overflow check after DOM is ready
+        this.$nextTick(() => {
+            this.checkTabOverflow();
+        });
+
+        // Add click outside listener for dropdown
+        document.addEventListener('click', this.handleClickOutside);
     },
 
     beforeUnmount() {
         window.removeEventListener('resize', this.checkScreenSize);
+        window.removeEventListener('resize', this.checkTabOverflow);
+        document.removeEventListener('click', this.handleClickOutside);
     },
 
     watch: {
@@ -352,7 +449,6 @@ createApp({
         },
 
         async selectContract(key){
-            // Verificar se o contrato atual foi modificado
             if (this.selectedContract) {
                 await this.updateContractSyncStatus(Object.keys(this.schema).find(k =>
                     this.schema[k].contractName === this.selectedContract.contractName));
@@ -360,6 +456,11 @@ createApp({
 
             this.selectedContract = this.schema[key];
             localStorage.setItem('selectedContract', key);
+
+            if(this.tabs[this.selectedTab].label === "Data"){
+                this.dataTable.init(this.selectedContract);
+            }
+
             this.opened = [];
             this.openedIndexes = {};
             this.openedMessages = {};
@@ -1989,6 +2090,132 @@ createApp({
             } finally {
                 this.isDeleting = false;
             }
-        }
+        },
+
+        toggleTabDropdown() {
+            this.tabDropdownOpen = !this.tabDropdownOpen;
+        },
+
+        selectTabAndCloseDropdown(index) {
+            console.log(index)
+            this.selectTab(index);
+            this.tabDropdownOpen = false;
+        },
+
+        checkTabOverflow() {
+            // Check if tabs are overflowing on medium screens
+            const tabsContainer = document.getElementById('full-tabs');
+            const overflowDropdown = document.getElementById('overflow-dropdown');
+
+            if (tabsContainer && overflowDropdown && window.innerWidth >= 768) { // md breakpoint
+                // Calculate if all tabs fit
+                const tabsWidth = tabsContainer.scrollWidth;
+                const containerWidth = tabsContainer.clientWidth;
+
+                // If tabs overflow, show the overflow dropdown
+                if (tabsWidth > containerWidth) {
+                    overflowDropdown.style.display = 'flex';
+                } else {
+                    overflowDropdown.style.display = 'none';
+                }
+            }
+        },
+
+        handleClickOutside(event) {
+            if (this.tabDropdownOpen) {
+                const dropdown = document.getElementById('tab-dropdown-container');
+                const button = document.getElementById('tab-menu-button');
+                const overflowDropdown = document.getElementById('overflow-dropdown');
+
+                if (dropdown && !dropdown.contains(event.target) &&
+                    button && !button.contains(event.target) &&
+                    overflowDropdown && !overflowDropdown.contains(event.target)) {
+                    this.tabDropdownOpen = false;
+                }
+            }
+        },
+
+        // Add validation methods for field validations
+        addValidation(field) {
+            if (!field.validations) {
+                field.validations = [];
+            }
+
+            field.validations.push({
+                type: 'IsString',
+                message: 'Invalid value',
+                value: null
+            });
+        },
+
+        removeValidation(field, index) {
+            if (field.validations && field.validations.length > index) {
+                field.validations.splice(index, 1);
+            }
+        },
+
+        needsSimpleValue(validationType) {
+            const typesWithSimpleValues = [
+                'Min', 'Max', 'MinLength', 'MaxLength',
+                'Matches', 'Equals', 'NotEquals',
+                'ArrayMinSize', 'ArrayMaxSize', 'ArrayContains', 'ArrayNotContains',
+                'IsDivisibleBy', 'MinDate', 'MaxDate'
+            ];
+            return typesWithSimpleValues.includes(validationType);
+        },
+
+        getInputTypeForValidation(validationType) {
+            const numberTypes = ['Min', 'Max', 'MinLength', 'MaxLength', 'ArrayMinSize', 'ArrayMaxSize', 'IsDivisibleBy'];
+            const dateTypes = ['MinDate', 'MaxDate'];
+
+            if (numberTypes.includes(validationType)) {
+                return 'number';
+            } else if (dateTypes.includes(validationType)) {
+                return 'date';
+            }
+
+            return 'text';
+        },
+
+        getPlaceholderForValidation(validationType) {
+            const placeholders = {
+                'Min': 'Minimum value',
+                'Max': 'Maximum value',
+                'MinLength': 'Minimum length',
+                'MaxLength': 'Maximum length',
+                'Matches': 'Regular expression pattern',
+                'Equals': 'Value to equal',
+                'NotEquals': 'Value to not equal',
+                'ArrayMinSize': 'Minimum array size',
+                'ArrayMaxSize': 'Maximum array size',
+                'ArrayContains': 'Value array must contain',
+                'ArrayNotContains': 'Value array must not contain',
+                'IsDivisibleBy': 'Number to be divisible by',
+                'MinDate': 'Minimum date',
+                'MaxDate': 'Maximum date'
+            };
+
+            return placeholders[validationType] || 'Value';
+        },
+
+        getOrCreateOptions(validation) {
+            if (!validation.options) {
+                validation.options = {};
+            }
+
+            // Initialize options based on validation type
+            if (validation.type === 'Length' && !('min' in validation.options)) {
+                validation.options.min = null;
+                validation.options.max = null;
+            } else if (validation.type === 'IsStrongPassword') {
+                if (!('minLength' in validation.options)) validation.options.minLength = 8;
+                if (!('minLowercase' in validation.options)) validation.options.minLowercase = true;
+                if (!('minUppercase' in validation.options)) validation.options.minUppercase = true;
+                if (!('minNumbers' in validation.options)) validation.options.minNumbers = true;
+                if (!('minSymbols' in validation.options)) validation.options.minSymbols = true;
+            }
+
+            return validation.options;
+        },
     }
 }).mount('#app')

@@ -59,4 +59,5 @@ newrelic.js
 /src/gateways/*
 /src/protos/*
 /src/services/*
+/src/migrations/*
 

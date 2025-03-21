@@ -34,7 +34,13 @@
 		"changelog": "lerna-changelog",
 		"release:lerna": "./node_modules/.bin/lerna publish --force-publish --exact -m \"chore: chore(@cmmv) publish %s release\"",
 		"release": "pnpm run build:prod && pnpm run packages:move && pnpm run release:lerna && pnpm run clean",
-		"prepare": "husky"
+		"prepare": "husky",
+        "typeorm": "node -r @swc-node/register ./node_modules/typeorm/cli.js",
+        "migration:run": "pnpm typeorm migration:run -d src/migration.ts",
+        "schema:sync": "pnpm typeorm schema:sync -d src/migration.ts",
+        "migration:show": "pnpm typeorm migration:show -d src/migration.ts",
+        "migration:generate": "pnpm typeorm migration:generate -d src/migration.ts",
+        "migration:create": "pnpm typeorm migration:create -d src/migration.ts"
 	},
 	"repository": {
 		"type": "git",

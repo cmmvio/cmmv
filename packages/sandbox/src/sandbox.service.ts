@@ -12,10 +12,15 @@ import {
     Hook,
     HooksType,
     Config,
+    Compile,
     SUB_PATH_METADATA,
     PUBLIC_METADATA,
     CONTROLLER_NAME_METADATA,
+    IContract,
+    Scope,
 } from '@cmmv/core';
+
+import { RepositoryMigration } from '@cmmv/repository';
 
 import { cwd } from 'node:process';
 
@@ -104,6 +109,36 @@ export class SandboxService {
         return SandboxService.port;
     }
 
+    public async compileContract(schema: IContract) {
+        const filanameRaw = schema.contractName
+            .toLowerCase()
+            .replace('contract', '.contract');
+        const schemaFilename = path.join(
+            cwd(),
+            'src',
+            'contracts',
+            filanameRaw + '.ts',
+        );
+        const outputDir = path.dirname(schemaFilename);
+
+        if (fs.existsSync(schemaFilename)) {
+            const contracts = Scope.getArray<any>('__contracts');
+
+            for (const contract of contracts) {
+                if (contract.contractName === schema.contractName) {
+                    await RepositoryMigration.generateMigration(
+                        contract,
+                        schema,
+                    );
+                }
+            }
+        } else {
+            await RepositoryMigration.generateMigration(null, schema);
+        }
+
+        return Compile.getInstance().compileSchema(schema, schemaFilename);
+    }
+
     public async deleteContract(contractName: string) {
         const contract = Application.getContract(contractName);
 
@@ -114,8 +149,6 @@ export class SandboxService {
                 PUBLIC_METADATA,
                 instance.constructor,
             );
-
-            console.log(isPublic);
 
             if (!isPublic)
                 return { success: false, message: 'Contract is not public' };
@@ -134,18 +167,28 @@ export class SandboxService {
                 ? path.join(
                       cwd(),
                       'src',
-                      'contract',
+                      'contracts',
                       subPath,
                       `${controllerName.toLowerCase()}.contract.ts`,
                   )
                 : path.join(
                       cwd(),
                       'src',
-                      'contract',
+                      'contracts',
                       `${controllerName.toLowerCase()}.contract.ts`,
                   );
 
             if (fs.existsSync(contractPath)) await fs.unlinkSync(contractPath);
+
+            const contracts = Scope.getArray<any>('__contracts');
+
+            for (const contractStructure of contracts) {
+                if (contractStructure.contractName === contractName)
+                    await RepositoryMigration.generateMigration(
+                        contractStructure,
+                        null,
+                    );
+            }
 
             const contractFiles = [
                 path.join(

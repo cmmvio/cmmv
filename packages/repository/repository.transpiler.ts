@@ -14,6 +14,9 @@ export class RepositoryTranspile
     extends AbstractTranspile
     implements ITranspile
 {
+    /**
+     * Run the transpile process
+     */
     run(): void {
         const contracts = Scope.getArray<any>('__contracts');
 
@@ -23,6 +26,10 @@ export class RepositoryTranspile
         });
     }
 
+    /**
+     * Generate the entities
+     * @param contract - The contract to generate the entities for
+     */
     private generateEntities(contract: IContract): void {
         const entityName = contract.controllerName;
         const modelName = `${entityName}.Model`;
@@ -67,6 +74,10 @@ ${contract.fields.map((field: any) => this.generateField(field)).join('\n\n')}${
         fs.writeFileSync(outputFilePath, entityTemplate, 'utf8');
     }
 
+    /**
+     * Generate the services
+     * @param contract - The contract to generate the services for
+     */
     private generateServices(contract: IContract): void {
         const telemetry = Config.get<boolean>('app.telemetry');
         const serviceName = `${contract.controllerName}Service`;
@@ -180,6 +191,12 @@ ${contract.services
         );
     }
 
+    /**
+     * Generate the indexes
+     * @param entityName - The name of the entity
+     * @param fields - The fields of the entity
+     * @param contract - The contract to generate the indexes for
+     */
     private generateIndexes(
         entityName: string,
         fields: any[],
@@ -215,6 +232,10 @@ ${contract.services
         return indexDecorators.join('\n');
     }
 
+    /**
+     * Generate the field
+     * @param field - The field to generate
+     */
     private generateField(field: any): string {
         let tsType = this.mapToTsType(field.protoType, field);
         const columnOptions = this.generateColumnOptions(field);
@@ -266,6 +287,10 @@ ${contract.services
         return `    ${decorators.join(' ')}\n    ${field.propertyKey}${optional}: ${tsType};`;
     }
 
+    /**
+     * Generate the column options
+     * @param field - The field to generate the column options for
+     */
     private generateColumnOptions(field: any): string {
         const isMongoDB = Config.get('repository.type') === 'mongodb';
         const typeField = this.mapToTypeORMType(field.protoType, field);
@@ -288,6 +313,11 @@ ${contract.services
         return options.join(', \n');
     }
 
+    /**
+     * Map the proto type to the ts type
+     * @param protoType - The proto type
+     * @param field - The field to map the proto type to
+     */
     private mapToTsType(protoType: string, field: any): string {
         const typeMapping: { [key: string]: string } = {
             string: 'string',
@@ -305,6 +335,11 @@ ${contract.services
         );
     }
 
+    /**
+     * Map the proto type to the typeorm type
+     * @param type - The type
+     * @param field - The field to map the proto type to
+     */
     private mapToTypeORMType(type: string, field: any): string {
         const typeMapping: { [key: string]: string } = {
             string: 'varchar',
@@ -342,6 +377,10 @@ ${contract.services
             : typeMapping[type] || 'varchar';
     }
 
+    /**
+     * Generate the typeorm imports
+     * @param contract - The contract to generate the typeorm imports for
+     */
     private generateTypeORMImports(contract: IContract) {
         let extraImport = [];
 
@@ -361,6 +400,10 @@ ${contract.services
     Column, Index, ${Config.get('repository.type') === 'mongodb' ? 'ObjectId,' : ''} ${extraImport.length > 0 ? `\n\t${extraImport.join(', \n    ')}` : ''}`;
     }
 
+    /**
+     * Generate the extra fields
+     * @param contract - The contract to generate the extra fields for
+     */
     private generateExtraFields(contract: IContract) {
         let extraFields = '';
         const isSQLite = Config.get('repository.type') === 'sqlite';
@@ -412,6 +455,10 @@ ${contract.services
         return extraFields ? `\n${extraFields}` : '';
     }
 
+    /**
+     * Generate the extra import
+     * @param contract - The contract to generate the extra import for
+     */
     private generateExtraImport(contract: IContract) {
         let imports: Array<{ name: string; path: string }> = [];
         const importEntitiesList = new Array<{
@@ -468,6 +515,11 @@ ${contract.services
         return imports;
     }
 
+    /**
+     * Generate the entities import
+     * @param contract - The contract to generate the entities import for
+     * @param extraImports - The extra imports to generate
+     */
     private generateEntitiesImport(
         contract: IContract,
         extraImports: Array<{ name: string; path: string }>,

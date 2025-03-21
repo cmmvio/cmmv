@@ -586,8 +586,8 @@ export class Application {
 
     protected async getPublicContracts() {
         const contracts = await fg([
-            path.join(cwd(), 'src', 'contract', '**', '*.ts'),
-            path.join(cwd(), 'src', 'contract', '*.ts'),
+            path.join(cwd(), 'src', 'contracts', '**', '*.ts'),
+            path.join(cwd(), 'src', 'contracts', '*.ts'),
         ]);
 
         for (const contract of contracts) {

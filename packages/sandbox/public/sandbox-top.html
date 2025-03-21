@@ -1,6 +1,6 @@
 <div class="border-b h-[48px] border-neutral-800 w-full">
     <div class="h-full flex items-center sticky top-0 z-10 relative">
-        <!-- Hamburger button ajustado para ocupar toda altura -->
+        <!-- Hamburger button -->
         <button
             class="h-full px-4 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors lg:hidden flex items-center justify-center"
             @click="toggleSidebar"
@@ -11,7 +11,8 @@
             </svg>
         </button>
 
-        <ul class="flex h-full justify-center">
+        <!-- Tabs for larger screens -->
+        <ul class="hidden md:flex h-full justify-center overflow-x-auto" id="full-tabs">
             <li
                 v-for="(item, key) in tabs"
                 class="px-4 py-1 select-none cursor-pointer justify-center flex items-center text-sm"
@@ -20,6 +21,84 @@
             >{{ item.label }}</li>
         </ul>
 
+        <!-- Dropdown for smaller screens or when tabs overflow -->
+        <div class="md:hidden flex-1 flex items-center justify-start h-full pl-2" id="tab-dropdown-container">
+            <div class="relative inline-block text-left">
+                <button
+                    type="button"
+                    class="inline-flex justify-between items-center w-[150px] px-4 py-2 text-sm bg-neutral-800 rounded-md shadow-sm hover:bg-neutral-700 focus:outline-none"
+                    @click="toggleTabDropdown"
+                    id="tab-menu-button"
+                    aria-expanded="true"
+                    aria-haspopup="true"
+                >
+                    {{ tabs[selectedTab].label }}
+                    <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+
+                <!-- Dropdown menu -->
+                <div
+                    v-show="tabDropdownOpen"
+                    class="origin-top-left absolute left-0 mt-2 w-[200px] rounded-md shadow-lg bg-neutral-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="tab-menu-button"
+                    tabindex="-1"
+                >
+                    <div class="py-1 max-h-[60vh] overflow-y-auto" role="none">
+                        <a
+                            v-for="(item, key) in tabs"
+                            :key="key"
+                            href="#"
+                            class="block px-4 py-2 text-sm hover:bg-neutral-700"
+                            :class="{'bg-neutral-700 text-white': key === selectedTab, 'text-neutral-300': key !== selectedTab}"
+                            role="menuitem"
+                            tabindex="-1"
+                            @click.prevent="selectTabAndCloseDropdown(key)"
+                        >{{ item.label }}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Also add an overflow dropdown for medium screens when tabs overflow -->
+        <div class="hidden md:flex items-center justify-center h-full" id="overflow-dropdown">
+            <button
+                type="button"
+                class="h-full px-3 text-neutral-400 hover:bg-neutral-800 transition-colors flex items-center justify-center"
+                @click="toggleTabDropdown"
+                aria-label="More tabs"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                </svg>
+            </button>
+
+            <!-- Dropdown menu for overflow tabs -->
+            <div
+                v-show="tabDropdownOpen"
+                class="origin-top-right absolute right-10 top-[48px] w-[200px] rounded-md shadow-lg bg-neutral-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-20"
+                role="menu"
+                aria-orientation="vertical"
+            >
+                <div class="py-1 max-h-[60vh] overflow-y-auto" role="none">
+                    <a
+                        v-for="(item, key) in tabs"
+                        :key="key"
+                        href="#"
+                        class="block px-4 py-2 text-sm hover:bg-neutral-700"
+                        :class="{'bg-neutral-700 text-white': key === selectedTab, 'text-neutral-300': key !== selectedTab}"
+                        role="menuitem"
+                        tabindex="-1"
+                        @click.prevent="selectTabAndCloseDropdown(key)"
+                    >{{ item.label }}</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right side icons -->
         <div class="absolute right-2 flex gap-x-4">
             <a href="https://cmmv.io/docs" target="_blank" title="Docs" class="hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24">
@@ -35,3 +114,4 @@
         </div>
     </div>
 </div>
+

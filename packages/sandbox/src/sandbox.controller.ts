@@ -12,7 +12,7 @@ import {
     Param,
 } from '@cmmv/http';
 
-import { Compile, IContract } from '@cmmv/core';
+import { IContract } from '@cmmv/core';
 
 import { SandboxService } from './sandbox.service';
 
@@ -53,6 +53,19 @@ export class SanboxController {
         );
     }
 
+    @Get('datatable.js', { exclude: true })
+    async handlerClientDataTable(@Response() res) {
+        res.contentType('text/javascript').send(
+            await fs.readFileSync(
+                path.join(
+                    __dirname.replace('src', 'public'),
+                    'sandbox-datatable.client.cjs',
+                ),
+                'utf-8',
+            ),
+        );
+    }
+
     @Get('schema', { exclude: true })
     async handlerSchema() {
         const schemaFilename = path.join(cwd(), '.generated', 'schema.json');
@@ -63,17 +76,7 @@ export class SanboxController {
 
     @Post('compile')
     async heandlerCompile(@Body() schema: IContract) {
-        const filanameRaw = schema.contractName
-            .toLowerCase()
-            .replace('contract', '.contract');
-        const schemaFilename = path.join(
-            cwd(),
-            'src',
-            'contract',
-            filanameRaw + '.ts',
-        );
-        Compile.getInstance().compileSchema(schema, schemaFilename);
-        return 'ok';
+        return await this.sandboxService.compileContract(schema);
     }
 
     @Delete(':contractName')

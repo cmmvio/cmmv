@@ -9,6 +9,7 @@ import {
 } from '../interfaces/contract.interface';
 
 import { Logger } from './logger';
+import { Application } from '..';
 
 export class Compile {
     private static instance: Compile;
@@ -331,7 +332,7 @@ export class Compile {
                 if (validation.type)
                     fieldCode += `                type: '${validation.type}',\n`;
 
-                if (validation.value !== undefined)
+                if (validation.value !== undefined && validation.value !== null)
                     fieldCode += `                value: ${validation.value},\n`;
 
                 if (validation.message)

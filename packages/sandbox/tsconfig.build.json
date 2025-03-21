@@ -7,12 +7,15 @@
             "@cmmv/core": ["../core"],
             "@cmmv/core/*": ["../core/*"],
             "@cmmv/http": ["../http"],
-            "@cmmv/http/*": ["../http/*"]
+            "@cmmv/http/*": ["../http/*"],
+            "@cmmv/repository": ["../repository"],
+            "@cmmv/repository/*": ["../repository/*"]
         }
     },
     "exclude": ["node_modules", "dist"],
     "references": [
         { "path": "../core/tsconfig.build.json" },
-        { "path": "../http/tsconfig.build.json" }
+        { "path": "../http/tsconfig.build.json" },
+        { "path": "../repository/tsconfig.build.json" }
     ]
 }

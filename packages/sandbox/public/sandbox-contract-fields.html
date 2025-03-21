@@ -197,35 +197,154 @@
 
         <div class="flex border-b border-neutral-800 mb-2 pb-1 text-neutral-500">
             Validations
+            <button
+                @click="addValidation(field)"
+                class="ml-2 px-2 py-0.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded"
+                :disabled="selectedContract.options.moduleContract"
+                v-if="!selectedContract.options.moduleContract"
+            >
+                Add
+            </button>
         </div>
 
-        <div class="flex-row">
+        <div class="flex-col">
             <div
-                v-for="validation in field.validations"
-                class=" border-b border-neutral-800"
+                v-for="(validation, validationIndex) in field.validations || []"
+                class="mb-1 p-2 bg-neutral-900/50"
             >
-                <select
-                    title="Type"
-                    class="p-2 pr-4 mr-2 h-[42px] w-56 outline-none bg-neutral-900 border-none"
-                    :class="[selectedContract.options.moduleContract ? 'text-neutral-500' : '']"
-                    :disabled="selectedContract.options.moduleContract"
-                    v-model="validation.type"
-                >
-                    <option
-                        v-for="validationType in validationsTypes"
-                        :selected="validation.type === validationType.key"
-                        :value="validationType.key"
-                    >{{ validationType.label }}</option>
-                </select>
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Validation Type -->
+                    <div class="flex w-56">
+                        <select
+                            title="Type"
+                            class="p-2 pr-4 h-[42px] w-full outline-none bg-neutral-900 border border-neutral-800 rounded"
+                            :class="[selectedContract.options.moduleContract ? 'text-neutral-500' : '']"
+                            :disabled="selectedContract.options.moduleContract"
+                            v-model="validation.type"
+                        >
+                            <option
+                                v-for="validationType in validationsTypes"
+                                :selected="validation.type === validationType.key"
+                                :value="validationType.key"
+                            >{{ validationType.label }}</option>
+                        </select>
+                    </div>
 
-                <input
-                    class="border-l pl-4 h-[42px] w-96 border-neutral-800 focus-none outline-none"
-                    type="text"
-                    placeholder="Message"
-                    title="Message"
-                    v-model="validation.message"
-                    :disabled="selectedContract.options.moduleContract"
-                />
+                    <!-- Validation Options Based on Type -->
+                    <div class="flex w-64">
+                        <!-- Single Value Input (for Min, Max, MinLength, MaxLength, etc.) -->
+                        <input
+                            v-if="needsSimpleValue(validation.type)"
+                            class="p-2 h-[42px] w-full border border-neutral-800 rounded focus-none outline-none"
+                            :type="getInputTypeForValidation(validation.type)"
+                            :placeholder="getPlaceholderForValidation(validation.type)"
+                            :title="getPlaceholderForValidation(validation.type)"
+                            v-model="validation.value"
+                            :disabled="selectedContract.options.moduleContract"
+                        />
+
+                        <!-- Multiple Options for Length -->
+                        <div v-else-if="validation.type === 'Length'" class="flex gap-2">
+                            <input
+                                class="p-2 h-[42px] w-1/2 border border-neutral-800 rounded focus-none outline-none"
+                                type="number"
+                                placeholder="Min"
+                                title="Min Length"
+                                v-model="getOrCreateOptions(validation).min"
+                                :disabled="selectedContract.options.moduleContract"
+                            />
+                            <input
+                                class="p-2 h-[42px] w-1/2 border border-neutral-800 rounded focus-none outline-none"
+                                type="number"
+                                placeholder="Max"
+                                title="Max Length"
+                                v-model="getOrCreateOptions(validation).max"
+                                :disabled="selectedContract.options.moduleContract"
+                            />
+                        </div>
+
+                        <!-- Multiple Options for IsEnum -->
+                        <div v-else-if="validation.type === 'IsEnum'" class="flex gap-2">
+                            <input
+                                class="p-2 h-[42px] w-full border border-neutral-800 rounded focus-none outline-none"
+                                type="text"
+                                placeholder="Enum object or values separated by comma"
+                                title="Enum values"
+                                v-model="validation.value"
+                                :disabled="selectedContract.options.moduleContract"
+                            />
+                        </div>
+
+                        <!-- Options for IsStrongPassword -->
+                        <div v-else-if="validation.type === 'IsStrongPassword'" class="flex flex-wrap gap-2">
+                            <div class="flex items-center">
+                                <label class="text-xs mr-2">Min Length:</label>
+                                <input
+                                    class="p-2 h-[42px] w-20 border border-neutral-800 rounded focus-none outline-none"
+                                    type="number"
+                                    v-model="getOrCreateOptions(validation).minLength"
+                                    :disabled="selectedContract.options.moduleContract"
+                                />
+                            </div>
+                            <div class="flex items-center">
+                                <label class="text-xs mx-2">Checks:</label>
+                                <label class="text-xs ml-2 mr-1">
+                                    <input type="checkbox" class="mr-1" v-model="getOrCreateOptions(validation).minLowercase"/>
+                                    a-z
+                                </label>
+                                <label class="text-xs mx-1">
+                                    <input type="checkbox" class="mr-1" v-model="getOrCreateOptions(validation).minUppercase"/>
+                                    A-Z
+                                </label>
+                                <label class="text-xs mx-1">
+                                    <input type="checkbox" class="mr-1" v-model="getOrCreateOptions(validation).minNumbers"/>
+                                    0-9
+                                </label>
+                                <label class="text-xs mx-1">
+                                    <input type="checkbox" class="mr-1" v-model="getOrCreateOptions(validation).minSymbols"/>
+                                    !@#
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Default - empty placeholder for validations without values -->
+                        <div v-else class="p-2 h-[42px] w-full border border-neutral-800 rounded text-neutral-500 flex items-center text-sm">
+                            No options required
+                        </div>
+                    </div>
+
+                    <!-- Validation Message -->
+                    <div class="flex">
+                        <input
+                            class="p-2 h-[42px] w-full border border-neutral-800 rounded focus-none outline-none"
+                            type="text"
+                            placeholder="Validation Message"
+                            title="Message"
+                            v-model="validation.message"
+                            :disabled="selectedContract.options.moduleContract"
+                        />
+                    </div>
+
+                    <!-- Remove Validation Button -->
+                    <div>
+                        <button
+                            @click="removeValidation(field, validationIndex)"
+                            class="p-1.5 text-red-500 hover:text-red-300 hover:bg-red-900/30 rounded transition-colors"
+                            :disabled="selectedContract.options.moduleContract"
+                            v-if="!selectedContract.options.moduleContract"
+                            title="Remove Validation"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- "No validations" message -->
+            <div v-if="!field.validations || field.validations.length === 0" class="py-4 text-center text-neutral-500 text-sm italic">
+                No validations added yet
             </div>
         </div>
 
