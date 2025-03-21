@@ -8,7 +8,7 @@
     <div class="flex flex-grow overflow-hidden">
         <div
             class="api-sidebar w-[280px] min-w-[280px] max-w-[280px] flex-shrink-0 border-r border-neutral-800 overflow-y-auto transition-all duration-300 bg-neutral-900 z-40 relative"
-            :class="{'left-0': apiSidebarOpen, '-left-[280px]': !apiSidebarOpen, 'md:left-0': true, 'fixed': isMobile, 'h-full': isMobile, 'relative': !isMobile}"
+            :class="{'left-0': apiSidebarOpen, 'md:left-0': true, 'fixed': isMobile, 'h-full': isMobile, 'relative': !isMobile}"
         >
             <div class="p-3 border-b border-neutral-800 bg-neutral-950 sticky top-0 flex justify-between items-center">
                 <div class="text-sm font-medium text-neutral-300">API Explorer</div>
@@ -227,24 +227,6 @@
                 </div>
 
                 <div v-else class="flex flex-col h-full">
-                    <div class="border-b border-neutral-800">
-                        <div class="flex items-center h-[40px]">
-                            <button
-                                class="h-full px-4 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors md:hidden flex items-center justify-center"
-                                @click="toggleApiSidebar"
-                                aria-label="Toggle API menu"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
-
-                            <div class="h-full px-4 py-2 text-sm font-medium text-neutral-300">
-                                API Request / Response
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="p-4 border-b border-neutral-800 bg-neutral-900">
                         <div class="flex items-center">
                             <button

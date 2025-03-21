@@ -209,8 +209,8 @@
                             <span class="text-sm text-neutral-300"
                                 >{{ field.name }}</span
                             >
-                            <span class="text-xs text-neutral-500"
-                                >{{ graphql.getTypeName(field.type) }}</span
+                            <span class="text-xs text-neutral-500 w-[80px] truncate"
+                                :title="graphql.getTypeName(field.type)">{{ graphql.getTypeName(field.type) }}</span
                             >
                         </div>
                     </template>

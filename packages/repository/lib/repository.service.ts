@@ -17,7 +17,16 @@ import {
     In,
 } from 'typeorm';
 
-import { Config, Logger, Singleton, Resolvers } from '@cmmv/core';
+import {
+    Config,
+    Logger,
+    Singleton,
+    Resolvers,
+    Hook,
+    HooksType,
+    LogEvent,
+    Hooks,
+} from '@cmmv/core';
 
 import { ObjectId, MongoClient } from 'mongodb';
 
@@ -30,6 +39,7 @@ import {
 export class Repository extends Singleton {
     public static logger: Logger = new Logger('Repository');
     public static entities = new Map<string, any>();
+    public static logEntity: any = null;
     public dataSource: DataSource;
 
     /**
@@ -95,7 +105,105 @@ export class Repository extends Singleton {
         if (instance.dataSource) {
             instance.dataSource.entityMetadatas?.forEach((entity) => {
                 Repository.entities.set(entity.name, entity.target);
+
+                if (entity.name === 'LogsEntity')
+                    Repository.logEntity = entity.target;
             });
+        }
+    }
+
+    @Hook(HooksType.Log)
+    public static async log(message: LogEvent) {
+        if (Repository.logEntity !== null) {
+            const repository = this.getRepository(Repository.logEntity);
+
+            switch (message.context) {
+                case 'HTTP':
+                    const split = message.message.split(' ');
+                    const method = split[0];
+                    const url = split[1];
+                    const processTime = split[2]
+                        .replace('(', '')
+                        .replace(')', '');
+                    const status = split[3];
+                    const ip = split[4];
+                    let messageLog = '';
+
+                    switch (status) {
+                        case '200':
+                            messageLog = `connection authorized: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
+                            break;
+                        case '401':
+                            messageLog = `connection unauthorized: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
+                            break;
+                        case '403':
+                            messageLog = `connection forbidden: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
+                            break;
+                        case '404':
+                            messageLog = `connection not found: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
+                            break;
+                        case '500':
+                            messageLog = `connection error: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
+                            break;
+                    }
+
+                    const newEntity = repository.create({
+                        message: messageLog,
+                        timestamp: message.timestamp,
+                        source: message.context,
+                        level: message.level,
+                        event: JSON.stringify({
+                            process_id: process.pid,
+                            method: method,
+                            url: url,
+                            process_time: processTime,
+                            status: status,
+                            connection_from: ip,
+                        }),
+                    });
+
+                    await repository.save(newEntity);
+                    break;
+                case 'DATABASE':
+                    const config = Config.get('repository');
+                    const newEntityDatabase = repository.create({
+                        message: `query: database="${config.database}" entity="${message.metadata?.entity}" total="${message.metadata?.total}"`,
+                        timestamp: message.timestamp,
+                        source: message.context,
+                        level: message.level,
+                        event: JSON.stringify({
+                            process_id: process.pid,
+                            process_time: message.metadata?.process_time,
+                        }),
+                        metadata: JSON.stringify(message.metadata ?? {}),
+                    });
+
+                    await repository.save(newEntityDatabase);
+                    break;
+                case 'AUTH':
+                    const newEntityAuth = repository.create({
+                        message: message.message,
+                        timestamp: message.timestamp,
+                        source: message.context,
+                        level: message.level,
+                        event: JSON.stringify(message.event ?? {}),
+                        metadata: JSON.stringify(message.metadata ?? {}),
+                    });
+
+                    await repository.save(newEntityAuth);
+                    break;
+                case 'EVENT':
+                    const newEntityDefault = repository.create({
+                        message: message.message,
+                        timestamp: message.timestamp,
+                        source: message.context,
+                        level: message.level,
+                        metadata: JSON.stringify(message.metadata ?? {}),
+                    });
+
+                    await repository.save(newEntityDefault);
+                    break;
+            }
         }
     }
 
@@ -172,7 +280,7 @@ export class Repository extends Singleton {
      * @param entity - The entity type
      * @returns TypeORMRepository<Entity>
      */
-    private static getRepository<Entity>(
+    public static getRepository<Entity>(
         entity: new () => Entity,
     ): TypeORMRepository<Entity> {
         const instance = Repository.getInstance();
@@ -374,8 +482,26 @@ export class Repository extends Singleton {
                 ...options,
             };
 
+            const start = Date.now();
+
             const total = await repository.count(queryOptions.where as any);
             const results = await repository.find(queryOptions);
+            const end = Date.now();
+
+            if (entity.name !== 'LogsEntity') {
+                Hooks.execute(HooksType.Log, {
+                    context: 'DATABASE',
+                    message: `findAll: ${entity.name} (${end - start}ms)`,
+                    level: 'INFO',
+                    timestamp: Date.now(),
+                    metadata: {
+                        total,
+                        entity: entity.name,
+                        process_time: end - start,
+                        ...queryOptions,
+                    },
+                });
+            }
 
             return {
                 data: results,

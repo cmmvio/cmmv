@@ -23,84 +23,92 @@ export class ProtobufTranspile extends AbstractTranspile implements ITranspile {
         const contractsJson: { [key: string]: any } = {};
 
         contracts?.forEach((contract: any) => {
-            let root = new protobufjs.Root();
-            const protoNamespace = root.define(contract.controllerName);
+            if (contract.controllerName) {
+                let root = new protobufjs.Root();
+                const protoNamespace = root.define(contract.controllerName);
 
-            const itemMessage = new protobufjs.Type(
-                contract.controllerName,
-            ).add(new protobufjs.Field('id', 1, 'int32'));
+                const itemMessage = new protobufjs.Type(
+                    contract.controllerName,
+                ).add(new protobufjs.Field('id', 1, 'int32'));
 
-            contract.fields.forEach((field: any, index: number) => {
-                let protoType = this.mapToProtoType(field.protoType);
-                let fieldType = protoType;
+                contract.fields.forEach((field: any, index: number) => {
+                    let protoType = this.mapToProtoType(field.protoType);
+                    let fieldType = protoType;
 
-                itemMessage.add(
-                    new protobufjs.Field(
-                        field.propertyKey,
-                        index + 2,
-                        fieldType,
-                    ),
-                );
-            });
-
-            protoNamespace.add(itemMessage);
-
-            if (!contract.directMessage) {
-                const listMessage = new protobufjs.Type(
-                    `${contract.controllerName}List`,
-                ).add(
-                    new protobufjs.Field(
-                        'items',
-                        1,
-                        `${contract.controllerName}`,
-                        'repeated',
-                    ),
-                );
-
-                protoNamespace.add(listMessage);
-            }
-
-            const outputDir = path.resolve(
-                this.getGeneratedPath(contract, 'protos'),
-            );
-            const protoFileName = `${contract.controllerName.toLowerCase()}.proto`;
-            const outputFilePath = path.join(outputDir, protoFileName);
-            const protoContent = this.generateProtoContent(
-                contract,
-                outputFilePath,
-            );
-            fs.writeFileSync(
-                outputFilePath,
-                this.removeExtraSpaces(protoContent),
-                'utf8',
-            );
-
-            //Types
-            if (
-                contract.customProto &&
-                typeof contract.customProto === 'function'
-            ) {
-                try {
-                    const customRoot = protobufjs.parse(protoContent).root;
-                    root = new protobufjs.Root(customRoot);
-                } catch (error) {
-                    this.logger.error(
-                        `Error parsing custom proto: ${error.message}`,
+                    itemMessage.add(
+                        new protobufjs.Field(
+                            field.propertyKey,
+                            index + 2,
+                            fieldType,
+                        ),
                     );
-                    console.error(error);
+                });
+
+                protoNamespace.add(itemMessage);
+
+                if (!contract.directMessage) {
+                    const listMessage = new protobufjs.Type(
+                        `${contract.controllerName}List`,
+                    ).add(
+                        new protobufjs.Field(
+                            'items',
+                            1,
+                            `${contract.controllerName}`,
+                            'repeated',
+                        ),
+                    );
+
+                    protoNamespace.add(listMessage);
                 }
+
+                const outputDir = path.resolve(
+                    this.getGeneratedPath(contract, 'protos'),
+                );
+                const protoFileName = `${contract.controllerName.toLowerCase()}.proto`;
+                const outputFilePath = path.join(outputDir, protoFileName);
+                const protoContent = this.generateProtoContent(
+                    contract,
+                    outputFilePath,
+                );
+                fs.writeFileSync(
+                    outputFilePath,
+                    this.removeExtraSpaces(protoContent),
+                    'utf8',
+                );
+
+                //Types
+                if (
+                    contract.customProto &&
+                    typeof contract.customProto === 'function'
+                ) {
+                    try {
+                        const customRoot = protobufjs.parse(protoContent).root;
+                        root = new protobufjs.Root(customRoot);
+                    } catch (error) {
+                        this.logger.error(
+                            `Error parsing custom proto: ${error.message}`,
+                        );
+                        console.error(error);
+                    }
+                }
+
+                const tsContent = this.generateTypes(contract, outputFilePath);
+                const outputPathTs = outputFilePath.replace('.proto', '.d.ts');
+                fs.writeFileSync(outputPathTs, tsContent, 'utf8');
+
+                //JSON
+                const contractJSON = root.toJSON();
+                contractsJson[contract.controllerName.toLocaleLowerCase()] = {
+                    content: contractJSON,
+                    path: outputFilePath.replace('.proto', '.json'),
+                };
+            } else {
+                this.logger.error(
+                    `Contract ${contract.controllerName} has no controllerName`,
+                );
+
+                console.error(contract);
             }
-
-            const tsContent = this.generateTypes(contract, outputFilePath);
-            const outputPathTs = outputFilePath.replace('.proto', '.d.ts');
-            fs.writeFileSync(outputPathTs, tsContent, 'utf8');
-
-            //JSON
-            const contractJSON = root.toJSON();
-            contractsJson[contract.controllerName.toLocaleLowerCase()] = {
-                content: contractJSON,
-                path: outputFilePath.replace('.proto', '.json'),
-            };
         });
 
         this.generateContractsJs(contractsJson);
@@ -119,10 +127,10 @@ export class ProtobufTranspile extends AbstractTranspile implements ITranspile {
             if (field.protoType === 'any') includesGoogleAny = true;
         });
 
-        lines.push(`/**                                                                               
+        lines.push(`/**
     **********************************************
     This script was generated automatically by CMMV.
-    It is recommended not to modify this file manually, 
+    It is recommended not to modify this file manually,
     as it may be overwritten by the application.
     **********************************************
 **/\n`);
@@ -135,7 +143,7 @@ export class ProtobufTranspile extends AbstractTranspile implements ITranspile {
 
         lines.push('');
 
-        this.imports.forEach(importStatement => {
+        this.imports.forEach((importStatement) => {
             lines.push(importStatement);
         });
 
@@ -326,10 +334,10 @@ ${Object.entries(contract.messages[key].properties)
         const lines: string[] = [];
         this.clearImports();
 
-        lines.push(`/**                                                                               
+        lines.push(`/**
     **********************************************
     This script was generated automatically by CMMV.
-    It is recommended not to modify this file manually, 
+    It is recommended not to modify this file manually,
     as it may be overwritten by the application.
     **********************************************
 **/\n`);
@@ -505,10 +513,10 @@ ${Object.entries(contract.messages[key].properties)
         if (returnResult) {
             return JSON.stringify(data);
         } else {
-            let jsContent = `/**                                                                               
+            let jsContent = `/**
     **********************************************
     This script was generated automatically by CMMV.
-    It is recommended not to modify this file manually, 
+    It is recommended not to modify this file manually,
     as it may be overwritten by the application.
     **********************************************
 **/\n`;

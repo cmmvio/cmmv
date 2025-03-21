@@ -11,6 +11,7 @@ createApp({
             schema: {},
             selectedContract: null,
             selectedTab: 0,
+            selectedMasterTab: 0,
             modalConfirm: false,
             modalNewContract: false,
             modalContent: {
@@ -26,8 +27,15 @@ createApp({
                 { label: "Methods", active: false },
                 { label: "Schema", active: false },
                 { label: "API", active: false },
-                { label: "GraphQL", active: false },
+
                 { label: "Data", active: false },
+            ],
+            tabsMaster: [
+                { label: "Contract", active: true },
+                { label: "GraphQL", active: false },
+                { label: "Logs", active: false },
+                { label: "Backup", active: false },
+                { label: "Modules", active: false },
             ],
             protoTypes: {
                 "int32": { key: "int32", label: "Integer (Int32)"},
@@ -203,6 +211,7 @@ createApp({
             filteredContracts: {},
             graphql: null,
             dataTable: null,
+            logViewer: null,
             syncModalOpen: false,
             syncInProgress: false,
             syncProgress: 0,
@@ -214,7 +223,10 @@ createApp({
             isDeleting: false,
             tabDropdownOpen: false,
             canScrollLeft: false,
-            canScrollRight: false
+            canScrollRight: false,
+            pendingDataTableRefresh: false,
+            contractTab: 'contract',
+            functionalTabDropdownOpen: false
         }
     },
 
@@ -261,6 +273,25 @@ createApp({
 
         completedCount() {
             return this.contractsToSync.filter(c => c.state === 'completed').length;
+        },
+
+        availableContracts() {
+            if (!this.schema) return [];
+
+            return Object.values(this.schema).filter(contract =>
+                contract.controllerName !== this.selectedContract?.controllerName &&
+                !contract.directMessage
+            );
+        },
+
+        contractTabLabel() {
+            const labels = {
+                'contract': 'Contract',
+                'schema': 'Schema',
+                'logs': 'Logs',
+                'backup': 'Backup'
+            };
+            return labels[this.contractTab] || 'Contract';
         }
     },
 
@@ -269,10 +300,14 @@ createApp({
         this.getSchema();
 
         const selectedTab = localStorage.getItem('selectedTab');
+        const selectedMasterTab = localStorage.getItem('selectedMasterTab');
         const hiddenModuleContracts = localStorage.getItem('hiddenModuleContracts');
+        const sidebarState = localStorage.getItem('sidebarOpen');
 
         this.selectedTab = Number(selectedTab) ?? 0;
+        this.selectedMasterTab = Number(selectedMasterTab) ?? 0;
         this.hiddenModuleContracts = (hiddenModuleContracts === 'true');
+        this.sidebarOpen = sidebarState === null ? true : sidebarState === 'true';
 
         if (!this.apiBaseUrl || this.apiBaseUrl === 'null' || this.apiBaseUrl === 'undefined')
             this.apiBaseUrl = window.location.origin;
@@ -292,6 +327,11 @@ createApp({
 
         this.dataTable = useDataTable();
         this.dataTable.init(this.selectedContract);
+
+        this.logViewer = useLogViewer();
+
+        // Passar o método de callback para lidar com erro de autenticação
+        this.dataTable.setAuthErrorHandler(this.handleDataTableAuthError.bind(this));
 
         // Initialize tab overflow check after DOM is ready
         this.$nextTick(() => {
@@ -359,6 +399,12 @@ createApp({
             handler() {
                 this.filterContracts();
             }
+        },
+        sidebarOpen: {
+            handler(newState) {
+                localStorage.setItem("sidebarOpen", newState);
+            },
+            immediate: true
         }
     },
 
@@ -1409,15 +1455,22 @@ createApp({
         },
 
         checkScreenSize() {
+            const wasMobile = this.isMobile;
             this.isMobile = window.innerWidth < 1024;
 
-            if (this.isMobile) {
+            if (!wasMobile && this.isMobile) {
                 this.sidebarOpen = false;
-                this.apiSidebarOpen = false;
-            } else {
-                this.sidebarOpen = true;
-                this.apiSidebarOpen = true;
+            } else if (wasMobile && !this.isMobile) {
+                const savedState = localStorage.getItem('sidebarOpen');
+
+                if (savedState === null)
+                    this.sidebarOpen = true;
             }
+
+            if (this.isMobile)
+                this.apiSidebarOpen = false;
+            else
+                this.apiSidebarOpen = true;
         },
 
         toggleSidebar() {
@@ -1438,6 +1491,13 @@ createApp({
                 this.saveAuthDataToStorage();
                 this.showAuthModal = false;
                 this.bearerToken = '';
+
+                // Atualizar a tabela de dados se estamos na tab de dados
+                if (this.selectedTab === 8 && this.dataTable) {
+                    setTimeout(() => {
+                        this.dataTable.refreshData();
+                    }, 300);
+                }
             }
         },
 
@@ -1471,6 +1531,13 @@ createApp({
                     this.saveAuthDataToStorage();
                     this.showAuthModal = false;
                     this.loginCredentials = { username: '', password: '' };
+
+                    // Atualizar a tabela de dados se estamos na tab de dados
+                    if (this.selectedTab === 8 && this.dataTable) {
+                        setTimeout(() => {
+                            this.dataTable.refreshData();
+                        }, 300);
+                    }
                 } else {
                     alert('Authentication failed. Please check your credentials.');
                 }
@@ -2094,12 +2161,35 @@ createApp({
 
         toggleTabDropdown() {
             this.tabDropdownOpen = !this.tabDropdownOpen;
+            if (this.tabDropdownOpen) {
+                this.functionalTabDropdownOpen = false;
+            }
         },
 
-        selectTabAndCloseDropdown(index) {
-            console.log(index)
-            this.selectTab(index);
-            this.tabDropdownOpen = false;
+        toggleFunctionalTabDropdown() {
+            this.functionalTabDropdownOpen = !this.functionalTabDropdownOpen;
+            if (this.functionalTabDropdownOpen) {
+                this.tabDropdownOpen = false;
+            }
+        },
+
+        selectTabAndCloseDropdown(key) {
+            this.selectTab(key);
+            this.functionalTabDropdownOpen = false;
+        },
+
+        selectContractMasterTabAndCloseDropdown(key) {
+            this.selectContractMasterTab(key);
+            this.functionalTabDropdownOpen = false;
+        },
+
+        setContractTab(tab) {
+            this.contractTab = tab;
+        },
+
+        setContractTabMaster(tab) {
+            this.selectedMasterTab = tab;
+            localStorage.setItem('selectedMasterTab', tab);
         },
 
         checkTabOverflow() {
@@ -2216,6 +2306,42 @@ createApp({
             }
 
             return validation.options;
+        },
+
+        addRelationship(field) {
+            if (!field.link) {
+                field.link = [];
+            }
+
+            field.link.push({
+                createRelationship: false,
+                entityName: '',
+                field: '_id',
+                array: false,
+                entityNullable: false,
+                contract: ''
+            });
+
+            // Configurações padrão quando um relacionamento é adicionado
+            if (!field.protoType) field.protoType = 'string';
+            if (!field.nullable) field.nullable = true;
+            if (!field.objectType) field.objectType = 'object';
+        },
+
+        // Remove um relacionamento existente
+        removeRelationship(field, index) {
+            if (field.link && field.link.length > index) {
+                field.link.splice(index, 1);
+            }
+        },
+
+        // Adicionar um novo método para lidar com erros de autenticação na DataTable
+        handleDataTableAuthError() {
+            // Abre o modal de autenticação
+            this.showAuthModal = true;
+
+            // Salva a informação que a tabela de dados precisa ser recarregada após autenticação
+            this.pendingDataTableRefresh = true;
         },
     }
 }).mount('#app')

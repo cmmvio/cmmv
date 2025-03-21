@@ -229,8 +229,18 @@ export class RepositoryMigration extends Singleton {
 
         const migrationPath = path.join(migrationDir, `${migrationName}.ts`);
         const migrationContent = isNewContract
-            ? this.generateCreateTableMigration(migrationName, changes)
-            : this.generateMigrationContent(migrationName, changes);
+            ? this.generateCreateTableMigration(
+                  migrationName,
+                  changes,
+                  timestamp,
+                  contractName,
+              )
+            : this.generateMigrationContent(
+                  migrationName,
+                  changes,
+                  timestamp,
+                  contractName,
+              );
 
         fs.writeFileSync(migrationPath, migrationContent);
 
@@ -246,6 +256,8 @@ export class RepositoryMigration extends Singleton {
     private static generateMigrationContent(
         className: string,
         changes: any,
+        timestamp: number,
+        contractName: string,
     ): string {
         const {
             tableName,
@@ -332,7 +344,7 @@ export class RepositoryMigration extends Singleton {
 
         return `import { MigrationInterface, QueryRunner, Table, TableColumn, TableIndex } from "typeorm";
 
-export class ${className} implements MigrationInterface {
+export class Update${contractName}${timestamp} implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
 ${this.indentCode(upMethodContent, 8)}
     }
@@ -588,6 +600,8 @@ ${this.indentCode(downMethodContent, 8)}
     private static generateCreateTableMigration(
         className: string,
         changes: any,
+        timestamp: number,
+        contractName: string,
     ): string {
         const { tableName, addedFields, addedIndexes } = changes;
 
@@ -664,7 +678,7 @@ await queryRunner.dropTable("${tableName}");`;
 
         return `import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
-export class ${className} implements MigrationInterface {
+export class Create${contractName}${timestamp} implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
 ${this.indentCode(upContent, 8)}
     }

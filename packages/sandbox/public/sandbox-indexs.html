@@ -19,6 +19,29 @@
     </div>
 </div>
 
+<!-- Empty state message when no indexes exist -->
+<div
+    v-if="!selectedContract.indexs || selectedContract.indexs.length === 0"
+    class="border border-dashed border-neutral-700 rounded-md p-6 mb-4 text-center"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-neutral-500" viewBox="0 0 1792 1792" fill="currentColor">
+        <path stroke-width="0" d="M384 1408q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm0-512q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm1408 416v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5zm-1408-928q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm1408 416v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5zm0-512v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5z"></path>
+    </svg>
+
+    <h3 class="text-lg font-medium text-neutral-400 mb-1">No Indexes Defined</h3>
+    <p class="text-sm text-neutral-500 mb-4">
+        You haven't created any indexes for this contract yet. Indexes help optimize database queries.
+    </p>
+    <button
+        class="text-sm p-2 px-4 rounded-md bg-green-800 hover:bg-green-700 cursor-pointer transition-colors"
+        @click="addIndex()"
+        :disabled="selectedContract.options.moduleContract"
+        :class="{'opacity-50 cursor-not-allowed': selectedContract.options.moduleContract}"
+    >
+        Create Your First Index
+    </button>
+</div>
+
 <div
     v-for="(index, indexKey) in selectedContract.indexs"
     class="mb-4 border w-full border-neutral-800 p-1 rounded-md flex-colum gap-x-4"

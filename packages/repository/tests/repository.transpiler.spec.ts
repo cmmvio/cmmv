@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { RepositoryTranspile } from './repository.transpiler';
+import { RepositoryTranspile } from '../lib/repository.transpiler';
 import { Config, Scope, IContract, CONTROLLER_NAME_METADATA } from '@cmmv/core';
 
 // Mock das dependências externas

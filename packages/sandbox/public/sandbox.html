@@ -12,9 +12,51 @@
         <script type="text/javascript" src="https://unpkg.com/vue-router@4.5.0/dist/vue-router.global.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/json.min.js"></script>
+        <style>
+            /* Estilos para o indicador de carregamento */
+            #initialLoading {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: #171717; /* neutral-900 */
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                transition: opacity 0.5s ease-out;
+            }
+            .spinner {
+                width: 50px;
+                height: 50px;
+                border: 5px solid rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                border-top-color: #3b82f6; /* blue-500 */
+                animation: spin 1s ease-in-out infinite;
+            }
+            .spinner-text {
+                margin-top: 20px;
+                color: #e5e5e5; /* neutral-200 */
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+            [v-cloak] {
+                display: none;
+            }
+        </style>
     </head>
     <body class="bg-neutral-900 text-neutral-200 overflow-hidden">
-        <div id="app" class="flex" v-clock>
+        <div id="initialLoading">
+            <div class="spinner"></div>
+            <div class="spinner-text">Loading CMMV Sandbox...</div>
+            <div class="text-xs text-neutral-500 mt-2">Initializing application...</div>
+        </div>
+
+        <div id="app" class="flex" v-cloak>
             <div
                 v-if="sidebarOpen && isMobile"
                 class="fixed inset-0 z-40 lg:hidden"
@@ -23,7 +65,7 @@
 
             <div
                 class="w-56 h-screen border-r border-neutral-800 fixed transition-all duration-300 bg-neutral-900 z-50"
-                :class="{'left-0': sidebarOpen, '-left-56': !sidebarOpen, 'lg:left-0': true}"
+                :class="{'left-0': sidebarOpen, '-left-56': !sidebarOpen}"
             >
                 <div class="h-[3rem] border-b border-neutral-800 flex items-center px-3 sticky top-0 z-10">
                     <div class="flex">
@@ -33,7 +75,7 @@
                         <h4 class="text-md">CMMV</h4>
                     </div>
                     <button
-                        class="ml-auto lg:hidden"
+                        class="ml-auto"
                         @click="toggleSidebar"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,23 +111,86 @@
 
             <div
                 class="flex-1 overflow-hidden h-screen transition-all duration-300"
-                :class="{'ml-56': sidebarOpen && !isMobile, 'ml-0': !sidebarOpen || isMobile, 'lg:ml-56': !isMobile}"
+                :class="{'ml-56': sidebarOpen, 'ml-0': !sidebarOpen}"
                 v-if="selectedContract"
             >
                 <!-- include("@packages/sandbox/public/sandbox-top.html"); -->
 
-                <div class="overflow-hidden">
-                    <div class="flex py-2 px-4 border-b border-neutral-800">
-                        <div class="flex mr-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clip-rule="evenodd"></path>
-                                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z"></path>
-                            </svg>
-                        </div>
-                        <div class="flex">
-                            <h3>
-                                {{ selectedContract?.controllerName }} ({{ selectedContract.contractName }})
-                            </h3>
+                <div
+                    v-show="tabsMaster[selectedMasterTab].label === 'Contract'"
+                    class="overflow-hidden"
+                >
+                    <div class="flex flex-col border-b border-neutral-800">
+                        <!-- Contract header with file icon and tabs side by side -->
+                        <div class="flex py-2 px-4 items-center justify-between">
+                            <!-- Left side - Contract name with icon -->
+                            <div class="flex items-center">
+                                <div class="flex mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z" clip-rule="evenodd"></path>
+                                        <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex">
+                                    <h3>
+                                        {{ selectedContract?.controllerName }}
+                                    </h3>
+                                </div>
+                            </div>
+
+                            <!-- Right side - Original functional tabs for larger screens -->
+                            <div class="hidden md:flex flex-1 ml-8 justify-end">
+                                <ul class="flex h-[40px] overflow-x-auto" id="functional-tabs">
+                                    <li
+                                        v-for="(item, key) in tabs"
+                                        class="px-4 py-1 select-none cursor-pointer justify-center flex items-center text-sm"
+                                        :class="{'bg-neutral-800 text-white': (key === selectedTab), 'text-neutral-400 hover:text-neutral-300': (key !== selectedTab)}"
+                                        @click="selectTab(key)"
+                                    >{{ item.label }}</li>
+                                </ul>
+                            </div>
+
+                            <!-- Dropdown for functional tabs on smaller screens -->
+                            <div class="md:hidden flex-1 ml-4">
+                                <div class="relative inline-block text-left">
+                                    <button
+                                        type="button"
+                                        class="inline-flex justify-between items-center w-[150px] px-4 py-2 text-sm bg-neutral-800 rounded-md shadow-sm hover:bg-neutral-700 focus:outline-none"
+                                        @click="toggleFunctionalTabDropdown"
+                                        id="functional-tab-menu-button"
+                                        aria-expanded="true"
+                                        aria-haspopup="true"
+                                    >
+                                        {{ tabs[selectedTab]?.label || 'Select Tab' }}
+                                        <svg class="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Dropdown menu for functional tabs -->
+                                    <div
+                                        v-show="functionalTabDropdownOpen"
+                                        class="origin-top-left absolute left-0 mt-2 w-[200px] rounded-md shadow-lg bg-neutral-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                                        role="menu"
+                                        aria-orientation="vertical"
+                                        aria-labelledby="functional-tab-menu-button"
+                                        tabindex="-1"
+                                    >
+                                        <div class="py-1 max-h-[60vh] overflow-y-auto" role="none">
+                                            <a
+                                                v-for="(item, key) in tabs"
+                                                :key="key"
+                                                href="#"
+                                                class="block px-4 py-2 text-sm hover:bg-neutral-700"
+                                                :class="{'bg-neutral-700 text-white': key === selectedTab, 'text-neutral-300': key !== selectedTab}"
+                                                role="menuitem"
+                                                tabindex="-1"
+                                                @click.prevent="selectTabAndCloseDropdown(key)"
+                                            >{{ item.label }}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -152,13 +257,6 @@
                     </div>
 
                     <div
-                        v-show="tabs[selectedTab].label === 'GraphQL'"
-                        class="flex-1 overflow-auto h-[calc(100%-96px)]"
-                    >
-                        <!-- include("@packages/sandbox/public/sandbox-graphql.html"); -->
-                    </div>
-
-                    <div
                         v-show="tabs[selectedTab].label === 'Data'"
                         class="flex-1 overflow-auto h-[calc(100%-96px)]"
                     >
@@ -172,6 +270,20 @@
                     >
                         <div id="schemaEditor" class="h-full border border-neutral-800"></div>
                     </div>
+                </div>
+
+                <div
+                    v-show="tabsMaster[selectedMasterTab].label === 'GraphQL'"
+                    class="flex-1 overflow-auto h-[calc(100%-50px)]"
+                >
+                    <!-- include("@packages/sandbox/public/sandbox-graphql.html"); -->
+                </div>
+
+                <div
+                    v-show="tabsMaster[selectedMasterTab].label === 'Logs'"
+                    class="flex-1 overflow-auto h-[calc(100%-50px)]"
+                >
+                    <!-- include("@packages/sandbox/public/sandbox-logs.html"); -->
                 </div>
             </div>
 
@@ -200,7 +312,48 @@
         <input type="hidden" s-attr="wsPort" id="wsPort" />
         <script type="text/javascript" src="/sandbox/graphql.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/datatable.js" type="module"></script>
+        <script type="text/javascript" src="/sandbox/logs.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/client.js"></script>
 
+        <!-- Script para remover o indicador de carregamento quando o Vue estiver pronto -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (window.createApp) {
+                    const originalCreateApp = window.createApp;
+                    window.createApp = function() {
+                        const app = originalCreateApp.apply(this, arguments);
+                        const originalMounted = app.mount;
+
+                        app.mount = function() {
+                            const vm = originalMounted.apply(this, arguments);
+                            // Remover o loading quando o Vue estiver montado
+                            const loadingEl = document.getElementById('initialLoading');
+                            if (loadingEl) {
+                                loadingEl.style.opacity = '0';
+                                setTimeout(() => {
+                                    loadingEl.remove();
+                                }, 500);
+                            }
+                            return vm;
+                        };
+
+                        return app;
+                    };
+                } else {
+                    // Fallback para quando o Vue estiver carregado
+                    window.addEventListener('load', function() {
+                        setTimeout(() => {
+                            const loadingEl = document.getElementById('initialLoading');
+                            if (loadingEl) {
+                                loadingEl.style.opacity = '0';
+                                setTimeout(() => {
+                                    loadingEl.remove();
+                                }, 500);
+                            }
+                        }, 1000); // Dar um tempo extra para garantir que o Vue inicializou
+                    });
+                }
+            });
+        </script>
     </body>
 </html>

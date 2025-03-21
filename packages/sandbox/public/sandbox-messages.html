@@ -10,6 +10,29 @@
     </div>
 </div>
 
+<!-- Empty state message when no DTOs exist -->
+<div
+    v-if="!selectedContract.messages || selectedContract.messages.length === 0"
+    class="border border-dashed border-neutral-700 rounded-md p-6 mb-4 text-center"
+>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-neutral-500" viewBox="0 0 24 24" fill="currentColor">
+        <path fill-rule="evenodd" d="M15.97 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 1 1-1.06-1.06l3.22-3.22H7.5a.75.75 0 0 1 0-1.5h11.69l-3.22-3.22a.75.75 0 0 1 0-1.06Zm-7.94 9a.75.75 0 0 1 0 1.06l-3.22 3.22H16.5a.75.75 0 0 1 0 1.5H4.81l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"></path>
+    </svg>
+
+    <h3 class="text-lg font-medium text-neutral-400 mb-1">No DTOs Defined</h3>
+    <p class="text-sm text-neutral-500 mb-4">
+        You haven't created any Data Transfer Objects (DTOs) for this contract yet.
+    </p>
+    <button
+        class="text-sm p-2 px-4 rounded-md bg-green-800 hover:bg-green-700 cursor-pointer transition-colors"
+        @click="addMessage()"
+        :disabled="selectedContract.options.moduleContract"
+        :class="{'opacity-50 cursor-not-allowed': selectedContract.options.moduleContract}"
+    >
+        Create Your First DTO
+    </button>
+</div>
+
 <div
     v-for="(message, messageKey) in selectedContract.messages"
     class="mb-4 border w-full border-neutral-800 p-1 rounded-md flex-colum gap-x-4"

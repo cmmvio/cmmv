@@ -1,7 +1,27 @@
+import { Hooks, HooksType } from './hooks';
+
+export enum LogLevel {
+    ERROR = 'ERROR',
+    WARNING = 'WARNING',
+    DEBUG = 'DEBUG',
+    VERBOSE = 'VERBOSE',
+    INFO = 'INFO',
+}
+
+export interface LogEvent {
+    level: LogLevel;
+    message: string;
+    context: string;
+    timestamp: number;
+    event?: any;
+    metadata?: any;
+}
+
 export class Logger {
     protected applicationContext: string = 'Server';
     protected defaultContext: string = 'Server';
     private context: string;
+    private emitLog = null;
 
     constructor(context?: string) {
         this.context = context || this.defaultContext;
@@ -22,6 +42,20 @@ export class Logger {
         message: string,
         context?: string,
     ): string {
+        if (this.emitLog === null) {
+            const { Config } = require('./config'); //@ts-ignore
+            this.emitLog = Config.get<boolean>('logger.emitLog', true);
+        }
+
+        if (this.emitLog) {
+            Hooks.execute(HooksType.Log, {
+                level,
+                message,
+                context: context || this.context,
+                timestamp: Date.now(),
+            });
+        }
+
         const timestamp = this.formatDate();
         const levelColored = this.getLevelColor(level);
         const contextName = context || this.context;

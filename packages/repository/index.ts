@@ -1,11 +1,11 @@
-export * from './repository.abstract';
-export * from './repository.config';
-export * from './repository.controller';
-export * from './repository.interface';
-export * from './repository.migration';
-export * from './repository.module';
-export * from './repository.service';
-export * from './repository.transpiler';
+export * from './lib/repository.abstract';
+export * from './lib/repository.config';
+export * from './lib/repository.controller';
+export * from './lib/repository.interface';
+export * from './lib/repository.migration';
+export * from './lib/repository.module';
+export * from './lib/repository.service';
+export * from './lib/repository.transpiler';
 
 export {
     // Connection and manipulation of dice bank

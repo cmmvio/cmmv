@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AbstractRepositoryService } from './repository.abstract';
+import { AbstractRepositoryService } from '../lib/repository.abstract';
 import { Config } from '@cmmv/core';
 import { ObjectId } from 'mongodb';
-import { RepositorySchema } from './repository.service';
+import { RepositorySchema } from '../lib/repository.service';
 
 // Mock para dependências externas
 vi.mock('@cmmv/core', () => ({

@@ -103,7 +103,8 @@ export interface ContractOptions {
 }
 
 export interface ContractLink {
-    contract: new () => any;
+    contract?: new () => any;
+    contractName?: string;
     entityName: string;
     entityNullable?: boolean;
     field: string;

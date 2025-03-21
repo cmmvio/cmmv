@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { RepositoryMigration } from './repository.migration';
+import { RepositoryMigration } from '../lib/repository.migration';
 
 // Mock fs and path modules
 vi.mock('fs', () => ({

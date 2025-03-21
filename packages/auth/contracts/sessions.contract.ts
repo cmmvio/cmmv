@@ -50,6 +50,7 @@ export class SessionsContract extends AbstractContract {
         link: [
             {
                 contract: UserContract,
+                contractName: 'UserContract',
                 entityName: 'user',
                 field: '_id',
                 array: true,

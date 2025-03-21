@@ -349,6 +349,118 @@
         </div>
 
         <div class="flex border-b border-neutral-800 mb-2 pb-1 mt-4 text-neutral-500">
+            Relationships
+            <button
+                @click="addRelationship(field)"
+                class="ml-2 px-2 py-0.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded"
+                :disabled="selectedContract.options.moduleContract"
+                v-if="!selectedContract.options.moduleContract"
+            >
+                Add
+            </button>
+        </div>
+
+        <div class="flex-col">
+            <div
+                v-for="(relationship, relationshipIndex) in field.link || []"
+                class="mb-2 p-3 bg-neutral-800/30 border border-neutral-800 rounded"
+            >
+                <div class="grid grid-cols-12 gap-3">
+                    <div class="flex flex-col col-span-2">
+                        <label class="text-xs mb-1 text-neutral-400">Entity Name</label>
+                        <input
+                            class="p-2 h-[42px] w-full border border-neutral-800 rounded bg-neutral-900 text-neutral-200 focus:outline-none"
+                            type="text"
+                            placeholder="entityName"
+                            title="Entity Name"
+                            v-model="relationship.entityName"
+                            :disabled="selectedContract.options.moduleContract"
+                        />
+                    </div>
+
+                    <!-- Field -->
+                    <div class="flex flex-col col-span-2">
+                        <label class="text-xs mb-1 text-neutral-400">Field</label>
+                        <input
+                            class="p-2 h-[42px] w-full border border-neutral-800 rounded bg-neutral-900 text-neutral-200 focus:outline-none"
+                            type="text"
+                            placeholder="_id"
+                            title="Field"
+                            v-model="relationship.field"
+                            :disabled="selectedContract.options.moduleContract"
+                        />
+                    </div>
+
+                    <!-- Contract Selector -->
+                    <div class="flex flex-col col-span-3">
+                        <label class="text-xs mb-1 text-neutral-400">Contract</label>
+                        <select
+                            class="p-2 h-[42px] w-full border border-neutral-800 rounded bg-neutral-900 text-neutral-200 focus:outline-none"
+                            v-model="relationship.contract"
+                            :disabled="selectedContract.options.moduleContract"
+                        >
+                            <option value="">Select Contract</option>
+                            <option
+                                v-for="contract in availableContracts"
+                                :value="contract.contractName"
+                            >
+                                {{ contract.controllerName }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Options - AUMENTADO -->
+                    <div class="flex flex-col col-span-4">
+                        <label class="text-xs mb-1 text-neutral-400">Options</label>
+                        <div class="flex h-[42px] border border-neutral-800 rounded bg-neutral-900 items-center px-3 justify-between">
+                            <!-- Array -->
+                            <div class="flex items-center" title="Array">
+                                <input
+                                    type="checkbox"
+                                    class="w-4 h-4 mr-2 text-blue-600 bg-neutral-800 rounded focus:ring-blue-800 focus:ring-2"
+                                    v-model="relationship.array"
+                                    :disabled="selectedContract.options.moduleContract"
+                                />
+                                <label class="text-xs">Array</label>
+                            </div>
+
+                            <!-- Create Relationship -->
+                            <div class="flex items-center" title="Create Database Relationship">
+                                <input
+                                    type="checkbox"
+                                    class="w-4 h-4 mr-2 text-blue-600 bg-neutral-800 rounded focus:ring-blue-800 focus:ring-2"
+                                    v-model="relationship.createRelationship"
+                                    :disabled="selectedContract.options.moduleContract"
+                                />
+                                <label class="text-xs">Create Database Relationship</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Remove Relationship Button -->
+                    <div class="flex items-end justify-end col-span-1">
+                        <button
+                            @click="removeRelationship(field, relationshipIndex)"
+                            class="p-2 text-red-500 hover:text-red-300 hover:bg-red-900/30 rounded transition-colors h-[42px]"
+                            :disabled="selectedContract.options.moduleContract"
+                            v-if="!selectedContract.options.moduleContract"
+                            title="Remove Relationship"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- "No relationships" message -->
+            <div v-if="!field.link || field.link.length === 0" class="py-4 text-center text-neutral-500 text-sm italic">
+                No relationships added yet
+            </div>
+        </div>
+
+        <div class="flex border-b border-neutral-800 mb-2 pb-1 mt-4 text-neutral-500">
             Schema
         </div>
 

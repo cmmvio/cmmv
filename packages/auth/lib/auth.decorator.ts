@@ -1,7 +1,8 @@
 import * as jwt from 'jsonwebtoken';
 import * as crypto from 'crypto';
 
-import { Config, Logger } from '@cmmv/core';
+import { Config, Hooks, HooksType, Logger } from '@cmmv/core';
+
 import { generateFingerprint } from '@cmmv/http';
 
 import { IAuthSettings, IJWTDecoded } from './auth.interface';
@@ -51,6 +52,21 @@ export function Auth(
                 if (session) token = session.user.token;
             }
 
+            const baseLog = {
+                context: 'AUTH',
+                level: 'WARNING',
+                timestamp: Date.now(),
+                metadata: {
+                    method: request.method.toUpperCase(),
+                    path: request.path,
+                    token,
+                    refreshToken,
+                    sessionId,
+                    ip: request.req.socket.remoteAddress,
+                    agent: request.req.headers['user-agent'],
+                },
+            };
+
             if (!token) {
                 token =
                     request.req.headers.authorization?.split(' ')[1] || null;
@@ -68,6 +84,11 @@ export function Auth(
                         `${request.method.toUpperCase()} ${request.path} (0ms) 401 - ${request.req.socket.remoteAddress}`,
                     );
                 }
+
+                Hooks.execute(HooksType.Log, {
+                    message: `Unauthorized: method="${request.method.toUpperCase()}" path="${request.path}" reason="No token provided"`,
+                    ...baseLog,
+                });
 
                 return response.code(401).end('Unauthorized');
             }
@@ -89,6 +110,11 @@ export function Auth(
                                     `${request.method.toUpperCase()} ${request.path} (0ms) 401 - ${request.req.socket.remoteAddress}`,
                                 );
                             }
+
+                            Hooks.execute(HooksType.Log, {
+                                message: `Unauthorized: method="${request.method.toUpperCase()}" path="${request.path}" reason="Expired or invalid token"`,
+                                ...baseLog,
+                            });
 
                             if (
                                 !refreshToken ||
@@ -118,6 +144,11 @@ export function Auth(
                                     decoded,
                                 ))
                             ) {
+                                Hooks.execute(HooksType.Log, {
+                                    message: `Unauthorized: method="${request.method.toUpperCase()}" path="${request.path}" reason="Invalid session"`,
+                                    ...baseLog,
+                                });
+
                                 return response.code(401).end('Unauthorized');
                             }
 
@@ -140,6 +171,11 @@ export function Auth(
                                         `${request.method.toUpperCase()} ${request.path} (0ms) 401 - ${request.req.socket.remoteAddress}`,
                                     );
                                 }
+
+                                Hooks.execute(HooksType.Log, {
+                                    message: `Unauthorized: method="${request.method.toUpperCase()}" path="${request.path}" reason="Invalid permissions"`,
+                                    ...baseLog,
+                                });
 
                                 return response.code(401).end('Unauthorized');
                             } else if (rolesOrSettings) {
@@ -167,12 +203,25 @@ export function Auth(
                                                 );
                                             }
 
+                                            Hooks.execute(HooksType.Log, {
+                                                message: `Unauthorized: method="${request.method.toUpperCase()}" path="${request.path}" reason="Invalid permissions"`,
+                                                ...baseLog,
+                                            });
+
                                             return response
                                                 .code(401)
                                                 .end('Unauthorized');
                                         }
                                     }
-                                } catch {
+                                } catch (error) {
+                                    Hooks.execute(HooksType.Log, {
+                                        message: `Unauthorized: method="${request.method.toUpperCase()}" path="${request.path}" reason="Validation error"`,
+                                        ...baseLog,
+                                        ...{
+                                            metadata: { error: error.message },
+                                        },
+                                    });
+
                                     return response
                                         .code(401)
                                         .end('Unauthorized');
@@ -193,14 +242,29 @@ export function Auth(
                                 `${request.method.toUpperCase()} ${request.path} (0ms) 403 - ${request.req.socket.remoteAddress}`,
                             );
 
+                            Hooks.execute(HooksType.Log, {
+                                message: `Forbidden: method="${request.method.toUpperCase()}" path="${request.path}" reason="Invalid fingerprint"`,
+                                ...baseLog,
+                            });
+
                             return response.code(403).end('Forbidden');
                         }
+
+                        Hooks.execute(HooksType.Log, {
+                            message: `Authorized: method="${request.method.toUpperCase()}" path="${request.path}"`,
+                            ...baseLog,
+                        });
 
                         request.user = decoded;
                         next();
                     },
                 );
             } else {
+                Hooks.execute(HooksType.Log, {
+                    message: `Unauthorized: method="${request.method.toUpperCase()}" path="${request.path}" reason="No token provided"`,
+                    ...baseLog,
+                });
+
                 return response.code(401).end('Unauthorized');
             }
         };

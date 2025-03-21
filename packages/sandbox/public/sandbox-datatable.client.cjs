@@ -125,21 +125,39 @@ const useDataTable = () => {
         });
     });
 
-    // Helper function to get auth headers from localStorage
-    function getAuthHeaders() {
-        const headers = {};
+    // Adicionar propriedade para o handler de erro de autenticação
+    let authErrorHandler = null;
 
-        try {
-            // Get auth data from localStorage (same as API Explorer)
-            const storedAuth = localStorage.getItem('apiExplorerAuth');
-            if (storedAuth) {
-                const authData = JSON.parse(storedAuth);
-                if (authData && authData.token) {
-                    headers['Authorization'] = `Bearer ${authData.token}`;
-                }
+    // Método para definir o handler de autenticação
+    function setAuthErrorHandler(handler) {
+        authErrorHandler = handler;
+    }
+
+    // Função auxiliar para obter o token de autenticação atual
+    function getAuthToken() {
+        // Tentar obter do localStorage
+        const storedAuth = localStorage.getItem('apiExplorerAuth');
+        if (storedAuth) {
+            try {
+                const auth = JSON.parse(storedAuth);
+                return auth.token ? `Bearer ${auth.token}` : '';
+            } catch (e) {
+                return '';
             }
-        } catch (error) {
-            console.error('Error getting auth headers:', error);
+        }
+        return '';
+    }
+
+    // Modificar a função getAuthHeaders() existente para utilizar getAuthToken
+    function getAuthHeaders() {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        // Adicionar token de autenticação se disponível
+        const token = getAuthToken();
+        if (token) {
+            headers['Authorization'] = token;
         }
 
         return headers;
@@ -266,11 +284,17 @@ const useDataTable = () => {
             const url = `${state.baseUrl}/${endpoint}?${queryParams.toString()}`;
             const response = await fetch(url, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...getAuthHeaders()
-                }
+                headers: getAuthHeaders()
             });
+
+            // Verificar se houve erro 401 (Unauthorized)
+            if (response.status === 401) {
+                // Não chame o handler automaticamente, apenas defina um estado de erro
+                state.error = "Authentication required to access data";
+                state.records = [];
+                state.loading = false;
+                return; // Interromper processamento
+            }
 
             if (!response.ok) {
                 throw new Error(`Error fetching data: ${response.statusText}`);
@@ -565,11 +589,7 @@ const useDataTable = () => {
 
             const response = await fetch(url, {
                 method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...getAuthHeaders()
-                },
-                body: JSON.stringify(recordToSave)
+                headers: getAuthHeaders()
             });
 
             if (!response.ok) {
@@ -617,10 +637,7 @@ const useDataTable = () => {
 
             const response = await fetch(url, {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...getAuthHeaders()
-                }
+                headers: getAuthHeaders()
             });
 
             if (!response.ok) {
@@ -773,10 +790,7 @@ const useDataTable = () => {
                     // Send the individual record
                     const response = await fetch(url, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...getAuthHeaders()
-                        },
+                        headers: getAuthHeaders(),
                         body: JSON.stringify(record)
                     });
 
@@ -919,7 +933,10 @@ const useDataTable = () => {
         openImportModal,
         closeImportModal,
         formatImportData,
-        importRecords
+        importRecords,
+
+        // Adicionar o método setAuthErrorHandler ao objeto retornado
+        setAuthErrorHandler
     };
 };
 

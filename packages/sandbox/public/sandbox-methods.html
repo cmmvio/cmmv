@@ -200,6 +200,29 @@
     Custom Methods
 </div>
 
+<!-- Empty state message when no custom methods exist -->
+<div
+    v-if="!selectedContract.services || selectedContract.services.length === 0"
+    class="border border-dashed border-neutral-700 rounded-md p-6 mb-4 text-center"
+>
+    <svg class="h-12 w-12 mx-auto mb-3 text-neutral-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" color="text-neutral-600 dark:text-white" aria-hidden="true">
+        <path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z"></path>
+    </svg>
+
+    <h3 class="text-lg font-medium text-neutral-400 mb-1">No Custom Methods</h3>
+    <p class="text-sm text-neutral-500 mb-4">
+        You haven't defined any custom methods for this contract yet.
+    </p>
+    <button
+        class="text-sm p-2 px-4 rounded-md bg-green-800 hover:bg-green-700 cursor-pointer transition-colors"
+        @click="addService()"
+        :disabled="selectedContract.options.moduleContract"
+        :class="{'opacity-50 cursor-not-allowed': selectedContract.options.moduleContract}"
+    >
+        Create Your First Method
+    </button>
+</div>
+
 <!-- Custom methods -->
 <div
     v-for="(service, serviceKey) in selectedContract.services"

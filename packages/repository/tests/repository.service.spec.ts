@@ -7,13 +7,13 @@ import {
     afterEach,
     beforeAll,
 } from 'vitest';
-import { Repository, RepositorySchema } from './repository.service';
+import { Repository, RepositorySchema } from '../lib/repository.service';
 import { Config, Logger, Resolvers } from '@cmmv/core';
 import {
     DataSource,
     Repository as TypeORMRepository,
     FindOptionsWhere,
-} from './index';
+} from '../index';
 import { ObjectId } from 'mongodb';
 
 // Mock dependencies
@@ -179,11 +179,9 @@ vi.mock('mongodb', () => {
         connect: vi.fn().mockResolvedValue({
             db: vi.fn().mockReturnValue({
                 admin: vi.fn().mockReturnValue({
-                    listDatabases: vi
-                        .fn()
-                        .mockResolvedValue({
-                            databases: [{ name: 'db1' }, { name: 'db2' }],
-                        }),
+                    listDatabases: vi.fn().mockResolvedValue({
+                        databases: [{ name: 'db1' }, { name: 'db2' }],
+                    }),
                 }),
                 listCollections: vi.fn().mockReturnValue({
                     toArray: vi

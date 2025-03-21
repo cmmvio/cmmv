@@ -269,6 +269,15 @@ ${contract.services
         nullable: true
     })`,
                     );
+                }
+                if (link.createRelationship !== false && link.array) {
+                    decorators.push(
+                        `@OneToMany(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${linkField}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
+    @Column({
+        type: "${linkType}",
+        nullable: true
+    })`,
+                    );
                 } else {
                     decorators.push(
                         `@Column({
@@ -391,7 +400,7 @@ ${contract.services
 
         contract.fields.map((field) => {
             if (field.link && field.link.length > 0)
-                extraImport.push('ManyToOne');
+                extraImport.push('ManyToOne', 'OneToMany');
         });
 
         extraImport = [...new Set(extraImport)];

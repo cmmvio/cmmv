@@ -344,6 +344,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                                     req.path,
                                     Telemetry.getProcessTimer(req.requestId),
                                     200,
+                                    req.ip,
                                 );
 
                                 if (typeof result === 'object') res.json(raw);
@@ -375,6 +376,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                                     req.path,
                                     Telemetry.getProcessTimer(req.requestId),
                                     200,
+                                    req.ip,
                                 );
 
                                 res.send(result);
@@ -411,6 +413,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                                 req.path,
                                 Telemetry.getProcessTimer(req.requestId),
                                 statusCode,
+                                req.ip,
                             );
 
                             res.set('content-type', 'text/json')
@@ -563,9 +566,10 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         path: string,
         timer: number,
         status: number,
+        ip: string,
     ) {
         const logging = Config.get<string>('server.logging', 'all');
-        const logContent = `${method.toUpperCase()} ${path} (${timer}ms) ${status}`;
+        const logContent = `${method.toUpperCase()} ${path} (${timer}ms) ${status} ${ip}`;
 
         switch (type) {
             case 'error':
