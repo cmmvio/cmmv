@@ -54,33 +54,20 @@ export class Repository extends Singleton {
             '.generated',
             'migrations',
         );
-        const entityFiles = await fg([
-            `${entitiesDir}/**/*.entity.ts`,
-            `${entitiesGeneratedDir}/**/*.entity.ts`,
-        ]);
-        const migrationFiles = await fg([
-            `${migrationsDir}/**/*.ts`,
-            `${migrationsGeneratedDir}/**/*.ts`,
-        ]);
-
-        const entities = await Promise.all(
-            entityFiles.map(async (file) => {
-                const entityModule = await import(file);
-                const entityContructor = Object.values(entityModule)[0];
-                this.entities.set(
-                    //@ts-ignore
-                    entityContructor.name,
-                    entityContructor,
-                );
-                return entityContructor;
-            }),
-        );
 
         try {
             const AppDataSource = new DataSource({
                 ...config,
-                entities,
-                migrations: migrations ? migrationFiles : [],
+                entities: [
+                    `${entitiesDir}/**/*.entity.ts`,
+                    `${entitiesGeneratedDir}/**/*.entity.ts`,
+                ],
+                migrations: migrations
+                    ? [
+                          `${migrationsDir}/**/*.ts`,
+                          `${migrationsGeneratedDir}/**/*.ts`,
+                      ]
+                    : [],
             });
 
             instance.dataSource = await AppDataSource.initialize();
@@ -89,8 +76,16 @@ export class Repository extends Singleton {
 
             const AppDataSource = new DataSource({
                 ...config,
-                entities,
-                migrations: migrations ? migrationFiles : [],
+                entities: [
+                    `${entitiesDir}/**/*.entity.ts`,
+                    `${entitiesGeneratedDir}/**/*.entity.ts`,
+                ],
+                migrations: migrations
+                    ? [
+                          `${migrationsDir}/**/*.ts`,
+                          `${migrationsGeneratedDir}/**/*.ts`,
+                      ]
+                    : [],
                 synchronize: false,
             });
 
