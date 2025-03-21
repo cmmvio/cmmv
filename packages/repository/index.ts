@@ -1,4 +1,4 @@
-export * from './service.abstract';
+export * from './repository.abstract';
 export * from './repository.config';
 export * from './repository.controller';
 export * from './repository.interface';
