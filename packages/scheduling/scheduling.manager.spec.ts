@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import { SchedulingManager } from './scheduling.manager';
 import { CronJob } from 'cron';
 import { Logger } from '@cmmv/core';
@@ -90,9 +90,8 @@ describe('SchedulingManager', () => {
         expect(mockObserver1).toHaveBeenCalled();
         expect(mockObserver2).toHaveBeenCalled();
     });
-
     it('should log messages when NODE_ENV is dev', () => {
-        const loggerInstance = (Logger as unknown as vi.Mock).mock.results[0]
+        const loggerInstance = (Logger as unknown as Mock).mock.results[0]
             .value;
         schedulingManager = new SchedulingManager('* * * * * *', mockOnTick);
         schedulingManager.addObserver(mockObserver1);
