@@ -91,6 +91,10 @@ export class Repository extends Singleton {
 
             instance.dataSource = await AppDataSource.initialize();
         }
+
+        instance.dataSource.entityMetadatas.forEach((entity) => {
+            Repository.entities.set(entity.name, entity.target);
+        });
     }
 
     /**
