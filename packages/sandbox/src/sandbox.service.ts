@@ -30,6 +30,9 @@ export class SandboxService {
     public static chokidar;
     public static port: number;
 
+    /**
+     * Define the public directory
+     */
     @Hook(HooksType.onHTTPServerInit)
     public definePublicDir() {
         Application.instance
@@ -37,6 +40,9 @@ export class SandboxService {
             .setPublicDir(path.join(__dirname.replace('src', 'public')));
     }
 
+    /**
+     * Load the config
+     */
     public static async loadConfig(): Promise<void> {
         const clients = [];
         const portDefault = 59885;
@@ -98,6 +104,10 @@ export class SandboxService {
             });
     }
 
+    /**
+     * Resolve the style
+     * @returns The style
+     */
     public async resolveStyle() {
         return await fs.readFileSync(
             path.join(__dirname.replace('src', 'public'), 'sandbox.css'),
@@ -105,10 +115,19 @@ export class SandboxService {
         );
     }
 
+    /**
+     * Get the web socket port
+     * @returns The web socket port
+     */
     public getWebSocketPort() {
         return SandboxService.port;
     }
 
+    /**
+     * Compile the contract
+     * @param schema - The schema of the contract
+     * @returns The success and message of the operation
+     */
     public async compileContract(schema: IContract) {
         const filanameRaw = schema.contractName
             .toLowerCase()
@@ -139,6 +158,11 @@ export class SandboxService {
         return Compile.getInstance().compileSchema(schema, schemaFilename);
     }
 
+    /**
+     * Delete the contract
+     * @param contractName - The name of the contract to delete
+     * @returns The success and message of the operation
+     */
     public async deleteContract(contractName: string) {
         const contract = Application.getContract(contractName);
 
