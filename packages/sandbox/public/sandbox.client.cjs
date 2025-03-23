@@ -1,4 +1,5 @@
-const { createApp } = Vue;
+const { createApp, vue } = Vue;
+
 let schemaEditor;
 let schemaChangeTimer = null;
 
@@ -477,7 +478,6 @@ createApp({
             this.migrateMessages();
             this.migrateServices();
 
-            // Verificar alterações nos contratos após carregá-los
             await this.checkContractsForChanges();
         },
 

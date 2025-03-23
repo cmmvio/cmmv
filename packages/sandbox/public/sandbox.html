@@ -324,7 +324,6 @@
         <script type="text/javascript" src="/sandbox/formbuilder.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/client.js"></script>
 
-        <!-- Script para remover o indicador de carregamento quando o Vue estiver pronto -->
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 if (window.createApp) {
@@ -335,7 +334,6 @@
 
                         app.mount = function() {
                             const vm = originalMounted.apply(this, arguments);
-                            // Remover o loading quando o Vue estiver montado
                             const loadingEl = document.getElementById('initialLoading');
                             if (loadingEl) {
                                 loadingEl.style.opacity = '0';
@@ -349,7 +347,6 @@
                         return app;
                     };
                 } else {
-                    // Fallback para quando o Vue estiver carregado
                     window.addEventListener('load', function() {
                         setTimeout(() => {
                             const loadingEl = document.getElementById('initialLoading');
@@ -359,7 +356,7 @@
                                     loadingEl.remove();
                                 }, 500);
                             }
-                        }, 1000); // Dar um tempo extra para garantir que o Vue inicializou
+                        }, 1000);
                     });
                 }
             });

@@ -1,15 +1,12 @@
 const useGraphQLExplorer = () => {
     const { ref, reactive, computed, watch, onMounted } = Vue;
 
-    // Referência para o editor Monaco
     let queryEditor = null;
     let editorInitTimer = null;
     let initAttempts = 0;
 
-    // Configuração
     const endpoint = ref('http://localhost:4000/graphql');
 
-    // Estado do schema
     const schema = reactive({
         loading: false,
         error: null,
@@ -20,21 +17,19 @@ const useGraphQLExplorer = () => {
         allTypes: []
     });
 
-    // UI State
     const ui = reactive({
         docExplorerOpen: true,
         selectedType: null,
         selectedField: null,
-        selectedOperation: 'query', // 'query', 'mutation', 'subscription'
+        selectedOperation: 'query',
         schemaFilter: '',
-        activeTab: 'query', // 'query', 'variables', 'headers', 'docs'
-        responseTab: 'formatted', // 'formatted', 'raw'
+        activeTab: 'query',
+        responseTab: 'formatted',
         cursorContext: null,
         contextFields: [],
         editorInitialized: false
     });
 
-    // Editor
     const editor = reactive({
         query: `# Write your GraphQL query here
 query {
@@ -49,66 +44,52 @@ query {
         error: null
     });
 
-    // Estado de seleção de campos
     const selection = reactive({
         fields: {},
         addedFields: new Set(),
         addedArguments: new Set(),
-        nestedFields: {}, // Estrutura: { "parent.field": Set() }
-        navigationPath: [], // Array de objetos {field, type}
-        currentPath: '', // Caminho atual (ex: "userFind.data")
+        nestedFields: {},
+        navigationPath: [],
+        currentPath: '',
         rootOperation: null,
     });
 
-    // Adicionar computed property para query com highlight
     const formattedQuery = computed(() => {
         if (!editor.query) return '';
 
         try {
-            // Detecta se temos o highlight.js disponível
             if (window.hljs) {
                 return hljs.highlight(editor.query, { language: 'graphql' }).value;
             }
 
-            // Fallback para query sem formatação
             return editor.query;
         } catch (err) {
-            console.error('Erro ao formatar query:', err);
+            console.error(err);
             return editor.query;
         }
     });
 
-    // ------------------------
-    // Funções auxiliares
-    // ------------------------
-
-    // NOVA função para obter os headers com autenticação
     function getAuthHeaders(customHeaders = {}) {
-        // Base headers
         const headers = {
             'Content-Type': 'application/json',
             ...customHeaders
         };
 
-        // Usar o mesmo sistema de autenticação que o sandbox-api
         try {
-            // Obter dados de autenticação do localStorage
             const storedAuth = localStorage.getItem('apiExplorerAuth');
             if (storedAuth) {
                 const authData = JSON.parse(storedAuth);
                 if (authData && authData.token) {
-                    // Adicionar token sem o prefixo Bearer
                     headers['Authorization'] = authData.token;
                 }
             }
         } catch (e) {
-            console.error('Erro ao processar token de autenticação:', e);
+            console.error(e);
         }
 
         return headers;
     }
 
-    // Função para obter o nome formatado de um tipo GraphQL
     function getTypeName(typeObj) {
         if (!typeObj) return "Unknown";
 
@@ -129,7 +110,6 @@ query {
         return getFullTypeName(typeObj);
     }
 
-    // Função para obter o tipo aninhado final
     function getNestedType(typeObj) {
         if (!typeObj) return null;
 
@@ -139,11 +119,9 @@ query {
             finalType = finalType.ofType;
         }
 
-        // Encontrar o tipo completo no schema
         return schema.allTypes.find(t => t.name === finalType.name);
     }
 
-    // NOVA FUNÇÃO: Verifica se um campo é um objeto (tipo complexo)
     function isObjectField(field) {
         if (!field) return false;
 
@@ -155,11 +133,6 @@ query {
                nestedType.fields.length > 0;
     }
 
-    // ------------------------
-    // Computed properties
-    // ------------------------
-
-    // Filtra os tipos com base na pesquisa
     const filteredTypes = computed(() => {
         if (!schema.allTypes || schema.allTypes.length === 0) return [];
 
@@ -175,7 +148,6 @@ query {
         );
     });
 
-    // Determina o tipo de operação atual
     const rootType = computed(() => {
         switch (ui.selectedOperation) {
             case 'query': return schema.data?.queryType;
@@ -185,18 +157,15 @@ query {
         }
     });
 
-    // Formata a resposta para exibição
     const formattedResponse = computed(() => {
         if (!editor.response) return '';
 
         try {
-            // Detecta se temos o highlight.js disponível
             if (window.hljs) {
                 const formatted = JSON.stringify(editor.response, null, 2);
                 return hljs.highlight(formatted, { language: 'json' }).value;
             }
 
-            // Fallback para formatação simples
             return JSON.stringify(editor.response, null, 2);
         } catch (err) {
             return typeof editor.response === 'string'
@@ -205,7 +174,6 @@ query {
         }
     });
 
-    // Modificar selectField para lidar com objetos
     function selectField(field) {
         ui.selectedField = field;
         ui.selectedType = getNestedType(field.type);
@@ -216,7 +184,6 @@ query {
                 newPath = `${selection.currentPath}.${field.name}`;
             }
 
-            // Verificar se este campo já foi selecionado antes
             if (!selection.navigationPath.some(p => p.path === newPath)) {
                 selection.navigationPath.push({
                     field: field.name,
@@ -232,16 +199,10 @@ query {
             }
         }
 
-        console.log('Navigation path:', selection.navigationPath);
-        console.log('Current path:', selection.currentPath);
-
-        // Reconstruir a query depois de selecionar o campo
         rebuildFullQuery();
     }
 
-    // Nova função para navegar de volta a um nível anterior
     function navigateBack(index) {
-        console.log("Navegando de volta para o índice:", index);
         const targetIndex = index !== undefined ? index : selection.navigationPath.length - 2;
 
         if (targetIndex >= -1 && targetIndex < selection.navigationPath.length) {
@@ -276,11 +237,9 @@ query {
             }
         }
 
-        // Importante: atualizar a query após a navegação
         rebuildFullQuery();
     }
 
-    // Nova função: Verifica se um campo está no caminho atual
     function isFieldInCurrentPath(fieldName) {
         if (!selection.currentPath) {
             return selection.addedFields.has(fieldName);
@@ -290,17 +249,14 @@ query {
                selection.nestedFields[selection.currentPath].has(fieldName);
     }
 
-    // Substituir a função isFieldSelected
     function isFieldSelected(fieldName) {
         return isFieldInCurrentPath(fieldName);
     }
 
-    // NOVA função: Verifica se um argumento está selecionado na query
     function isArgumentSelected(argName) {
         return selection.addedArguments.has(argName);
     }
 
-    // ADICIONAR a função toggleArgument que está faltando
     function toggleArgument(argName) {
         if (isArgumentSelected(argName)) {
             removeArgumentFromQuery(argName);
@@ -309,7 +265,6 @@ query {
         }
     }
 
-    // Modificar toggleField para lidar com campos aninhados
     function toggleField(fieldName) {
         if (!ui.selectedType || !ui.selectedType.fields) return;
 
@@ -321,23 +276,19 @@ query {
         } else {
             addFieldToQuery(ui.selectedType.name, fieldName, isObjectField(field));
 
-            // Se for um campo objeto, navegar para ele para mostrar sub-campos
             if (isObjectField(field)) {
                 selectField(field);
             }
         }
     }
 
-    // Função para adicionar um campo à query
     function addFieldToQuery(typeName, fieldName, isObject = false) {
         if (!selection.rootOperation && !ui.selectedField) return;
 
-        // Garantir que o rootOperation esteja definido
         if (!selection.rootOperation && ui.selectedField) {
             selection.rootOperation = ui.selectedField;
         }
 
-        // Adicionar o campo ao caminho atual
         if (!selection.currentPath) {
             selection.addedFields.add(fieldName);
         } else {
@@ -350,7 +301,6 @@ query {
         rebuildFullQuery();
     }
 
-    // Função para remover um campo da query
     function removeFieldFromQuery(fieldName) {
         if (!selection.rootOperation && !ui.selectedField) return;
 
@@ -365,7 +315,6 @@ query {
         rebuildFullQuery();
     }
 
-    // NOVA função: Adiciona um argumento à query
     function addArgumentToQuery(argName) {
         if (!ui.selectedField && !selection.rootOperation) return;
 
@@ -374,7 +323,6 @@ query {
         rebuildFullQuery();
     }
 
-    // NOVA função: Remove um argumento da query
     function removeArgumentFromQuery(argName) {
         if (!ui.selectedField && !selection.rootOperation) return;
 
@@ -383,31 +331,23 @@ query {
         rebuildFullQuery();
     }
 
-    // Atualizar a query no editor e aplicar formatação
     function updateQueryWithHighlight(queryText) {
         editor.query = queryText;
-        // Se houver um elemento DOM onde exibir a query formatada, podemos atualizar aqui
-        // Por exemplo, se estiver usando um editor Monaco ou CodeMirror, atualizaria o valor lá
     }
 
-    // Função completamente reescrita para construir queries com campos aninhados
     function rebuildFullQuery() {
         if (!selection.rootOperation && !ui.selectedField) return;
 
-        // Usar sempre a operação raiz para construir a query
         let operationField = selection.rootOperation ? selection.rootOperation.name : ui.selectedField.name;
 
-        // Se não tivermos uma operação raiz, usar o campo selecionado atual
         if (!selection.rootOperation && ui.selectedField) {
             selection.rootOperation = ui.selectedField;
         }
 
         const opNameCapitalized = operationField.charAt(0).toUpperCase() + operationField.slice(1);
 
-        // Obter argumentos da operação raiz
         let args = selection.rootOperation && selection.rootOperation.args ? selection.rootOperation.args : [];
 
-        // Construir a definição de variáveis
         let variablesDefinition = '';
         if (selection.addedArguments.size > 0) {
             const variablesList = [];
@@ -424,10 +364,8 @@ query {
             }
         }
 
-        // Começar a query
         let query = `${ui.selectedOperation} ${opNameCapitalized}${variablesDefinition} {\n`;
 
-        // Adicionar argumentos à operação
         let functionArgs = '';
         if (selection.addedArguments.size > 0) {
             const argsList = [];
@@ -444,18 +382,13 @@ query {
             }
         }
 
-        // Adicionar a operação principal
         query += `  ${operationField}${functionArgs} {\n`;
 
-        // Novo algoritmo para construir a query sem duplicações
         function buildQueryStructure() {
-            // Estrutura para rastrear o que já foi processado
             const processedPaths = new Set();
 
-            // Conjunto para armazenar caminhos processados
             const addedFields = new Set();
 
-            // Adicionar campos diretos da raiz
             if (selection.addedFields.size > 0) {
                 const rootTypeObj = selection.rootOperation ?
                     getNestedType(selection.rootOperation.type) : null;
@@ -473,7 +406,6 @@ query {
                     addedFields.add(field);
 
                     if (isObject) {
-                        // Usar recursive para processar campos aninhados
                         addObjectFieldToQuery(field, [], 2);
                     } else {
                         query += `    ${field}\n`;
@@ -481,32 +413,25 @@ query {
                 });
             }
 
-            // Função para adicionar um campo objeto e seus campos aninhados
             function addObjectFieldToQuery(fieldName, parentPath, depth) {
                 const indent = '  '.repeat(depth);
                 const currentPath = [...parentPath, fieldName];
                 const currentPathStr = currentPath.join('.');
 
-                // Se já processamos este caminho, não fazer nada
                 if (processedPaths.has(currentPathStr)) {
                     return;
                 }
 
-                // Marcar o caminho como processado
                 processedPaths.add(currentPathStr);
 
-                // Começar o bloco do objeto
                 query += `${indent}${fieldName} {\n`;
 
-                // Verificar se há campos diretamente no objeto
                 const directFields = selection.nestedFields[currentPathStr];
                 if (directFields && directFields.size > 0) {
-                    // Verificar o tipo do objeto atual para saber quais campos são objetos
                     let currentType = null;
                     let currentPathArr = currentPathStr.split('.');
 
                     if (currentPathArr.length === 1) {
-                        // Campo na raiz da query
                         if (selection.rootOperation && getNestedType(selection.rootOperation.type)) {
                             const rootType = getNestedType(selection.rootOperation.type);
                             const fieldDef = rootType.fields.find(f => f.name === fieldName);
@@ -515,7 +440,6 @@ query {
                             }
                         }
                     } else {
-                        // Campo aninhado, precisamos percorrer a hierarquia de tipos
                         let typeObj = selection.rootOperation ? getNestedType(selection.rootOperation.type) : null;
 
                         for (let i = 0; i < currentPathArr.length && typeObj; i++) {
@@ -532,11 +456,9 @@ query {
                         currentType = typeObj;
                     }
 
-                    // Adicionar cada campo direto
                     directFields.forEach(subField => {
                         let isSubObject = false;
 
-                        // Verificar se o subcampo é um objeto
                         if (currentType && currentType.fields) {
                             const subFieldDef = currentType.fields.find(f => f.name === subField);
                             if (subFieldDef) {
@@ -545,39 +467,30 @@ query {
                         }
 
                         if (isSubObject) {
-                            // Processar objetos aninhados recursivamente
                             addObjectFieldToQuery(subField, currentPath, depth + 1);
                         } else {
-                            // Campo simples
                             query += `${indent}  ${subField}\n`;
                         }
                     });
                 } else {
-                    // Se não houver campos selecionados, adicionar um comentário
                     query += `${indent}  # Selecione campos\n`;
                 }
 
-                // Fechar o bloco do objeto
                 query += `${indent}}\n`;
             }
         }
 
-        // Construir a estrutura da query
         buildQueryStructure();
 
-        // Fechar a query
         query += `  }\n}`;
 
-        // Atualizar o editor
         editor.query = query;
 
-        // Usar a função updateQueryEditor para atualizar o Monaco Editor
         updateQueryEditor();
 
         updateVariablesPanel();
     }
 
-    // Modificar updateVariablesPanel para usar nomes de variáveis mais simples
     function updateVariablesPanel() {
         if (!ui.selectedField && selection.navigationPath.length === 0 && !selection.rootOperation) return;
 
@@ -619,11 +532,10 @@ query {
 
             editor.variables = JSON.stringify(variablesObj, null, 2);
         } catch (e) {
-            console.error('Erro ao atualizar variáveis:', e);
+            console.error(e);
         }
     }
 
-    // Modificar selectOperation para lidar com navegação aninhada
     function selectOperation(field) {
         ui.selectedField = field;
         const returnType = getNestedType(field.type);
@@ -642,7 +554,6 @@ query {
         ui.activeTab = 'query';
     }
 
-    // Modificar clearSelectedField para lidar com navegação aninhada
     function clearSelectedField() {
         selection.navigationPath = [];
         selection.currentPath = '';
@@ -652,7 +563,6 @@ query {
         ui.selectedType = null;
     }
 
-    // NOVO: Actualiza o contexto do cursor para sugerir campos
     function updateCursorContext(event) {
         if (ui.selectedType && ui.selectedType.fields) {
             ui.contextFields = ui.selectedType.fields;
@@ -663,13 +573,11 @@ query {
         }
     }
 
-    // NOVO: Adiciona um campo no ponto onde o cursor está
     function addFieldAtCursor(fieldName) {
         if (!editor.query) return;
         addFieldToQuery(ui.cursorContext, fieldName);
     }
 
-    // Carrega o schema GraphQL usando introspection
     async function fetchSchema() {
         schema.loading = true;
         schema.error = null;
@@ -764,7 +672,6 @@ query {
         }
       `;
 
-            // Usar a função getAuthHeaders para obter os headers com autenticação
             const headers = getAuthHeaders();
 
             const response = await fetch(endpoint.value, {
@@ -779,25 +686,22 @@ query {
                 throw new Error(result.errors[0].message);
             }
 
-            // Processar o schema
             processSchema(result.data.__schema);
 
         } catch (error) {
-            console.error('Erro ao carregar schema GraphQL:', error);
+            console.error(error);
             schema.error = error.message || 'Erro ao carregar schema';
         } finally {
             schema.loading = false;
         }
     }
 
-    // Processa e organiza o schema recebido
     function processSchema(schemaData) {
         if (!schemaData) return;
 
         schema.data = schemaData;
         schema.allTypes = schemaData.types || [];
 
-        // Encontrar tipos raiz (Query, Mutation, Subscription)
         if (schemaData.queryType) {
             const queryType = schema.allTypes.find(t => t.name === schemaData.queryType.name);
             schema.queryTypes = queryType?.fields || [];
@@ -814,13 +718,11 @@ query {
         }
     }
 
-    // Seleciona um tipo para visualizar detalhes
     function selectType(type) {
         ui.selectedType = type;
         ui.activeTab = 'docs';
     }
 
-    // Navega para um tipo pelo nome
     function navigateToType(typeName) {
         const type = schema.allTypes.find(t => t.name === typeName);
         if (type) {
@@ -828,7 +730,6 @@ query {
         }
     }
 
-    // Constrói uma consulta GraphQL a partir dos campos selecionados
     function buildQueryFromSelection() {
         if (selection.addedFields.size === 0) {
             editor.query = `# Selecione campos para construir sua consulta\n${ui.selectedOperation} {\n  \n}`;
@@ -871,39 +772,33 @@ query {
         editor.query = query;
     }
 
-    // Executa a consulta atual
     async function executeQuery() {
-        if (!editor.query.trim()) {
-            alert('Por favor, insira uma consulta GraphQL');
+        if (!editor.query.trim())
             return;
-        }
 
         editor.loading = true;
         editor.error = null;
         editor.response = null;
 
         try {
-            // Analisar headers personalizados
             let customHeaders = {};
             try {
                 if (editor.headers.trim()) {
                     customHeaders = JSON.parse(editor.headers);
                 }
             } catch (e) {
-                console.warn('Headers inválidos, usando apenas o padrão');
+                console.warn(e);
             }
 
-            // Usar a função getAuthHeaders com os headers personalizados
             const headers = getAuthHeaders(customHeaders);
 
-            // Preparar variáveis
             let variables = {};
             try {
                 if (editor.variables.trim()) {
                     variables = JSON.parse(editor.variables);
                 }
             } catch (e) {
-                throw new Error('Erro ao processar variáveis: JSON inválido');
+                throw new Error(e);
             }
 
             const startTime = performance.now();
@@ -924,11 +819,10 @@ query {
             const result = await response.json();
             editor.response = result;
 
-            // Mudar para a tab de resposta
             ui.activeTab = 'query';
 
         } catch (error) {
-            console.error('Erro ao executar consulta GraphQL:', error);
+            console.error(error);
             editor.error = error.message || 'Erro ao executar consulta';
             editor.response = { error: editor.error };
         } finally {
@@ -936,10 +830,8 @@ query {
         }
     }
 
-    // Formata a consulta atual
     function prettifyQuery() {
         try {
-            // Função básica de formatação (pode ser melhorada)
             let query = editor.query.trim()
                 .replace(/\s+/g, ' ')
                 .replace(/\s*{\s*/g, ' {\n  ')
@@ -968,11 +860,10 @@ query {
 
             editor.query = formattedLines.join('\n');
         } catch (e) {
-            console.error('Erro ao formatar consulta:', e);
+            console.error(e);
         }
     }
 
-    // Formata o JSON nas variáveis
     function prettifyVariables() {
         try {
             if (!editor.variables.trim()) return;
@@ -980,11 +871,10 @@ query {
             const parsed = JSON.parse(editor.variables);
             editor.variables = JSON.stringify(parsed, null, 2);
         } catch (e) {
-            alert('JSON inválido no campo de variáveis');
+            alert(e);
         }
     }
 
-    // Formata o JSON nos headers
     function prettifyHeaders() {
         try {
             if (!editor.headers.trim()) return;
@@ -996,7 +886,6 @@ query {
         }
     }
 
-    // Copia a resposta para a área de transferência
     function copyResponse() {
         if (!editor.response) return;
 
@@ -1006,18 +895,14 @@ query {
                 : JSON.stringify(editor.response, null, 2);
 
             navigator.clipboard.writeText(text)
-                .then(() => {
-                    console.log('Resposta copiada para a área de transferência');
-                })
                 .catch(err => {
-                    console.error('Erro ao copiar resposta:', err);
+                    console.error(err);
                 });
         } catch (e) {
-            console.error('Erro ao preparar resposta para cópia:', e);
+            console.error(e);
         }
     }
 
-    // Reinicia o explorer
     function resetExplorer() {
         ui.selectedType = null;
         ui.selectedField = null;
@@ -1031,65 +916,52 @@ query {
         editor.query = `# Write your GraphQL query here\n${ui.selectedOperation} {\n  \n}`;
     }
 
-    // Função para atualizar o conteúdo do editor Monaco (com melhor tratamento de erros)
     function updateQueryEditor() {
         try {
-            if (!queryEditor) {
-                return; // Sair silenciosamente se o editor não estiver disponível
-            }
-
-            // Verificar se o modelo do editor ainda existe
-            if (!queryEditor.getModel()) {
-                console.warn('Modelo do editor não disponível');
+            if (!queryEditor)
                 return;
-            }
+
+            if (!queryEditor.getModel())
+                return;
 
             const currentValue = queryEditor.getValue();
-            if (currentValue !== editor.query) {
+
+            if (currentValue !== editor.query)
                 queryEditor.setValue(editor.query);
-            }
         } catch (error) {
-            console.error('Erro ao atualizar o editor:', error);
-            // Não recrie o editor aqui para evitar ciclos de erro
+            console.error(error);
         }
     }
 
-    // Função para inicializar o Monaco Editor (com melhor tratamento de erros)
     function initQueryEditor() {
-        // Se o editor já existir e parecer válido, apenas tente atualizar o layout
         if (queryEditor) {
             try {
                 queryEditor.layout();
                 return;
             } catch (e) {
-                console.warn('Erro ao ajustar layout do editor existente, recriando...', e);
+                console.warn(e);
+
                 try {
                     queryEditor.dispose();
-                } catch(err) {
-                    // Ignorar erros ao tentar limpar
-                }
+                } catch(err) {}
+
                 queryEditor = null;
             }
         }
 
-        // Limpar timer anterior se existir
         if (editorInitTimer) {
             clearTimeout(editorInitTimer);
         }
 
         editorInitTimer = setTimeout(() => {
             if (!document.getElementById('graphqlQueryEditor')) {
-                return; // Não inicializar se o contêiner não existir
+                return;
             }
 
             try {
-                // Verificar se o Monaco está disponível
-                if (!window.monaco) {
-                    console.warn('Monaco editor não disponível');
+                if (!window.monaco)
                     return;
-                }
 
-                // Criar o editor Monaco dentro de um bloco try/catch
                 queryEditor = monaco.editor.create(document.getElementById('graphqlQueryEditor'), {
                     value: editor.query,
                     language: 'graphql',
@@ -1103,7 +975,6 @@ query {
                     tabSize: 2
                 });
 
-                // Adicionar listener para atualizar o modelo quando o editor mudar (com tratamento de erro)
                 queryEditor.onDidChangeModelContent(() => {
                     try {
                         if (queryEditor && queryEditor.getModel()) {
@@ -1113,21 +984,20 @@ query {
                             }
                         }
                     } catch (e) {
-                        console.error('Erro ao atualizar valor do modelo', e);
+                        console.error(e);
                     }
                 });
 
                 ui.editorInitialized = true;
 
             } catch (error) {
-                console.error('Erro ao inicializar o GraphQL Query Editor:', error);
+                console.error(error);
                 queryEditor = null;
                 ui.editorInitialized = false;
             }
         }, 300);
     }
 
-    // Função para limpar o editor com segurança
     function cleanupEditor() {
         if (editorInitTimer) {
             clearTimeout(editorInitTimer);
@@ -1136,7 +1006,6 @@ query {
 
         if (queryEditor) {
             try {
-                // Salvar o valor atual antes de limpar
                 const currentValue = queryEditor.getValue();
                 if (currentValue) {
                     editor.query = currentValue;
@@ -1144,7 +1013,7 @@ query {
 
                 queryEditor.dispose();
             } catch (e) {
-                console.warn('Erro ao limpar editor', e);
+                console.warn(e);
             }
             queryEditor = null;
         }
@@ -1152,40 +1021,30 @@ query {
         ui.editorInitialized = false;
     }
 
-    // ------------------------
-    // Lifecycle hooks
-    // ------------------------
-
     onMounted(() => {
-        console.log('GraphQL Explorer mounted');
         fetchSchema();
     });
 
     return {
-        // Estado
         endpoint,
         schema,
         ui,
         editor,
         selection,
 
-        // Computed
         filteredTypes,
         rootType,
         formattedResponse,
         formattedQuery,
 
-        // Utils
         getTypeName,
         getNestedType,
         getAuthHeaders,
 
-        // Métodos - Schema
         fetchSchema,
         navigateToType,
         selectType,
 
-        // NOVAS funções para suporte ao estilo Apollo
         selectOperation,
         clearSelectedField,
         addFieldToQuery,
@@ -1200,7 +1059,6 @@ query {
         addArgumentToQuery,
         removeArgumentFromQuery,
 
-        // Métodos - Editor
         buildQueryFromSelection,
         executeQuery,
         prettifyQuery,
@@ -1209,12 +1067,10 @@ query {
         copyResponse,
         resetExplorer,
 
-        // Adicionar novas funções para navegação aninhada
         navigateBack,
         isFieldInCurrentPath,
         isObjectField,
 
-        // Adicionar métodos para o editor
         initQueryEditor,
         updateQueryEditor,
         cleanupEditor

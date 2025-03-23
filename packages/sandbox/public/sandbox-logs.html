@@ -1,5 +1,4 @@
 <div class="flex flex-col h-full overflow-hidden relative" v-if="logViewer">
-    <!-- Top control bar -->
     <div
         class="flex border-b border-neutral-800 justify-between items-center flex-wrap"
     >
@@ -30,9 +29,7 @@
             </button>
         </div>
         <div class="flex items-center space-x-3 flex-wrap gap-2 py-2 px-4">
-            <!-- Date range filter -->
             <div class="flex items-center space-x-2">
-                <!-- Start date dropdown -->
                 <div class="relative">
                     <div class="flex items-center">
                         <input
@@ -73,13 +70,11 @@
                         </svg>
                     </div>
 
-                    <!-- Start date calendar dropdown -->
                     <div
                         v-if="logViewer.showStartCalendar"
                         class="absolute left-0 top-full mt-1 bg-neutral-900 border border-neutral-700 rounded-md shadow-lg z-40 w-[300px] transform origin-top transition-all duration-150"
                         :class="{'scale-100 opacity-100': logViewer.showStartCalendar, 'scale-95 opacity-0': !logViewer.showStartCalendar}"
                     >
-                        <!-- Calendar header with month/year selectors -->
                         <div
                             class="p-3 border-b border-neutral-700 flex justify-between items-center"
                         >
@@ -153,7 +148,6 @@
                             </button>
                         </div>
 
-                        <!-- Days of week header -->
                         <div class="grid grid-cols-7 gap-1 p-2">
                             <div
                                 v-for="day in logViewer.weekDays"
@@ -164,7 +158,6 @@
                             </div>
                         </div>
 
-                        <!-- Calendar days -->
                         <div class="grid grid-cols-7 gap-1 p-2 pt-0">
                             <div
                                 v-for="(day, idx) in logViewer.startCalendarDays"
@@ -181,7 +174,6 @@
                             </div>
                         </div>
 
-                        <!-- Time picker and buttons -->
                         <div class="p-3 border-t border-neutral-700">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-xs text-neutral-400"
@@ -229,7 +221,6 @@
 
             <span class="text-neutral-400">to</span>
 
-            <!-- End date dropdown -->
             <div class="relative">
                 <div class="flex items-center">
                     <input
@@ -270,13 +261,11 @@
                     </svg>
                 </div>
 
-                <!-- End date calendar dropdown -->
                 <div
                     v-if="logViewer.showEndCalendar"
                     class="absolute left-0 top-full mt-1 bg-neutral-900 border border-neutral-700 rounded-md shadow-lg z-40 w-[300px] transform origin-top transition-all duration-150"
                     :class="{'scale-100 opacity-100': logViewer.showEndCalendar, 'scale-95 opacity-0': !logViewer.showEndCalendar}"
                 >
-                    <!-- Calendar header with month/year selectors -->
                     <div
                         class="p-3 border-b border-neutral-700 flex justify-between items-center"
                     >
@@ -350,7 +339,6 @@
                         </button>
                     </div>
 
-                    <!-- Days of week header -->
                     <div class="grid grid-cols-7 gap-1 p-2">
                         <div
                             v-for="day in logViewer.weekDays"
@@ -361,7 +349,6 @@
                         </div>
                     </div>
 
-                    <!-- Calendar days -->
                     <div class="grid grid-cols-7 gap-1 p-2 pt-0">
                         <div
                             v-for="(day, idx) in logViewer.endCalendarDays"
@@ -378,7 +365,6 @@
                         </div>
                     </div>
 
-                    <!-- Time picker and buttons -->
                     <div class="p-3 border-t border-neutral-700">
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-xs text-neutral-400">Time:</span>
@@ -421,7 +407,6 @@
                 </div>
             </div>
 
-            <!-- Log level filter -->
             <select
                 v-model="logViewer.filters.level"
                 class="h-9 py-1.5 px-3 border border-neutral-700 bg-neutral-800 text-sm focus:outline-none focus:border-blue-500 rounded-md min-w-[120px]"
@@ -437,7 +422,6 @@
                 </option>
             </select>
 
-            <!-- Search input -->
             <div class="relative flex-grow max-w-sm">
                 <input
                     type="text"
@@ -462,7 +446,6 @@
                 </svg>
             </div>
 
-            <!-- Clear filters button -->
             <button
                 @click="logViewer.clearFilters()"
                 class="h-9 p-1.5 px-3 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 rounded-md flex items-center text-sm transition-colors"
@@ -487,9 +470,7 @@
         </div>
     </div>
 
-    <!-- Main content area with table and sidebar -->
     <div class="flex flex-1 overflow-hidden">
-        <!-- Logs table -->
         <div
             class="flex-1 overflow-auto transition-all duration-300"
             :class="{'mr-0': !logViewer.selectedLog, 'mr-[400px]': logViewer.selectedLog}"
@@ -676,7 +657,6 @@
             </table>
         </div>
 
-        <!-- Detail sidebar with transition -->
         <div
             class="fixed top-0 right-0 bottom-0 w-[400px] bg-neutral-900 border-l border-neutral-800 overflow-y-auto z-30 shadow-xl flex flex-col transform transition-transform duration-300 ease-in-out"
             :class="logViewer.selectedLog ? 'translate-x-0' : 'translate-x-full'"
@@ -835,7 +815,6 @@
         </div>
     </div>
 
-    <!-- Pagination controls -->
     <div
         class="border-t border-neutral-800 p-4 flex justify-between items-center"
     >

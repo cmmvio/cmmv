@@ -11,6 +11,7 @@ const useFormBuilder = () => {
 
     const ui = reactive({
         activePropertyTab: 'attributes',
+        activeElementsTab: 'fields',
         draggedComponent: null,
         dropPreviewPosition: 0,
         isDraggingNewComponent: false,
@@ -82,13 +83,35 @@ const useFormBuilder = () => {
             component.defaultValue = '';
         }
 
+        else if (type === 'heading') {
+            component.headingSize = 'h1';
+            component.content = 'Heading Text';
+        } else if (type === 'divider') {
+            component.dividerStyle = 'solid';
+        } else if (type === 'quote') {
+            component.content = 'This is a quotation.';
+            component.author = '';
+        } else if (type === 'alert') {
+            component.alertType = 'info';
+            component.content = 'This is an alert message.';
+        } else if (type === 'image') {
+            component.imageUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAP8AAADGCAMAAAAqo6adAAAAKlBMVEXQ0NDw8PDOzs7y8vLa2trf39/b29vr6+vW1tbU1NTl5eXt7e3n5+fh4eHlFfvKAAADdUlEQVR4nO2dCYKCMBAEMQG59P/fXVB0FckB5JjMdL0gVYSsSMxWFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQglJ9V9ddr1TukeRA1cOon7RNJS5Bc9H6sjAlGPrcA0qJ6sa3/CtBI2cKqEav9OcCt9zDSoW6/9rPAdrcA0vDdPW39MUE6Az6U4BBwhowmvSnAHXuwUXHcPMvjLmHFx+L/TQBrrmHFxvT4vdaApmvAKq1+l8098+BVnv+N4D5j9/iP+QeYVyuLn/mC4B9+Ztg7m/96z8z8vZ3XX/u8792+d94+/cu/3vuEUbGcftzfwJSN8fnv9wDjI19AeB++1fWx//Jv8s9vOjYPgEKuPzWJ0D2T38PzPrMH/4WTM+A+s5/9j/oNl5/SPn290G/fv0l7AVYVQ3fU0DrtpekX6l+eL8Ant+A16LsZ1R1HdpZf7w1sq79m+fGD5nbPwAAAAAAAAAAAADACUS8RjJT66vg79RUrS+CA6jHDgOxAdSywUJoAPXeX6LlvVL51BcZQH3tLpIXYLW5SlqAn71logKoja11ggJs6QsKsK0vJoBJX0gAs76MANZdxfwDOH5VwT2A60clvAPY7n0BAXz0GQfw02cbwFefawBvfZ4BduhzDLBLn1+AnfoFBNjz8y//pa+UAKrZ8a31EX3aAeaDobwDHNOnHOB5Lpbv+A7q0w3wOhbMbwYc1qca4P9UNJ8AJ/RpBvg8FM4d4JQ+xQDfZ+K5ApzUpxdgfSSgNcDRlZ9ugN8TES0BQujTCrB1IKQ5QBB9SgG2z8M0jS+QPp0ApuNAt2dAMH0qAYynoW4GCKhPI4BZfytAUH0KAWz6vwEC6+cPYNdfBwiunzuAS/87QAT9vAHc+p/ji6KfM4CP/v8MiKSfL4Cf/itANP1cAXz1nwEi6ucJ4K8/j891auxJ0gfYo5+A1AGI6acOQE4/bQCC+ikDkNRPF4CofqoAZPXTBCCsnyIAaf34AYjrxw5AXj9ugAL0YwYoQj9egEL0YwUoRj9OgIL0YwQoSj98gML0QwcoTj9sgAL1QwYoUj9cgEL1QwUoVj9MgIL1QwQoWv98gML1zwYoXv9cAAb6ZwKw0D8egIn+0QBs9I8FYKR/JAAr/f0BmOnvDcBOf18Ahvq7AnDU5/+fSQEAAAAAAAAAAABM9LL5A+aIOy3aq/BcAAAAAElFTkSuQmCC';
+            component.imageAlt = 'Image description';
+            component.caption = '';
+            component.imageWidth = 'w-full';
+        } else if (type === 'link') {
+            component.linkUrl = '#';
+            component.linkText = 'Click here';
+            component.openInNewTab = false;
+        } else if (type === 'html') {
+            component.htmlContent = '<p>Add your HTML content here.</p>';
+        }
+
         components.value.push(component);
         selectComponent(component);
     }
 
-    // Add component from contract field
     function addComponentFromField(field) {
-        // Don't allow adding components in read-only mode
         if (isReadOnly.value) return;
 
         if (!field || !field.propertyKey) return;
@@ -98,11 +121,9 @@ const useFormBuilder = () => {
         selectComponent(component);
     }
 
-    // Helper to create a component from a field (used both by addComponentFromField and generateAutoForm)
     function createComponentFromField(field) {
         if (!field || !field.propertyKey) return null;
 
-        // Map contract field type to form component type
         let componentType = 'text';
         if (field.protoType === 'boolean' || field.protoType === 'bool') {
             componentType = 'checkbox';
@@ -122,8 +143,7 @@ const useFormBuilder = () => {
             helpText: '',
             contractFieldId: field.propertyKey,
             readOnly: field.readOnly || false,
-            gridSize: 12, // Tamanho padrão: ocupa as 12 colunas
-            // Add default styles
+            gridSize: 12,
             styles: {
                 bgColor: 'bg-white dark:bg-neutral-800',
                 textColor: 'text-neutral-700 dark:text-neutral-300',
@@ -134,7 +154,6 @@ const useFormBuilder = () => {
             }
         };
 
-        // Add options for select if it has enum values
         if (componentType === 'select' && field.enum) {
             component.options = field.enum.map((value, index) => ({
                 value: value.toString(),
@@ -150,18 +169,13 @@ const useFormBuilder = () => {
         return component;
     }
 
-    // Generate form from contract fields
     function generateFromContractFields() {
-        // Don't regenerate if in read-only mode
         if (isReadOnly.value) return;
 
-        // Generate form using internal auto-generation
         generateAutoForm();
     }
 
-    // Internal function to auto generate form from contract fields
     function generateAutoForm() {
-        // Clear existing components
         components.value = [];
         selectedComponent.value = null;
 
@@ -169,9 +183,7 @@ const useFormBuilder = () => {
             return;
         }
 
-        // Add a component for each field
         currentContract.fields.forEach(field => {
-            // Skip hidden fields or fields that shouldn't be in forms
             const skipFields = ['id', 'createdAt', 'updatedAt', 'deletedAt', 'createdBy', 'updatedBy', 'deletedBy', 'deleted'];
             if (!skipFields.includes(field.propertyKey)) {
                 const component = createComponentFromField(field);
@@ -182,9 +194,7 @@ const useFormBuilder = () => {
         });
     }
 
-    // Save form to contract
     function saveFormToContract() {
-        // Don't save if in read-only mode
         if (isReadOnly.value) return;
 
         if (!currentContract) {
@@ -192,7 +202,6 @@ const useFormBuilder = () => {
             return;
         }
 
-        // Create form configuration object
         const formConfig = {
             settings: formSettings,
             components: components.value.map(component => ({
@@ -205,32 +214,24 @@ const useFormBuilder = () => {
                 helpText: component.helpText,
                 contractFieldId: component.contractFieldId,
                 readOnly: component.readOnly,
-                gridSize: component.gridSize, // Salvar o tamanho da grade
+                gridSize: component.gridSize,
                 options: component.options ? [...component.options] : undefined,
-                // Add styles to the saved configuration
                 styles: component.styles ? { ...component.styles } : undefined
             }))
         };
 
-        // Save to contract's viewForm property
         currentContract.viewForm = formConfig;
 
-        // Show success message
         alert('Form configuration saved to contract successfully!');
     }
 
-    // Select a component for editing
     function selectComponent(component) {
-        console.log('selectComponent', component);
-        // Don't allow selection in read-only mode
         if (isReadOnly.value) return;
 
         selectedComponent.value = component;
     }
 
-    // Delete a component from the form
     function deleteComponent(id) {
-        // Don't allow deletion in read-only mode
         if (isReadOnly.value) return;
 
         const index = components.value.findIndex(c => c.id === id);
@@ -240,21 +241,16 @@ const useFormBuilder = () => {
         }
     }
 
-    // Toggle preview mode
     function togglePreviewMode() {
-        // In read-only mode, don't allow toggling (always stay in preview)
         if (isReadOnly.value) return;
 
         previewMode.value = !previewMode.value;
-        // When entering preview mode, clear any component selection
         if (previewMode.value) {
             selectedComponent.value = null;
         }
     }
 
-    // Add option to a select/checkbox/radio component
     function addOption() {
-        // Don't allow option modification in read-only mode
         if (isReadOnly.value) return;
 
         if (!selectedComponent.value) return;
@@ -273,9 +269,7 @@ const useFormBuilder = () => {
         }
     }
 
-    // Remove an option from a select/checkbox/radio component
     function removeOption(index) {
-        // Don't allow option modification in read-only mode
         if (isReadOnly.value) return;
 
         if (!selectedComponent.value || !selectedComponent.value.options) return;
@@ -283,14 +277,11 @@ const useFormBuilder = () => {
         selectedComponent.value.options.splice(index, 1);
     }
 
-    // Generate HTML for a component
     function getComponentHtml(component, isPreview) {
-        // In read-only mode, always render as if in preview
         if (isReadOnly.value) {
             isPreview = true;
         }
 
-        // Extract styles for cleaner code
         const styles = component.styles || {
             bgColor: 'bg-white dark:bg-neutral-800',
             textColor: 'text-neutral-700 dark:text-neutral-300',
@@ -300,26 +291,115 @@ const useFormBuilder = () => {
             rounded: 'rounded-md'
         };
 
-        // Special case for hidden input - it doesn't need the usual wrapper in preview mode
         if (component.type === 'hidden' && isPreview) {
             return `<input type="hidden" name="${component.name}" value="${component.defaultValue || ''}">`;
         }
 
-        let html = `
-        <div class="${styles.margin}">
-          <label class="block ${styles.textSize} font-medium mb-1 ${isPreview ? styles.textColor : 'text-neutral-300'}">
-            ${component.label}${component.required ? ' <span class="text-red-500">*</span>' : ''}
-            ${component.readOnly ? '<span class="text-yellow-500 ml-1">[Read-only]</span>' : ''}
-            ${component.type === 'hidden' ? '<span class="bg-neutral-700 text-neutral-300 ml-1 px-1 py-0.5 text-xs rounded">[Hidden]</span>' : ''}
-          </label>
-      `;
+        const isStaticComponent = ['heading', 'divider', 'quote', 'alert', 'image', 'link', 'html'].includes(component.type);
 
-        // Mark readonly fields as disabled
+        let html = '';
+
+        if (isStaticComponent) {
+            html = `<div class="${styles.margin}">`;
+        } else {
+            html = `
+                <div class="${styles.margin}">
+                  <label class="block ${styles.textSize} font-medium mb-1 ${isPreview ? styles.textColor : 'text-neutral-300'}">
+                    ${component.label}${component.required ? ' <span class="text-red-500">*</span>' : ''}
+                    ${component.readOnly ? '<span class="text-yellow-500 ml-1">[Read-only]</span>' : ''}
+                    ${component.type === 'hidden' ? '<span class="bg-neutral-700 text-neutral-300 ml-1 px-1 py-0.5 text-xs rounded">[Hidden]</span>' : ''}
+                  </label>
+              `;
+        }
+
         const isDisabled = !isPreview || component.readOnly ? 'disabled' : '';
 
         switch (component.type) {
+            case 'heading':
+                const headingSize = component.headingSize || 'h1';
+                const headingSizeClasses = {
+                    h1: 'text-3xl font-bold',
+                    h2: 'text-2xl font-bold',
+                    h3: 'text-xl font-bold',
+                    h4: 'text-lg font-bold',
+                    h5: 'text-base font-bold',
+                    h6: 'text-sm font-bold'
+                };
+                html += `<${headingSize} class="${headingSizeClasses[headingSize]} ${styles.textColor}">${component.content || 'Heading Text'}</${headingSize}>`;
+                break;
+
+            case 'divider':
+                const dividerStyle = component.dividerStyle || 'solid';
+                const dividerClasses = {
+                    solid: 'border-t',
+                    dashed: 'border-t border-dashed',
+                    dotted: 'border-t border-dotted'
+                };
+                html += `<hr class="${dividerClasses[dividerStyle]} border-neutral-300 dark:border-neutral-600 my-4">`;
+                break;
+
+            case 'quote':
+                html += `
+                    <blockquote class="pl-4 border-l-4 border-neutral-300 dark:border-neutral-600 italic ${styles.textColor}">
+                        <p>${component.content || 'This is a quotation.'}</p>
+                        ${component.author ? `<footer class="text-sm text-neutral-500 mt-2">— ${component.author}</footer>` : ''}
+                    </blockquote>
+                `;
+                break;
+
+            case 'alert':
+                const alertType = component.alertType || 'info';
+                const alertClasses = {
+                    info: 'bg-blue-100 border-blue-500 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+                    success: 'bg-green-100 border-green-500 text-green-800 dark:bg-green-900 dark:text-green-300',
+                    warning: 'bg-yellow-100 border-yellow-500 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+                    error: 'bg-red-100 border-red-500 text-red-800 dark:bg-red-900 dark:text-red-300'
+                };
+                html += `
+                    <div class="p-4 border-l-4 rounded-r ${alertClasses[alertType]}">
+                        <div class="flex">
+                            <div class="ml-3">
+                                <p class="text-sm">${component.content || 'This is an alert message.'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                break;
+
+            case 'image':
+                html += `
+                    <figure class="flex flex-col items-center">
+                        <img
+                            src="${component.imageUrl || 'https://via.placeholder.com/800x400?text=Image'}"
+                            alt="${component.imageAlt || 'Image'}"
+                            class="${component.imageWidth || 'w-full'} ${styles.rounded}"
+                        >
+                        ${component.caption ? `<figcaption class="text-sm text-center text-neutral-500 mt-2">${component.caption}</figcaption>` : ''}
+                    </figure>
+                `;
+                break;
+
+            case 'link':
+                html += `
+                    <a
+                        href="${component.linkUrl || '#'}"
+                        class="text-blue-600 hover:underline dark:text-blue-400"
+                        ${component.openInNewTab ? 'target="_blank" rel="noopener noreferrer"' : ''}
+                    >
+                        ${component.linkText || 'Click here'}
+                    </a>
+                `;
+                break;
+
+            case 'html':
+                html += `
+                    <div class="static-html">
+                        ${component.htmlContent || '<p>Add your HTML content here.</p>'}
+                    </div>
+                `;
+                break;
+
             case 'hidden':
-                // Para o modo de edição, mostramos uma representação visual do campo oculto
                 if (!isPreview) {
                     html += `
                     <div class="flex items-center">
@@ -330,40 +410,44 @@ const useFormBuilder = () => {
                             disabled>
                     </div>`;
                 } else {
-                    // No modo de preview, adicione o campo oculto real
                     html += `<input type="hidden" name="${component.name}" value="${component.defaultValue || ''}">`;
                 }
                 break;
+
             case 'text':
                 html += `<input type="text"
-                  placeholder="${component.placeholder || ''}"
-                  class="w-full ${styles.padding} border ${isPreview ? 'border-neutral-300 dark:border-neutral-600' : 'border-neutral-700'} ${styles.rounded} ${styles.bgColor} ${styles.textColor} ${component.readOnly ? 'opacity-70' : ''}"
-                  ${isDisabled}>`;
+                      placeholder="${component.placeholder || ''}"
+                      class="w-full ${styles.padding} border ${isPreview ? 'border-neutral-300 dark:border-neutral-600' : 'border-neutral-700'} ${styles.rounded} ${styles.bgColor} ${styles.textColor} ${component.readOnly ? 'opacity-70' : ''}"
+                      ${isDisabled}>`;
                 break;
+
             case 'textarea':
                 html += `<textarea
-                  placeholder="${component.placeholder || ''}"
-                  rows="${component.rows || 4}"
-                  class="w-full ${styles.padding} border ${isPreview ? 'border-neutral-300 dark:border-neutral-600' : 'border-neutral-700'} ${styles.rounded} ${styles.bgColor} ${styles.textColor} ${component.readOnly ? 'opacity-70' : ''}"
-                  ${isDisabled}></textarea>`;
+                      placeholder="${component.placeholder || ''}"
+                      rows="${component.rows || 4}"
+                      class="w-full ${styles.padding} border ${isPreview ? 'border-neutral-300 dark:border-neutral-600' : 'border-neutral-700'} ${styles.rounded} ${styles.bgColor} ${styles.textColor} ${component.readOnly ? 'opacity-70' : ''}"
+                      ${isDisabled}></textarea>`;
                 break;
+
             case 'number':
                 html += `<input type="number"
-                  placeholder="${component.placeholder || ''}"
-                  class="w-full ${styles.padding} border ${isPreview ? 'border-neutral-300 dark:border-neutral-600' : 'border-neutral-700'} ${styles.rounded} ${styles.bgColor} ${styles.textColor} ${component.readOnly ? 'opacity-70' : ''}"
-                  ${isDisabled}>`;
+                      placeholder="${component.placeholder || ''}"
+                      class="w-full ${styles.padding} border ${isPreview ? 'border-neutral-300 dark:border-neutral-600' : 'border-neutral-700'} ${styles.rounded} ${styles.bgColor} ${styles.textColor} ${component.readOnly ? 'opacity-70' : ''}"
+                      ${isDisabled}>`;
                 break;
+
             case 'datepicker':
                 html += `<input type="date"
-                  placeholder="${component.placeholder || ''}"
-                  class="w-full ${styles.padding} border ${isPreview ? 'border-neutral-300 dark:border-neutral-600' : 'border-neutral-700'} ${styles.rounded} ${styles.bgColor} ${styles.textColor} ${component.readOnly ? 'opacity-70' : ''}"
-                  ${isDisabled}>`;
+                      placeholder="${component.placeholder || ''}"
+                      class="w-full ${styles.padding} border ${isPreview ? 'border-neutral-300 dark:border-neutral-600' : 'border-neutral-700'} ${styles.rounded} ${styles.bgColor} ${styles.textColor} ${component.readOnly ? 'opacity-70' : ''}"
+                      ${isDisabled}>`;
                 break;
+
             case 'select':
                 html += `
-            <select class="w-full ${styles.padding} border ${isPreview ? 'border-neutral-300 dark:border-neutral-600' : 'border-neutral-700'} ${styles.rounded} ${styles.bgColor} ${styles.textColor} ${component.readOnly ? 'opacity-70' : ''}"
-                   ${isDisabled}>
-          `;
+                <select class="w-full ${styles.padding} border ${isPreview ? 'border-neutral-300 dark:border-neutral-600' : 'border-neutral-700'} ${styles.rounded} ${styles.bgColor} ${styles.textColor} ${component.readOnly ? 'opacity-70' : ''}"
+                       ${isDisabled}>
+             `;
 
                 if (component.options) {
                     component.options.forEach(option => {
@@ -373,42 +457,45 @@ const useFormBuilder = () => {
 
                 html += `</select>`;
                 break;
+
             case 'radio':
                 if (component.options) {
                     component.options.forEach((option, idx) => {
                         html += `
-                <div class="flex items-center mt-2">
-                  <input type="radio" id="radio_${option.value}" name="${component.name || 'radio_group'}" value="${option.value}"
-                        class="mr-2 ${component.readOnly ? 'opacity-70' : ''}"
-                        ${isDisabled}>
-                  <label for="radio_${option.value}" class="text-sm ${isPreview ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-300'}">${option.label}</label>
-                </div>
-              `;
+                    <div class="flex items-center mt-2">
+                      <input type="radio" id="radio_${option.value}" name="${component.name || 'radio_group'}" value="${option.value}"
+                            class="mr-2 ${component.readOnly ? 'opacity-70' : ''}"
+                            ${isDisabled}>
+                      <label for="radio_${option.value}" class="text-sm ${isPreview ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-300'}">${option.label}</label>
+                    </div>
+                  `;
                     });
                 }
                 break;
+
             case 'checkbox':
                 if (component.options) {
                     component.options.forEach(option => {
                         html += `
-                <div class="flex items-center mt-2">
-                  <input type="checkbox" id="check_${option.value}" value="${option.value}"
-                        class="rounded border-neutral-300 dark:border-neutral-600 mr-2 ${component.readOnly ? 'opacity-70' : ''}"
-                        ${isDisabled}>
-                  <label for="check_${option.value}" class="text-sm ${isPreview ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-300'}">${option.label}</label>
-                </div>
-              `;
+                    <div class="flex items-center mt-2">
+                      <input type="checkbox" id="check_${option.value}" value="${option.value}"
+                            class="rounded border-neutral-300 dark:border-neutral-600 mr-2 ${component.readOnly ? 'opacity-70' : ''}"
+                            ${isDisabled}>
+                      <label for="check_${option.value}" class="text-sm ${isPreview ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-300'}">${option.label}</label>
+                    </div>
+                  `;
                     });
                 } else {
                     html += `
-              <div class="flex items-center mt-2">
-                <input type="checkbox" class="rounded border-neutral-300 dark:border-neutral-600 mr-2 ${component.readOnly ? 'opacity-70' : ''}"
-                      ${isDisabled}>
-                <label class="text-sm ${isPreview ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-300'}">Yes</label>
-              </div>
-            `;
+                  <div class="flex items-center mt-2">
+                    <input type="checkbox" class="rounded border-neutral-300 dark:border-neutral-600 mr-2 ${component.readOnly ? 'opacity-70' : ''}"
+                          ${isDisabled}>
+                    <label class="text-sm ${isPreview ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-300'}">Yes</label>
+                  </div>
+                `;
                 }
                 break;
+
             case 'slider':
                 const min = component.min || 0;
                 const max = component.max || 100;
@@ -416,28 +503,28 @@ const useFormBuilder = () => {
                 const defaultValue = component.defaultValue || (min + max) / 2;
 
                 html += `
-              <div class="flex flex-col">
-                <div class="flex justify-between mb-1 text-xs ${isPreview ? 'text-neutral-600 dark:text-neutral-400' : 'text-neutral-400'}">
-                  <span>${min}</span>
-                  <span>${max}</span>
-                </div>
-                <input
-                  type="range"
-                  min="${min}"
-                  max="${max}"
-                  step="${step}"
-                  value="${defaultValue}"
-                  class="w-full ${component.readOnly ? 'opacity-70' : ''}"
-                  ${isDisabled}>
-                <div class="text-center mt-1 text-xs ${isPreview ? 'text-neutral-600 dark:text-neutral-400' : 'text-neutral-400'}">
-                  Value: ${defaultValue}
-                </div>
-              </div>
-            `;
+                  <div class="flex flex-col">
+                    <div class="flex justify-between mb-1 text-xs ${isPreview ? 'text-neutral-600 dark:text-neutral-400' : 'text-neutral-400'}">
+                      <span>${min}</span>
+                      <span>${max}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="${min}"
+                      max="${max}"
+                      step="${step}"
+                      value="${defaultValue}"
+                      class="w-full ${component.readOnly ? 'opacity-70' : ''}"
+                      ${isDisabled}>
+                    <div class="text-center mt-1 text-xs ${isPreview ? 'text-neutral-600 dark:text-neutral-400' : 'text-neutral-400'}">
+                      Value: ${defaultValue}
+                    </div>
+                  </div>
+                `;
                 break;
         }
 
-        if (component.helpText) {
+        if (component.helpText && !isStaticComponent) {
             html += `<p class="mt-1 text-xs ${isPreview ? 'text-neutral-500 dark:text-neutral-400' : 'text-neutral-500'}">${component.helpText}</p>`;
         }
 
@@ -445,9 +532,7 @@ const useFormBuilder = () => {
         return html;
     }
 
-    // Drag and drop handlers
     function handleDragStart(event, type) {
-        // Prevent drag in read-only mode
         if (isReadOnly.value) {
             event.preventDefault();
             return false;
@@ -456,11 +541,10 @@ const useFormBuilder = () => {
         event.dataTransfer.setData('componentType', type);
         event.dataTransfer.effectAllowed = 'copy';
         isDragging.value = true;
-        ui.isDraggingNewComponent = true; // Indica que estamos arrastando do sidebar
+        ui.isDraggingNewComponent = true;
     }
 
     function handleDragOver(event) {
-        // Prevent drop in read-only mode
         if (isReadOnly.value) {
             return;
         }
@@ -470,7 +554,6 @@ const useFormBuilder = () => {
     }
 
     function handleDragLeave(event) {
-        // Only set to false if we're leaving the main drop area
         if (!event.currentTarget.contains(event.relatedTarget)) {
             isDragging.value = false;
             ui.isDraggingNewComponent = false;
@@ -478,7 +561,6 @@ const useFormBuilder = () => {
     }
 
     function handleDrop(event) {
-        // Prevent drop in read-only mode
         if (isReadOnly.value) {
             return;
         }
@@ -493,7 +575,6 @@ const useFormBuilder = () => {
         }
     }
 
-    // Helper functions
     function getDefaultLabel(type) {
         const labels = {
             'text': 'Text Input',
@@ -504,23 +585,26 @@ const useFormBuilder = () => {
             'radio': 'Radio Buttons',
             'checkbox': 'Checkbox',
             'slider': 'Slider',
-            'hidden': 'Hidden Input'
+            'hidden': 'Hidden Input',
+            'heading': 'Heading',
+            'divider': 'Divider',
+            'quote': 'Quote',
+            'alert': 'Alert',
+            'image': 'Image',
+            'link': 'Link',
+            'html': 'HTML Content'
         };
         return labels[type] || 'New Field';
     }
 
     function getDefaultName(type) {
-        // Convert to snake_case
         return getDefaultLabel(type).toLowerCase().replace(/\s+/g, '_');
     }
 
-    // Handle form submission in preview mode
     function handleFormSubmit() {
-        console.log('Form submitted with data:', components.value);
         alert('Form submitted successfully!');
     }
 
-    // Update contract fields from the current contract
     function updateContractFields() {
         if (currentContract && currentContract.fields) {
             contractFields.value = currentContract.fields;
@@ -529,7 +613,6 @@ const useFormBuilder = () => {
         }
     }
 
-    // Load form configuration from the current contract
     function loadFormFromContract() {
         if (!currentContract) return;
 
@@ -538,20 +621,15 @@ const useFormBuilder = () => {
         try {
             let formLoaded = false;
 
-            // Load saved form configuration if available
             if (currentContract.viewForm) {
-                // Load form settings
                 if (currentContract.viewForm.settings) {
                     Object.assign(formSettings, currentContract.viewForm.settings);
                 }
 
-                // Load components
                 if (currentContract.viewForm.components && Array.isArray(currentContract.viewForm.components)) {
                     components.value = currentContract.viewForm.components;
 
-                    // Ensure each component has a readOnly property and styles
                     components.value.forEach(component => {
-                        // If the component has a contractFieldId, get the field's readOnly value
                         if (component.contractFieldId) {
                             const field = contractFields.value.find(f =>
                                 f.propertyKey === component.contractFieldId);
@@ -561,12 +639,10 @@ const useFormBuilder = () => {
                             }
                         }
 
-                        // If readOnly is not set, default to false
                         if (component.readOnly === undefined) {
                             component.readOnly = false;
                         }
 
-                        // Ensure styles exist
                         if (!component.styles) {
                             component.styles = {
                                 bgColor: 'bg-white dark:bg-neutral-800',
@@ -578,105 +654,80 @@ const useFormBuilder = () => {
                             };
                         }
 
-                        // Ensure gridSize exists
                         if (component.gridSize === undefined) {
                             component.gridSize = 12;
                         }
                     });
 
-                    // Reset nextId to be higher than any existing component id
                     nextId = Math.max(0, ...components.value.map(c => c.id || 0)) + 1;
                     formLoaded = true;
                 }
             }
 
-            // If in read-only mode and no form configuration was loaded,
-            // automatically generate the form from contract fields
             if (isReadOnly.value && !formLoaded) {
                 generateAutoForm();
             }
 
-            // When it's a module contract or any time we have a read-only contract,
-            // enable preview mode to show fields as disabled
             if (isReadOnly.value) {
                 previewMode.value = true;
                 selectedComponent.value = null;
             }
         } catch (error) {
-            console.error("Error loading form from contract:", error);
+            console.error(error);
         } finally {
             isLoading.value = false;
         }
     }
 
-    // Move a component up in the list
     function moveComponentUp(id) {
-        // Don't allow moving in read-only mode
         if (isReadOnly.value) return;
 
         const index = components.value.findIndex(c => c.id === id);
         if (index > 0) {
-            // Swap with the previous component
             [components.value[index], components.value[index - 1]] =
-            [components.value[index - 1], components.value[index]];
+                [components.value[index - 1], components.value[index]];
         }
     }
 
-    // Move a component down in the list
     function moveComponentDown(id) {
-        // Don't allow moving in read-only mode
         if (isReadOnly.value) return;
 
         const index = components.value.findIndex(c => c.id === id);
         if (index >= 0 && index < components.value.length - 1) {
-            // Swap with the next component
             [components.value[index], components.value[index + 1]] =
-            [components.value[index + 1], components.value[index]];
+                [components.value[index + 1], components.value[index]];
         }
     }
 
-    // Handle drag start for component reordering
     function handleComponentDragStart(event, component) {
-        // Don't allow dragging in read-only mode
         if (isReadOnly.value || previewMode.value) {
             event.preventDefault();
             return false;
         }
 
-        // Prevent text selection during drag
         event.stopPropagation();
 
-        // Store the dragged component
         ui.draggedComponent = component;
 
-        // Set data transfer to make drag work across browsers
         event.dataTransfer.effectAllowed = 'move';
-        event.dataTransfer.setData('application/json', JSON.stringify({id: component.id}));
+        event.dataTransfer.setData('application/json', JSON.stringify({ id: component.id }));
 
-        // Set initial drop position based on the dragged component's position
         const componentElement = event.target.closest('.mb-4.relative');
         if (componentElement) {
-            // Posicionar inicialmente no topo do componente arrastado
             ui.dropPreviewPosition = componentElement.offsetTop;
-            // Também define o target como o próprio componente no início
             ui.targetComponent = component;
-            ui.dropPosition = 'before'; // Default position
+            ui.dropPosition = 'before';
         }
 
-        // Add a delay to allow dragging visual to appear
         setTimeout(() => {
             event.target.classList.add('opacity-50');
         }, 0);
     }
 
-    // Handle drag over for component reordering
     function handleComponentDragOver(event, targetComponent) {
-        // Don't allow dragging in read-only mode
         if (isReadOnly.value || previewMode.value || !ui.draggedComponent) return;
 
-        // Se for o mesmo componente, ignorar
         if (ui.draggedComponent.id === targetComponent.id) {
-            // Esconde o indicador quando arrasta sobre o próprio componente
             ui.dropPreviewPosition = -1000;
             return;
         }
@@ -684,34 +735,26 @@ const useFormBuilder = () => {
         event.preventDefault();
         event.dataTransfer.dropEffect = 'move';
 
-        // Salvar o componente alvo atual
         ui.targetComponent = targetComponent;
 
-        // Calcular a posição da barra indicadora
         const wrapper = event.target.closest('.mb-4.relative');
         if (!wrapper) return;
 
-        // Obter a posição e dimensões do wrapper
         const rect = wrapper.getBoundingClientRect();
         const mouseY = event.clientY - rect.top;
         const midPoint = rect.height / 2;
 
-        // Definir a posição de inserção (antes ou depois)
         if (mouseY < midPoint) {
             ui.dropPosition = 'before';
-            // Posicionar no topo do componente
             ui.dropPreviewPosition = wrapper.offsetTop;
         } else {
             ui.dropPosition = 'after';
-            // Posicionar no fundo do componente
             ui.dropPreviewPosition = wrapper.offsetTop + wrapper.offsetHeight;
         }
 
-        // Adicionar feedback visual ao componente alvo
         wrapper.classList.add('bg-blue-500/10');
     }
 
-    // Handle drag leave for component reordering
     function handleComponentDragLeave(event) {
         const wrapper = event.target.closest('.mb-4.relative');
         if (wrapper) {
@@ -719,56 +762,43 @@ const useFormBuilder = () => {
         }
     }
 
-    // Handle drag end for component reordering
     function handleComponentDragEnd(event, component) {
         event.preventDefault();
         event.stopPropagation();
 
-        // Limpar qualquer alteração visual
         const wrappers = document.querySelectorAll('.mb-4.relative');
         wrappers.forEach(wrapper => {
             wrapper.classList.remove('bg-blue-500/10', 'opacity-50');
         });
 
-        // Verificar se temos um destino para realizar a reordenação
         if (ui.draggedComponent && ui.targetComponent && ui.draggedComponent.id !== ui.targetComponent.id) {
-            // Obter as posições no array
             const draggedIndex = components.value.findIndex(c => c.id === ui.draggedComponent.id);
             const targetIndex = components.value.findIndex(c => c.id === ui.targetComponent.id);
 
             if (draggedIndex >= 0 && targetIndex >= 0) {
-                // Cria uma cópia do array para preservar a reatividade
                 const updatedComponents = [...components.value];
 
-                // Remove o componente arrastado
                 const [draggedComponent] = updatedComponents.splice(draggedIndex, 1);
 
-                // Recalcula o índice de destino após a remoção
                 let insertPosition = targetIndex;
                 if (draggedIndex < targetIndex) {
                     insertPosition--;
                 }
 
-                // Insere na posição correta baseado na posição do mouse
                 if (ui.dropPosition === 'before') {
-                    // Inserir antes do alvo
                     updatedComponents.splice(insertPosition, 0, draggedComponent);
                 } else {
-                    // Inserir depois do alvo
                     updatedComponents.splice(insertPosition + 1, 0, draggedComponent);
                 }
 
-                // Atualiza o array de componentes
                 components.value = updatedComponents;
             }
         }
 
-        // Adicionar novo componente se estiver arrastando do sidebar
         const componentType = event.dataTransfer.getData('componentType');
         if (componentType && ui.targetComponent) {
             const index = components.value.findIndex(c => c.id === ui.targetComponent.id);
             if (index !== -1) {
-                // Criar novo componente
                 const newComponent = {
                     id: nextId++,
                     type: componentType,
@@ -789,7 +819,6 @@ const useFormBuilder = () => {
                     }
                 };
 
-                // Adicionar opções para tipos específicos
                 if (componentType === 'select' || componentType === 'checkbox' || componentType === 'radio') {
                     newComponent.options = [
                         { value: 'option1', label: 'Option 1' },
@@ -797,7 +826,6 @@ const useFormBuilder = () => {
                     ];
                 }
 
-                // Inserir antes ou depois conforme a posição
                 if (ui.dropPosition === 'before') {
                     components.value.splice(index, 0, newComponent);
                 } else {
@@ -806,7 +834,6 @@ const useFormBuilder = () => {
             }
         }
 
-        // Resetar todos os estados
         ui.draggedComponent = null;
         ui.targetComponent = null;
         ui.dropPreviewPosition = 0;
@@ -815,37 +842,29 @@ const useFormBuilder = () => {
         ui.isDraggingNewComponent = false;
     }
 
-    // Add support for drop on empty form and end of list
     function handleCanvasDrop(event) {
-        // Don't allow dropping in read-only mode
         if (isReadOnly.value || previewMode.value) return;
 
         event.preventDefault();
         event.stopPropagation();
 
-        // Verificar se é um novo componente do sidebar
         const componentType = event.dataTransfer.getData('componentType');
         if (componentType) {
-            // Adicionar novo componente ao final
             addComponent(componentType);
             isDragging.value = false;
             ui.isDraggingNewComponent = false;
             return;
         }
 
-        // Se for um componente existente, move para o final
         if (!ui.draggedComponent) return;
 
-        // Get the position of dragged component
         const draggedIndex = components.value.findIndex(c => c.id === ui.draggedComponent.id);
 
         if (draggedIndex < 0) return;
 
-        // Remove from current position and add to end
         const [draggedComponent] = components.value.splice(draggedIndex, 1);
         components.value.push(draggedComponent);
 
-        // Reset state
         ui.draggedComponent = null;
         ui.targetComponent = null;
         ui.dropPreviewPosition = 0;
@@ -853,85 +872,62 @@ const useFormBuilder = () => {
         ui.isDraggingNewComponent = false;
     }
 
-    // Adicionar esta função em vez de setupResizeHandlers
     function initResize(event, component) {
-        // Prevent event propagation
         event.preventDefault();
         event.stopPropagation();
 
-        // Ignore if in preview or read-only mode
         if (previewMode.value || isReadOnly.value) return;
 
-        // Get component element
         const componentElement = event.target.closest('.grid-component');
         if (!componentElement) return;
 
-        // Initial values
         const startX = event.clientX;
         const startWidth = componentElement.getBoundingClientRect().width;
         const containerWidth = componentElement.parentElement.getBoundingClientRect().width;
         const startGridSize = component.gridSize;
         const columnWidth = containerWidth / 12;
 
-        // Add visual feedback during resize
         document.body.classList.add('resizing');
         componentElement.classList.add('resizing');
 
-        // Ensure the component is selected
         selectComponent(component);
 
-        // Set the resizing flag
         component.isResizing = true;
 
-        // Event handlers
         function handleMouseMove(e) {
-            // Calculate how many columns to change by
             const dx = e.clientX - startX;
             const columnsChange = Math.round(dx / columnWidth);
             const newGridSize = Math.max(1, Math.min(12, startGridSize + columnsChange));
 
-            // Update component model
             component.gridSize = newGridSize;
 
-            // Update visual size during drag
             componentElement.style.gridColumn = `span ${newGridSize}`;
         }
 
         function handleMouseUp() {
-            // Remove event listeners
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
 
-            // Remove visual feedback
             document.body.classList.remove('resizing');
             componentElement.classList.remove('resizing');
 
-            // Clear inline style as Tailwind classes will handle it now
             componentElement.style.gridColumn = '';
 
-            // Clear the resizing flag
             component.isResizing = false;
         }
 
-        // Add event listeners
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
     }
 
-    // Adicione esta função antes do bloco return
     function setupResizeHandlers() {
-        // Não precisamos mais desta função já que estamos usando initResize diretamente
-        // Mantemos apenas para compatibilidade e evitar erros
-        console.log('Using direct resize handlers instead of setup');
+
     }
 
-    // Adicione esta função para inicializar se precisar
     function initializeResizing() {
-        // Função vazia para compatibilidade da API
-        console.log('Resize handlers are initialized directly');
+
     }
 
-    // Return the API
     return {
         components,
         selectedComponent,

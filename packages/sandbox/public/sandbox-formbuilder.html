@@ -1,36 +1,8 @@
 <div
     id="form-builder-app"
-    class="flex flex-col h-full bg-neutral-950 text-white"
+    class="flex flex-col h-full bg-neutral-800 text-white"
     v-if="formBuilder"
 >
-    <!-- Header -->
-    <div
-        class="border-b border-neutral-800 bg-neutral-900 p-3 flex justify-between items-center"
-    >
-        <h1 class="text-lg font-semibold">Contract Form Builder</h1>
-        <div class="flex items-center gap-2">
-            <!-- Read-only badge for module contracts -->
-            <div v-if="formBuilder.isReadOnly" class="px-2 py-1 bg-yellow-600 text-white text-xs rounded mr-2">
-                Read-only Mode
-            </div>
-
-            <button
-                v-if="!formBuilder.isReadOnly"
-                @click="formBuilder.saveFormToContract"
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-sm mr-2"
-            >
-                Save Changes
-            </button>
-            <button
-                v-if="!formBuilder.isReadOnly"
-                @click="formBuilder.togglePreviewMode"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm"
-            >
-                {{ formBuilder.previewMode ? 'Edit Mode' : 'Preview Mode' }}
-            </button>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <div class="flex-1 flex overflow-hidden">
         <!-- Left: Components Panel - Hide when in read-only mode -->
@@ -38,15 +10,27 @@
             v-if="!formBuilder.isReadOnly"
             class="w-[240px] flex-shrink-0 border-r border-neutral-800 bg-neutral-900 overflow-y-auto"
         >
-            <div class="p-3 border-b border-neutral-800 bg-neutral-800">
-                <h2 class="text-sm font-semibold text-neutral-300">
-                    Form Components
-                </h2>
+            <!-- Tabs for Attributes/Styles -->
+            <div class="flex border-b border-neutral-800">
+                <button
+                    class="flex-1 h-[40px] px-4 py-2 text-sm select-none"
+                    :class="formBuilder.ui.activeElementsTab === 'fields' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800'"
+                    @click="formBuilder.ui.activeElementsTab = 'fields'"
+                >
+                    Fields
+                </button>
+                <button
+                    class="flex-1 h-[40px] px-4 py-2 text-sm select-none"
+                    :class="formBuilder.ui.activeElementsTab === 'statics' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800'"
+                    @click="formBuilder.ui.activeElementsTab = 'statics'"
+                >
+                    Statics
+                </button>
             </div>
 
-            <div class="p-3">
+            <div class="p-3 h-[calc(100%-330px)] overflow-y-auto">
                 <!-- Basic Inputs Section -->
-                <div class="mb-4">
+                <div class="mb-4" v-show="formBuilder.ui.activeElementsTab === 'fields'">
                     <h3
                         class="text-xs uppercase text-neutral-500 font-semibold mb-2"
                     >
@@ -258,10 +242,145 @@
                         <span class="text-sm">Hidden Input</span>
                     </div>
                 </div>
+
+                <div class="mb-4" v-show="formBuilder.ui.activeElementsTab === 'statics'">
+                    <h3
+                        class="text-xs uppercase text-neutral-500 font-semibold mb-2"
+                    >
+                        Static Elements
+                    </h3>
+
+                    <!-- H1 Header -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('heading')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'heading')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-green-400"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path fill-rule="evenodd" d="M2.25 4.5A.75.75 0 0 1 3 3.75h14.25a.75.75 0 0 1 0 1.5H3a.75.75 0 0 1-.75-.75Zm0 4.5A.75.75 0 0 1 3 8.25h9.75a.75.75 0 0 1 0 1.5H3A.75.75 0 0 1 2.25 9Zm15-3A.75.75 0 0 1 18 5.25h.75a.75.75 0 0 1 0 1.5H18a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd"></path>
+                            <path d="M2.625 12.75a.75.75 0 0 1 .75-.75H12a.75.75 0 0 1 0 1.5H3.375a.75.75 0 0 1-.75-.75Zm4.5 4.5a.75.75 0 0 1 .75-.75h9a.75.75 0 0 1 0 1.5h-9a.75.75 0 0 1-.75-.75Z"></path>
+                        </svg>
+                        <span class="text-sm">H1 Header</span>
+                    </div>
+
+                    <!-- Divider -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('divider')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'divider')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-green-400"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path fill-rule="evenodd" d="M2.25 12c0-.69.56-1.25 1.25-1.25h17A1.25 1.25 0 0 1 21.75 12c0 .69-.56 1.25-1.25 1.25h-17A1.25 1.25 0 0 1 2.25 12Z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm">Divider</span>
+                    </div>
+
+                    <!-- Quote -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('quote')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'quote')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-green-400"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path fill-rule="evenodd" d="M4.5 3.75a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V6.75a3 3 0 0 0-3-3h-15Zm9 4.5a.75.75 0 0 0-1.5 0v7.5a.75.75 0 0 0 1.5 0v-7.5Zm1.5 0a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1-.75-.75ZM6 10.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1-.75-.75Zm0 3.75a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-.75Zm7.5 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm">Quote</span>
+                    </div>
+
+                    <!-- Alert -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('alert')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'alert')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-green-400"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm">Alert</span>
+                    </div>
+
+                    <!-- Image -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('image')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'image')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-green-400"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm">Image</span>
+                    </div>
+
+                    <!-- Link -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('link')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'link')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-green-400"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path fill-rule="evenodd" d="M19.902 4.098a3.75 3.75 0 0 0-5.304 0l-4.5 4.5a3.75 3.75 0 0 0 1.035 6.037.75.75 0 0 1-.646 1.353 5.25 5.25 0 0 1-1.449-8.45l4.5-4.5a5.25 5.25 0 1 1 7.424 7.424l-1.757 1.757a.75.75 0 1 1-1.06-1.06l1.757-1.757a3.75 3.75 0 0 0 0-5.304Zm-7.389 4.267a.75.75 0 0 1 1-.353 5.25 5.25 0 0 1 1.449 8.45l-4.5 4.5a5.25 5.25 0 1 1-7.424-7.424l1.757-1.757a.75.75 0 1 1 1.06 1.06l-1.757 1.757a3.75 3.75 0 1 0 5.304 5.304l4.5-4.5a3.75 3.75 0 0 0-1.035-6.037.75.75 0 0 1-.354-1Z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm">Link</span>
+                    </div>
+
+                    <!-- Static HTML -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('html')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'html')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-green-400"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path fill-rule="evenodd" d="M14.447 3.026a.75.75 0 0 1 .527.921l-4.5 16.5a.75.75 0 0 1-1.448-.394l4.5-16.5a.75.75 0 0 1 .921-.527ZM16.72 6.22a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06L21.44 12l-4.72-4.72a.75.75 0 0 1 0-1.06Zm-9.44 0a.75.75 0 0 1 0 1.06L2.56 12l4.72 4.72a.75.75 0 0 1-1.06 1.06L.97 12.53a.75.75 0 0 1 0-1.06L6.22 6.22a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-sm">Static HTML</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Contract Fields Section -->
-            <div class="p-3 border-t border-neutral-800">
+            <div class="p-3 pb-0 border-t border-neutral-800">
                 <div class="flex justify-between items-center mb-2">
                     <h3
                         class="text-xs uppercase text-neutral-500 font-semibold"
@@ -323,7 +442,7 @@
         >
             <div
                 id="form-builder-canvas"
-                class="w-full max-w-[1024px] overflow-y-auto p-6 bg-neutral-950 relative"
+                class="w-full max-w-[700px] overflow-y-auto p-6 bg-neutral-950 relative"
                 @dragover="!formBuilder.isReadOnly && formBuilder.handleDragOver($event)"
                 @dragleave="!formBuilder.isReadOnly && formBuilder.handleDragLeave($event)"
                 @drop="!formBuilder.isReadOnly && formBuilder.handleDrop($event)"
@@ -592,13 +711,6 @@
             v-if="!formBuilder.isReadOnly"
             class="w-[300px] flex-shrink-0 border-l border-neutral-800 bg-neutral-900 overflow-y-auto"
         >
-            <div class="p-3 border-b border-neutral-800 bg-neutral-800">
-                <h2 class="text-sm font-semibold text-neutral-300 select-none">
-                    Properties
-                </h2>
-            </div>
-
-
             <!-- Component properties tabs -->
             <div v-if="formBuilder.selectedComponent && !formBuilder.previewMode">
                 <!-- Tabs for Attributes/Styles -->
@@ -844,6 +956,225 @@
                                 This value will be submitted with the form but won't be visible to users.
                             </p>
                         </div>
+
+                        <!-- Configurações específicas para Heading -->
+                        <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'heading'" class="mt-4">
+                            <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
+                                Heading Options
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Heading Text</label>
+                                <input
+                                    type="text"
+                                    v-model="formBuilder.selectedComponent.content"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Heading Type</label>
+                                <select
+                                    v-model="formBuilder.selectedComponent.headingSize"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                >
+                                    <option value="h1">H1 (Largest)</option>
+                                    <option value="h2">H2</option>
+                                    <option value="h3">H3</option>
+                                    <option value="h4">H4</option>
+                                    <option value="h5">H5</option>
+                                    <option value="h6">H6 (Smallest)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Configurações específicas para Divider -->
+                        <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'divider'" class="mt-4">
+                            <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
+                                Divider Options
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Style</label>
+                                <select
+                                    v-model="formBuilder.selectedComponent.dividerStyle"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                >
+                                    <option value="solid">Solid</option>
+                                    <option value="dashed">Dashed</option>
+                                    <option value="dotted">Dotted</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Configurações específicas para Quote -->
+                        <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'quote'" class="mt-4">
+                            <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
+                                Quote Options
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Quote Text</label>
+                                <textarea
+                                    v-model="formBuilder.selectedComponent.content"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                    rows="3"
+                                ></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Author (Optional)</label>
+                                <input
+                                    type="text"
+                                    v-model="formBuilder.selectedComponent.author"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                    placeholder="Author name"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Configurações específicas para Alert -->
+                        <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'alert'" class="mt-4">
+                            <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
+                                Alert Options
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Alert Text</label>
+                                <textarea
+                                    v-model="formBuilder.selectedComponent.content"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                    rows="3"
+                                ></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Alert Type</label>
+                                <select
+                                    v-model="formBuilder.selectedComponent.alertType"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                >
+                                    <option value="info">Info (Blue)</option>
+                                    <option value="success">Success (Green)</option>
+                                    <option value="warning">Warning (Yellow)</option>
+                                    <option value="error">Error (Red)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Configurações específicas para Image -->
+                        <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'image'" class="mt-4">
+                            <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
+                                Image Options
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Image URL</label>
+                                <input
+                                    type="text"
+                                    v-model="formBuilder.selectedComponent.imageUrl"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                    placeholder="https://example.com/image.jpg"
+                                />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Alt Text</label>
+                                <input
+                                    type="text"
+                                    v-model="formBuilder.selectedComponent.imageAlt"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                    placeholder="Image description"
+                                />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Caption (Optional)</label>
+                                <input
+                                    type="text"
+                                    v-model="formBuilder.selectedComponent.caption"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                    placeholder="Image caption"
+                                />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Width</label>
+                                <select
+                                    v-model="formBuilder.selectedComponent.imageWidth"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                >
+                                    <option value="w-full">Full Width (100%)</option>
+                                    <option value="w-3/4">Large (75%)</option>
+                                    <option value="w-1/2">Medium (50%)</option>
+                                    <option value="w-1/4">Small (25%)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Configurações específicas para Link -->
+                        <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'link'" class="mt-4">
+                            <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
+                                Link Options
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Link Text</label>
+                                <input
+                                    type="text"
+                                    v-model="formBuilder.selectedComponent.linkText"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                    placeholder="Click here"
+                                />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">URL</label>
+                                <input
+                                    type="text"
+                                    v-model="formBuilder.selectedComponent.linkUrl"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                    placeholder="https://example.com"
+                                />
+                            </div>
+
+                            <div class="mb-3 flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id="open-new-tab"
+                                    v-model="formBuilder.selectedComponent.openInNewTab"
+                                    class="mr-2"
+                                />
+                                <label
+                                    for="open-new-tab"
+                                    class="text-xs text-neutral-400"
+                                >Open in new tab</label>
+                            </div>
+                        </div>
+
+                        <!-- Configurações específicas para HTML -->
+                        <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'html'" class="mt-4">
+                            <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
+                                HTML Content
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">HTML</label>
+                                <textarea
+                                    v-model="formBuilder.selectedComponent.htmlContent"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white font-mono"
+                                    rows="6"
+                                    placeholder="<p>Your HTML content here</p>"
+                                ></textarea>
+                            </div>
+
+                            <p class="text-xs text-yellow-500 mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                Use with caution. Ensure the HTML is properly formed.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -982,6 +1313,32 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div
+        class="border-t border-neutral-800 bg-neutral-900 p-3 flex justify-end items-center"
+    >
+        <div class="flex items-center gap-2">
+            <!-- Read-only badge for module contracts -->
+            <div v-if="formBuilder.isReadOnly" class="px-2 py-1 bg-yellow-600 text-white text-xs rounded mr-2">
+                Read-only Mode
+            </div>
+
+            <button
+                v-if="!formBuilder.isReadOnly"
+                @click="formBuilder.saveFormToContract"
+                class="bg-green-900 hover:bg-green-700 text-white px-4 py-1.5 rounded text-sm mr-2 cursor-pointer"
+            >
+                Save Changes
+            </button>
+            <button
+                v-if="!formBuilder.isReadOnly"
+                @click="formBuilder.togglePreviewMode"
+                class="bg-blue-900 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm cursor-pointer"
+            >
+                {{ formBuilder.previewMode ? 'Edit Mode' : 'Preview Mode' }}
+            </button>
         </div>
     </div>
 </div>

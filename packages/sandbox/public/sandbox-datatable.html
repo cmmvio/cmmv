@@ -41,7 +41,6 @@
     </div>
 
     <template v-else class="relative">
-        <!-- Loader overlay -->
         <div
             v-if="dataTable && dataTable.loading"
             class="absolute inset-0 bg-neutral-900/70 z-50 flex items-center justify-center"
@@ -106,7 +105,6 @@
                 </button>
             </div>
             <div class="flex items-center space-x-3">
-                <!-- Grouped search inputs -->
                 <div class="flex items-stretch h-9">
                     <div class="relative flex-grow">
                         <input
@@ -146,7 +144,7 @@
                         </option>
                     </select>
                 </div>
-                <!-- Import button with responsive text -->
+
                 <button
                     @click="dataTable.openImportModal()"
                     class="h-9 p-1.5 px-3 bg-teal-600 hover:bg-teal-700 text-white rounded-md flex items-center text-sm transition-colors"
@@ -168,7 +166,7 @@
                     </svg>
                     <span class="ml-1 hidden sm:inline">Import</span>
                 </button>
-                <!-- Add button with responsive text -->
+
                 <button
                     @click="dataTable.refreshData(true)"
                     class="h-9 p-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center text-sm transition-colors"
@@ -197,7 +195,6 @@
             <table class="min-w-full border-separate border-spacing-0">
                 <thead class="bg-neutral-800 sticky top-0 z-20">
                     <tr>
-                        <!-- Dynamic columns based on fields -->
                         <th
                             v-for="field in dataTable.visibleFields || []"
                             :key="field?.propertyKey || idx"
@@ -262,13 +259,10 @@
                             :colspan="dataTable.visibleFields.length + 1"
                             class="px-4 py-8 text-neutral-400"
                         >
-                            <!-- Wrapper for centering -->
                             <div class="w-full flex justify-center">
-                                <!-- Fixed width container for content -->
                                 <div
                                     class="max-w-sm mx-auto flex flex-col items-center"
                                 >
-                                    <!-- Message when not authenticated -->
                                     <template v-if="!isAuthenticated">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
@@ -301,7 +295,6 @@
                                         </button>
                                     </template>
 
-                                    <!-- Message when authenticated but no records -->
                                     <template v-else>
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
@@ -341,7 +334,6 @@
                             :key="field?.propertyKey || fieldIdx"
                             class="px-4 py-2.5 text-sm border-b border-neutral-800 align-top"
                         >
-                            <!-- Only render content if field is valid -->
                             <template v-if="field && field?.propertyKey">
                                 <span
                                     v-if="field?.protoType === 'boolean' || field?.protoType === 'bool'"
@@ -760,7 +752,6 @@
                                 >
                             </label>
 
-                            <!-- Boolean field -->
                             <div
                                 v-if="field?.protoType === 'boolean' || field?.protoType === 'bool'"
                                 class="flex items-center"
@@ -777,7 +768,6 @@
                                 </span>
                             </div>
 
-                            <!-- Date/Time field -->
                             <input
                                 v-else-if="field?.protoType === 'date'"
                                 type="date"
@@ -787,7 +777,6 @@
                                 @input="dataTable.checkRequiredFields()"
                             />
 
-                            <!-- JSON field -->
                             <textarea
                                 v-else-if="field?.protoType === 'json'"
                                 v-model="dataTable.editingRecord._raw[field?.propertyKey]"
@@ -797,7 +786,6 @@
                                 @input="() => { dataTable.handleJsonFieldChange(field?.propertyKey); dataTable.checkRequiredFields(); }"
                             ></textarea>
 
-                            <!-- Number field -->
                             <input
                                 v-else-if="['int32', 'int64', 'float', 'double', 'number', 'bigint'].includes(field?.protoType)"
                                 type="number"
@@ -807,7 +795,6 @@
                                 @input="dataTable.checkRequiredFields()"
                             />
 
-                            <!-- Default text field -->
                             <input
                                 v-else
                                 type="text"
@@ -1030,7 +1017,6 @@
                         </div>
                     </div>
 
-                    <!-- Add validation error messages section -->
                     <div
                         v-if="dataTable.validationErrors && dataTable.validationErrors.length > 0"
                         class="mb-4 bg-amber-900/30 border border-amber-800 text-amber-200 p-3 rounded-md text-sm"
@@ -1046,7 +1032,6 @@
                         </ul>
                     </div>
 
-                    <!-- Add progress bar section -->
                     <div v-if="dataTable.importProgress.show" class="mb-4">
                         <div
                             class="flex justify-between text-sm text-neutral-300 mb-1"

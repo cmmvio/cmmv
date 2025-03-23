@@ -1,7 +1,6 @@
 const useLogViewer = () => {
     const { ref, reactive, computed, watch, onMounted, onBeforeUnmount } = Vue;
 
-    // State
     const state = reactive({
         logs: [],
         loading: false,
@@ -25,8 +24,6 @@ const useLogViewer = () => {
             search: ''
         },
         parsedContent: null,
-
-        // New calendar-related properties
         showStartCalendar: false,
         showEndCalendar: false,
         startCalendarMonth: new Date().getMonth(),
@@ -43,11 +40,9 @@ const useLogViewer = () => {
         endCalendarDays: []
     });
 
-    // Process log response helper function
     const processLogsResponse = (data) => {
         if (!data || !data.result) return [];
 
-        // Convert object to array
         if (typeof data.result === 'object' && !Array.isArray(data.result)) {
             return Object.values(data.result);
         }
@@ -55,7 +50,6 @@ const useLogViewer = () => {
         return data.result;
     };
 
-    // Format timestamp
     const formatTimestamp = (timestamp, detailed = false) => {
         if (!timestamp) return '';
 
@@ -83,7 +77,6 @@ const useLogViewer = () => {
         });
     };
 
-    // Get CSS class for log level
     const getLevelClass = (level) => {
         if (!level) return 'bg-neutral-700 text-neutral-300';
 
@@ -104,7 +97,6 @@ const useLogViewer = () => {
         }
     };
 
-    // Parse log message to extract key-value pairs
     const parseLogMessage = (message) => {
         if (!message) return null;
 
@@ -121,13 +113,11 @@ const useLogViewer = () => {
         return Object.keys(parsed).length > 0 ? parsed : null;
     };
 
-    // Fetch logs from API - MOVED UP BEFORE initialize()
     const fetchLogs = async () => {
         try {
             state.loading = true;
             state.error = null;
 
-            // Build query parameters
             const queryParams = new URLSearchParams({
                 limit: state.pageSize,
                 offset: (state.currentPage - 1) * state.pageSize,
@@ -135,7 +125,6 @@ const useLogViewer = () => {
                 sort: state.sortDirection
             });
 
-            // Add filters if they exist
             if (state.filters.level) {
                 queryParams.append('level', state.filters.level);
             }
@@ -154,7 +143,6 @@ const useLogViewer = () => {
                 queryParams.append('search', state.filters.search);
             }
 
-            // Fetch logs
             const url = `${state.baseUrl}/logs?${queryParams.toString()}`;
             const response = await fetch(url);
 
@@ -164,18 +152,15 @@ const useLogViewer = () => {
 
             const data = await response.json();
 
-            // Process response
             state.logs = processLogsResponse(data);
             state.totalLogs = data.total || data.count || state.logs.length;
             state.totalPages = Math.max(1, Math.ceil(state.totalLogs / state.pageSize));
 
-            // Adjust current page if it's out of bounds
             if (state.currentPage > state.totalPages) {
                 state.currentPage = state.totalPages;
-                await fetchLogs(); // Refetch with corrected page
+                await fetchLogs();
             }
 
-            // Parse log messages for display
             state.logs.forEach(log => {
                 log.parsedContent = parseLogMessage(log.message);
             });
@@ -189,7 +174,6 @@ const useLogViewer = () => {
         }
     };
 
-    // Fetch log details
     const fetchLogDetail = async (logId) => {
         if (!logId) return;
 
@@ -214,39 +198,32 @@ const useLogViewer = () => {
         }
     };
 
-    // Calendar related functions
     const initializeCalendarLabels = () => {
         const userLocale = navigator.language || 'en-US';
 
-        // Initialize week days (short format)
         state.weekDays = Array.from({ length: 7 }, (_, i) => {
-            const date = new Date(2021, 0, 3 + i); // Start with Sunday
+            const date = new Date(2021, 0, 3 + i);
             return new Intl.DateTimeFormat(userLocale, { weekday: 'short' }).format(date);
         });
 
-        // Initialize month names
         state.monthNames = Array.from({ length: 12 }, (_, i) => {
             const date = new Date(2021, i, 1);
             return new Intl.DateTimeFormat(userLocale, { month: 'long' }).format(date);
         });
     };
 
-    // Computed property for year range (+-10 years from current)
     const yearRange = computed(() => {
         const currentYear = new Date().getFullYear();
         return Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
     });
 
-    // Helper function to generate calendar days
     const generateCalendarDays = (year, month) => {
         const days = [];
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
 
-        // Get the day of the week for the first day (0 = Sunday)
         const firstDayOfWeek = firstDay.getDay();
 
-        // Add days from previous month to fill the first week
         const prevMonthLastDay = new Date(year, month, 0).getDate();
 
         for (let i = firstDayOfWeek - 1; i >= 0; i--) {
@@ -255,13 +232,11 @@ const useLogViewer = () => {
             days.push({ day, date, isCurrentMonth: false });
         }
 
-        // Add days for current month
         for (let day = 1; day <= lastDay.getDate(); day++) {
             const date = new Date(year, month, day);
             days.push({ day, date, isCurrentMonth: true });
         }
 
-        // Add days from next month to complete the grid (6 rows of 7 days)
         const remainingCells = 42 - days.length;
         for (let day = 1; day <= remainingCells; day++) {
             const date = new Date(year, month + 1, day);
@@ -271,7 +246,6 @@ const useLogViewer = () => {
         return days;
     };
 
-    // Generate calendar days for the start date calendar
     const generateStartCalendarDays = () => {
         state.startCalendarDays = generateCalendarDays(
             state.startCalendarYear,
@@ -279,7 +253,6 @@ const useLogViewer = () => {
         );
     };
 
-    // Generate calendar days for the end date calendar
     const generateEndCalendarDays = () => {
         state.endCalendarDays = generateCalendarDays(
             state.endCalendarYear,
@@ -287,43 +260,34 @@ const useLogViewer = () => {
         );
     };
 
-    // Set up default date range (last 24 hours)
     const initializeDateRange = () => {
         const now = new Date();
         const yesterday = new Date(now);
         yesterday.setDate(yesterday.getDate() - 1);
 
-        // Set default end date to now
         now.setHours(23, 59, 59, 999);
         state.filters.endDate = now.toISOString().slice(0, 16);
         state.endHours = now.getHours();
         state.endMinutes = now.getMinutes();
 
-        // Set default start date to 24 hours ago
         yesterday.setHours(0, 0, 0, 0);
         state.filters.startDate = yesterday.toISOString().slice(0, 16);
         state.startHours = yesterday.getHours();
         state.startMinutes = yesterday.getMinutes();
     };
 
-    // Initialize function - Now fetchLogs is defined before this
     const initialize = () => {
-        // Initialize date range
         initializeDateRange();
 
-        // Initialize calendars
         initializeCalendarLabels();
         generateStartCalendarDays();
         generateEndCalendarDays();
 
-        // Fetch logs
         fetchLogs();
     };
 
-    // Initialize the component
     initialize();
 
-    // Close calendar
     const closeCalendar = (type) => {
         if (type === 'start') {
             state.showStartCalendar = false;
@@ -337,7 +301,6 @@ const useLogViewer = () => {
         document.removeEventListener('click', handleClickOutside);
     };
 
-    // Handle clicks outside the calendar
     const handleClickOutside = (event) => {
         const startCalendar = document.querySelector('.start-calendar');
         const endCalendar = document.querySelector('.end-calendar');
@@ -355,7 +318,6 @@ const useLogViewer = () => {
         }
     };
 
-    // Navigate to previous month
     const prevMonth = (type) => {
         if (type === 'start') {
             if (state.startCalendarMonth === 0) {
@@ -376,7 +338,6 @@ const useLogViewer = () => {
         }
     };
 
-    // Navigate to next month
     const nextMonth = (type) => {
         if (type === 'start') {
             if (state.startCalendarMonth === 11) {
@@ -397,7 +358,6 @@ const useLogViewer = () => {
         }
     };
 
-    // Update the calendar when month/year selectors change
     const updateCalendar = (type) => {
         if (type === 'start') {
             generateStartCalendarDays();
@@ -406,7 +366,6 @@ const useLogViewer = () => {
         }
     };
 
-    // Check if a date is today
     const isToday = (date) => {
         const today = new Date();
         return (
@@ -416,7 +375,6 @@ const useLogViewer = () => {
         );
     };
 
-    // Check if a date is the selected start date
     const isSelectedStartDate = (date) => {
         if (!state.filters.startDate) return false;
 
@@ -428,7 +386,6 @@ const useLogViewer = () => {
         );
     };
 
-    // Check if a date is the selected end date
     const isSelectedEndDate = (date) => {
         if (!state.filters.endDate) return false;
 
@@ -440,11 +397,9 @@ const useLogViewer = () => {
         );
     };
 
-    // Select a date as start date
     const selectStartDate = (date) => {
         if (!date || !date.isCurrentMonth) return;
 
-        // Create a new date with the selected date and current time values
         const selectedDate = new Date(
             date.getFullYear(),
             date.getMonth(),
@@ -459,11 +414,9 @@ const useLogViewer = () => {
         applyFilters();
     };
 
-    // Select a date as end date
     const selectEndDate = (date) => {
         if (!date || !date.isCurrentMonth) return;
 
-        // Create a new date with the selected date and current time values
         const selectedDate = new Date(
             date.getFullYear(),
             date.getMonth(),
@@ -478,7 +431,6 @@ const useLogViewer = () => {
         applyFilters();
     };
 
-    // Set today as the selected date
     const selectToday = (type) => {
         const today = new Date();
 
@@ -495,7 +447,6 @@ const useLogViewer = () => {
         applyFilters();
     };
 
-    // Update start time
     const updateStartTime = () => {
         if (!state.filters.startDate) return;
 
@@ -504,7 +455,6 @@ const useLogViewer = () => {
         state.filters.startDate = date.toISOString().slice(0, 16);
     };
 
-    // Update end time
     const updateEndTime = () => {
         if (!state.filters.endDate) return;
 
@@ -513,7 +463,6 @@ const useLogViewer = () => {
         state.filters.endDate = date.toISOString().slice(0, 16);
     };
 
-    // Format date for display in the input field
     const formatCalendarDate = (dateString) => {
         if (!dateString) return '';
 
@@ -529,18 +478,15 @@ const useLogViewer = () => {
         return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
 
-    // Refresh logs
     const refreshData = () => {
         fetchLogs();
     };
 
-    // Apply filters
     const applyFilters = () => {
-        state.currentPage = 1; // Reset to first page
+        state.currentPage = 1;
         fetchLogs();
     };
 
-    // Clear all filters
     const clearFilters = () => {
         state.filters = {
             level: '',
@@ -552,19 +498,17 @@ const useLogViewer = () => {
         fetchLogs();
     };
 
-    // Handle search input with debounce
     const handleSearchInput = () => {
         if (state.searchDebounce) {
             clearTimeout(state.searchDebounce);
         }
 
         state.searchDebounce = setTimeout(() => {
-            state.currentPage = 1; // Reset to first page
+            state.currentPage = 1;
             fetchLogs();
         }, 300);
     };
 
-    // Pagination methods
     const goToPage = (page) => {
         if (page < 1 || page > state.totalPages) return;
         state.currentPage = page;
@@ -586,44 +530,37 @@ const useLogViewer = () => {
     };
 
     const handlePageSizeChange = () => {
-        state.currentPage = 1; // Reset to first page
+        state.currentPage = 1;
         fetchLogs();
     };
 
-    // Sorting
     const toggleSort = (field) => {
         if (state.sortBy === field) {
-            // Toggle direction if already sorting by this field
             state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
-            // Set new sort field and default to descending for logs (newest first)
             state.sortBy = field;
             state.sortDirection = 'desc';
         }
-        state.currentPage = 1; // Reset to first page
+        state.currentPage = 1;
         fetchLogs();
     };
 
-    // Select a log to view details
     const selectLog = (log) => {
         state.selectedLog = log;
         state.parsedContent = parseLogMessage(log.message);
         fetchLogDetail(log.id);
     };
 
-    // Close detail sidebar
     const closeDetail = () => {
         state.selectedLog = null;
         state.logDetail = null;
     };
 
-    // Clean up event listeners
     onBeforeUnmount(() => {
         document.removeEventListener('click', handleClickOutside);
     });
 
     return {
-        // Existing properties
         logs: computed(() => state.logs),
         loading: computed(() => state.loading),
         error: computed(() => state.error),
@@ -639,8 +576,6 @@ const useLogViewer = () => {
         filters: computed(() => state.filters),
         availableLevels: computed(() => state.availableLevels),
         parsedContent: computed(() => state.parsedContent),
-
-        // New calendar-related properties
         showStartCalendar: computed(() => state.showStartCalendar),
         showEndCalendar: computed(() => state.showEndCalendar),
         startCalendarMonth: computed({
@@ -680,8 +615,6 @@ const useLogViewer = () => {
         yearRange,
         startCalendarDays: computed(() => state.startCalendarDays),
         endCalendarDays: computed(() => state.endCalendarDays),
-
-        // Existing methods
         refreshData,
         selectLog,
         closeDetail,
@@ -697,15 +630,12 @@ const useLogViewer = () => {
         toggleSort,
         formatTimestamp,
         getLevelClass,
-
-        // New calendar-related methods
         toggleCalendar: (type) => {
             if (type === 'start') {
                 state.showStartCalendar = !state.showStartCalendar;
                 state.showEndCalendar = false;
 
                 if (state.showStartCalendar) {
-                    // Update calendar if the start date is already set
                     if (state.filters.startDate) {
                         const date = new Date(state.filters.startDate);
                         state.startCalendarMonth = date.getMonth();
@@ -713,7 +643,6 @@ const useLogViewer = () => {
                         state.startHours = date.getHours();
                         state.startMinutes = date.getMinutes();
                     } else {
-                        // Otherwise show current month
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
                         state.startCalendarMonth = today.getMonth();
@@ -724,7 +653,6 @@ const useLogViewer = () => {
 
                     generateStartCalendarDays();
 
-                    // Add click outside listener
                     setTimeout(() => {
                         document.addEventListener('click', handleClickOutside);
                     }, 100);
@@ -734,7 +662,6 @@ const useLogViewer = () => {
                 state.showStartCalendar = false;
 
                 if (state.showEndCalendar) {
-                    // Update calendar if the end date is already set
                     if (state.filters.endDate) {
                         const date = new Date(state.filters.endDate);
                         state.endCalendarMonth = date.getMonth();
@@ -742,7 +669,6 @@ const useLogViewer = () => {
                         state.endHours = date.getHours();
                         state.endMinutes = date.getMinutes();
                     } else {
-                        // Otherwise show current month
                         const today = new Date();
                         today.setHours(23, 59, 59, 999);
                         state.endCalendarMonth = today.getMonth();
@@ -753,7 +679,6 @@ const useLogViewer = () => {
 
                     generateEndCalendarDays();
 
-                    // Add click outside listener
                     setTimeout(() => {
                         document.addEventListener('click', handleClickOutside);
                     }, 100);
@@ -775,8 +700,3 @@ const useLogViewer = () => {
         formatCalendarDate
     };
 };
-
-// Export for use in browser
-if (typeof window !== 'undefined') {
-    window.useLogViewer = useLogViewer;
-}

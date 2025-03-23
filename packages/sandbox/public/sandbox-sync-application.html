@@ -17,7 +17,6 @@
         </div>
 
         <div class="p-4">
-            <!-- Disclaimer/Warning -->
             <div class="mb-4 bg-amber-900/30 border border-amber-800 text-amber-200 p-3 rounded-md text-sm">
                 <div class="flex items-start">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -31,7 +30,6 @@
                 </div>
             </div>
 
-            <!-- Empty state when no contracts to sync -->
             <div v-if="getUnsyncedContracts().length === 0" class="py-6 text-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-3 text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -40,7 +38,6 @@
                 <p class="text-neutral-400 mt-1">There are no contracts pending synchronization</p>
             </div>
 
-            <!-- Contract list to sync -->
             <div class="mb-4" v-if="getUnsyncedContracts().length > 0">
                 <h3 class="text-sm font-medium text-neutral-400 mb-2">Contracts pending synchronization:</h3>
 
@@ -56,14 +53,12 @@
                                 <span class="text-xs text-neutral-500 ml-2">{{ contract.status }}</span>
                             </div>
                             <div class="flex items-center">
-                                <!-- Pending state -->
                                 <span v-if="contract.state === 'pending'" class="text-neutral-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                                     </svg>
                                 </span>
 
-                                <!-- Processing state -->
                                 <svg
                                     v-if="contract.state === 'processing'"
                                     class="animate-spin h-5 w-5 text-blue-500"
@@ -75,7 +70,6 @@
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
 
-                                <!-- Completed state -->
                                 <svg
                                     v-if="contract.state === 'completed'"
                                     class="h-5 w-5 text-green-500"
@@ -86,7 +80,6 @@
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                 </svg>
 
-                                <!-- Error state -->
                                 <svg
                                     v-if="contract.state === 'error'"
                                     class="h-5 w-5 text-red-500"
@@ -102,7 +95,6 @@
                 </div>
             </div>
 
-            <!-- Progress status -->
             <div class="mb-5 bg-neutral-800 p-3 rounded-md" v-if="syncInProgress">
                 <div class="flex items-center justify-between text-sm mb-2">
                     <span>Progress:</span>
@@ -113,7 +105,6 @@
                 </div>
             </div>
 
-            <!-- Action buttons -->
             <div class="flex justify-end space-x-3">
                 <button
                     class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-md transition-colors"

@@ -1,6 +1,5 @@
 <div class="border-b h-[48px] border-neutral-800 w-full">
     <div class="h-full flex items-center sticky top-0 z-10 relative">
-        <!-- Hamburger button - removido lg:hidden para ser sempre visível -->
         <button
             class="h-full px-4 text-sm text-neutral-400 hover:bg-neutral-800 transition-colors flex items-center justify-center"
             @click="toggleSidebar"
@@ -11,9 +10,7 @@
             </svg>
         </button>
 
-        <!-- Tabs for larger screens -->
         <ul class="hidden md:flex h-full justify-center overflow-x-auto" id="full-tabs">
-            <!-- Contract tab -->
             <li
                 v-for="(item, key) in tabsMaster"
                 class="px-4 py-1 select-none cursor-pointer justify-center flex items-center text-sm"
@@ -22,7 +19,6 @@
             >{{ item.label }}</li>
         </ul>
 
-        <!-- Dropdown for smaller screens or when tabs overflow -->
         <div class="md:hidden flex-1 flex items-center justify-start h-full pl-2" id="tab-dropdown-container">
             <div class="relative inline-block text-left">
                 <button
@@ -39,7 +35,6 @@
                     </svg>
                 </button>
 
-                <!-- Dropdown menu -->
                 <div
                     v-show="tabDropdownOpen"
                     class="origin-top-left absolute left-0 mt-2 w-[200px] rounded-md shadow-lg bg-neutral-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
@@ -49,7 +44,6 @@
                     tabindex="-1"
                 >
                     <div class="py-1 max-h-[60vh] overflow-y-auto" role="none">
-                        <!-- Contract option -->
                         <a
                             href="#"
                             class="block px-4 py-2 text-sm hover:bg-neutral-700"
@@ -76,7 +70,6 @@
                 </svg>
             </button>
 
-            <!-- Dropdown menu for overflow tabs -->
             <div
                 v-show="tabDropdownOpen"
                 class="origin-top-right absolute right-10 top-[48px] w-[200px] rounded-md shadow-lg bg-neutral-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-20"
@@ -84,7 +77,6 @@
                 aria-orientation="vertical"
             >
                 <div class="py-1 max-h-[60vh] overflow-y-auto" role="none">
-                    <!-- Contract option -->
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm hover:bg-neutral-700"
@@ -94,7 +86,6 @@
                         @click.prevent="selectContractTabAndCloseDropdown('contract')"
                     >Contract</a>
 
-                    <!-- Schema option -->
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm hover:bg-neutral-700"
@@ -104,7 +95,6 @@
                         @click.prevent="selectContractTabAndCloseDropdown('schema')"
                     >Schema</a>
 
-                    <!-- Logs option -->
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm hover:bg-neutral-700"
@@ -114,7 +104,6 @@
                         @click.prevent="selectContractTabAndCloseDropdown('logs')"
                     >Logs</a>
 
-                    <!-- Backup option -->
                     <a
                         href="#"
                         class="block px-4 py-2 text-sm hover:bg-neutral-700"
@@ -127,7 +116,6 @@
             </div>
         </div>
 
-        <!-- Right side icons -->
         <div class="absolute right-2 flex gap-x-4">
             <a href="https://cmmv.io/docs" target="_blank" title="Docs" class="hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24">

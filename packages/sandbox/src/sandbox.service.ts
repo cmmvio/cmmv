@@ -139,6 +139,10 @@ export class SandboxService {
             filanameRaw + '.ts',
         );
         const outputDir = path.dirname(schemaFilename);
+        fs.writeFileSync(
+            schemaFilename.replace('.ts', '.json'),
+            JSON.stringify(schema, null, 4),
+        );
 
         if (fs.existsSync(schemaFilename)) {
             const contracts = Scope.getArray<any>('__contracts');

@@ -256,7 +256,6 @@
                 class="mb-1 p-2 bg-neutral-900/50"
             >
                 <div class="flex flex-wrap items-center gap-2">
-                    <!-- Validation Type -->
                     <div class="flex w-56">
                         <select
                             title="Type"
@@ -275,9 +274,7 @@
                         </select>
                     </div>
 
-                    <!-- Validation Options Based on Type -->
                     <div class="flex w-64">
-                        <!-- Single Value Input (for Min, Max, MinLength, MaxLength, etc.) -->
                         <input
                             v-if="needsSimpleValue(validation.type)"
                             class="p-2 h-[42px] w-full border border-neutral-800 rounded focus-none outline-none"
@@ -288,7 +285,6 @@
                             :disabled="selectedContract.options.moduleContract"
                         />
 
-                        <!-- Multiple Options for Length -->
                         <div
                             v-else-if="validation.type === 'Length'"
                             class="flex gap-2"
@@ -311,7 +307,6 @@
                             />
                         </div>
 
-                        <!-- Multiple Options for IsEnum -->
                         <div
                             v-else-if="validation.type === 'IsEnum'"
                             class="flex gap-2"
@@ -326,7 +321,6 @@
                             />
                         </div>
 
-                        <!-- Options for IsStrongPassword -->
                         <div
                             v-else-if="validation.type === 'IsStrongPassword'"
                             class="flex flex-wrap gap-2"
@@ -377,7 +371,6 @@
                             </div>
                         </div>
 
-                        <!-- Default - empty placeholder for validations without values -->
                         <div
                             v-else
                             class="p-2 h-[42px] w-full border border-neutral-800 rounded text-neutral-500 flex items-center text-sm"
@@ -386,7 +379,6 @@
                         </div>
                     </div>
 
-                    <!-- Validation Message -->
                     <div class="flex">
                         <input
                             class="p-2 h-[42px] w-full border border-neutral-800 rounded focus-none outline-none"
@@ -398,7 +390,6 @@
                         />
                     </div>
 
-                    <!-- Remove Validation Button -->
                     <div>
                         <button
                             @click="removeValidation(field, validationIndex)"
@@ -426,7 +417,6 @@
                 </div>
             </div>
 
-            <!-- "No validations" message -->
             <div
                 v-if="!field.validations || field.validations.length === 0"
                 class="py-4 text-center text-neutral-500 text-sm italic"
@@ -469,7 +459,6 @@
                         />
                     </div>
 
-                    <!-- Field -->
                     <div class="flex flex-col col-span-2">
                         <label class="text-xs mb-1 text-neutral-400"
                             >Field</label
@@ -484,7 +473,6 @@
                         />
                     </div>
 
-                    <!-- Contract Selector -->
                     <div class="flex flex-col col-span-3">
                         <label class="text-xs mb-1 text-neutral-400"
                             >Contract</label
@@ -504,7 +492,6 @@
                         </select>
                     </div>
 
-                    <!-- Options - AUMENTADO -->
                     <div class="flex flex-col col-span-4">
                         <label class="text-xs mb-1 text-neutral-400"
                             >Options</label
@@ -512,7 +499,6 @@
                         <div
                             class="flex h-[42px] border border-neutral-800 rounded bg-neutral-900 items-center px-3 justify-between"
                         >
-                            <!-- Array -->
                             <div class="flex items-center" title="Array">
                                 <input
                                     type="checkbox"
@@ -523,7 +509,6 @@
                                 <label class="text-xs">Array</label>
                             </div>
 
-                            <!-- Create Relationship -->
                             <div
                                 class="flex items-center"
                                 title="Create Database Relationship"
@@ -541,7 +526,6 @@
                         </div>
                     </div>
 
-                    <!-- Remove Relationship Button -->
                     <div class="flex items-end justify-end col-span-1">
                         <button
                             @click="removeRelationship(field, relationshipIndex)"
@@ -569,7 +553,6 @@
                 </div>
             </div>
 
-            <!-- "No relationships" message -->
             <div
                 v-if="!field.link || field.link.length === 0"
                 class="py-4 text-center text-neutral-500 text-sm italic"
