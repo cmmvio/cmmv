@@ -122,7 +122,7 @@
                 >
                     <div class="flex flex-col border-b border-neutral-800">
                         <!-- Contract header with file icon and tabs side by side -->
-                        <div class="flex py-2 px-4 items-center justify-between">
+                        <div class="flex px-2 items-center justify-between">
                             <!-- Left side - Contract name with icon -->
                             <div class="flex items-center">
                                 <div class="flex mr-2">
@@ -270,6 +270,14 @@
                     >
                         <div id="schemaEditor" class="h-full border border-neutral-800"></div>
                     </div>
+
+                    <div
+                        v-show="tabs[selectedTab].label === 'Form Builder'"
+                        class="flex-1 overflow-auto h-[calc(100%-96px)]"
+                    >
+                        <!-- include("@packages/sandbox/public/sandbox-formbuilder.html"); -->
+                    </div>
+
                 </div>
 
                 <div
@@ -313,6 +321,7 @@
         <script type="text/javascript" src="/sandbox/graphql.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/datatable.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/logs.js" type="module"></script>
+        <script type="text/javascript" src="/sandbox/formbuilder.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/client.js"></script>
 
         <!-- Script para remover o indicador de carregamento quando o Vue estiver pronto -->

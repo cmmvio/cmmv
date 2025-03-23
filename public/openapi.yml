@@ -732,18 +732,6 @@ components:
         numeric:
           type: string
           required: false
-        ddi:
-          type: string
-          required: false
-        phoneMask:
-          type: string
-          required: false
-        dateMask:
-          type: object
-          required: false
-        timeMask:
-          type: string
-          required: false
       required:
         - name
         - iso
@@ -1978,7 +1966,6 @@ paths:
                 name:
                   type: string
                   nullable: false
-                  uniqueItems: true
                 iso:
                   type: string
                   nullable: false
@@ -1986,18 +1973,6 @@ paths:
                   type: string
                   nullable: true
                 numeric:
-                  type: string
-                  nullable: true
-                ddi:
-                  type: string
-                  nullable: true
-                phoneMask:
-                  type: string
-                  nullable: true
-                dateMask:
-                  type: string
-                  nullable: true
-                timeMask:
                   type: string
                   nullable: true
       responses:
@@ -2118,7 +2093,6 @@ paths:
                 name:
                   type: string
                   nullable: false
-                  uniqueItems: true
                 iso:
                   type: string
                   nullable: false
@@ -2126,18 +2100,6 @@ paths:
                   type: string
                   nullable: true
                 numeric:
-                  type: string
-                  nullable: true
-                ddi:
-                  type: string
-                  nullable: true
-                phoneMask:
-                  type: string
-                  nullable: true
-                dateMask:
-                  type: string
-                  nullable: true
-                timeMask:
                   type: string
                   nullable: true
       responses:

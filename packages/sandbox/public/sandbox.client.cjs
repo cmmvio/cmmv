@@ -27,8 +27,8 @@ createApp({
                 { label: "Methods", active: false },
                 { label: "Schema", active: false },
                 { label: "API", active: false },
-
                 { label: "Data", active: false },
+                { label: "Form Builder", active: false },
             ],
             tabsMaster: [
                 { label: "Contract", active: true },
@@ -212,6 +212,7 @@ createApp({
             graphql: null,
             dataTable: null,
             logViewer: null,
+            formBuilder: null,
             syncModalOpen: false,
             syncInProgress: false,
             syncProgress: 0,
@@ -329,6 +330,8 @@ createApp({
         this.dataTable.init(this.selectedContract);
 
         this.logViewer = useLogViewer();
+        this.formBuilder = useFormBuilder();
+        this.formBuilder.init(this.selectedContract);
 
         // Passar o método de callback para lidar com erro de autenticação
         this.dataTable.setAuthErrorHandler(this.handleDataTableAuthError.bind(this));
@@ -503,9 +506,8 @@ createApp({
             this.selectedContract = this.schema[key];
             localStorage.setItem('selectedContract', key);
 
-            if(this.tabs[this.selectedTab].label === "Data"){
-                this.dataTable.init(this.selectedContract);
-            }
+            this.dataTable.init(this.selectedContract);
+            this.formBuilder.init(this.selectedContract);
 
             this.opened = [];
             this.openedIndexes = {};

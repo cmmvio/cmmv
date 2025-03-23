@@ -24,13 +24,24 @@
     v-if="!selectedContract.indexs || selectedContract.indexs.length === 0"
     class="border border-dashed border-neutral-700 rounded-md p-6 mb-4 text-center"
 >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-neutral-500" viewBox="0 0 1792 1792" fill="currentColor">
-        <path stroke-width="0" d="M384 1408q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm0-512q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm1408 416v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5zm-1408-928q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm1408 416v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5zm0-512v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5z"></path>
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-12 w-12 mx-auto mb-3 text-neutral-500"
+        viewBox="0 0 1792 1792"
+        fill="currentColor"
+    >
+        <path
+            stroke-width="0"
+            d="M384 1408q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm0-512q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm1408 416v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5zm-1408-928q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm1408 416v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5zm0-512v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5z"
+        ></path>
     </svg>
 
-    <h3 class="text-lg font-medium text-neutral-400 mb-1">No Indexes Defined</h3>
+    <h3 class="text-lg font-medium text-neutral-400 mb-1">
+        No Indexes Defined
+    </h3>
     <p class="text-sm text-neutral-500 mb-4">
-        You haven't created any indexes for this contract yet. Indexes help optimize database queries.
+        You haven't created any indexes for this contract yet. Indexes help
+        optimize database queries.
     </p>
     <button
         class="text-sm p-2 px-4 rounded-md bg-green-800 hover:bg-green-700 cursor-pointer transition-colors"
@@ -56,7 +67,9 @@
             :disabled="selectedContract.options.moduleContract"
         />
 
-        <div class="flex justify-end mr-4 items-right h-[42px] w-full text-xs ml-4">
+        <div
+            class="flex justify-end mr-4 items-right h-[42px] w-full text-xs ml-4"
+        >
             <div class="items-center flex">
                 <input
                     type="checkbox"
@@ -129,7 +142,19 @@
                 class="items-center justify-center flex select-none cursor-pointer mr-2 ml-2"
                 @click="toggleIndexOpened(index.name)"
             >
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clip-rule="evenodd"></path></svg>
+                <svg
+                    width="18"
+                    height="18"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                >
+                    <path
+                        fill-rule="evenodd"
+                        d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z"
+                        clip-rule="evenodd"
+                    ></path>
+                </svg>
             </button>
         </div>
 
@@ -140,8 +165,18 @@
                 @click="removeIndex(index.name, indexKey)"
                 title="Remove Index"
             >
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                <svg
+                    width="18"
+                    height="18"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                >
+                    <path
+                        fill-rule="evenodd"
+                        d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                        clip-rule="evenodd"
+                    ></path>
                 </svg>
             </button>
         </div>
@@ -151,7 +186,9 @@
         class="flex-colums border-t min-h-[200px] flex-1 border-neutral-800 p-4"
         v-show="isIndexOpened(index.name) ?? false"
     >
-        <div class="flex justify-between items-center border-b border-neutral-800 mb-2 pb-1 text-neutral-500">
+        <div
+            class="flex justify-between items-center border-b border-neutral-800 mb-2 pb-1 text-neutral-500"
+        >
             <span>Fields</span>
             <button
                 class="text-sm p-1 px-3 rounded-md bg-blue-800 hover:bg-blue-700 cursor-pointer text-white"
@@ -172,7 +209,9 @@
                 <option
                     v-for="contractField in selectedContract.fields"
                     :value="contractField.propertyKey"
-                >{{ contractField.propertyKey }}</option>
+                >
+                    {{ contractField.propertyKey }}
+                </option>
             </select>
 
             <button
@@ -180,19 +219,33 @@
                 @click="removeFieldFromIndex(index, fieldIndex)"
                 :disabled="selectedContract.options.moduleContract"
             >
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                <svg
+                    width="18"
+                    height="18"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                >
+                    <path
+                        fill-rule="evenodd"
+                        d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                        clip-rule="evenodd"
+                    ></path>
                 </svg>
             </button>
         </div>
 
-        <div class="flex border-b border-neutral-800 mb-2 pb-1 mt-4 text-neutral-500">
+        <div
+            class="flex border-b border-neutral-800 mb-2 pb-1 mt-4 text-neutral-500"
+        >
             Options
         </div>
 
         <div class="flex-colums mb-4 pt-2">
             <div class="flex text-xs justify-center">
-                <div class="w-[200px] flex items-center">Expiration Time (seconds): </div>
+                <div class="w-[200px] flex items-center">
+                    Expiration Time (seconds):
+                </div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input
                         class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
@@ -205,7 +258,7 @@
                 </div>
             </div>
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Parser: </div>
+                <div class="w-[200px] flex items-center">Parser:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input
                         class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
@@ -218,7 +271,7 @@
                 </div>
             </div>
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Where Clause: </div>
+                <div class="w-[200px] flex items-center">Where Clause:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input
                         class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
@@ -231,7 +284,7 @@
                 </div>
             </div>
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Null Filtered: </div>
+                <div class="w-[200px] flex items-center">Null Filtered:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input
                         type="checkbox"

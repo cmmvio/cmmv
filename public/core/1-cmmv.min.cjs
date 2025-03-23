@@ -1,6 +1,6 @@
 /*!
  * cmmv.io (c) 2024, Andre Ferreira
- * compiled Fri, 21 Mar 2025 19:33:32 GMT
+ * compiled Sat, 22 Mar 2025 22:51:34 GMT
  * licensed under the MIT license
  * see: https://github.com/cmmvio/cmmv for details
  */

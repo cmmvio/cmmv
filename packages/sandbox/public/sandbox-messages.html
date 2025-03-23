@@ -15,13 +15,23 @@
     v-if="!selectedContract.messages || selectedContract.messages.length === 0"
     class="border border-dashed border-neutral-700 rounded-md p-6 mb-4 text-center"
 >
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-neutral-500" viewBox="0 0 24 24" fill="currentColor">
-        <path fill-rule="evenodd" d="M15.97 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 1 1-1.06-1.06l3.22-3.22H7.5a.75.75 0 0 1 0-1.5h11.69l-3.22-3.22a.75.75 0 0 1 0-1.06Zm-7.94 9a.75.75 0 0 1 0 1.06l-3.22 3.22H16.5a.75.75 0 0 1 0 1.5H4.81l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"></path>
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-12 w-12 mx-auto mb-3 text-neutral-500"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+    >
+        <path
+            fill-rule="evenodd"
+            d="M15.97 2.47a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 1 1-1.06-1.06l3.22-3.22H7.5a.75.75 0 0 1 0-1.5h11.69l-3.22-3.22a.75.75 0 0 1 0-1.06Zm-7.94 9a.75.75 0 0 1 0 1.06l-3.22 3.22H16.5a.75.75 0 0 1 0 1.5H4.81l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 0Z"
+            clip-rule="evenodd"
+        ></path>
     </svg>
 
     <h3 class="text-lg font-medium text-neutral-400 mb-1">No DTOs Defined</h3>
     <p class="text-sm text-neutral-500 mb-4">
-        You haven't created any Data Transfer Objects (DTOs) for this contract yet.
+        You haven't created any Data Transfer Objects (DTOs) for this contract
+        yet.
     </p>
     <button
         class="text-sm p-2 px-4 rounded-md bg-green-800 hover:bg-green-700 cursor-pointer transition-colors"
@@ -52,7 +62,19 @@
                 class="items-center justify-center flex select-none cursor-pointer mr-2 ml-2"
                 @click="toggleMessageOpened(message.name)"
             >
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clip-rule="evenodd"></path></svg>
+                <svg
+                    width="18"
+                    height="18"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                >
+                    <path
+                        fill-rule="evenodd"
+                        d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z"
+                        clip-rule="evenodd"
+                    ></path>
+                </svg>
             </button>
         </div>
 
@@ -63,8 +85,18 @@
                 @click="removeMessage(message.name, messageKey)"
                 title="Remove Message"
             >
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                <svg
+                    width="18"
+                    height="18"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                >
+                    <path
+                        fill-rule="evenodd"
+                        d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                        clip-rule="evenodd"
+                    ></path>
                 </svg>
             </button>
         </div>
@@ -74,7 +106,9 @@
         class="flex-colums border-t min-h-[200px] flex-1 border-neutral-800 p-4"
         v-show="isMessageOpened(message.name) ?? false"
     >
-        <div class="flex justify-between items-center border-b border-neutral-800 mb-2 pb-1 text-neutral-500">
+        <div
+            class="flex justify-between items-center border-b border-neutral-800 mb-2 pb-1 text-neutral-500"
+        >
             <span>Properties</span>
             <button
                 class="text-sm p-1 px-3 rounded-md bg-blue-800 hover:bg-blue-700 cursor-pointer text-white"
@@ -85,23 +119,38 @@
             </button>
         </div>
 
-        <div v-for="(propValue, propKey) in message.properties" class="border-b border-neutral-800 mb-4 pb-4">
+        <div
+            v-for="(propValue, propKey) in message.properties"
+            class="border-b border-neutral-800 mb-4 pb-4"
+        >
             <div class="flex justify-between mb-2">
-                <div class="text-sm font-medium text-neutral-300">Property Configuration</div>
+                <div class="text-sm font-medium text-neutral-300">
+                    Property Configuration
+                </div>
                 <button
                     class="p-1 h-[28px] text-red-500 cursor-pointer flex-shrink-0"
                     @click="removePropertyFromMessage(message, propKey)"
                     :disabled="selectedContract.options.moduleContract"
                     title="Remove Property"
                 >
-                    <svg width="14" height="14" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                    <svg
+                        width="14"
+                        height="14"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                            clip-rule="evenodd"
+                        ></path>
                     </svg>
                 </button>
             </div>
 
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Property Name: </div>
+                <div class="w-[200px] flex items-center">Property Name:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input
                         class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
@@ -115,7 +164,7 @@
             </div>
 
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Type: </div>
+                <div class="w-[200px] flex items-center">Type:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <select
                         class="border pl-4 h-[42px] w-full outline-none bg-neutral-900 border-neutral-800"
@@ -138,7 +187,7 @@
             </div>
 
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Parameter Type: </div>
+                <div class="w-[200px] flex items-center">Parameter Type:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <select
                         class="border pl-4 h-[42px] w-full outline-none bg-neutral-900 border-neutral-800"
@@ -154,7 +203,7 @@
             </div>
 
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Default Value: </div>
+                <div class="w-[200px] flex items-center">Default Value:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input
                         class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
@@ -167,7 +216,7 @@
             </div>
 
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Required: </div>
+                <div class="w-[200px] flex items-center">Required:</div>
                 <div class="w-[calc(100%-200px)] justify-start">
                     <input
                         type="checkbox"

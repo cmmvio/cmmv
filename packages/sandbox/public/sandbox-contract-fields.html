@@ -9,13 +9,18 @@
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="12" height="12"
+                width="12"
+                height="12"
                 viewBox="0 0 24 24"
                 fill="currentColor"
                 class="mr-1"
                 title="ReadOnly"
             >
-                <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd"></path>
+                <path
+                    fill-rule="evenodd"
+                    d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z"
+                    clip-rule="evenodd"
+                ></path>
             </svg>
         </div>
 
@@ -30,7 +35,9 @@
                 v-for="fieldType in protoTypes"
                 :selected="field.protoType === fieldType.key"
                 :value="fieldType.key"
-            >{{ fieldType.label }}</option>
+            >
+                {{ fieldType.label }}
+            </option>
         </select>
 
         <div class="items-center flex ml-4 mr-2" title="Array">
@@ -40,7 +47,17 @@
                 :disabled="selectedContract.options.moduleContract"
                 v-model="field.protoRepeated"
             />
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" viewBox="0 0 1792 1792" fill="currentColor"><path stroke-width="0" d="M384 1408q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm0-512q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm1408 416v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5zm-1408-928q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm1408 416v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5zm0-512v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5z"></path></svg>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                viewBox="0 0 1792 1792"
+                fill="currentColor"
+            >
+                <path
+                    stroke-width="0"
+                    d="M384 1408q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm0-512q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm1408 416v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5zm-1408-928q0 80-56 136t-136 56-136-56-56-136 56-136 136-56 136 56 56 136zm1408 416v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5zm0-512v192q0 13-9.5 22.5t-22.5 9.5h-1216q-13 0-22.5-9.5t-9.5-22.5v-192q0-13 9.5-22.5t22.5-9.5h1216q13 0 22.5 9.5t9.5 22.5z"
+                ></path>
+            </svg>
         </div>
 
         <input
@@ -114,7 +131,19 @@
                 class="items-center justify-center flex select-none cursor-pointer mr-2 ml-2"
                 @click="toggleOpened(field.propertyKey)"
             >
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" clip-rule="evenodd"></path></svg>
+                <svg
+                    width="18"
+                    height="18"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                >
+                    <path
+                        fill-rule="evenodd"
+                        d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z"
+                        clip-rule="evenodd"
+                    ></path>
+                </svg>
             </button>
         </div>
 
@@ -125,8 +154,18 @@
                 @click="removeField(field.propertyKey, fieldKey)"
                 title="Remove Field"
             >
-                <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                <svg
+                    width="18"
+                    height="18"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                >
+                    <path
+                        fill-rule="evenodd"
+                        d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                        clip-rule="evenodd"
+                    ></path>
                 </svg>
             </button>
         </div>
@@ -136,13 +175,15 @@
         class="flex-colums border-t min-h-[400px] flex-1 border-neutral-800 p-4"
         v-show="isOpened(field.propertyKey) ?? false"
     >
-        <div class="flex border-b border-neutral-800 mb-2 pb-1 text-neutral-500">
+        <div
+            class="flex border-b border-neutral-800 mb-2 pb-1 text-neutral-500"
+        >
             Options
         </div>
 
         <div class="flex-colums mb-4 pt-2">
             <div class="flex text-xs justify-center">
-                <div class="w-[200px] flex items-center">Object Type: </div>
+                <div class="w-[200px] flex items-center">Object Type:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input
                         class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
@@ -155,7 +196,7 @@
                 </div>
             </div>
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Entity Type: </div>
+                <div class="w-[200px] flex items-center">Entity Type:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input
                         class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
@@ -168,7 +209,7 @@
                 </div>
             </div>
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Model Name: </div>
+                <div class="w-[200px] flex items-center">Model Name:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input
                         class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
@@ -181,7 +222,7 @@
                 </div>
             </div>
             <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Resolver: </div>
+                <div class="w-[200px] flex items-center">Resolver:</div>
                 <div class="w-[calc(100%-200px)] justify-end">
                     <input
                         class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
@@ -195,7 +236,9 @@
             </div>
         </div>
 
-        <div class="flex border-b border-neutral-800 mb-2 pb-1 text-neutral-500">
+        <div
+            class="flex border-b border-neutral-800 mb-2 pb-1 text-neutral-500"
+        >
             Validations
             <button
                 @click="addValidation(field)"
@@ -226,7 +269,9 @@
                                 v-for="validationType in validationsTypes"
                                 :selected="validation.type === validationType.key"
                                 :value="validationType.key"
-                            >{{ validationType.label }}</option>
+                            >
+                                {{ validationType.label }}
+                            </option>
                         </select>
                     </div>
 
@@ -244,7 +289,10 @@
                         />
 
                         <!-- Multiple Options for Length -->
-                        <div v-else-if="validation.type === 'Length'" class="flex gap-2">
+                        <div
+                            v-else-if="validation.type === 'Length'"
+                            class="flex gap-2"
+                        >
                             <input
                                 class="p-2 h-[42px] w-1/2 border border-neutral-800 rounded focus-none outline-none"
                                 type="number"
@@ -264,7 +312,10 @@
                         </div>
 
                         <!-- Multiple Options for IsEnum -->
-                        <div v-else-if="validation.type === 'IsEnum'" class="flex gap-2">
+                        <div
+                            v-else-if="validation.type === 'IsEnum'"
+                            class="flex gap-2"
+                        >
                             <input
                                 class="p-2 h-[42px] w-full border border-neutral-800 rounded focus-none outline-none"
                                 type="text"
@@ -276,7 +327,10 @@
                         </div>
 
                         <!-- Options for IsStrongPassword -->
-                        <div v-else-if="validation.type === 'IsStrongPassword'" class="flex flex-wrap gap-2">
+                        <div
+                            v-else-if="validation.type === 'IsStrongPassword'"
+                            class="flex flex-wrap gap-2"
+                        >
                             <div class="flex items-center">
                                 <label class="text-xs mr-2">Min Length:</label>
                                 <input
@@ -289,26 +343,45 @@
                             <div class="flex items-center">
                                 <label class="text-xs mx-2">Checks:</label>
                                 <label class="text-xs ml-2 mr-1">
-                                    <input type="checkbox" class="mr-1" v-model="getOrCreateOptions(validation).minLowercase"/>
+                                    <input
+                                        type="checkbox"
+                                        class="mr-1"
+                                        v-model="getOrCreateOptions(validation).minLowercase"
+                                    />
                                     a-z
                                 </label>
                                 <label class="text-xs mx-1">
-                                    <input type="checkbox" class="mr-1" v-model="getOrCreateOptions(validation).minUppercase"/>
+                                    <input
+                                        type="checkbox"
+                                        class="mr-1"
+                                        v-model="getOrCreateOptions(validation).minUppercase"
+                                    />
                                     A-Z
                                 </label>
                                 <label class="text-xs mx-1">
-                                    <input type="checkbox" class="mr-1" v-model="getOrCreateOptions(validation).minNumbers"/>
+                                    <input
+                                        type="checkbox"
+                                        class="mr-1"
+                                        v-model="getOrCreateOptions(validation).minNumbers"
+                                    />
                                     0-9
                                 </label>
                                 <label class="text-xs mx-1">
-                                    <input type="checkbox" class="mr-1" v-model="getOrCreateOptions(validation).minSymbols"/>
+                                    <input
+                                        type="checkbox"
+                                        class="mr-1"
+                                        v-model="getOrCreateOptions(validation).minSymbols"
+                                    />
                                     !@#
                                 </label>
                             </div>
                         </div>
 
                         <!-- Default - empty placeholder for validations without values -->
-                        <div v-else class="p-2 h-[42px] w-full border border-neutral-800 rounded text-neutral-500 flex items-center text-sm">
+                        <div
+                            v-else
+                            class="p-2 h-[42px] w-full border border-neutral-800 rounded text-neutral-500 flex items-center text-sm"
+                        >
                             No options required
                         </div>
                     </div>
@@ -334,8 +407,19 @@
                             v-if="!selectedContract.options.moduleContract"
                             title="Remove Validation"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
                             </svg>
                         </button>
                     </div>
@@ -343,12 +427,17 @@
             </div>
 
             <!-- "No validations" message -->
-            <div v-if="!field.validations || field.validations.length === 0" class="py-4 text-center text-neutral-500 text-sm italic">
+            <div
+                v-if="!field.validations || field.validations.length === 0"
+                class="py-4 text-center text-neutral-500 text-sm italic"
+            >
                 No validations added yet
             </div>
         </div>
 
-        <div class="flex border-b border-neutral-800 mb-2 pb-1 mt-4 text-neutral-500">
+        <div
+            class="flex border-b border-neutral-800 mb-2 pb-1 mt-4 text-neutral-500"
+        >
             Relationships
             <button
                 @click="addRelationship(field)"
@@ -367,7 +456,9 @@
             >
                 <div class="grid grid-cols-12 gap-3">
                     <div class="flex flex-col col-span-2">
-                        <label class="text-xs mb-1 text-neutral-400">Entity Name</label>
+                        <label class="text-xs mb-1 text-neutral-400"
+                            >Entity Name</label
+                        >
                         <input
                             class="p-2 h-[42px] w-full border border-neutral-800 rounded bg-neutral-900 text-neutral-200 focus:outline-none"
                             type="text"
@@ -380,7 +471,9 @@
 
                     <!-- Field -->
                     <div class="flex flex-col col-span-2">
-                        <label class="text-xs mb-1 text-neutral-400">Field</label>
+                        <label class="text-xs mb-1 text-neutral-400"
+                            >Field</label
+                        >
                         <input
                             class="p-2 h-[42px] w-full border border-neutral-800 rounded bg-neutral-900 text-neutral-200 focus:outline-none"
                             type="text"
@@ -393,7 +486,9 @@
 
                     <!-- Contract Selector -->
                     <div class="flex flex-col col-span-3">
-                        <label class="text-xs mb-1 text-neutral-400">Contract</label>
+                        <label class="text-xs mb-1 text-neutral-400"
+                            >Contract</label
+                        >
                         <select
                             class="p-2 h-[42px] w-full border border-neutral-800 rounded bg-neutral-900 text-neutral-200 focus:outline-none"
                             v-model="relationship.contract"
@@ -411,8 +506,12 @@
 
                     <!-- Options - AUMENTADO -->
                     <div class="flex flex-col col-span-4">
-                        <label class="text-xs mb-1 text-neutral-400">Options</label>
-                        <div class="flex h-[42px] border border-neutral-800 rounded bg-neutral-900 items-center px-3 justify-between">
+                        <label class="text-xs mb-1 text-neutral-400"
+                            >Options</label
+                        >
+                        <div
+                            class="flex h-[42px] border border-neutral-800 rounded bg-neutral-900 items-center px-3 justify-between"
+                        >
                             <!-- Array -->
                             <div class="flex items-center" title="Array">
                                 <input
@@ -425,14 +524,19 @@
                             </div>
 
                             <!-- Create Relationship -->
-                            <div class="flex items-center" title="Create Database Relationship">
+                            <div
+                                class="flex items-center"
+                                title="Create Database Relationship"
+                            >
                                 <input
                                     type="checkbox"
                                     class="w-4 h-4 mr-2 text-blue-600 bg-neutral-800 rounded focus:ring-blue-800 focus:ring-2"
                                     v-model="relationship.createRelationship"
                                     :disabled="selectedContract.options.moduleContract"
                                 />
-                                <label class="text-xs">Create Database Relationship</label>
+                                <label class="text-xs"
+                                    >Create Database Relationship</label
+                                >
                             </div>
                         </div>
                     </div>
@@ -446,8 +550,19 @@
                             v-if="!selectedContract.options.moduleContract"
                             title="Remove Relationship"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
                             </svg>
                         </button>
                     </div>
@@ -455,12 +570,17 @@
             </div>
 
             <!-- "No relationships" message -->
-            <div v-if="!field.link || field.link.length === 0" class="py-4 text-center text-neutral-500 text-sm italic">
+            <div
+                v-if="!field.link || field.link.length === 0"
+                class="py-4 text-center text-neutral-500 text-sm italic"
+            >
                 No relationships added yet
             </div>
         </div>
 
-        <div class="flex border-b border-neutral-800 mb-2 pb-1 mt-4 text-neutral-500">
+        <div
+            class="flex border-b border-neutral-800 mb-2 pb-1 mt-4 text-neutral-500"
+        >
             Schema
         </div>
 

@@ -1,0 +1,1108 @@
+<div
+    id="form-builder-app"
+    class="flex flex-col h-full bg-neutral-950 text-white"
+    v-if="formBuilder"
+>
+    <!-- Header -->
+    <div
+        class="border-b border-neutral-800 bg-neutral-900 p-3 flex justify-between items-center"
+    >
+        <h1 class="text-lg font-semibold">Contract Form Builder</h1>
+        <div class="flex items-center gap-2">
+            <!-- Read-only badge for module contracts -->
+            <div v-if="formBuilder.isReadOnly" class="px-2 py-1 bg-yellow-600 text-white text-xs rounded mr-2">
+                Read-only Mode
+            </div>
+
+            <button
+                v-if="!formBuilder.isReadOnly"
+                @click="formBuilder.saveFormToContract"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-sm mr-2"
+            >
+                Save Changes
+            </button>
+            <button
+                v-if="!formBuilder.isReadOnly"
+                @click="formBuilder.togglePreviewMode"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm"
+            >
+                {{ formBuilder.previewMode ? 'Edit Mode' : 'Preview Mode' }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Left: Components Panel - Hide when in read-only mode -->
+        <div
+            v-if="!formBuilder.isReadOnly"
+            class="w-[240px] flex-shrink-0 border-r border-neutral-800 bg-neutral-900 overflow-y-auto"
+        >
+            <div class="p-3 border-b border-neutral-800 bg-neutral-800">
+                <h2 class="text-sm font-semibold text-neutral-300">
+                    Form Components
+                </h2>
+            </div>
+
+            <div class="p-3">
+                <!-- Basic Inputs Section -->
+                <div class="mb-4">
+                    <h3
+                        class="text-xs uppercase text-neutral-500 font-semibold mb-2"
+                    >
+                        Basic Inputs
+                    </h3>
+
+                    <!-- Text Input -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('text')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'text')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-blue-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                        </svg>
+                        <span class="text-sm">Text Input</span>
+                    </div>
+
+                    <!-- Textarea -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('textarea')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'textarea')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-blue-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6h16M4 12h16m-7 6h7"
+                            />
+                        </svg>
+                        <span class="text-sm">Textarea</span>
+                    </div>
+
+                    <!-- Number -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('number')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'number')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-blue-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                            />
+                        </svg>
+                        <span class="text-sm">Number</span>
+                    </div>
+
+                    <!-- Datepicker -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('datepicker')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'datepicker')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-blue-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                        </svg>
+                        <span class="text-sm">Date Picker</span>
+                    </div>
+
+                    <!-- Slider -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('slider')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'slider')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-blue-400"
+                            fill="none"
+                            viewBox="0 0 200 154"
+                            stroke="currentColor"
+                        >
+                            <path stroke-width="2" fill="currentColor" d="M66.418795,89.7675781 L13,89.7675781 C5.82029825,89.7675781 -2.75424496e-14,83.9472799 -2.84217094e-14,76.7675781 C-2.93009693e-14,69.5878764 5.82029825,63.7675781 13,63.7675781 L66.418795,63.7675781 C71.6320617,50.3100922 84.701644,40.7675781 100,40.7675781 C115.298356,40.7675781 128.367938,50.3100922 133.581205,63.7675781 L187,63.7675781 C194.179702,63.7675781 200,69.5878764 200,76.7675781 C200,83.9472799 194.179702,89.7675781 187,89.7675781 L133.581205,89.7675781 C128.367938,103.225064 115.298356,112.767578 100,112.767578 C84.701644,112.767578 71.6320617,103.225064 66.418795,89.7675781 Z M100,94.7675781 C109.941125,94.7675781 118,86.7087036 118,76.7675781 C118,66.8264526 109.941125,58.7675781 100,58.7675781 C90.0588745,58.7675781 82,66.8264526 82,76.7675781 C82,86.7087036 90.0588745,94.7675781 100,94.7675781 Z"></path>
+                        </svg>
+                        <span class="text-sm">Slider</span>
+                    </div>
+
+                    <!-- Select -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('select')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'select')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-blue-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                            />
+                        </svg>
+                        <span class="text-sm">Dropdown</span>
+                    </div>
+
+                    <!-- Radio -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('radio')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'radio')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-blue-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <span class="text-sm">Radio Buttons</span>
+                    </div>
+
+                    <!-- Checkbox -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('checkbox')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'checkbox')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-blue-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+                        <span class="text-sm">Checkbox</span>
+                    </div>
+
+                    <!-- Hidden Input -->
+                    <div
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponent('hidden')"
+                        draggable="true"
+                        @dragstart="formBuilder.handleDragStart($event, 'hidden')"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-blue-400"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path d="M3.53 2.47a.75.75 0 0 0-1.06 1.06l18 18a.75.75 0 1 0 1.06-1.06l-18-18ZM22.676 12.553a11.249 11.249 0 0 1-2.631 4.31l-3.099-3.099a5.25 5.25 0 0 0-6.71-6.71L7.759 4.577a11.217 11.217 0 0 1 4.242-.827c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113Z"></path><path d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0 1 15.75 12ZM12.53 15.713l-4.243-4.244a3.75 3.75 0 0 0 4.244 4.243Z"></path><path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 0 0-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.5 0 2.933-.294 4.242-.827l-2.477-2.477A5.25 5.25 0 0 1 6.75 12Z"></path>
+                        </svg>
+                        <span class="text-sm">Hidden Input</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contract Fields Section -->
+            <div class="p-3 border-t border-neutral-800">
+                <div class="flex justify-between items-center mb-2">
+                    <h3
+                        class="text-xs uppercase text-neutral-500 font-semibold"
+                    >
+                        Contract Fields
+                    </h3>
+                </div>
+
+                <div
+                    v-if="!formBuilder.contractFields || formBuilder.contractFields.length === 0"
+                    class="text-sm text-neutral-500 text-center py-2"
+                >
+                    No fields found in contract
+                </div>
+
+                <!-- List of contract fields -->
+                <div v-else class="max-h-[200px] overflow-y-auto">
+                    <div
+                        v-for="field in formBuilder.contractFields"
+                        :key="field.propertyKey"
+                        class="flex items-center gap-2 p-2 rounded hover:bg-neutral-800 cursor-pointer"
+                        @click="formBuilder.addComponentFromField(field)"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 text-purple-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                            />
+                        </svg>
+                        <div class="flex flex-col">
+                            <span class="text-sm">{{ field.propertyKey }}</span>
+                            <span class="text-xs text-neutral-500"
+                                >{{ field.protoType }}</span
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <button
+                    @click="formBuilder.generateFromContractFields"
+                    class="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded text-xs"
+                >
+                    Auto-Generate Form
+                </button>
+            </div>
+        </div>
+
+        <!-- Middle: Form Builder Canvas -->
+        <div
+            class="flex-1 flex justify-center bg-neutral-950 overflow-hidden"
+        >
+            <div
+                id="form-builder-canvas"
+                class="w-full max-w-[1024px] overflow-y-auto p-6 bg-neutral-950 relative"
+                @dragover="!formBuilder.isReadOnly && formBuilder.handleDragOver($event)"
+                @dragleave="!formBuilder.isReadOnly && formBuilder.handleDragLeave($event)"
+                @drop="!formBuilder.isReadOnly && formBuilder.handleDrop($event)"
+            >
+                <!-- Overlay for when dragging a new component from sidebar -->
+                <div
+                    v-if="formBuilder.isDragging && formBuilder.ui.isDraggingNewComponent"
+                    class="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg flex items-center justify-center z-40"
+                >
+                    <div class="text-blue-400 text-lg font-medium">Release to add new component</div>
+                </div>
+
+                <!-- Loading indicator -->
+                <div
+                    v-if="formBuilder.isLoading"
+                    class="absolute inset-0 bg-neutral-900/80 flex items-center justify-center z-50"
+                >
+                    <div class="flex flex-col items-center">
+                        <svg
+                            class="animate-spin h-8 w-8 text-blue-500 mb-2"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                        </svg>
+                        <span class="text-white">Loading...</span>
+                    </div>
+                </div>
+
+                <!-- Empty state for read-only contract with no form configuration -->
+                <div
+                    v-if="formBuilder.isReadOnly"
+                    class="border-2 border-dashed border-neutral-700 rounded-lg p-6 min-h-[300px]"
+                >
+                    <div class="text-center py-10">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-12 w-12 mx-auto mb-3 text-neutral-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.5"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            />
+                        </svg>
+                        <h3 class="text-lg font-medium text-neutral-400 mb-1">
+                            Read-Only Contract
+                        </h3>
+                        <p class="text-sm text-neutral-500 mb-4">
+                            This is a module contract that cannot be edited. No form configuration was found.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Regular empty state (not read-only) -->
+                <div
+                    v-else-if="formBuilder.components.length === 0"
+                    class="border-2 border-dashed border-neutral-700 rounded-lg p-6 min-h-[300px]"
+                >
+                    <div class="text-center py-10">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-12 w-12 mx-auto mb-3 text-neutral-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.5"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                        </svg>
+                        <h3 class="text-lg font-medium text-neutral-400 mb-1">
+                            Empty Form
+                        </h3>
+                        <p class="text-sm text-neutral-500 mb-4">
+                            Drag components from the left sidebar or use the button below to auto-create a form based on your contract fields.
+                        </p>
+                        <button
+                            @click="formBuilder.generateFromContractFields"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm"
+                        >
+                            Generate from Contract Fields
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form Builder Canvas with components -->
+                <div
+                    v-else
+                    class="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-800 p-6 relative w-full"
+                    @dragover.prevent="!formBuilder.isReadOnly && !formBuilder.previewMode"
+                    @drop.prevent.stop="!formBuilder.isReadOnly && !formBuilder.previewMode && formBuilder.handleCanvasDrop($event)"
+                >
+                    <!-- Overlay para quando arrastar sobre o canvas -->
+                    <div
+                        v-if="formBuilder.isDragging && formBuilder.ui.isDraggingNewComponent"
+                        class="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg flex items-center justify-center z-40"
+                    >
+                        <div class="text-blue-400 text-lg font-medium">Solte para adicionar ao final</div>
+                    </div>
+
+                    <!-- Indicador de inserção -->
+                    <div
+                        v-show="formBuilder.ui.draggedComponent && formBuilder.ui.dropPreviewPosition > 0"
+                        class="absolute h-1.5 bg-blue-500 left-0 right-0 transition-all duration-100 z-50 rounded-full"
+                        :style="{ top: formBuilder.ui.dropPreviewPosition + 'px' }"
+                    ></div>
+
+                    <!-- Grid Container -->
+                    <div class="grid grid-cols-12 gap-2 relative">
+                        <!-- Overlay de grade para mostrar colunas durante o redimensionamento -->
+                        <div
+                            v-if="formBuilder.components.some(c => c.isResizing)"
+                            class="absolute inset-0 grid grid-cols-12 gap-4 pointer-events-none z-40"
+                        >
+                            <div
+                                v-for="n in 12"
+                                :key="n"
+                                class="h-full border-r border-blue-400/20 last:border-r-0"
+                            ></div>
+                        </div>
+
+                        <!-- Componentes do formulário -->
+                        <div
+                            v-for="(component, index) in formBuilder.components"
+                            :key="component.id"
+                            :data-component-id="component.id"
+                            class="grid-component relative select-none"
+                            :class="{
+                                'outline outline-2 outline-blue-500 bg-blue-500/10': !formBuilder.isReadOnly && formBuilder.selectedComponent && formBuilder.selectedComponent.id === component.id && !formBuilder.previewMode,
+                                'bg-blue-500/10': formBuilder.ui.draggedComponent && formBuilder.ui.targetComponent && formBuilder.ui.targetComponent.id === component.id && formBuilder.ui.draggedComponent.id !== component.id,
+                                [`col-span-${component.gridSize}`]: true
+                            }"
+                            :data-drop-position="formBuilder.ui.targetComponent && formBuilder.ui.targetComponent.id === component.id ? formBuilder.ui.dropPosition : ''"
+                        >
+                            <!-- Visual indicator for drag handle (left side bar) -->
+                            <div
+                                v-if="!formBuilder.isReadOnly && !formBuilder.previewMode"
+                                class="absolute left-0 top-0 bottom-0 w-1 bg-transparent rounded-l z-30"
+                            ></div>
+
+                            <!-- Resize handle for grid size -->
+                            <div
+                                v-if="!formBuilder.isReadOnly && !formBuilder.previewMode && component.type !== 'hidden'"
+                                class="resize-handle absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 w-4 h-4 bg-blue-500 border-2 border-white dark:border-neutral-800 rounded-sm cursor-col-resize z-50 shadow-md"
+                                @mousedown.stop.prevent="formBuilder.initResize($event, component)"
+                            ></div>
+
+                            <!-- Overlay transparente para drag e drop -->
+                            <div
+                                v-if="!formBuilder.isReadOnly && !formBuilder.previewMode"
+                                class="component-wrapper absolute inset-0 bg-transparent z-40 select-none cursor-move"
+                                :class="{'opacity-50': formBuilder.ui.draggedComponent && formBuilder.ui.draggedComponent.id === component.id}"
+                                @click.stop="!formBuilder.isReadOnly && !formBuilder.previewMode && formBuilder.selectComponent(component)"
+                                :draggable="!formBuilder.isReadOnly && !formBuilder.previewMode"
+                                @dragstart.stop="!formBuilder.isReadOnly && !formBuilder.previewMode && formBuilder.handleComponentDragStart($event, component)"
+                                @dragover.prevent="!formBuilder.isReadOnly && !formBuilder.previewMode && formBuilder.handleComponentDragOver($event, component)"
+                                @dragleave.prevent="!formBuilder.isReadOnly && !formBuilder.previewMode && formBuilder.handleComponentDragLeave($event)"
+                                @dragend.stop="!formBuilder.isReadOnly && !formBuilder.previewMode && formBuilder.handleComponentDragEnd($event, component)"
+                            ></div>
+
+                            <!-- Conteúdo do componente -->
+                            <div
+                                v-html="formBuilder.getComponentHtml(component, formBuilder.previewMode || formBuilder.isReadOnly)"
+                                class="z-20 relative"
+                            ></div>
+
+                            <!-- Badges e botões de ação (mantidos como estavam) -->
+                            <div
+                                v-if="component.contractFieldId && !formBuilder.previewMode && !formBuilder.isReadOnly"
+                                class="absolute top-0 right-3 mt-1 mr-1 bg-purple-500 text-white text-xs px-1.5 py-0.5 rounded z-20"
+                            >
+                                Contract Field
+                            </div>
+
+                            <div
+                                v-if="component.readOnly && !formBuilder.previewMode && !formBuilder.isReadOnly"
+                                class="absolute top-0 right-3 mt-1 mr-1 bg-yellow-500 text-white text-xs px-1.5 py-0.5 rounded z-20"
+                            >
+                                Read-only
+                            </div>
+
+                            <!-- Grid size badge -->
+                            <div
+                                v-if="!formBuilder.isReadOnly && !formBuilder.previewMode && component.isResizing"
+                                class="absolute bottom-0 right-0 mb-2 mr-2 px-2 py-1 text-xs bg-blue-500 text-white rounded font-bold z-50"
+                            >
+                                {{ component.gridSize }}/12
+                            </div>
+
+                            <div
+                                v-if="!formBuilder.isReadOnly && !formBuilder.previewMode && formBuilder.selectedComponent && formBuilder.selectedComponent.id === component.id"
+                                class="absolute -right-2 -top-2 flex gap-1 z-50"
+                            >
+                                <button
+                                    v-if="index > 0"
+                                    @click.stop="formBuilder.moveComponentUp(component.id)"
+                                    class="bg-blue-500 hover:bg-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-white cursor-pointer"
+                                    title="Move up"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+
+                                <button
+                                    v-if="index < formBuilder.components.length - 1"
+                                    @click.stop="formBuilder.moveComponentDown(component.id)"
+                                    class="bg-blue-500 hover:bg-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-white cursor-pointer"
+                                    title="Move down"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+
+                                <button
+                                    @click.stop="formBuilder.deleteComponent(component.id)"
+                                    class="bg-red-500 hover:bg-red-600 rounded-full w-6 h-6 flex items-center justify-center text-white cursor-pointer"
+                                    title="Delete component"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit button in preview mode -->
+                    <div
+                        v-if="formBuilder.previewMode || formBuilder.isReadOnly"
+                        class="mt-6 flex justify-end"
+                    >
+                        <button
+                            type="button"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                        >
+                            {{ formBuilder.formSettings.submitButtonText }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Properties Panel (hide in read-only mode) -->
+        <div
+            v-if="!formBuilder.isReadOnly"
+            class="w-[300px] flex-shrink-0 border-l border-neutral-800 bg-neutral-900 overflow-y-auto"
+        >
+            <div class="p-3 border-b border-neutral-800 bg-neutral-800">
+                <h2 class="text-sm font-semibold text-neutral-300 select-none">
+                    Properties
+                </h2>
+            </div>
+
+
+            <!-- Component properties tabs -->
+            <div v-if="formBuilder.selectedComponent && !formBuilder.previewMode">
+                <!-- Tabs for Attributes/Styles -->
+                <div class="flex border-b border-neutral-800">
+                    <button
+                        class="flex-1 h-[40px] px-4 py-2 text-sm select-none"
+                        :class="formBuilder.ui.activePropertyTab === 'attributes' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800'"
+                        @click="formBuilder.ui.activePropertyTab = 'attributes'"
+                    >
+                        Attributes
+                    </button>
+                    <button
+                        class="flex-1 h-[40px] px-4 py-2 text-sm select-none"
+                        :class="formBuilder.ui.activePropertyTab === 'styles' ? 'border-b-2 border-blue-500 text-blue-400' : 'text-neutral-400 hover:bg-neutral-800'"
+                        @click="formBuilder.ui.activePropertyTab = 'styles'"
+                    >
+                        Styles
+                    </button>
+                </div>
+
+                <!-- Attributes Content -->
+                <div v-show="formBuilder.ui.activePropertyTab === 'attributes'" class="p-4">
+                    <div class="mb-4">
+                        <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
+                            General
+                        </div>
+
+                        <!-- Contract Field Association -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1">Contract Field</label>
+                            <select
+                                v-model="formBuilder.selectedComponent.contractFieldId"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            >
+                                <option :value="null">None (Custom Field)</option>
+                                <option
+                                    v-for="field in formBuilder.contractFields"
+                                    :key="field.propertyKey"
+                                    :value="field.propertyKey"
+                                >
+                                    {{ field.propertyKey }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Label -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1 select-none">Label</label>
+                            <input
+                                type="text"
+                                v-model="formBuilder.selectedComponent.label"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            />
+                        </div>
+
+                        <!-- Name/ID -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1 select-none">Name/ID</label>
+                            <input
+                                type="text"
+                                v-model="formBuilder.selectedComponent.name"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            />
+                        </div>
+
+                        <!-- Placeholder -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1 select-none">Placeholder</label>
+                            <input
+                                type="text"
+                                v-model="formBuilder.selectedComponent.placeholder"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            />
+                        </div>
+
+                        <!-- Help Text -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1 select-none">Help Text</label>
+                            <input
+                                type="text"
+                                v-model="formBuilder.selectedComponent.helpText"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            />
+                        </div>
+
+                        <!-- Required -->
+                        <div class="mb-3 flex items-center">
+                            <input
+                                type="checkbox"
+                                id="required-field"
+                                v-model="formBuilder.selectedComponent.required"
+                                class="mr-2"
+                            />
+                            <label
+                                for="required-field"
+                                class="text-xs text-neutral-400"
+                                >Required Field</label
+                            >
+                        </div>
+
+                        <!-- Campos específicos para Textarea -->
+                        <div v-if="formBuilder.selectedComponent.type === 'textarea'" class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1 select-none">Rows</label>
+                            <input
+                                type="number"
+                                v-model="formBuilder.selectedComponent.rows"
+                                min="2"
+                                max="20"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            />
+                        </div>
+
+                        <!-- Campos específicos para Slider -->
+                        <div v-if="formBuilder.selectedComponent.type === 'slider'" class="mt-4">
+                            <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
+                                Slider Options
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Minimum Value</label>
+                                <input
+                                    type="number"
+                                    v-model="formBuilder.selectedComponent.min"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Maximum Value</label>
+                                <input
+                                    type="number"
+                                    v-model="formBuilder.selectedComponent.max"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Step</label>
+                                <input
+                                    type="number"
+                                    v-model="formBuilder.selectedComponent.step"
+                                    min="0.1"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-xs text-neutral-400 mb-1">Default Value</label>
+                                <input
+                                    type="number"
+                                    v-model="formBuilder.selectedComponent.defaultValue"
+                                    class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Component-specific properties for Select/Checkbox/Radio -->
+                        <div
+                            v-if="['select', 'checkbox', 'radio'].includes(formBuilder.selectedComponent.type)"
+                            class="mt-4"
+                        >
+                            <div
+                                class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none"
+                            >
+                                Options
+                            </div>
+
+                            <div
+                                v-for="(option, optionIndex) in formBuilder.selectedComponent.options"
+                                :key="optionIndex"
+                                class="flex items-center mb-2"
+                            >
+                                <input
+                                    type="text"
+                                    v-model="option.label"
+                                    class="flex-grow bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                    placeholder="Option label"
+                                />
+                                <button
+                                    @click="formBuilder.removeOption(optionIndex)"
+                                    class="ml-2 text-red-500 hover:text-red-400"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <button
+                                @click="formBuilder.addOption"
+                                class="mt-2 w-full bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 px-3 py-1.5 rounded text-sm select-none"
+                            >
+                                + Add Option
+                            </button>
+                        </div>
+
+                        <!-- Grid Size -->
+                        <div class="mb-4">
+                            <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none flex justify-between">
+                                <span>Layout</span>
+                                <span class="font-mono text-blue-400">{{ formBuilder.selectedComponent.gridSize }}/12 columns</span>
+                            </div>
+                            <label class="block text-xs text-neutral-400 mb-1 select-none">Grid Size</label>
+                            <input
+                                type="range"
+                                v-model="formBuilder.selectedComponent.gridSize"
+                                min="1"
+                                max="12"
+                                step="1"
+                                class="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <div class="mt-2 grid grid-cols-12 gap-1 h-3">
+                                <div
+                                    v-for="n in 12"
+                                    :key="n"
+                                    class="h-full rounded-sm transition-colors duration-150"
+                                    :class="n <= formBuilder.selectedComponent.gridSize ? 'bg-blue-500' : 'bg-neutral-700'"
+                                ></div>
+                            </div>
+                        </div>
+
+                        <!-- Campo específico para Hidden Input -->
+                        <div v-if="formBuilder.selectedComponent.type === 'hidden'" class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1 select-none">Default Value</label>
+                            <input
+                                type="text"
+                                v-model="formBuilder.selectedComponent.defaultValue"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                                placeholder="Value to be stored in the hidden field"
+                            />
+                            <p class="mt-1 text-xs text-neutral-500">
+                                This value will be submitted with the form but won't be visible to users.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Styles Content -->
+                <div v-show="formBuilder.ui.activePropertyTab === 'styles'" class="p-4">
+                    <div class="mb-4">
+                        <div class="text-xs font-semibold text-neutral-500 uppercase mb-2">
+                            Appearance
+                        </div>
+
+                        <!-- Background Color -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1">Background Color</label>
+                            <select
+                                v-model="formBuilder.selectedComponent.styles.bgColor"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            >
+                                <option value="bg-white dark:bg-neutral-800">Default</option>
+                                <option value="bg-gray-100 dark:bg-neutral-700">Light Gray</option>
+                                <option value="bg-blue-50 dark:bg-blue-900">Light Blue</option>
+                                <option value="bg-green-50 dark:bg-green-900">Light Green</option>
+                                <option value="bg-yellow-50 dark:bg-yellow-900">Light Yellow</option>
+                                <option value="bg-red-50 dark:bg-red-900">Light Red</option>
+                            </select>
+                        </div>
+
+                        <!-- Text Color -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1">Text Color</label>
+                            <select
+                                v-model="formBuilder.selectedComponent.styles.textColor"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            >
+                                <option value="text-neutral-700 dark:text-neutral-300">Default</option>
+                                <option value="text-gray-900 dark:text-gray-100">Dark Gray</option>
+                                <option value="text-blue-600 dark:text-blue-300">Blue</option>
+                                <option value="text-green-600 dark:text-green-300">Green</option>
+                                <option value="text-yellow-600 dark:text-yellow-300">Yellow</option>
+                                <option value="text-red-600 dark:text-red-300">Red</option>
+                            </select>
+                        </div>
+
+                        <!-- Text Size -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1">Text Size</label>
+                            <select
+                                v-model="formBuilder.selectedComponent.styles.textSize"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            >
+                                <option value="text-xs">Extra Small</option>
+                                <option value="text-sm">Small</option>
+                                <option value="text-base">Medium</option>
+                                <option value="text-lg">Large</option>
+                                <option value="text-xl">Extra Large</option>
+                            </select>
+                        </div>
+
+                        <!-- Padding -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1">Padding</label>
+                            <select
+                                v-model="formBuilder.selectedComponent.styles.padding"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            >
+                                <option value="px-2 py-1">Small (px-2 py-1)</option>
+                                <option value="px-3 py-2">Medium (px-3 py-2)</option>
+                                <option value="px-4 py-3">Large (px-4 py-3)</option>
+                                <option value="px-5 py-4">Extra Large (px-5 py-4)</option>
+                            </select>
+                        </div>
+
+                        <!-- Margin Bottom -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1">Margin Bottom</label>
+                            <select
+                                v-model="formBuilder.selectedComponent.styles.margin"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            >
+                                <option value="mb-2">Small (mb-2)</option>
+                                <option value="mb-4">Medium (mb-4)</option>
+                                <option value="mb-6">Large (mb-6)</option>
+                                <option value="mb-8">Extra Large (mb-8)</option>
+                            </select>
+                        </div>
+
+                        <!-- Border Radius -->
+                        <div class="mb-3">
+                            <label class="block text-xs text-neutral-400 mb-1">Border Radius</label>
+                            <select
+                                v-model="formBuilder.selectedComponent.styles.rounded"
+                                class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                            >
+                                <option value="rounded-none">None</option>
+                                <option value="rounded-sm">Small</option>
+                                <option value="rounded-md">Medium</option>
+                                <option value="rounded-lg">Large</option>
+                                <option value="rounded-xl">Extra Large</option>
+                                <option value="rounded-full">Full</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form settings (when no component selected) -->
+            <div v-else-if="!formBuilder.previewMode" class="p-4">
+                <div class="mb-4">
+                    <div
+                        class="text-xs font-semibold text-neutral-500 uppercase mb-2"
+                    >
+                        Form Settings
+                    </div>
+
+                    <!-- Form Name -->
+                    <div class="mb-3">
+                        <label class="block text-xs text-neutral-400 mb-1"
+                            >Form Name</label
+                        >
+                        <input
+                            type="text"
+                            v-model="formBuilder.formSettings.name"
+                            class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                        />
+                    </div>
+
+                    <!-- Submit Button Text -->
+                    <div class="mb-3">
+                        <label class="block text-xs text-neutral-400 mb-1"
+                            >Submit Button Text</label
+                        >
+                        <input
+                            type="text"
+                            v-model="formBuilder.formSettings.submitButtonText"
+                            class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-1.5 text-sm text-white"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .component-wrapper {
+        transition: background-color 0.2s ease-out;
+    }
+
+    .component-wrapper:hover {
+        background-color: rgba(59, 130, 246, 0.05);
+    }
+
+    .mb-4.relative {
+        transition: background-color 0.2s ease-out, opacity 0.2s ease-out;
+        position: relative;
+    }
+
+    .mb-4.relative.bg-blue-500\/10 {
+        background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    /* Melhorar visualização da barra de inserção */
+    .mb-4.relative[data-drop-position="before"]::before,
+    .mb-4.relative[data-drop-position="after"]::before {
+        content: '';
+        position: absolute;
+        left: -10px;
+        right: -10px;
+        height: 2px;
+        background-color: #3b82f6;
+        z-index: 60;
+        border-radius: 2px;
+        box-shadow: 0 0 4px #3b82f6;
+    }
+
+    .mb-4.relative[data-drop-position="before"]::before {
+        top: -1px;
+    }
+
+    .mb-4.relative[data-drop-position="after"]::before {
+        bottom: -1px;
+    }
+
+    /* Novos estilos para o container do canvas */
+    #form-builder-canvas {
+        transition: width 0.3s ease-out;
+    }
+
+    /* Para telas pequenas, garantir que o canvas ocupe pelo menos 100% */
+    @media (max-width: 1024px) {
+        #form-builder-canvas {
+            min-width: 100%;
+        }
+    }
+
+    /* Estilos para o redimensionamento */
+    .resize-handle {
+        transition: background-color 0.2s ease-out;
+    }
+
+    .resize-handle:hover {
+        background-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .resize-handle:active {
+        background-color: rgba(59, 130, 246, 0.5);
+    }
+
+    /* Animação para mudanças de grid */
+    .grid-component {
+        transition: grid-column 0.2s ease-out;
+    }
+
+    /* Larguras responsivas para grid em telas pequenas */
+    @media (max-width: 640px) {
+        .grid-component {
+            grid-column: span 12 !important;
+        }
+    }
+
+    /* Feedback visual durante o redimensionamento */
+    .resizing {
+        user-select: none;
+    }
+
+    .grid-component.resizing {
+        box-shadow: 0 0 0 1px #3b82f6;
+        outline: 1px solid rgba(59, 130, 246, 0.5);
+    }
+
+    /* Estilo para o manipulador de redimensionamento */
+    .resize-handle {
+        transition: all 0.15s ease-out;
+        opacity: 0;
+    }
+
+    .grid-component:hover .resize-handle {
+        opacity: 1;
+    }
+
+    /* Animação de pulso para o manipulador durante hover */
+    .grid-component:hover .resize-handle {
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: translate(50%, -50%) scale(1);
+        }
+        50% {
+            transform: translate(50%, -50%) scale(1.2);
+        }
+        100% {
+            transform: translate(50%, -50%) scale(1);
+        }
+    }
+
+    /* Estilo mais evidente para o hover */
+    .resize-handle:hover {
+        transform: translate(50%, -50%) scale(1.3) !important;
+        box-shadow: 0 0 5px 2px rgba(59, 130, 246, 0.5);
+    }
+</style>

@@ -79,6 +79,19 @@ export class SanboxController {
         );
     }
 
+    @Get('formbuilder.js', { exclude: true })
+    async handlerFormBuilder(@Response() res) {
+        res.contentType('text/javascript').send(
+            await fs.readFileSync(
+                path.join(
+                    __dirname.replace('src', 'public'),
+                    'sandbox-formbuilder.client.cjs',
+                ),
+                'utf-8',
+            ),
+        );
+    }
+
     @Get('schema', { exclude: true })
     async handlerSchema() {
         const schemaFilename = path.join(cwd(), '.generated', 'schema.json');

@@ -1,17 +1,41 @@
-<div class="flex flex-col h-full overflow-hidden relative" v-if="dataTable && selectedContract">
-    <div v-if="!hasController() " class="flex-1 flex items-center justify-center p-6">
-        <div class="bg-neutral-800 border border-neutral-700 rounded-lg p-6 max-w-md text-center">
+<div
+    class="flex flex-col h-full overflow-hidden relative"
+    v-if="dataTable && selectedContract"
+>
+    <div
+        v-if="!hasController() "
+        class="flex-1 flex items-center justify-center p-6"
+    >
+        <div
+            class="bg-neutral-800 border border-neutral-700 rounded-lg p-6 max-w-md text-center"
+        >
             <div class="flex justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-12 w-12 text-amber-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
                 </svg>
             </div>
-            <h3 class="text-lg font-medium text-amber-400 mb-2">Controller Not Generated</h3>
+            <h3 class="text-lg font-medium text-amber-400 mb-2">
+                Controller Not Generated
+            </h3>
             <p class="text-neutral-300 mb-4">
-                This contract doesn't have controllers generated. Data management requires CRUD endpoints to function properly.
+                This contract doesn't have controllers generated. Data
+                management requires CRUD endpoints to function properly.
             </p>
             <p class="text-neutral-400 text-sm mb-4">
-                To enable data management for this contract, please edit the contract and enable "Generate Controllers" in the contract settings.
+                To enable data management for this contract, please edit the
+                contract and enable "Generate Controllers" in the contract
+                settings.
             </p>
         </div>
     </div>
@@ -23,23 +47,40 @@
             class="absolute inset-0 bg-neutral-900/70 z-50 flex items-center justify-center"
         >
             <div class="flex flex-col items-center">
-                <div class="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mb-2"></div>
+                <div
+                    class="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mb-2"
+                ></div>
                 <div class="text-sm text-neutral-300">Loading data...</div>
             </div>
         </div>
 
-        <div class="flex border-b border-neutral-800 p-4 justify-between items-center">
+        <div
+            class="flex border-b border-neutral-800 p-4 justify-between items-center"
+        >
             <div class="text-lg font-medium text-neutral-300 flex items-center">
                 <button
                     class="flex items-center px-3 py-1.5 h-9 bg-neutral-800 hover:bg-neutral-700 text-white rounded-md mr-3"
                     @click="toggleAuthModal"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4 mr-1"
                         :class="isAuthenticated ? 'text-green-400' : 'text-yellow-400'"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                        />
                     </svg>
-                    <span class="text-xs">{{ isAuthenticated ? 'Authenticated' : 'Authenticate' }}</span>
+                    <span class="text-xs"
+                        >{{ isAuthenticated ? 'Authenticated' : 'Authenticate'
+                        }}</span
+                    >
                 </button>
 
                 <button
@@ -47,8 +88,19 @@
                     class="h-9 p-1.5 px-3 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md text-neutral-300 flex items-center"
                     title="Refresh Data"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
                     </svg>
                     <span class="ml-1 hidden sm:inline">Refresh</span>
                 </button>
@@ -64,8 +116,19 @@
                             v-model="dataTable.searchTerm"
                             @input="dataTable.handleSearchInput"
                         />
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
                         </svg>
                     </div>
                     <select
@@ -74,7 +137,11 @@
                         @change="dataTable.handleSearchFieldChange"
                     >
                         <option value="">All Fields</option>
-                        <option v-for="field in dataTable.searchableFields" :key="field.propertyKey" :value="field.propertyKey">
+                        <option
+                            v-for="field in dataTable.searchableFields"
+                            :key="field.propertyKey"
+                            :value="field.propertyKey"
+                        >
                             {{ field.propertyKey }}
                         </option>
                     </select>
@@ -85,8 +152,19 @@
                     class="h-9 p-1.5 px-3 bg-teal-600 hover:bg-teal-700 text-white rounded-md flex items-center text-sm transition-colors"
                     title="Import Data"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+                        />
                     </svg>
                     <span class="ml-1 hidden sm:inline">Import</span>
                 </button>
@@ -96,8 +174,19 @@
                     class="h-9 p-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center text-sm transition-colors"
                     title="Add New Record"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 4v16m8-8H4"
+                        />
                     </svg>
                     <span class="ml-1 hidden sm:inline">Add</span>
                 </button>
@@ -116,36 +205,94 @@
                             @click="field?.propertyKey && dataTable.toggleSort(field?.propertyKey)"
                         >
                             <div class="flex items-center space-x-1">
-                                <span>{{ field?.propertyKey || 'Unknown Field' }}</span>
-                                <span v-if="field?.propertyKey && dataTable.sortBy === field?.propertyKey" class="text-blue-400">
-                                    <svg v-if="dataTable.sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                <span
+                                    >{{ field?.propertyKey || 'Unknown Field'
+                                    }}</span
+                                >
+                                <span
+                                    v-if="field?.propertyKey && dataTable.sortBy === field?.propertyKey"
+                                    class="text-blue-400"
+                                >
+                                    <svg
+                                        v-if="dataTable.sortDirection === 'asc'"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M5 15l7-7 7 7"
+                                        />
                                     </svg>
-                                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    <svg
+                                        v-else
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
                                     </svg>
                                 </span>
                             </div>
                         </th>
-                        <th class="w-24 px-2 py-2 text-center text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap sticky right-0 bg-neutral-800 z-10 shadow-[-4px_0_10px_rgba(0,0,0,0.3)]">
+                        <th
+                            class="w-24 px-2 py-2 text-center text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap sticky right-0 bg-neutral-800 z-10 shadow-[-4px_0_10px_rgba(0,0,0,0.3)]"
+                        >
                             Actions
                         </th>
                     </tr>
                 </thead>
                 <tbody class="bg-neutral-900 divide-y divide-neutral-800">
-                    <tr v-if="!dataTable.records || dataTable.records.length === 0" class="text-center">
-                        <td :colspan="dataTable.visibleFields.length + 1" class="px-4 py-8 text-neutral-400">
+                    <tr
+                        v-if="!dataTable.records || dataTable.records.length === 0"
+                        class="text-center"
+                    >
+                        <td
+                            :colspan="dataTable.visibleFields.length + 1"
+                            class="px-4 py-8 text-neutral-400"
+                        >
                             <!-- Wrapper for centering -->
                             <div class="w-full flex justify-center">
                                 <!-- Fixed width container for content -->
-                                <div class="max-w-sm mx-auto flex flex-col items-center">
+                                <div
+                                    class="max-w-sm mx-auto flex flex-col items-center"
+                                >
                                     <!-- Message when not authenticated -->
                                     <template v-if="!isAuthenticated">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-12 w-12 mb-3 text-yellow-500"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                            />
                                         </svg>
-                                        <p class="text-lg font-medium text-yellow-400">Authentication Required</p>
-                                        <p class="mt-1 text-sm text-center">You need to authenticate to access this data</p>
+                                        <p
+                                            class="text-lg font-medium text-yellow-400"
+                                        >
+                                            Authentication Required
+                                        </p>
+                                        <p class="mt-1 text-sm text-center">
+                                            You need to authenticate to access
+                                            this data
+                                        </p>
                                         <button
                                             @click="() => { toggleAuthModal(); refreshAfterAuth(); }"
                                             class="mt-4 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm transition-colors"
@@ -156,17 +303,39 @@
 
                                     <!-- Message when authenticated but no records -->
                                     <template v-else>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-12 w-12 mb-3 text-gray-400"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                            />
                                         </svg>
-                                        <p class="text-lg font-medium text-gray-500">No Records Found</p>
-                                        <p class="mt-1 text-sm text-center">There is no data to display in this table</p>
+                                        <p
+                                            class="text-lg font-medium text-gray-500"
+                                        >
+                                            No Records Found
+                                        </p>
+                                        <p class="mt-1 text-sm text-center">
+                                            There is no data to display in this
+                                            table
+                                        </p>
                                     </template>
                                 </div>
                             </div>
                         </td>
                     </tr>
-                    <tr v-for="(record, idx) in dataTable.records || []" :key="record?.id || idx" class="hover:bg-neutral-800 transition-colors">
+                    <tr
+                        v-for="(record, idx) in dataTable.records || []"
+                        :key="record?.id || idx"
+                        class="hover:bg-neutral-800 transition-colors"
+                    >
                         <td
                             v-for="(field, fieldIdx) in dataTable.visibleFields || []"
                             :key="field?.propertyKey || fieldIdx"
@@ -174,48 +343,86 @@
                         >
                             <!-- Only render content if field is valid -->
                             <template v-if="field && field?.propertyKey">
-                                <span v-if="field?.protoType === 'boolean' || field?.protoType === 'bool'">
+                                <span
+                                    v-if="field?.protoType === 'boolean' || field?.protoType === 'bool'"
+                                >
                                     <span
                                         :class="record[field?.propertyKey] ? 'bg-green-900 text-green-100' : 'bg-neutral-700 text-neutral-300'"
                                         class="px-2 py-0.5 rounded-full text-xs"
                                     >
-                                        {{ record[field?.propertyKey] ? 'Yes' : 'No' }}
+                                        {{ record[field?.propertyKey] ? 'Yes' :
+                                        'No' }}
                                     </span>
                                 </span>
-                                <span v-else-if="field?.protoType === 'timestamp' || field?.protoType === 'date'">
+                                <span
+                                    v-else-if="field?.protoType === 'timestamp' || field?.protoType === 'date'"
+                                >
                                     {{ formatDate(record[field?.propertyKey]) }}
                                 </span>
                                 <span v-else-if="field?.protoType === 'json'">
-                                    <pre class="text-xs bg-neutral-800 p-1.5 rounded-md overflow-auto max-h-32">{{ formatJSON(record[field?.propertyKey]) }}</pre>
+                                    <pre
+                                        class="text-xs bg-neutral-800 p-1.5 rounded-md overflow-auto max-h-32"
+                                    >
+{{ formatJSON(record[field?.propertyKey]) }}</pre
+                                    >
                                 </span>
-                                <span v-else-if="Array.isArray(record[field?.propertyKey])">
+                                <span
+                                    v-else-if="Array.isArray(record[field?.propertyKey])"
+                                >
                                     <div class="flex flex-wrap gap-1">
                                         <span
                                             v-for="(item, idx) in record[field?.propertyKey]"
                                             :key="idx"
                                             class="bg-neutral-800 px-2 py-0.5 rounded text-xs"
                                         >
-                                            {{ typeof item === 'object' ? JSON.stringify(item) : item }}
+                                            {{ typeof item === 'object' ?
+                                            JSON.stringify(item) : item }}
                                         </span>
                                     </div>
                                 </span>
-                                <span v-else-if="typeof record[field?.propertyKey] === 'object' && record[field?.propertyKey] !== null">
-                                    <pre class="text-xs bg-neutral-800 p-1.5 rounded-md overflow-auto max-h-32">{{ formatJSON(record[field?.propertyKey]) }}</pre>
+                                <span
+                                    v-else-if="typeof record[field?.propertyKey] === 'object' && record[field?.propertyKey] !== null"
+                                >
+                                    <pre
+                                        class="text-xs bg-neutral-800 p-1.5 rounded-md overflow-auto max-h-32"
+                                    >
+{{ formatJSON(record[field?.propertyKey]) }}</pre
+                                    >
                                 </span>
-                                <span v-else>{{ record[field?.propertyKey] }}</span>
+                                <span v-else
+                                    >{{ record[field?.propertyKey] }}</span
+                                >
                             </template>
                             <span v-else>--</span>
                         </td>
-                        <td class="w-24 px-2 py-2.5 text-sm border-b border-neutral-800 sticky right-0 bg-neutral-900 z-5 shadow-[-4px_0_10px_rgba(0,0,0,0.3)]">
+                        <td
+                            class="w-24 px-2 py-2.5 text-sm border-b border-neutral-800 sticky right-0 bg-neutral-900 z-5 shadow-[-4px_0_10px_rgba(0,0,0,0.3)]"
+                        >
                             <div class="flex justify-center space-x-1">
                                 <button
                                     @click="dataTable.viewRecord(record)"
                                     class="p-1.5 text-blue-400 hover:text-blue-300 hover:bg-blue-900/30 rounded transition-colors"
                                     title="View"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                        />
                                     </svg>
                                 </button>
                                 <button
@@ -223,8 +430,19 @@
                                     class="p-1.5 text-amber-400 hover:text-amber-300 hover:bg-amber-900/30 rounded transition-colors"
                                     title="Edit"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                        />
                                     </svg>
                                 </button>
                                 <button
@@ -232,8 +450,19 @@
                                     class="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-900/30 rounded transition-colors"
                                     title="Delete"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        />
                                     </svg>
                                 </button>
                             </div>
@@ -243,7 +472,9 @@
             </table>
         </div>
 
-        <div class="border-t border-neutral-800 p-4 flex justify-between items-center">
+        <div
+            class="border-t border-neutral-800 p-4 flex justify-between items-center"
+        >
             <div class="flex items-center space-x-2 text-sm text-neutral-400">
                 <span>Total: {{ dataTable.totalRecords }} records</span>
                 <span>|</span>
@@ -268,8 +499,19 @@
                     class="p-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-300 disabled:opacity-50 disabled:pointer-events-none transition-colors"
                     :disabled="dataTable.currentPage === 1"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                        />
                     </svg>
                 </button>
                 <button
@@ -277,11 +519,24 @@
                     class="p-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-300 disabled:opacity-50 disabled:pointer-events-none transition-colors"
                     :disabled="dataTable.currentPage === 1"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 19l-7-7 7-7"
+                        />
                     </svg>
                 </button>
-                <div class="px-2 py-1 bg-neutral-800 rounded-md flex items-center space-x-1 min-w-[100px] justify-center">
+                <div
+                    class="px-2 py-1 bg-neutral-800 rounded-md flex items-center space-x-1 min-w-[100px] justify-center"
+                >
                     <span class="text-sm">Page</span>
                     <input
                         type="number"
@@ -298,8 +553,19 @@
                     class="p-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-300 disabled:opacity-50 disabled:pointer-events-none transition-colors"
                     :disabled="dataTable.currentPage >= dataTable.totalPages"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                        />
                     </svg>
                 </button>
                 <button
@@ -307,8 +573,19 @@
                     class="p-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-300 disabled:opacity-50 disabled:pointer-events-none transition-colors"
                     :disabled="dataTable.currentPage >= dataTable.totalPages"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                        />
                     </svg>
                 </button>
             </div>
@@ -317,50 +594,103 @@
         <div
             v-if="dataTable.viewModalOpen"
             class="fixed inset-0 bg-neutral-900/70 z-50 flex items-center justify-center"
-            style="backdrop-filter: blur(2px);"
+            style="backdrop-filter: blur(2px)"
         >
-            <div class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
-                <div class="flex justify-between items-center border-b border-neutral-800 p-4">
+            <div
+                class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col"
+            >
+                <div
+                    class="flex justify-between items-center border-b border-neutral-800 p-4"
+                >
                     <h3 class="text-lg font-medium">View Record</h3>
-                    <button @click="dataTable.closeViewModal" class="text-neutral-400 hover:text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <button
+                        @click="dataTable.closeViewModal"
+                        class="text-neutral-400 hover:text-white"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
                         </svg>
                     </button>
                 </div>
                 <div class="overflow-auto p-4 flex-1">
-                    <div v-if="dataTable.selectedRecord" class="grid grid-cols-1 gap-4">
-                        <div v-for="field in dataTable.visibleFields || []" :key="field?.propertyKey || idx" class="border-b border-neutral-800 pb-3">
-                            <div class="text-xs text-neutral-500 font-medium uppercase mb-1">{{ field?.propertyKey || 'Unknown Field' }}</div>
-                            <div v-if="field?.protoType === 'boolean' || field?.protoType === 'bool'">
+                    <div
+                        v-if="dataTable.selectedRecord"
+                        class="grid grid-cols-1 gap-4"
+                    >
+                        <div
+                            v-for="field in dataTable.visibleFields || []"
+                            :key="field?.propertyKey || idx"
+                            class="border-b border-neutral-800 pb-3"
+                        >
+                            <div
+                                class="text-xs text-neutral-500 font-medium uppercase mb-1"
+                            >
+                                {{ field?.propertyKey || 'Unknown Field' }}
+                            </div>
+                            <div
+                                v-if="field?.protoType === 'boolean' || field?.protoType === 'bool'"
+                            >
                                 <span
                                     :class="dataTable.selectedRecord[field?.propertyKey] ? 'bg-green-900 text-green-100' : 'bg-neutral-700 text-neutral-300'"
                                     class="px-2 py-0.5 rounded-full text-xs"
                                 >
-                                    {{ dataTable.selectedRecord[field?.propertyKey] ? 'Yes' : 'No' }}
+                                    {{
+                                    dataTable.selectedRecord[field?.propertyKey]
+                                    ? 'Yes' : 'No' }}
                                 </span>
                             </div>
-                            <div v-else-if="field?.protoType === 'timestamp' || field?.protoType === 'date'">
-                                {{ formatDate(dataTable.selectedRecord[field?.propertyKey]) }}
+                            <div
+                                v-else-if="field?.protoType === 'timestamp' || field?.protoType === 'date'"
+                            >
+                                {{
+                                formatDate(dataTable.selectedRecord[field?.propertyKey])
+                                }}
                             </div>
                             <div v-else-if="field?.protoType === 'json'">
-                                <pre class="text-xs bg-neutral-800 p-2 rounded-md overflow-auto max-h-60">{{ formatJSON(dataTable.selectedRecord[field?.propertyKey]) }}</pre>
+                                <pre
+                                    class="text-xs bg-neutral-800 p-2 rounded-md overflow-auto max-h-60"
+                                >
+{{ formatJSON(dataTable.selectedRecord[field?.propertyKey]) }}</pre
+                                >
                             </div>
-                            <div v-else-if="Array.isArray(dataTable.selectedRecord[field?.propertyKey])">
+                            <div
+                                v-else-if="Array.isArray(dataTable.selectedRecord[field?.propertyKey])"
+                            >
                                 <div class="flex flex-wrap gap-1">
                                     <span
                                         v-for="(item, idx) in dataTable.selectedRecord[field?.propertyKey]"
                                         :key="idx"
                                         class="bg-neutral-800 px-2 py-0.5 rounded text-xs"
                                     >
-                                        {{ typeof item === 'object' ? JSON.stringify(item) : item }}
+                                        {{ typeof item === 'object' ?
+                                        JSON.stringify(item) : item }}
                                     </span>
                                 </div>
                             </div>
-                            <div v-else-if="typeof dataTable.selectedRecord[field?.propertyKey] === 'object' && dataTable.selectedRecord[field?.propertyKey] !== null">
-                                <pre class="text-xs bg-neutral-800 p-2 rounded-md overflow-auto max-h-60">{{ formatJSON(dataTable.selectedRecord[field?.propertyKey]) }}</pre>
+                            <div
+                                v-else-if="typeof dataTable.selectedRecord[field?.propertyKey] === 'object' && dataTable.selectedRecord[field?.propertyKey] !== null"
+                            >
+                                <pre
+                                    class="text-xs bg-neutral-800 p-2 rounded-md overflow-auto max-h-60"
+                                >
+{{ formatJSON(dataTable.selectedRecord[field?.propertyKey]) }}</pre
+                                >
                             </div>
-                            <div v-else>{{ dataTable.selectedRecord[field?.propertyKey] }}</div>
+                            <div v-else>
+                                {{ dataTable.selectedRecord[field?.propertyKey]
+                                }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -378,34 +708,72 @@
         <div
             v-if="dataTable.editModalOpen"
             class="fixed inset-0 bg-neutral-900/70 z-50 flex items-center justify-center"
-            style="backdrop-filter: blur(2px);"
+            style="backdrop-filter: blur(2px)"
         >
-            <div class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
-                <div class="flex justify-between items-center border-b border-neutral-800 p-4">
-                    <h3 class="text-lg font-medium">{{ dataTable.isCreating ? 'Create' : 'Edit' }} Record</h3>
-                    <button @click="dataTable.closeEditModal" class="text-neutral-400 hover:text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <div
+                class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col"
+            >
+                <div
+                    class="flex justify-between items-center border-b border-neutral-800 p-4"
+                >
+                    <h3 class="text-lg font-medium">
+                        {{ dataTable.isCreating ? 'Create' : 'Edit' }} Record
+                    </h3>
+                    <button
+                        @click="dataTable.closeEditModal"
+                        class="text-neutral-400 hover:text-white"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
                         </svg>
                     </button>
                 </div>
                 <div class="overflow-auto p-4 flex-1">
-                    <div v-if="dataTable.editingRecord" class="grid grid-cols-1 gap-4">
-                        <div v-for="field in dataTable.editableFields || []" :key="field?.propertyKey || idx" class="mb-3">
-                            <label class="block text-sm font-medium text-neutral-300 mb-1">
+                    <div
+                        v-if="dataTable.editingRecord"
+                        class="grid grid-cols-1 gap-4"
+                    >
+                        <div
+                            v-for="field in dataTable.editableFields || []"
+                            :key="field?.propertyKey || idx"
+                            class="mb-3"
+                        >
+                            <label
+                                class="block text-sm font-medium text-neutral-300 mb-1"
+                            >
                                 {{ field?.propertyKey || 'Unknown Field' }}
-                                <span v-if="dataTable.isRequiredField(field)" class="text-red-500 ml-1">*</span>
+                                <span
+                                    v-if="dataTable.isRequiredField(field)"
+                                    class="text-red-500 ml-1"
+                                    >*</span
+                                >
                             </label>
 
                             <!-- Boolean field -->
-                            <div v-if="field?.protoType === 'boolean' || field?.protoType === 'bool'" class="flex items-center">
+                            <div
+                                v-if="field?.protoType === 'boolean' || field?.protoType === 'bool'"
+                                class="flex items-center"
+                            >
                                 <input
                                     type="checkbox"
                                     v-model="dataTable.editingRecord[field?.propertyKey]"
                                     class="h-4 w-4 text-blue-600 bg-neutral-700 border-neutral-600 rounded"
                                 />
                                 <span class="ml-2 text-sm text-neutral-400">
-                                    {{ dataTable.editingRecord[field?.propertyKey] ? 'Yes' : 'No' }}
+                                    {{
+                                    dataTable.editingRecord[field?.propertyKey]
+                                    ? 'Yes' : 'No' }}
                                 </span>
                             </div>
 
@@ -450,11 +818,16 @@
                             />
                         </div>
                     </div>
-                    <div v-if="dataTable.anyRequiredFieldEmpty" class="text-red-500 text-sm mt-2">
+                    <div
+                        v-if="dataTable.anyRequiredFieldEmpty"
+                        class="text-red-500 text-sm mt-2"
+                    >
                         * Required fields must be filled
                     </div>
                 </div>
-                <div class="border-t border-neutral-800 p-4 flex justify-end space-x-3">
+                <div
+                    class="border-t border-neutral-800 p-4 flex justify-end space-x-3"
+                >
                     <button
                         @click="dataTable.closeEditModal"
                         class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-md text-sm transition-colors"
@@ -468,9 +841,25 @@
                         :class="{ 'opacity-50 cursor-not-allowed': dataTable.saving || dataTable.anyRequiredFieldEmpty }"
                     >
                         <span v-if="dataTable.saving" class="mr-2">
-                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <svg
+                                class="animate-spin h-4 w-4 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                ></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
                             </svg>
                         </span>
                         {{ dataTable.isCreating ? 'Create' : 'Save' }}
@@ -482,17 +871,35 @@
         <div
             v-if="dataTable.deleteModalOpen"
             class="fixed inset-0 bg-neutral-900/70 z-50 flex items-center justify-center"
-            style="backdrop-filter: blur(2px);"
+            style="backdrop-filter: blur(2px)"
         >
-            <div class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-md p-4">
+            <div
+                class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-md p-4"
+            >
                 <div class="text-center mb-6">
-                    <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-900/30 text-red-500 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <div
+                        class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-900/30 text-red-500 mb-4"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-8 w-8"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
                         </svg>
                     </div>
                     <h3 class="text-lg font-medium mb-2">Delete Record</h3>
-                    <p class="text-neutral-400">Are you sure you want to delete this record? This action cannot be undone.</p>
+                    <p class="text-neutral-400">
+                        Are you sure you want to delete this record? This action
+                        cannot be undone.
+                    </p>
                 </div>
                 <div class="flex justify-center space-x-3">
                     <button
@@ -507,9 +914,25 @@
                         :disabled="dataTable.deleting"
                     >
                         <span v-if="dataTable.deleting" class="mr-2">
-                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <svg
+                                class="animate-spin h-4 w-4 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                ></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
                             </svg>
                         </span>
                         Delete
@@ -521,20 +944,40 @@
         <div
             v-if="dataTable.importModalOpen"
             class="fixed inset-0 bg-neutral-900/70 z-50 flex items-center justify-center"
-            style="backdrop-filter: blur(2px);"
+            style="backdrop-filter: blur(2px)"
         >
-            <div class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
-                <div class="flex justify-between items-center border-b border-neutral-800 p-4">
+            <div
+                class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col"
+            >
+                <div
+                    class="flex justify-between items-center border-b border-neutral-800 p-4"
+                >
                     <h3 class="text-lg font-medium">Import Data</h3>
-                    <button @click="dataTable.closeImportModal" class="text-neutral-400 hover:text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <button
+                        @click="dataTable.closeImportModal"
+                        class="text-neutral-400 hover:text-white"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
                         </svg>
                     </button>
                 </div>
                 <div class="p-4 flex-1 overflow-auto">
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-neutral-300 mb-2">
+                        <label
+                            class="block text-sm font-medium text-neutral-300 mb-2"
+                        >
                             JSON Data
                             <span class="text-red-500 ml-1">*</span>
                         </label>
@@ -559,9 +1002,15 @@
 
                     <div class="mb-4">
                         <div class="flex items-center">
-                            <label class="text-sm font-medium text-neutral-300 flex-grow">Options</label>
+                            <label
+                                class="text-sm font-medium text-neutral-300 flex-grow"
+                                >Options</label
+                            >
                             <div class="text-xs text-neutral-400">
-                                <span v-if="dataTable.estimatedImportCount > 0">{{ dataTable.estimatedImportCount }} records to import</span>
+                                <span v-if="dataTable.estimatedImportCount > 0"
+                                    >{{ dataTable.estimatedImportCount }}
+                                    records to import</span
+                                >
                             </div>
                         </div>
 
@@ -572,43 +1021,83 @@
                                 v-model="dataTable.importOptions.skipErrors"
                                 class="h-4 w-4 text-blue-600 bg-neutral-700 border-neutral-600 rounded"
                             />
-                            <label for="skipErrors" class="ml-2 text-sm text-neutral-300">
+                            <label
+                                for="skipErrors"
+                                class="ml-2 text-sm text-neutral-300"
+                            >
                                 Continue on error
                             </label>
                         </div>
                     </div>
 
                     <!-- Add validation error messages section -->
-                    <div v-if="dataTable.validationErrors && dataTable.validationErrors.length > 0" class="mb-4 bg-amber-900/30 border border-amber-800 text-amber-200 p-3 rounded-md text-sm">
+                    <div
+                        v-if="dataTable.validationErrors && dataTable.validationErrors.length > 0"
+                        class="mb-4 bg-amber-900/30 border border-amber-800 text-amber-200 p-3 rounded-md text-sm"
+                    >
                         <strong>Validation Errors:</strong>
                         <ul class="mt-1 list-disc list-inside">
-                            <li v-for="error in dataTable.validationErrors" :key="error">{{ error }}</li>
+                            <li
+                                v-for="error in dataTable.validationErrors"
+                                :key="error"
+                            >
+                                {{ error }}
+                            </li>
                         </ul>
                     </div>
 
                     <!-- Add progress bar section -->
                     <div v-if="dataTable.importProgress.show" class="mb-4">
-                        <div class="flex justify-between text-sm text-neutral-300 mb-1">
-                            <span>Progress: {{ dataTable.importProgress.current }} of {{ dataTable.importProgress.total }}</span>
-                            <span>{{ Math.round((dataTable.importProgress.current / dataTable.importProgress.total) * 100) }}%</span>
+                        <div
+                            class="flex justify-between text-sm text-neutral-300 mb-1"
+                        >
+                            <span
+                                >Progress: {{ dataTable.importProgress.current
+                                }} of {{ dataTable.importProgress.total }}</span
+                            >
+                            <span
+                                >{{ Math.round((dataTable.importProgress.current
+                                / dataTable.importProgress.total) * 100)
+                                }}%</span
+                            >
                         </div>
-                        <div class="w-full bg-neutral-700 rounded-full h-4 overflow-hidden">
+                        <div
+                            class="w-full bg-neutral-700 rounded-full h-4 overflow-hidden"
+                        >
                             <div
                                 class="bg-blue-600 h-4 transition-all duration-200 ease-out"
                                 :style="{ width: `${(dataTable.importProgress.current / dataTable.importProgress.total) * 100}%` }"
                             ></div>
                         </div>
-                        <div v-if="dataTable.importProgress.success > 0 || dataTable.importProgress.failed > 0" class="flex justify-between text-xs text-neutral-400 mt-1">
-                            <span v-if="dataTable.importProgress.success > 0" class="text-green-400">Success: {{ dataTable.importProgress.success }}</span>
-                            <span v-if="dataTable.importProgress.failed > 0" class="text-red-400">Failed: {{ dataTable.importProgress.failed }}</span>
+                        <div
+                            v-if="dataTable.importProgress.success > 0 || dataTable.importProgress.failed > 0"
+                            class="flex justify-between text-xs text-neutral-400 mt-1"
+                        >
+                            <span
+                                v-if="dataTable.importProgress.success > 0"
+                                class="text-green-400"
+                                >Success: {{ dataTable.importProgress.success
+                                }}</span
+                            >
+                            <span
+                                v-if="dataTable.importProgress.failed > 0"
+                                class="text-red-400"
+                                >Failed: {{ dataTable.importProgress.failed
+                                }}</span
+                            >
                         </div>
                     </div>
 
-                    <div v-if="dataTable.importError" class="mb-4 bg-red-900/30 border border-red-800 text-red-200 p-3 rounded-md text-sm">
+                    <div
+                        v-if="dataTable.importError"
+                        class="mb-4 bg-red-900/30 border border-red-800 text-red-200 p-3 rounded-md text-sm"
+                    >
                         <strong>Error:</strong> {{ dataTable.importError }}
                     </div>
                 </div>
-                <div class="border-t border-neutral-800 p-4 flex justify-end space-x-3">
+                <div
+                    class="border-t border-neutral-800 p-4 flex justify-end space-x-3"
+                >
                     <button
                         @click="dataTable.closeImportModal"
                         class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-md text-sm transition-colors"
@@ -622,9 +1111,25 @@
                         :class="{ 'opacity-50 cursor-not-allowed': dataTable.importing || !dataTable.isValidImportData }"
                     >
                         <span v-if="dataTable.importing" class="mr-2">
-                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <svg
+                                class="animate-spin h-4 w-4 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                ></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
                             </svg>
                         </span>
                         Import
@@ -636,21 +1141,44 @@
         <div
             v-if="showAuthModal"
             class="absolute top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center overflow-hidden"
-            style="background-color: rgba(23, 23, 23, 0.75); backdrop-filter: blur(2px);"
+            style="
+                background-color: rgba(23, 23, 23, 0.75);
+                backdrop-filter: blur(2px);
+            "
         >
-            <div class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-md p-4 mx-4">
+            <div
+                class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-md p-4 mx-4"
+            >
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-medium">Authentication Required</h3>
-                    <button @click="showAuthModal = false" class="text-neutral-400 hover:text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <button
+                        @click="showAuthModal = false"
+                        class="text-neutral-400 hover:text-white"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
                         </svg>
                     </button>
                 </div>
 
                 <div class="mb-6">
-                    <p class="text-neutral-300 mb-2">Authentication is required to access this data.</p>
-                    <p class="text-neutral-400 text-sm">Please authenticate to continue.</p>
+                    <p class="text-neutral-300 mb-2">
+                        Authentication is required to access this data.
+                    </p>
+                    <p class="text-neutral-400 text-sm">
+                        Please authenticate to continue.
+                    </p>
                 </div>
 
                 <div class="flex justify-end space-x-3">

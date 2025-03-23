@@ -1,15 +1,30 @@
 <div class="flex flex-col h-full overflow-hidden relative" v-if="logViewer">
     <!-- Top control bar -->
-    <div class="flex border-b border-neutral-800 justify-between items-center flex-wrap">
-        <div class="text-lg font-medium text-neutral-300 flex items-center border-b border-neutral-800 py-2 px-4 w-full">
+    <div
+        class="flex border-b border-neutral-800 justify-between items-center flex-wrap"
+    >
+        <div
+            class="text-lg font-medium text-neutral-300 flex items-center border-b border-neutral-800 py-2 px-4 w-full"
+        >
             <h2 class="mr-2">System Logs</h2>
             <button
                 @click="logViewer.refreshData()"
                 class="h-9 p-1.5 px-3 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md text-neutral-300 flex items-center"
                 title="Refresh Logs"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
                 </svg>
                 <span class="ml-1 hidden sm:inline">Refresh</span>
             </button>
@@ -28,64 +43,140 @@
                             class="h-9 py-1.5 pl-8 pr-8 border border-neutral-700 bg-neutral-800 text-sm focus:outline-none focus:border-blue-500 rounded-md cursor-pointer w-[180px]"
                             @click="logViewer.toggleCalendar('start')"
                         />
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
                         </svg>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 9l-7 7-7-7"
+                            />
                         </svg>
                     </div>
 
                     <!-- Start date calendar dropdown -->
-                    <div v-if="logViewer.showStartCalendar"
-                         class="absolute left-0 top-full mt-1 bg-neutral-900 border border-neutral-700 rounded-md shadow-lg z-40 w-[300px] transform origin-top transition-all duration-150"
-                         :class="{'scale-100 opacity-100': logViewer.showStartCalendar, 'scale-95 opacity-0': !logViewer.showStartCalendar}">
+                    <div
+                        v-if="logViewer.showStartCalendar"
+                        class="absolute left-0 top-full mt-1 bg-neutral-900 border border-neutral-700 rounded-md shadow-lg z-40 w-[300px] transform origin-top transition-all duration-150"
+                        :class="{'scale-100 opacity-100': logViewer.showStartCalendar, 'scale-95 opacity-0': !logViewer.showStartCalendar}"
+                    >
                         <!-- Calendar header with month/year selectors -->
-                        <div class="p-3 border-b border-neutral-700 flex justify-between items-center">
-                            <button @click="logViewer.prevMonth('start')" class="p-1 rounded-full hover:bg-neutral-800">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        <div
+                            class="p-3 border-b border-neutral-700 flex justify-between items-center"
+                        >
+                            <button
+                                @click="logViewer.prevMonth('start')"
+                                class="p-1 rounded-full hover:bg-neutral-800"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 19l-7-7 7-7"
+                                    />
                                 </svg>
                             </button>
 
                             <div class="flex items-center space-x-1">
-                                <select v-model="logViewer.startCalendarMonth"
-                                        class="bg-neutral-800 border-none text-sm p-1 rounded outline-none cursor-pointer"
-                                        @change="logViewer.updateCalendar('start')">
-                                    <option v-for="(month, idx) in logViewer.monthNames" :key="idx" :value="idx">{{ month }}</option>
+                                <select
+                                    v-model="logViewer.startCalendarMonth"
+                                    class="bg-neutral-800 border-none text-sm p-1 rounded outline-none cursor-pointer"
+                                    @change="logViewer.updateCalendar('start')"
+                                >
+                                    <option
+                                        v-for="(month, idx) in logViewer.monthNames"
+                                        :key="idx"
+                                        :value="idx"
+                                    >
+                                        {{ month }}
+                                    </option>
                                 </select>
-                                <select v-model="logViewer.startCalendarYear"
-                                        class="bg-neutral-800 border-none text-sm p-1 rounded outline-none cursor-pointer"
-                                        @change="logViewer.updateCalendar('start')">
-                                    <option v-for="year in logViewer.yearRange" :key="year" :value="year">{{ year }}</option>
+                                <select
+                                    v-model="logViewer.startCalendarYear"
+                                    class="bg-neutral-800 border-none text-sm p-1 rounded outline-none cursor-pointer"
+                                    @change="logViewer.updateCalendar('start')"
+                                >
+                                    <option
+                                        v-for="year in logViewer.yearRange"
+                                        :key="year"
+                                        :value="year"
+                                    >
+                                        {{ year }}
+                                    </option>
                                 </select>
                             </div>
 
-                            <button @click="logViewer.nextMonth('start')" class="p-1 rounded-full hover:bg-neutral-800">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            <button
+                                @click="logViewer.nextMonth('start')"
+                                class="p-1 rounded-full hover:bg-neutral-800"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 5l7 7-7 7"
+                                    />
                                 </svg>
                             </button>
                         </div>
 
                         <!-- Days of week header -->
                         <div class="grid grid-cols-7 gap-1 p-2">
-                            <div v-for="day in logViewer.weekDays" :key="day"
-                                 class="text-center text-xs font-medium text-neutral-500 py-1">
+                            <div
+                                v-for="day in logViewer.weekDays"
+                                :key="day"
+                                class="text-center text-xs font-medium text-neutral-500 py-1"
+                            >
                                 {{ day }}
                             </div>
                         </div>
 
                         <!-- Calendar days -->
                         <div class="grid grid-cols-7 gap-1 p-2 pt-0">
-                            <div v-for="(day, idx) in logViewer.startCalendarDays" :key="idx"
-                                 class="text-center py-1 text-sm rounded cursor-pointer"
-                                 :class="[
+                            <div
+                                v-for="(day, idx) in logViewer.startCalendarDays"
+                                :key="idx"
+                                class="text-center py-1 text-sm rounded cursor-pointer"
+                                :class="[
                                     day.isCurrentMonth ? 'hover:bg-neutral-800' : 'text-neutral-600 pointer-events-none',
                                     logViewer.isSelectedStartDate(day.date) ? 'bg-blue-600 text-white' : '',
                                     logViewer.isToday(day.date) && !logViewer.isSelectedStartDate(day.date) ? 'border border-blue-500' : '',
                                  ]"
-                                 @click="logViewer.selectStartDate(day.date)">
+                                @click="logViewer.selectStartDate(day.date)"
+                            >
                                 {{ day.day }}
                             </div>
                         </div>
@@ -93,23 +184,43 @@
                         <!-- Time picker and buttons -->
                         <div class="p-3 border-t border-neutral-700">
                             <div class="flex items-center justify-between mb-3">
-                                <span class="text-xs text-neutral-400">Time:</span>
+                                <span class="text-xs text-neutral-400"
+                                    >Time:</span
+                                >
                                 <div class="flex items-center space-x-2">
-                                    <input type="number" v-model="logViewer.startHours" min="0" max="23"
-                                           class="w-12 bg-neutral-800 border border-neutral-700 rounded p-1 text-sm"
-                                           @change="logViewer.updateStartTime()">
+                                    <input
+                                        type="number"
+                                        v-model="logViewer.startHours"
+                                        min="0"
+                                        max="23"
+                                        class="w-12 bg-neutral-800 border border-neutral-700 rounded p-1 text-sm"
+                                        @change="logViewer.updateStartTime()"
+                                    />
                                     <span>:</span>
-                                    <input type="number" v-model="logViewer.startMinutes" min="0" max="59"
-                                           class="w-12 bg-neutral-800 border border-neutral-700 rounded p-1 text-sm"
-                                           @change="logViewer.updateStartTime()">
+                                    <input
+                                        type="number"
+                                        v-model="logViewer.startMinutes"
+                                        min="0"
+                                        max="59"
+                                        class="w-12 bg-neutral-800 border border-neutral-700 rounded p-1 text-sm"
+                                        @change="logViewer.updateStartTime()"
+                                    />
                                 </div>
                             </div>
 
                             <div class="flex justify-between">
-                                <button @click="logViewer.selectToday('start')"
-                                        class="text-sm text-blue-500 hover:text-blue-400">Today</button>
-                                <button @click="logViewer.closeCalendar('start')"
-                                        class="text-sm text-neutral-400 hover:text-neutral-300">Close</button>
+                                <button
+                                    @click="logViewer.selectToday('start')"
+                                    class="text-sm text-blue-500 hover:text-blue-400"
+                                >
+                                    Today
+                                </button>
+                                <button
+                                    @click="logViewer.closeCalendar('start')"
+                                    class="text-sm text-neutral-400 hover:text-neutral-300"
+                                >
+                                    Close
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -129,64 +240,140 @@
                         class="h-9 py-1.5 pl-8 pr-8 border border-neutral-700 bg-neutral-800 text-sm focus:outline-none focus:border-blue-500 rounded-md cursor-pointer w-[180px]"
                         @click="logViewer.toggleCalendar('end')"
                     />
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
                     </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7"
+                        />
                     </svg>
                 </div>
 
                 <!-- End date calendar dropdown -->
-                <div v-if="logViewer.showEndCalendar"
-                     class="absolute left-0 top-full mt-1 bg-neutral-900 border border-neutral-700 rounded-md shadow-lg z-40 w-[300px] transform origin-top transition-all duration-150"
-                     :class="{'scale-100 opacity-100': logViewer.showEndCalendar, 'scale-95 opacity-0': !logViewer.showEndCalendar}">
+                <div
+                    v-if="logViewer.showEndCalendar"
+                    class="absolute left-0 top-full mt-1 bg-neutral-900 border border-neutral-700 rounded-md shadow-lg z-40 w-[300px] transform origin-top transition-all duration-150"
+                    :class="{'scale-100 opacity-100': logViewer.showEndCalendar, 'scale-95 opacity-0': !logViewer.showEndCalendar}"
+                >
                     <!-- Calendar header with month/year selectors -->
-                    <div class="p-3 border-b border-neutral-700 flex justify-between items-center">
-                        <button @click="logViewer.prevMonth('end')" class="p-1 rounded-full hover:bg-neutral-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    <div
+                        class="p-3 border-b border-neutral-700 flex justify-between items-center"
+                    >
+                        <button
+                            @click="logViewer.prevMonth('end')"
+                            class="p-1 rounded-full hover:bg-neutral-800"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 19l-7-7 7-7"
+                                />
                             </svg>
                         </button>
 
                         <div class="flex items-center space-x-1">
-                            <select v-model="logViewer.endCalendarMonth"
-                                    class="bg-neutral-800 border-none text-sm p-1 rounded outline-none cursor-pointer"
-                                    @change="logViewer.updateCalendar('end')">
-                                <option v-for="(month, idx) in logViewer.monthNames" :key="idx" :value="idx">{{ month }}</option>
+                            <select
+                                v-model="logViewer.endCalendarMonth"
+                                class="bg-neutral-800 border-none text-sm p-1 rounded outline-none cursor-pointer"
+                                @change="logViewer.updateCalendar('end')"
+                            >
+                                <option
+                                    v-for="(month, idx) in logViewer.monthNames"
+                                    :key="idx"
+                                    :value="idx"
+                                >
+                                    {{ month }}
+                                </option>
                             </select>
-                            <select v-model="logViewer.endCalendarYear"
-                                    class="bg-neutral-800 border-none text-sm p-1 rounded outline-none cursor-pointer"
-                                    @change="logViewer.updateCalendar('end')">
-                                <option v-for="year in logViewer.yearRange" :key="year" :value="year">{{ year }}</option>
+                            <select
+                                v-model="logViewer.endCalendarYear"
+                                class="bg-neutral-800 border-none text-sm p-1 rounded outline-none cursor-pointer"
+                                @change="logViewer.updateCalendar('end')"
+                            >
+                                <option
+                                    v-for="year in logViewer.yearRange"
+                                    :key="year"
+                                    :value="year"
+                                >
+                                    {{ year }}
+                                </option>
                             </select>
                         </div>
 
-                        <button @click="logViewer.nextMonth('end')" class="p-1 rounded-full hover:bg-neutral-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        <button
+                            @click="logViewer.nextMonth('end')"
+                            class="p-1 rounded-full hover:bg-neutral-800"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 5l7 7-7 7"
+                                />
                             </svg>
                         </button>
                     </div>
 
                     <!-- Days of week header -->
                     <div class="grid grid-cols-7 gap-1 p-2">
-                        <div v-for="day in logViewer.weekDays" :key="day"
-                             class="text-center text-xs font-medium text-neutral-500 py-1">
+                        <div
+                            v-for="day in logViewer.weekDays"
+                            :key="day"
+                            class="text-center text-xs font-medium text-neutral-500 py-1"
+                        >
                             {{ day }}
                         </div>
                     </div>
 
                     <!-- Calendar days -->
                     <div class="grid grid-cols-7 gap-1 p-2 pt-0">
-                        <div v-for="(day, idx) in logViewer.endCalendarDays" :key="idx"
-                             class="text-center py-1 text-sm rounded cursor-pointer"
-                             :class="[
+                        <div
+                            v-for="(day, idx) in logViewer.endCalendarDays"
+                            :key="idx"
+                            class="text-center py-1 text-sm rounded cursor-pointer"
+                            :class="[
                                 day.isCurrentMonth ? 'hover:bg-neutral-800' : 'text-neutral-600 pointer-events-none',
                                 logViewer.isSelectedEndDate(day.date) ? 'bg-blue-600 text-white' : '',
                                 logViewer.isToday(day.date) && !logViewer.isSelectedEndDate(day.date) ? 'border border-blue-500' : '',
                              ]"
-                             @click="logViewer.selectEndDate(day.date)">
+                            @click="logViewer.selectEndDate(day.date)"
+                        >
                             {{ day.day }}
                         </div>
                     </div>
@@ -196,21 +383,39 @@
                         <div class="flex items-center justify-between mb-3">
                             <span class="text-xs text-neutral-400">Time:</span>
                             <div class="flex items-center space-x-2">
-                                <input type="number" v-model="logViewer.endHours" min="0" max="23"
-                                       class="w-12 bg-neutral-800 border border-neutral-700 rounded p-1 text-sm"
-                                       @change="logViewer.updateEndTime()">
+                                <input
+                                    type="number"
+                                    v-model="logViewer.endHours"
+                                    min="0"
+                                    max="23"
+                                    class="w-12 bg-neutral-800 border border-neutral-700 rounded p-1 text-sm"
+                                    @change="logViewer.updateEndTime()"
+                                />
                                 <span>:</span>
-                                <input type="number" v-model="logViewer.endMinutes" min="0" max="59"
-                                       class="w-12 bg-neutral-800 border border-neutral-700 rounded p-1 text-sm"
-                                       @change="logViewer.updateEndTime()">
+                                <input
+                                    type="number"
+                                    v-model="logViewer.endMinutes"
+                                    min="0"
+                                    max="59"
+                                    class="w-12 bg-neutral-800 border border-neutral-700 rounded p-1 text-sm"
+                                    @change="logViewer.updateEndTime()"
+                                />
                             </div>
                         </div>
 
                         <div class="flex justify-between">
-                            <button @click="logViewer.selectToday('end')"
-                                    class="text-sm text-blue-500 hover:text-blue-400">Today</button>
-                            <button @click="logViewer.closeCalendar('end')"
-                                    class="text-sm text-neutral-400 hover:text-neutral-300">Close</button>
+                            <button
+                                @click="logViewer.selectToday('end')"
+                                class="text-sm text-blue-500 hover:text-blue-400"
+                            >
+                                Today
+                            </button>
+                            <button
+                                @click="logViewer.closeCalendar('end')"
+                                class="text-sm text-neutral-400 hover:text-neutral-300"
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -223,7 +428,11 @@
                 @change="logViewer.applyFilters()"
             >
                 <option value="">All Levels</option>
-                <option v-for="level in logViewer.availableLevels" :key="level" :value="level">
+                <option
+                    v-for="level in logViewer.availableLevels"
+                    :key="level"
+                    :value="level"
+                >
                     {{ level }}
                 </option>
             </select>
@@ -237,8 +446,19 @@
                     v-model="logViewer.filters.search"
                     @input="logViewer.handleSearchInput"
                 />
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                 </svg>
             </div>
 
@@ -248,8 +468,19 @@
                 class="h-9 p-1.5 px-3 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 rounded-md flex items-center text-sm transition-colors"
                 title="Clear Filters"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
                 </svg>
                 <span class="ml-1 hidden sm:inline">Clear</span>
             </button>
@@ -259,38 +490,102 @@
     <!-- Main content area with table and sidebar -->
     <div class="flex flex-1 overflow-hidden">
         <!-- Logs table -->
-        <div class="flex-1 overflow-auto transition-all duration-300"
-             :class="{'mr-0': !logViewer.selectedLog, 'mr-[400px]': logViewer.selectedLog}">
+        <div
+            class="flex-1 overflow-auto transition-all duration-300"
+            :class="{'mr-0': !logViewer.selectedLog, 'mr-[400px]': logViewer.selectedLog}"
+        >
             <table class="min-w-full border-separate border-spacing-0">
                 <thead class="bg-neutral-800 sticky top-0 z-20">
                     <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap cursor-pointer select-none" @click="logViewer.toggleSort('timestamp')">
+                        <th
+                            class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap cursor-pointer select-none"
+                            @click="logViewer.toggleSort('timestamp')"
+                        >
                             <div class="flex items-center space-x-1">
                                 <span>Timestamp</span>
-                                <span v-if="logViewer.sortBy === 'timestamp'" class="text-blue-400">
-                                    <svg v-if="logViewer.sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                <span
+                                    v-if="logViewer.sortBy === 'timestamp'"
+                                    class="text-blue-400"
+                                >
+                                    <svg
+                                        v-if="logViewer.sortDirection === 'asc'"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M5 15l7-7 7 7"
+                                        />
                                     </svg>
-                                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    <svg
+                                        v-else
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
                                     </svg>
                                 </span>
                             </div>
                         </th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap cursor-pointer select-none w-[100px]" @click="logViewer.toggleSort('level')">
+                        <th
+                            class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap cursor-pointer select-none w-[100px]"
+                            @click="logViewer.toggleSort('level')"
+                        >
                             <div class="flex items-center space-x-1">
                                 <span>Level</span>
-                                <span v-if="logViewer.sortBy === 'level'" class="text-blue-400">
-                                    <svg v-if="logViewer.sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                <span
+                                    v-if="logViewer.sortBy === 'level'"
+                                    class="text-blue-400"
+                                >
+                                    <svg
+                                        v-if="logViewer.sortDirection === 'asc'"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M5 15l7-7 7 7"
+                                        />
                                     </svg>
-                                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    <svg
+                                        v-else
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
                                     </svg>
                                 </span>
                             </div>
                         </th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                        <th
+                            class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap"
+                        >
                             Message
                         </th>
                     </tr>
@@ -300,20 +595,44 @@
                     <tr v-if="logViewer.loading" class="text-center">
                         <td colspan="3" class="px-4 py-8 text-neutral-400">
                             <div class="flex justify-center items-center">
-                                <div class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mr-2"></div>
+                                <div
+                                    class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mr-2"
+                                ></div>
                                 <span>Loading logs...</span>
                             </div>
                         </td>
                     </tr>
-                    <tr v-else-if="!logViewer.logs || logViewer.logs.length === 0" class="text-center">
+                    <tr
+                        v-else-if="!logViewer.logs || logViewer.logs.length === 0"
+                        class="text-center"
+                    >
                         <td colspan="3" class="px-4 py-8 text-neutral-400">
                             <div class="w-full flex justify-center">
-                                <div class="max-w-sm mx-auto flex flex-col items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                <div
+                                    class="max-w-sm mx-auto flex flex-col items-center"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-12 w-12 mb-3 text-neutral-500"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                        />
                                     </svg>
-                                    <p class="text-lg font-medium text-neutral-400">No Logs Found</p>
-                                    <p class="mt-1 text-sm text-center">No logs match your current filters</p>
+                                    <p
+                                        class="text-lg font-medium text-neutral-400"
+                                    >
+                                        No Logs Found
+                                    </p>
+                                    <p class="mt-1 text-sm text-center">
+                                        No logs match your current filters
+                                    </p>
                                     <button
                                         @click="logViewer.clearFilters()"
                                         class="mt-4 px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-md text-sm transition-colors"
@@ -332,10 +651,14 @@
                         :class="{'bg-blue-900/20': logViewer.selectedLog && logViewer.selectedLog.id === log.id}"
                         @click="logViewer.selectLog(log)"
                     >
-                        <td class="px-4 py-2.5 text-sm border-b border-neutral-800 whitespace-nowrap">
+                        <td
+                            class="px-4 py-2.5 text-sm border-b border-neutral-800 whitespace-nowrap"
+                        >
                             {{ logViewer.formatTimestamp(log.timestamp) }}
                         </td>
-                        <td class="px-4 py-2.5 text-sm border-b border-neutral-800">
+                        <td
+                            class="px-4 py-2.5 text-sm border-b border-neutral-800"
+                        >
                             <span
                                 class="px-2 py-0.5 rounded-full text-xs font-medium"
                                 :class="logViewer.getLevelClass(log.level)"
@@ -343,7 +666,9 @@
                                 {{ log.level }}
                             </span>
                         </td>
-                        <td class="px-4 py-2.5 text-sm border-b border-neutral-800 font-mono break-all">
+                        <td
+                            class="px-4 py-2.5 text-sm border-b border-neutral-800 font-mono break-all"
+                        >
                             {{ log.message }}
                         </td>
                     </tr>
@@ -355,35 +680,69 @@
         <div
             class="fixed top-0 right-0 bottom-0 w-[400px] bg-neutral-900 border-l border-neutral-800 overflow-y-auto z-30 shadow-xl flex flex-col transform transition-transform duration-300 ease-in-out"
             :class="logViewer.selectedLog ? 'translate-x-0' : 'translate-x-full'"
-            style="height: calc(100vh - 48px); margin-top: 48px;"
+            style="height: calc(100vh - 48px); margin-top: 48px"
         >
-            <div class="flex justify-between items-center p-4 border-b border-neutral-800 sticky top-0 bg-neutral-900 z-10">
+            <div
+                class="flex justify-between items-center p-4 border-b border-neutral-800 sticky top-0 bg-neutral-900 z-10"
+            >
                 <h3 class="text-lg font-medium">Log Details</h3>
                 <button
                     @click="logViewer.closeDetail()"
                     class="p-1 rounded-md hover:bg-neutral-800 text-neutral-400 hover:text-white"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
                     </svg>
                 </button>
             </div>
 
             <div class="p-4 overflow-auto flex-1">
-                <div v-if="logViewer.detailLoading" class="flex justify-center items-center h-full">
-                    <div class="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                <div
+                    v-if="logViewer.detailLoading"
+                    class="flex justify-center items-center h-full"
+                >
+                    <div
+                        class="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"
+                    ></div>
                 </div>
                 <div v-else-if="logViewer.selectedLog">
                     <!-- Basic Info Section -->
                     <div class="mb-4">
-                        <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">Basic Information</h4>
+                        <h4
+                            class="text-xs uppercase text-neutral-500 font-medium mb-2"
+                        >
+                            Basic Information
+                        </h4>
                         <div class="bg-neutral-800 rounded-md p-3">
-                            <div class="flex justify-between items-center mb-2 pb-2 border-b border-neutral-700">
-                                <span class="text-xs text-neutral-400">Timestamp</span>
-                                <span class="text-sm font-mono">{{ logViewer.formatTimestamp(logViewer.selectedLog.timestamp, true) }}</span>
+                            <div
+                                class="flex justify-between items-center mb-2 pb-2 border-b border-neutral-700"
+                            >
+                                <span class="text-xs text-neutral-400"
+                                    >Timestamp</span
+                                >
+                                <span class="text-sm font-mono"
+                                    >{{
+                                    logViewer.formatTimestamp(logViewer.selectedLog.timestamp,
+                                    true) }}</span
+                                >
                             </div>
-                            <div class="flex justify-between items-center mb-2 pb-2 border-b border-neutral-700">
-                                <span class="text-xs text-neutral-400">Level</span>
+                            <div
+                                class="flex justify-between items-center mb-2 pb-2 border-b border-neutral-700"
+                            >
+                                <span class="text-xs text-neutral-400"
+                                    >Level</span
+                                >
                                 <span
                                     class="px-2 py-0.5 rounded-full text-xs font-medium"
                                     :class="logViewer.getLevelClass(logViewer.selectedLog.level)"
@@ -393,43 +752,82 @@
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-xs text-neutral-400">ID</span>
-                                <span class="text-sm font-mono">{{ logViewer.selectedLog.id }}</span>
+                                <span class="text-sm font-mono"
+                                    >{{ logViewer.selectedLog.id }}</span
+                                >
                             </div>
                         </div>
                     </div>
 
                     <!-- Message Section -->
                     <div class="mb-4">
-                        <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">Message</h4>
+                        <h4
+                            class="text-xs uppercase text-neutral-500 font-medium mb-2"
+                        >
+                            Message
+                        </h4>
                         <div class="bg-neutral-800 rounded-md p-3">
-                            <div class="text-sm font-mono whitespace-pre-wrap break-all">{{ logViewer.selectedLog.message }}</div>
+                            <div
+                                class="text-sm font-mono whitespace-pre-wrap break-all"
+                            >
+                                {{ logViewer.selectedLog.message }}
+                            </div>
                         </div>
                     </div>
 
                     <!-- Parsed Content Section -->
                     <div v-if="logViewer.parsedContent" class="mb-4">
-                        <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">Parsed Content</h4>
+                        <h4
+                            class="text-xs uppercase text-neutral-500 font-medium mb-2"
+                        >
+                            Parsed Content
+                        </h4>
                         <div class="bg-neutral-800 rounded-md p-3">
-                            <div v-for="(value, key) in logViewer.parsedContent" :key="key" class="flex justify-between items-center mb-2 pb-2 border-b border-neutral-700 last:border-b-0 last:mb-0 last:pb-0">
-                                <span class="text-xs text-neutral-400">{{ key }}</span>
-                                <span class="text-sm font-mono">{{ value }}</span>
+                            <div
+                                v-for="(value, key) in logViewer.parsedContent"
+                                :key="key"
+                                class="flex justify-between items-center mb-2 pb-2 border-b border-neutral-700 last:border-b-0 last:mb-0 last:pb-0"
+                            >
+                                <span class="text-xs text-neutral-400"
+                                    >{{ key }}</span
+                                >
+                                <span class="text-sm font-mono"
+                                    >{{ value }}</span
+                                >
                             </div>
                         </div>
                     </div>
 
                     <!-- Metadata Section -->
-                    <div v-if="logViewer.logDetail && logViewer.logDetail.metadata">
-                        <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">Metadata</h4>
+                    <div
+                        v-if="logViewer.logDetail && logViewer.logDetail.metadata"
+                    >
+                        <h4
+                            class="text-xs uppercase text-neutral-500 font-medium mb-2"
+                        >
+                            Metadata
+                        </h4>
                         <div class="bg-neutral-800 rounded-md overflow-hidden">
-                            <pre class="text-xs p-3 overflow-x-auto">{{ JSON.stringify(logViewer.logDetail.metadata, null, 4) }}</pre>
+                            <pre class="text-xs p-3 overflow-x-auto">
+{{ JSON.stringify(logViewer.logDetail.metadata, null, 4) }}</pre
+                            >
                         </div>
                     </div>
 
                     <!-- Event Data Section -->
-                    <div v-if="logViewer.logDetail && logViewer.logDetail.event" class="mt-4">
-                        <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">Event Data</h4>
+                    <div
+                        v-if="logViewer.logDetail && logViewer.logDetail.event"
+                        class="mt-4"
+                    >
+                        <h4
+                            class="text-xs uppercase text-neutral-500 font-medium mb-2"
+                        >
+                            Event Data
+                        </h4>
                         <div class="bg-neutral-800 rounded-md overflow-hidden">
-                            <pre class="text-xs p-3 overflow-x-auto">{{ JSON.stringify(logViewer.logDetail.event, null, 4) }}</pre>
+                            <pre class="text-xs p-3 overflow-x-auto">
+{{ JSON.stringify(logViewer.logDetail.event, null, 4) }}</pre
+                            >
                         </div>
                     </div>
                 </div>
@@ -438,7 +836,9 @@
     </div>
 
     <!-- Pagination controls -->
-    <div class="border-t border-neutral-800 p-4 flex justify-between items-center">
+    <div
+        class="border-t border-neutral-800 p-4 flex justify-between items-center"
+    >
         <div class="flex items-center space-x-2 text-sm text-neutral-400">
             <span>Total: {{ logViewer.totalLogs }} logs</span>
             <span>|</span>
@@ -463,8 +863,19 @@
                 class="p-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-300 disabled:opacity-50 disabled:pointer-events-none transition-colors"
                 :disabled="logViewer.currentPage === 1"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                    />
                 </svg>
             </button>
             <button
@@ -472,11 +883,24 @@
                 class="p-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-300 disabled:opacity-50 disabled:pointer-events-none transition-colors"
                 :disabled="logViewer.currentPage === 1"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 19l-7-7 7-7"
+                    />
                 </svg>
             </button>
-            <div class="px-2 py-1 bg-neutral-800 rounded-md flex items-center space-x-1 min-w-[100px] justify-center">
+            <div
+                class="px-2 py-1 bg-neutral-800 rounded-md flex items-center space-x-1 min-w-[100px] justify-center"
+            >
                 <span class="text-sm">Page</span>
                 <input
                     type="number"
@@ -493,8 +917,19 @@
                 class="p-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-300 disabled:opacity-50 disabled:pointer-events-none transition-colors"
                 :disabled="logViewer.currentPage >= logViewer.totalPages"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                    />
                 </svg>
             </button>
             <button
@@ -502,8 +937,19 @@
                 class="p-1.5 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-300 disabled:opacity-50 disabled:pointer-events-none transition-colors"
                 :disabled="logViewer.currentPage >= logViewer.totalPages"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                    />
                 </svg>
             </button>
         </div>

@@ -14,7 +14,6 @@
         </div>
 
         <div class="p-4">
-            <!-- Authentication Tabs -->
             <div class="mb-4 border-b border-neutral-700">
                 <div class="flex">
                     <button
@@ -30,7 +29,6 @@
                 </div>
             </div>
 
-            <!-- Bearer Token Input -->
             <div v-if="authTab === 'token'" class="mb-4">
                 <div class="text-xs text-neutral-400 mb-1">Bearer Token</div>
                 <input
@@ -45,7 +43,6 @@
                 >Save Token</button>
             </div>
 
-            <!-- Login Form -->
             <div v-if="authTab === 'login'" class="mb-4">
                 <div class="mb-3">
                     <div class="text-xs text-neutral-400 mb-1">Username / Email</div>
@@ -72,7 +69,6 @@
                 >{{ isLoggingIn ? 'Logging in...' : 'Login' }}</button>
             </div>
 
-            <!-- Current Authentication Status -->
             <div v-if="isAuthenticated" class="mt-4 p-3 bg-green-900 bg-opacity-20 border border-green-700 rounded-md">
                 <div class="flex items-center text-green-400 mb-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
