@@ -7,14 +7,12 @@ import { RepositorySchema } from '../lib/repository.service';
 vi.mock('@cmmv/core', () => {
     const createDecorator = () => {
         const decorator = (...args: any[]) => {
-            // Se chamado como factory (@Decorator())
             if (
                 args.length === 0 ||
                 (args.length === 1 && typeof args[0] !== 'function')
             ) {
                 return (...innerArgs: any[]) => decorator(...innerArgs);
             }
-            // Se chamado diretamente (@Decorator)
             return args[0];
         };
         return decorator;

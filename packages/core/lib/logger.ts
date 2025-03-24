@@ -42,7 +42,6 @@ export class Logger {
         message: string,
         context?: string,
     ): string {
-        console.log(process.env.NODE_ENV);
         if (this.emitLog === null && process.env.NODE_ENV !== 'test') {
             const { Config } = require('./config'); //@ts-ignore
             this.emitLog = Config.get<boolean>('logger.emitLog', true);
