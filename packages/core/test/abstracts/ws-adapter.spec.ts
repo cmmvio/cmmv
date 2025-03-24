@@ -21,6 +21,10 @@ class TestWSAdapter extends AbstractWSAdapter {
         server.onMessageHandler = callback;
         return server;
     }
+
+    public close() {
+        return true;
+    }
 }
 
 describe('AbstractWSAdapter', () => {
