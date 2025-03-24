@@ -6,9 +6,25 @@
             class="text-lg font-medium text-neutral-300 flex items-center border-b border-neutral-800 py-2 px-4 w-full"
         >
             <h2 class="mr-2">System Logs</h2>
+
+            <!-- Botão de autenticação (novo) -->
+            <button
+                @click="toggleAuthModal && toggleAuthModal(() => logViewer.fetchLogs())"
+                class="h-7 p-1.5 px-3 mr-2 ml-2 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md flex items-center"
+                :class="isAuthenticated ? 'text-green-400' : 'text-yellow-400'"
+                title="Authentication"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span class="ml-1 hidden sm:inline">{{ isAuthenticated ? 'Authenticated' : 'Authenticate' }}</span>
+            </button>
+
+            <!-- Botão de atualização existente -->
             <button
                 @click="logViewer.refreshData()"
-                class="h-9 p-1.5 px-3 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md text-neutral-300 flex items-center"
+                class="h-7 p-1.5 px-3 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md text-neutral-300 flex items-center"
                 title="Refresh Logs"
             >
                 <svg
@@ -583,15 +599,52 @@
                             </div>
                         </td>
                     </tr>
+                    <!-- Mensagem de acesso restrito (agora em inglês) -->
+                    <tr
+                        v-if="logViewer.error && logViewer.error.includes('Restricted Access')"
+                        class="text-center"
+                    >
+                        <td colspan="3" class="px-4 py-8 text-neutral-400">
+                            <div class="w-full flex justify-center">
+                                <div class="max-w-sm mx-auto flex flex-col items-center">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-12 w-12 mb-3 text-yellow-500"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                        />
+                                    </svg>
+                                    <p class="text-lg font-medium text-yellow-400">
+                                        Restricted Access
+                                    </p>
+                                    <p class="mt-1 text-sm text-center">
+                                        Viewing logs requires administrator privileges
+                                    </p>
+                                    <button
+                                        @click="toggleAuthModal && toggleAuthModal(()=> logViewer.fetchLogs())"
+                                        class="mt-4 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm transition-colors"
+                                    >
+                                        Login as Admin
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Mensagem de nenhum log encontrado (ajustando a condição) -->
                     <tr
                         v-else-if="!logViewer.logs || logViewer.logs.length === 0"
                         class="text-center"
                     >
                         <td colspan="3" class="px-4 py-8 text-neutral-400">
                             <div class="w-full flex justify-center">
-                                <div
-                                    class="max-w-sm mx-auto flex flex-col items-center"
-                                >
+                                <div class="max-w-sm mx-auto flex flex-col items-center">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         class="h-12 w-12 mb-3 text-neutral-500"
@@ -606,9 +659,7 @@
                                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                         />
                                     </svg>
-                                    <p
-                                        class="text-lg font-medium text-neutral-400"
-                                    >
+                                    <p class="text-lg font-medium text-neutral-400">
                                         No Logs Found
                                     </p>
                                     <p class="mt-1 text-sm text-center">
@@ -931,6 +982,67 @@
                     />
                 </svg>
             </button>
+        </div>
+    </div>
+
+    <!-- Adicionar modal de autenticação -->
+    <div
+        v-if="logViewer.authModalOpen"
+        class="fixed inset-0 bg-neutral-900/70 z-50 flex items-center justify-center"
+        style="backdrop-filter: blur(2px)"
+    >
+        <div class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-md p-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium">Administrator Authentication</h3>
+                <button
+                    @click="logViewer.closeAuthModal"
+                    class="text-neutral-400 hover:text-white"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-neutral-300 mb-2">
+                    Viewing logs requires administrator privileges.
+                </p>
+                <p class="text-neutral-400 text-sm">
+                    Please authenticate with an account that has admin/root privileges.
+                </p>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button
+                    @click="logViewer.closeAuthModal"
+                    class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-md text-sm transition-colors"
+                >
+                    Cancel
+                </button>
+                <button
+                    @click="() => {
+                        toggleAuthModal && toggleAuthModal(() => logViewer.fetchLogs());
+                        logViewer.closeAuthModal();
+                        document.body.classList.add('modal-closed');
+                        setTimeout(() => document.body.classList.remove('modal-closed'), 500);
+                    }"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition-colors"
+                >
+                    Authenticate
+                </button>
+            </div>
         </div>
     </div>
 </div>

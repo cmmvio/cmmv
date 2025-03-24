@@ -214,6 +214,7 @@ createApp({
             dataTable: null,
             logViewer: null,
             formBuilder: null,
+            backupViewer: null,
             syncModalOpen: false,
             syncInProgress: false,
             syncProgress: 0,
@@ -229,8 +230,9 @@ createApp({
             pendingDataTableRefresh: false,
             contractTab: 'contract',
             functionalTabDropdownOpen: false,
-            linkedEntities: {}, // Armazena os registros relacionados por nome de entidade
-            loadingLinks: {}, // Controla estados de carregamento por campo
+            linkedEntities: {},
+            loadingLinks: {},
+            authModalCallback: null
         }
     },
 
@@ -257,20 +259,14 @@ createApp({
             if (!this.responseText) return '';
 
             try {
-                // Verificar se é JSON válido
                 if (this.responseText.trim().startsWith('{') || this.responseText.trim().startsWith('[')) {
-                    // Formatar e aplicar highlight no JSON
                     const parsedJson = JSON.parse(this.responseText);
                     const formattedJson = JSON.stringify(parsedJson, null, 2);
-
-                    // Usar highlight.js para colorir o JSON
                     return hljs.highlight(formattedJson, { language: 'json' }).value;
                 }
 
-                // Texto não-JSON, escape para HTML
                 return this.escapeHtml(this.responseText);
             } catch (e) {
-                // Se falhar em parsear como JSON, retornar como texto simples
                 return this.escapeHtml(this.responseText);
             }
         },
@@ -322,7 +318,6 @@ createApp({
 
         this.loadAuthDataFromStorage();
 
-        // Inicializar o filteredContracts
         this.filteredContracts = this.schema;
 
         this.graphql = useGraphQLExplorer();
@@ -331,23 +326,20 @@ createApp({
 
         this.dataTable = useDataTable();
         this.dataTable.init(this.selectedContract, this.schema);
+        this.dataTable.setAuthErrorHandler(this.handleDataTableAuthError.bind(this));
 
         this.logViewer = useLogViewer();
         this.formBuilder = useFormBuilder();
         this.formBuilder.init(this.selectedContract);
 
-        // Passar o método de callback para lidar com erro de autenticação
-        this.dataTable.setAuthErrorHandler(this.handleDataTableAuthError.bind(this));
+        this.backupViewer = useBackupViewer();
 
-        // Initialize tab overflow check after DOM is ready
         this.$nextTick(() => {
             this.checkTabOverflow();
         });
 
-        // Add click outside listener for dropdown
         document.addEventListener('click', this.handleClickOutside);
 
-        // Adicione esta linha antes do final do método mounted
         this.initLinkedEntities();
     },
 
@@ -397,7 +389,6 @@ createApp({
                         this.updateFullRequestUrl();
                     }, 50);
 
-                    // Adicione esta linha para inicializar entidades vinculadas
                     this.$nextTick(() => {
                         this.initLinkedEntities();
                     });
@@ -758,7 +749,6 @@ createApp({
                     propertyKey: "newfield"
                 });
 
-                // Marcar contrato como não sincronizado
                 const key = Object.keys(this.schema).find(k =>
                     this.schema[k].contractName === this.selectedContract.contractName);
                 if (key) {
@@ -778,7 +768,6 @@ createApp({
                         this.selectedContract.fields = fields;
                         this.modalConfirm = false;
 
-                        // Marcar contrato como não sincronizado
                         const contractKey = Object.keys(this.schema).find(k =>
                             this.schema[k].contractName === this.selectedContract.contractName);
                         if (contractKey) {
@@ -1000,26 +989,22 @@ createApp({
                     credentials: 'include',
                 };
 
-                // Adicionar headers customizados
                 this.headers.forEach(header => {
                     if (header.name && header.value) {
                         options.headers[header.name] = header.value;
                     }
                 });
 
-                // Adicionar header params do DTO
                 for (const [name, value] of Object.entries(this.headerParamValues)) {
                     if (value !== undefined && value !== null && value !== '') {
                         options.headers[name] = value;
                     }
                 }
 
-                // Adicionar token de autenticação se disponível
                 if (this.isAuthenticated && this.authData.token) {
                     options.headers['Authorization'] = `Bearer ${this.authData.token}`;
                 }
 
-                // Adicionar body para métodos que o suportam
                 if (['POST', 'PUT', 'PATCH'].includes(method) && this.bodyParams.length > 0) {
                     if (!options.headers['Content-Type']) {
                         options.headers['Content-Type'] = 'application/json';
@@ -1062,7 +1047,6 @@ createApp({
                     };
                 }
 
-                // Alternar para a aba de Response automaticamente após receber a resposta
                 this.mainTab = 'response';
             } catch (error) {
                 this.responseStatus = 0;
@@ -1352,51 +1336,41 @@ createApp({
         updateFullRequestUrl() {
             if (!this.selectedEndpoint || !this.selectedContract) return;
 
-            // Construir a URL base
             const basePath = this.selectedContract.controllerCustomPath ||
                             (this.selectedContract.controllerName ?
                              this.selectedContract.controllerName.toLowerCase() : '');
 
             let path = '';
 
-            // Construir o caminho com base no endpoint selecionado
             if (this.selectedEndpoint.startsWith('custom_')) {
-                // Para métodos customizados
                 const serviceIndex = parseInt(this.selectedEndpoint.split('_')[1]);
                 const service = this.selectedContract.services[serviceIndex];
 
                 if (service) {
                     let servicePath = service.path || '';
 
-                    // Substituir parâmetros de path
                     for (const param of this.pathParams) {
                         const placeholder = `:${param.name}`;
                         if (servicePath.includes(placeholder)) {
-                            // Se o valor estiver preenchido, substituir com valor codificado
-                            // Caso contrário, manter o placeholder como está (sem codificar)
                             if (this.paramValues[param.name]) {
                                 servicePath = servicePath.replace(
                                     placeholder,
-                                    this.paramValues[param.name]  // Sem encode para manter o formato :param
+                                    this.paramValues[param.name]
                                 );
                             }
                         }
                     }
 
-                    // CORREÇÃO: Usar o path explícito do contrato diretamente
-                    // Remover barra inicial se existir
                     path = servicePath.startsWith('/') ? servicePath.substring(1) : servicePath;
                 } else {
-                    path = basePath; // Fallback para o basePath se o serviço não for encontrado
+                    path = basePath;
                 }
             } else {
-                // Para endpoints CRUD padrão
                 switch (this.selectedEndpoint) {
                     case 'getAll':
                         path = basePath;
                         break;
                     case 'getById':
-                        // Manter o placeholder se não houver valor
                         const idValue = this.paramValues.id;
                         path = idValue ?
                             `${basePath}/${idValue}` :
@@ -1409,14 +1383,12 @@ createApp({
                         path = basePath;
                         break;
                     case 'update':
-                        // Manter o placeholder se não houver valor
                         const updateId = this.paramValues.id;
                         path = updateId ?
                             `${basePath}/${updateId}` :
                             `${basePath}/:id`;
                         break;
                     case 'delete':
-                        // Manter o placeholder se não houver valor
                         const deleteId = this.paramValues.id;
                         path = deleteId ?
                             `${basePath}/${deleteId}` :
@@ -1427,17 +1399,13 @@ createApp({
                 }
             }
 
-            // Adicionar parâmetros de query (apenas os preenchidos)
             const queryParams = [];
             for (const param of this.queryParams) {
                 const value = this.queryParamValues[param.name];
 
-                // Apenas adicionar se o valor existir e não for vazio
                 if (value !== undefined && value !== null && value !== '') {
-                    // Tratamento especial para o parâmetro "filters"
                     if (param.name === 'filters' || param.type === 'json') {
                         try {
-                            // Tentar parsear o JSON antes de adicionar à URL
                             const parsedValue = typeof value === 'string' ?
                                 (value.trim() ? JSON.parse(value) : {}) :
                                 value;
@@ -1447,7 +1415,6 @@ createApp({
                                 queryParams.push(`${param.name}=${encodeURIComponent(jsonStr)}`);
                             }
                         } catch (e) {
-                            // Se não for um JSON válido, não adicionar à URL
                             console.warn(`Invalid JSON for param ${param.name}:`, e);
                         }
                     } else {
@@ -1456,7 +1423,6 @@ createApp({
                 }
             }
 
-            // Montar a URL final
             let url = `${this.apiBaseUrl}/${path}`;
             if (queryParams.length > 0) {
                 url += `?${queryParams.join('&')}`;
@@ -1492,8 +1458,9 @@ createApp({
             this.apiSidebarOpen = !this.apiSidebarOpen;
         },
 
-        toggleAuthModal() {
+        toggleAuthModal(fn) {
             this.showAuthModal = !this.showAuthModal;
+            this.authModalCallback = fn;
         },
 
         saveToken() {
@@ -1503,7 +1470,6 @@ createApp({
                 this.showAuthModal = false;
                 this.bearerToken = '';
 
-                // Atualizar a tabela de dados se estamos na tab de dados
                 if (this.selectedTab === 8 && this.dataTable) {
                     setTimeout(() => {
                         this.dataTable.refreshData();
@@ -1543,16 +1509,20 @@ createApp({
                     this.showAuthModal = false;
                     this.loginCredentials = { username: '', password: '' };
 
-                    // Atualizar a tabela de dados se estamos na tab de dados
                     if (this.selectedTab === 8 && this.dataTable) {
                         setTimeout(() => {
                             this.dataTable.refreshData();
                         }, 300);
                     }
+
+                    if (this.authModalCallback) {
+                        this.authModalCallback();
+                    }
                 } else {
                     alert('Authentication failed. Please check your credentials.');
                 }
             } catch (error) {
+                console.log(error);
                 alert('Authentication error. Please try again later.');
             } finally {
                 this.isLoggingIn = false;
@@ -1944,12 +1914,7 @@ createApp({
             for (const key in obj) {
                 if (obj[key] === undefined) {
                     obj[key] = null;
-                } else if (obj[key] === '') {
-                    // Manter strings vazias
-                } else if (obj[key] === 0 || obj[key] === false) {
-                    // Manter zeros e falsos
-                } else if (!obj[key] && obj[key] !== 0 && obj[key] !== false) {
-                    // Normalizar outros valores "falsy" para null
+                } if (!obj[key] && obj[key] !== 0 && obj[key] !== false) {
                     obj[key] = null;
                 } else if (typeof obj[key] === 'object') {
                     this.normalizeValues(obj[key]);
@@ -2126,7 +2091,6 @@ createApp({
             try {
                 this.isDeleting = true;
 
-                // Find the contract key
                 const contractKey = Object.keys(this.schema).find(
                     key => this.schema[key].contractName === this.selectedContract.contractName
                 );
@@ -2147,13 +2111,10 @@ createApp({
                     throw new Error(errorData.message || 'Failed to delete contract');
                 }
 
-                // Remove contract from schema
                 delete this.schema[contractKey];
 
-                // Save schema to localStorage
                 this.schemaToLocalStorege();
 
-                // Select another contract if available
                 const remainingContracts = Object.keys(this.schema);
                 if (remainingContracts.length > 0) {
                     this.selectContract(remainingContracts[0]);
@@ -2161,7 +2122,6 @@ createApp({
                     this.selectedContract = null;
                 }
 
-                // Close modal
                 this.modalDeleteContract = false;
             } catch (error) {
                 console.error('Error deleting contract:', error);
@@ -2205,16 +2165,13 @@ createApp({
         },
 
         checkTabOverflow() {
-            // Check if tabs are overflowing on medium screens
             const tabsContainer = document.getElementById('full-tabs');
             const overflowDropdown = document.getElementById('overflow-dropdown');
 
-            if (tabsContainer && overflowDropdown && window.innerWidth >= 768) { // md breakpoint
-                // Calculate if all tabs fit
+            if (tabsContainer && overflowDropdown && window.innerWidth >= 768) {
                 const tabsWidth = tabsContainer.scrollWidth;
                 const containerWidth = tabsContainer.clientWidth;
 
-                // If tabs overflow, show the overflow dropdown
                 if (tabsWidth > containerWidth) {
                     overflowDropdown.style.display = 'flex';
                 } else {
@@ -2237,7 +2194,6 @@ createApp({
             }
         },
 
-        // Add validation methods for field validations
         addValidation(field) {
             if (!field.validations) {
                 field.validations = [];
@@ -2305,7 +2261,6 @@ createApp({
                 validation.options = {};
             }
 
-            // Initialize options based on validation type
             if (validation.type === 'Length' && !('min' in validation.options)) {
                 validation.options.min = null;
                 validation.options.max = null;
@@ -2334,29 +2289,22 @@ createApp({
                 contract: ''
             });
 
-            // Configurações padrão quando um relacionamento é adicionado
             if (!field.protoType) field.protoType = 'string';
             if (!field.nullable) field.nullable = true;
             if (!field.objectType) field.objectType = 'object';
         },
 
-        // Remove um relacionamento existente
         removeRelationship(field, index) {
             if (field.link && field.link.length > index) {
                 field.link.splice(index, 1);
             }
         },
 
-        // Adicionar um novo método para lidar com erros de autenticação na DataTable
         handleDataTableAuthError() {
-            // Abre o modal de autenticação
             this.showAuthModal = true;
-
-            // Salva a informação que a tabela de dados precisa ser recarregada após autenticação
             this.pendingDataTableRefresh = true;
         },
 
-        // Verifica se um campo é um link para outra entidade
         isLinkField(param) {
             return (
                 param.type === 'string' ||
@@ -2370,19 +2318,14 @@ createApp({
             );
         },
 
-        // Extrai o nome da entidade a partir do campo
         getEntityNameFromField(param) {
-            // Se tiver informações específicas de link, usar elas
             if (param.link && Array.isArray(param.link) && param.link.length > 0) {
-                // Retornar o primeiro relacionamento (poderia ser melhorado para suportar múltiplos)
                 const linkInfo = param.link[0];
                 return linkInfo.entityName || linkInfo.contract || '';
             }
 
-            // Se tiver configuração de relação direta
             if (param.relation) return param.relation;
 
-            // Extrair do nome do campo
             let name = param.name || param.propertyKey || '';
 
             if (name.endsWith('Id')) {
@@ -2393,7 +2336,6 @@ createApp({
                 return name.substring(0, name.length - 3);
             }
 
-            // Última opção: usar o próprio nome
             return name;
         },
 
@@ -2406,7 +2348,6 @@ createApp({
             return null;
         },
 
-        // Busca registros da entidade relacionada
         async fetchLinkedEntityRecords(entityName, contractName) {
             if (this.linkedEntities[entityName]) {
                 return this.linkedEntities[entityName];
@@ -2415,11 +2356,9 @@ createApp({
             this.loadingLinks[entityName] = true;
 
             try {
-                // Encontrar o contrato correto no schema
                 let targetContract = null;
                 let apiPath = '';
 
-                // Procurar o contrato pelo nome da entidade (normalmente o nome do contrato sem "Contract")
                 for (const key in this.schema) {
                     const contract = this.schema[key];
 
@@ -2462,7 +2401,6 @@ createApp({
 
                 const data = await response.json();
 
-                // Tentar encontrar os registros na resposta, tratando diversos formatos possíveis
                 const records = data.result?.data ||
                               data.result?.items ||
                               data.result ||
@@ -2489,7 +2427,7 @@ createApp({
             );
 
             if (nameField) return record[nameField];
-             // Caso não encontre, usa o primeiro campo que não seja ID
+
             const nonIdFields = Object.keys(record).filter(key =>
                 !['id', '_id', 'uuid', 'createdAt', 'updatedAt', 'deletedAt'].includes(key)
             );

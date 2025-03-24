@@ -1,4 +1,4 @@
-import { Repository } from './repository.service';
+import { Repository } from '@cmmv/repository';
 
 import { Between } from 'typeorm';
 

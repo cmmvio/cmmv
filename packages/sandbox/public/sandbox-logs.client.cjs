@@ -37,7 +37,10 @@ const useLogViewer = () => {
         weekDays: [],
         monthNames: [],
         startCalendarDays: [],
-        endCalendarDays: []
+        endCalendarDays: [],
+        requiresAuthentication: false,
+        isRootUser: false,
+        authModalOpen: false
     });
 
     const processLogsResponse = (data) => {
@@ -113,6 +116,35 @@ const useLogViewer = () => {
         return Object.keys(parsed).length > 0 ? parsed : null;
     };
 
+    function checkIfRootUser() {
+        const storedAuth = localStorage.getItem('apiExplorerAuth');
+        if (storedAuth) {
+            try {
+                const auth = JSON.parse(storedAuth);
+                return auth.isRoot === true || auth.roles?.includes('admin');
+            } catch (e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    function getAuthToken() {
+        const storedAuth = localStorage.getItem('apiExplorerAuth');
+        if (storedAuth) {
+            try {
+                const auth = JSON.parse(storedAuth);
+                state.isRootUser = auth.isRoot === true || auth.roles?.includes('admin');
+                return auth.token ? `Bearer ${auth.token}` : '';
+            } catch (e) {
+                state.isRootUser = false;
+                return '';
+            }
+        }
+        state.isRootUser = false;
+        return '';
+    }
+
     const fetchLogs = async () => {
         try {
             state.loading = true;
@@ -144,10 +176,23 @@ const useLogViewer = () => {
             }
 
             const url = `${state.baseUrl}/logs?${queryParams.toString()}`;
-            const response = await fetch(url);
+
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': getAuthToken()
+                }
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                state.error = "Restricted Access: Administrator privileges required";
+                state.logs = [];
+                state.totalLogs = 0;
+                state.totalPages = 1;
+                return;
+            }
 
             if (!response.ok) {
-                throw new Error(`Error fetching logs: ${response.statusText}`);
+                throw new Error(`Erro ao buscar logs: ${response.statusText}`);
             }
 
             const data = await response.json();
@@ -278,11 +323,12 @@ const useLogViewer = () => {
 
     const initialize = () => {
         initializeDateRange();
-
         initializeCalendarLabels();
         generateStartCalendarDays();
         generateEndCalendarDays();
-
+        getAuthToken();
+        setupAuthListener();
+        listenForAuthChanges();
         fetchLogs();
     };
 
@@ -556,9 +602,151 @@ const useLogViewer = () => {
         state.logDetail = null;
     };
 
+    function openAuthModal() {
+        state.authModalOpen = true;
+    }
+
+    function closeAuthModal() {
+        state.authModalOpen = false;
+        checkForAuthAfterModalOpen();
+    }
+
     onBeforeUnmount(() => {
         document.removeEventListener('click', handleClickOutside);
     });
+
+    let toggleAuthModalFunction = null;
+
+    function setToggleAuthModal(fn) {
+        toggleAuthModalFunction = fn;
+    }
+
+    function toggleAuthModal(callback) {
+        if (toggleAuthModalFunction) {
+            toggleAuthModalFunction(() => {
+                if (typeof callback === 'function') {
+                    console.log('Authentication callback will be executed after login');
+                    setTimeout(() => {
+                        if (checkIfRootUser()) {
+                            console.log('User is now admin, executing callback');
+                            callback();
+                        }
+                    }, 1000);
+                }
+            });
+
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList' && document.body.classList.contains('modal-closed')) {
+                        const isAdmin = checkIfRootUser();
+                        if (isAdmin && typeof callback === 'function') {
+                            console.log('User authenticated via modal, executing callback');
+                            callback();
+                        }
+                        observer.disconnect();
+                    }
+                });
+            });
+
+            observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        }
+    }
+
+    function setupAuthListener() {
+        const initialAuthState = checkIfRootUser();
+
+        const authCheckInterval = setInterval(() => {
+            const currentAuthState = checkIfRootUser();
+
+            if (!initialAuthState && currentAuthState) {
+                console.log('User authenticated as admin, refreshing logs...');
+                fetchLogs();
+                clearInterval(authCheckInterval);
+            }
+        }, 1000);
+
+        onBeforeUnmount(() => {
+            clearInterval(authCheckInterval);
+        });
+    }
+
+    function handleSuccessfulAuth() {
+        getAuthToken();
+
+        if (state.isRootUser) {
+            setTimeout(() => {
+                fetchLogs();
+            }, 500);
+        }
+    }
+
+    function listenForAuthChanges() {
+        window.removeEventListener('storage', handleStorageChange);
+
+        window.addEventListener('storage', handleStorageChange);
+
+        window.addEventListener('authSuccess', () => {
+            console.log('Auth success event detected, refreshing logs...');
+            getAuthToken();
+            fetchLogs();
+        });
+
+        const storageCheckInterval = setInterval(() => {
+            const wasAdmin = state.isRootUser;
+            const isNowAdmin = checkIfRootUser();
+
+            if (!wasAdmin && isNowAdmin) {
+                console.log('User gained admin privileges, refreshing logs...');
+                getAuthToken();
+                fetchLogs();
+            }
+
+            state.isRootUser = isNowAdmin;
+        }, 1500);
+
+        onBeforeUnmount(() => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('authSuccess', fetchLogs);
+            clearInterval(storageCheckInterval);
+        });
+    }
+
+    function handleStorageChange(event) {
+        if (event.key === 'apiExplorerAuth') {
+            console.log('Auth storage changed, checking permissions...');
+            const wasAdmin = state.isRootUser;
+            getAuthToken();
+
+            if (!wasAdmin && state.isRootUser) {
+                console.log('User authenticated as admin via storage event, refreshing logs...');
+                fetchLogs();
+            }
+        }
+    }
+
+    function checkForAuthAfterModalOpen() {
+        const wasAdmin = state.isRootUser;
+        let checkCount = 0;
+
+        const authCheckTimer = setInterval(() => {
+            checkCount++;
+            getAuthToken();
+
+            if (!wasAdmin && state.isRootUser) {
+                console.log('User authenticated successfully, refreshing logs...');
+                fetchLogs();
+                clearInterval(authCheckTimer);
+            }
+
+            if (checkCount >= 10) {
+                clearInterval(authCheckTimer);
+            }
+        }, 1000);
+
+        onBeforeUnmount(() => {
+            clearInterval(authCheckTimer);
+        });
+    }
 
     return {
         logs: computed(() => state.logs),
@@ -697,6 +885,16 @@ const useLogViewer = () => {
         selectToday,
         updateStartTime,
         updateEndTime,
-        formatCalendarDate
+        formatCalendarDate,
+        requiresAuthentication: computed(() => state.requiresAuthentication),
+        isRootUser: computed(() => state.isRootUser),
+        authModalOpen: computed(() => state.authModalOpen),
+        openAuthModal,
+        closeAuthModal,
+        setToggleAuthModal,
+        toggleAuthModal,
+        setupAuthListener,
+        listenForAuthChanges,
+        fetchLogs
     };
 };

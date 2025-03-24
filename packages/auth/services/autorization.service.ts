@@ -10,6 +10,8 @@ import {
     IContract,
     Application,
     Config,
+    Hooks,
+    HooksType,
 } from '@cmmv/core';
 
 import { Repository } from '@cmmv/repository';
@@ -228,6 +230,22 @@ export class AuthAutorizationService extends AbstractService {
 
             session.save();
         }
+
+        Hooks.execute(HooksType.Log, {
+            message: `Authorized: method="${req.method.toUpperCase()}" path="${req.path}"`,
+            context: 'AUTH',
+            level: 'INFO',
+            timestamp: Date.now(),
+            metadata: {
+                method: req.method.toUpperCase(),
+                path: req.path,
+                token: accessToken,
+                refreshToken,
+                fingerprint,
+                ip: req.ip,
+                userAgent: req.headers['user-agent'],
+            },
+        });
 
         return {
             result: {

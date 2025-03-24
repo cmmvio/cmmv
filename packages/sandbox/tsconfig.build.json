@@ -4,6 +4,8 @@
         "outDir": ".",
         "rootDir": ".",
         "paths": {
+            "@cmmv/auth": ["../auth"],
+            "@cmmv/auth/*": ["../auth/*"],
             "@cmmv/core": ["../core"],
             "@cmmv/core/*": ["../core/*"],
             "@cmmv/http": ["../http"],
@@ -16,6 +18,7 @@
     "references": [
         { "path": "../core/tsconfig.build.json" },
         { "path": "../http/tsconfig.build.json" },
+        { "path": "../auth/tsconfig.build.json" },
         { "path": "../repository/tsconfig.build.json" }
     ]
 }

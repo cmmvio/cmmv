@@ -250,11 +250,6 @@ export function Auth(
                             return response.code(403).end('Forbidden');
                         }
 
-                        Hooks.execute(HooksType.Log, {
-                            message: `Authorized: method="${request.method.toUpperCase()}" path="${request.path}"`,
-                            ...baseLog,
-                        });
-
                         request.user = decoded;
                         next();
                     },

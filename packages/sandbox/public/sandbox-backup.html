@@ -1,0 +1,381 @@
+<div class="flex flex-col h-full overflow-hidden relative" v-if="backupViewer">
+    <div class="flex border-b border-neutral-800 justify-between items-center flex-wrap">
+        <div class="text-lg font-medium text-neutral-300 flex items-center border-b border-neutral-800 py-2 px-4 w-full">
+            <h2 class="mr-2">Backups</h2>
+
+            <button
+                @click="toggleAuthModal && toggleAuthModal(() => backupViewer.fetchBackups())"
+                class="h-7 p-1.5 px-3 mr-2 ml-2 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md flex items-center"
+                :class="isAuthenticated ? 'text-green-400' : 'text-yellow-400'"
+                title="Authentication"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span class="ml-1 hidden sm:inline">{{ isAuthenticated ? 'Authenticated' : 'Authenticate' }}</span>
+            </button>
+
+            <button
+                @click="backupViewer.refreshData()"
+                class="h-7 p-1.5 px-3 mr-2 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md text-neutral-300 flex items-center"
+                title="Refresh Backups"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                </svg>
+                <span class="ml-1 hidden sm:inline">Refresh</span>
+            </button>
+
+            <button
+                @click="backupViewer.createBackup()"
+                class="h-7 p-1.5 px-3 text-xs bg-blue-700 hover:bg-blue-600 rounded-md text-white flex items-center"
+                :disabled="backupViewer.createLoading"
+                title="Create New Backup"
+            >
+                <svg v-if="backupViewer.createLoading" class="animate-spin h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                <span class="ml-1 hidden sm:inline">Create Backup</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-auto">
+        <div v-if="backupViewer.createSuccess" class="bg-green-900/30 m-4 p-4 rounded-md border border-green-800">
+            <div class="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                    <div class="text-green-300 font-medium">{{ backupViewer.createSuccess.message }}</div>
+                    <div class="text-green-200/70 text-sm mt-1" v-if="backupViewer.createSuccess.data">
+                        Created {{ backupViewer.formatTimestamp(backupViewer.createSuccess.data.timestamp) }}
+                        <span v-if="backupViewer.createSuccess.data.fileSize">({{ backupViewer.formatFileSize(backupViewer.createSuccess.data.fileSize) }})</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <table class="min-w-full border-separate border-spacing-0">
+            <thead class="bg-neutral-800 sticky top-0 z-20">
+                <tr>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                        Filename
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                        Created At
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                        Size
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                        Entities
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                        Records
+                    </th>
+                    <th class="px-4 py-2 text-center text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-neutral-900 divide-y divide-neutral-800">
+                <tr v-if="backupViewer.loading" class="text-center">
+                    <td colspan="6" class="px-4 py-8 text-neutral-400">
+                        <div class="flex justify-center items-center">
+                            <div class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full mr-2"></div>
+                            <span>Loading backups...</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr v-else-if="backupViewer.error && backupViewer.error.includes('Restricted Access')" class="text-center">
+                    <td colspan="6" class="px-4 py-8 text-neutral-400">
+                        <div class="w-full flex justify-center">
+                            <div class="max-w-sm mx-auto flex flex-col items-center">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-12 w-12 mb-3 text-yellow-500"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                    />
+                                </svg>
+                                <p class="text-lg font-medium text-yellow-400">
+                                    Restricted Access
+                                </p>
+                                <p class="mt-1 text-sm text-center">
+                                    Viewing and managing backups requires administrator privileges
+                                </p>
+                                <button
+                                    @click="toggleAuthModal && toggleAuthModal(() => backupViewer.fetchBackups())"
+                                    class="mt-4 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm transition-colors"
+                                >
+                                    Login as Admin
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr v-else-if="!backupViewer.backups || backupViewer.backups.length === 0" class="text-center">
+                    <td colspan="6" class="px-4 py-8 text-neutral-400">
+                        <div class="w-full flex justify-center">
+                            <div class="max-w-sm mx-auto flex flex-col items-center">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-12 w-12 mb-3 text-neutral-500"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                                    />
+                                </svg>
+                                <p class="text-lg font-medium text-neutral-400">
+                                    No Backups Found
+                                </p>
+                                <p class="mt-1 text-sm text-center">
+                                    No backups have been created yet
+                                </p>
+                                <button
+                                    @click="backupViewer.createBackup()"
+                                    class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition-colors"
+                                >
+                                    Create First Backup
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr
+                    v-for="backup in backupViewer.backups"
+                    :key="backup.filename"
+                    class="hover:bg-neutral-800 transition-colors cursor-pointer"
+                    :class="{'bg-blue-900/20': backupViewer.selectedBackup && backupViewer.selectedBackup.filename === backup.filename}"
+                    @click="backupViewer.selectBackup(backup)"
+                >
+                    <td class="px-4 py-2.5 text-sm border-b border-neutral-800">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                            </svg>
+                            {{ backup.filename }}
+                        </div>
+                    </td>
+                    <td class="px-4 py-2.5 text-sm border-b border-neutral-800 whitespace-nowrap">
+                        {{ backupViewer.formatTimestamp(backup.timestamp) }}
+                    </td>
+                    <td class="px-4 py-2.5 text-sm border-b border-neutral-800 whitespace-nowrap">
+                        {{ backupViewer.formatFileSize(backup.fileSize) }}
+                    </td>
+                    <td class="px-4 py-2.5 text-sm border-b border-neutral-800">
+                        {{ backup.entityCount || 0 }}
+                    </td>
+                    <td class="px-4 py-2.5 text-sm border-b border-neutral-800">
+                        {{ backup.recordCount || 0 }}
+                    </td>
+                    <td class="px-4 py-2.5 text-sm border-b border-neutral-800 text-center">
+                        <button
+                            @click.stop="backupViewer.downloadBackup(backup.filename)"
+                            class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs transition-colors"
+                            title="Download Backup"
+                        >
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                <span>Download</span>
+                            </div>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div
+        class="fixed top-0 right-0 bottom-0 w-[400px] bg-neutral-900 border-l border-neutral-800 overflow-y-auto z-30 shadow-xl flex flex-col transform transition-transform duration-300 ease-in-out"
+        :class="backupViewer.selectedBackup ? 'translate-x-0' : 'translate-x-full'"
+        style="height: calc(100vh - 48px); margin-top: 48px"
+    >
+        <div class="flex justify-between items-center p-4 border-b border-neutral-800 sticky top-0 bg-neutral-900 z-10">
+            <h3 class="text-lg font-medium">Backup Details</h3>
+            <button
+                @click="backupViewer.closeDetail()"
+                class="p-1 rounded-md hover:bg-neutral-800 text-neutral-400 hover:text-white"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-4 overflow-auto flex-1" v-if="backupViewer.selectedBackup">
+            <div class="mb-4">
+                <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">
+                    Basic Information
+                </h4>
+                <div class="bg-neutral-800 rounded-md p-3">
+                    <div class="flex justify-between items-center mb-2 pb-2 border-b border-neutral-700">
+                        <span class="text-xs text-neutral-400">Filename</span>
+                        <span class="text-sm font-mono">{{ backupViewer.selectedBackup.filename }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2 pb-2 border-b border-neutral-700">
+                        <span class="text-xs text-neutral-400">Created At</span>
+                        <span class="text-sm">{{ backupViewer.formatTimestamp(backupViewer.selectedBackup.createdAt) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2 pb-2 border-b border-neutral-700">
+                        <span class="text-xs text-neutral-400">File Size</span>
+                        <span class="text-sm">{{ backupViewer.formatFileSize(backupViewer.selectedBackup.fileSize) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2 pb-2 border-b border-neutral-700">
+                        <span class="text-xs text-neutral-400">Duration</span>
+                        <span class="text-sm">{{ backupViewer.formatDuration(backupViewer.selectedBackup.duration) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-neutral-400">SHA256</span>
+                        <span class="text-sm font-mono text-xs truncate w-[250px]" title="backupViewer.selectedBackup.sha256">
+                            {{ backupViewer.selectedBackup.sha256 }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4" v-if="backupViewer.selectedBackup.entities && backupViewer.selectedBackup.entities.length > 0">
+                <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">
+                    Backup Entities ({{ backupViewer.selectedBackup.entityCount }})
+                </h4>
+                <div class="bg-neutral-800 rounded-md p-3">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div v-for="entity in backupViewer.selectedBackup.entities" :key="entity"
+                             class="px-2 py-1 bg-blue-900/30 text-blue-300 rounded text-xs">
+                            {{ entity }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4" v-if="backupViewer.selectedBackup.errors && backupViewer.selectedBackup.errors.length > 0">
+                <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">
+                    Errors
+                </h4>
+                <div class="bg-neutral-800 rounded-md p-3">
+                    <div v-for="(error, index) in backupViewer.selectedBackup.errors" :key="index"
+                         class="mb-2 pb-2 border-b border-neutral-700 last:border-0 last:mb-0 last:pb-0">
+                        <div class="text-red-400 text-xs mb-1">{{ error.entity }}</div>
+                        <div class="text-xs text-neutral-300">{{ error.error }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <button
+                @click="backupViewer.downloadBackup(backupViewer.selectedBackup.filename)"
+                class="w-full mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition-colors flex items-center justify-center"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download Backup
+            </button>
+        </div>
+    </div>
+
+    <div
+        v-if="backupViewer.authModalOpen"
+        class="fixed inset-0 bg-neutral-900/70 z-50 flex items-center justify-center"
+        style="backdrop-filter: blur(2px)"
+    >
+        <div class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-md p-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium">Administrator Authentication</h3>
+                <button
+                    @click="backupViewer.closeAuthModal"
+                    class="text-neutral-400 hover:text-white"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-neutral-300 mb-2">
+                    Viewing and managing backups requires administrator privileges.
+                </p>
+                <p class="text-neutral-400 text-sm">
+                    Please authenticate with an account that has admin/root privileges.
+                </p>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button
+                    @click="backupViewer.closeAuthModal"
+                    class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-md text-sm transition-colors"
+                >
+                    Cancel
+                </button>
+                <button
+                    @click="() => {
+                        toggleAuthModal && toggleAuthModal(() => backupViewer.fetchBackups());
+                        backupViewer.closeAuthModal();
+                        document.body.classList.add('modal-closed');
+                        setTimeout(() => document.body.classList.remove('modal-closed'), 500);
+                    }"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition-colors"
+                >
+                    Authenticate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

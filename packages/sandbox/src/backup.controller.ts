@@ -1,0 +1,63 @@
+import { Controller, Get, Post, Param, Response, Request } from '@cmmv/http';
+
+import { Auth } from '@cmmv/auth';
+
+import { BackupService } from './backup.service';
+import * as path from 'path';
+import * as fs from 'fs';
+
+@Controller('backups')
+export class BackupController {
+    constructor(private readonly backupService: BackupService) {}
+
+    @Post()
+    @Auth({ rootOnly: true })
+    async createBackup() {
+        try {
+            const result = await this.backupService.createBackup();
+            return {
+                success: true,
+                message: 'Backup created successfully',
+                data: result.metadata,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error creating backup',
+                error: error.message,
+            };
+        }
+    }
+
+    @Get()
+    @Auth({ rootOnly: true })
+    async listBackups() {
+        try {
+            const backups = await this.backupService.listBackups();
+
+            return {
+                success: true,
+                data: backups,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error listing backups',
+                error: error.message,
+            };
+        }
+    }
+
+    @Get('download/:filename')
+    async downloadBackup(@Param('filename') filename: string, @Response() res) {
+        try {
+            return await this.backupService.downloadBackupFile(filename, res);
+        } catch (error) {
+            return res.code(500).json({
+                success: false,
+                message: 'Error downloading backup',
+                error: error.message,
+            });
+        }
+    }
+}

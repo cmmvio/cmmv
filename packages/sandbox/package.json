@@ -28,17 +28,21 @@
         "README.md"
     ],
     "dependencies": {
-        "@xenova/transformers": "^2.17.2",
+        "@cmmv/auth": "latest",
+        "@cmmv/core": "latest",
+        "@cmmv/http": "latest",
+        "@cmmv/repository": "latest",
+        "archiver": "^7.0.1",
         "chokidar": "^4.0.3",
         "fast-glob": "^3.3.3",
-        "v-money3": "^3.24.1",
-        "vue-the-mask": "^0.11.1",
         "ws": "^8.18.1"
     },
     "pnpm": {
         "onlyBuiltDependencies": [
             "protobufjs",
-            "sharp"
+            "sharp",
+            "skia-canvas",
+            "sqlite3"
         ]
     }
 }
