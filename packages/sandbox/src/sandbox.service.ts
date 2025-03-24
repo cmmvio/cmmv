@@ -52,7 +52,7 @@ export class SandboxService {
         SandboxService.createWebsocket();
 
         const files = await fg([
-            path.resolve(__dirname, '../public/sandbox.client.cjs'),
+            path.resolve(__dirname, '../public/sandbox*.cjs'),
             path.resolve(__dirname, '../public/sandbox.css'),
             path.resolve(__dirname, '../public/**/*.html'),
             path.resolve(__dirname, '../public/*.html'),
@@ -71,9 +71,11 @@ export class SandboxService {
                 },
             })
             .on('change', (filePath) => {
+                console.log('change', filePath);
                 SandboxService.broadcast({ event: 'change', filePath });
             })
             .on('unlink', (filePath) => {
+                console.log('unlink', filePath);
                 SandboxService.broadcast({ event: 'unlink', filePath });
             })
             .on('error', (error) => {
@@ -104,7 +106,7 @@ export class SandboxService {
     }
 
     public static broadcast(data: any) {
-        SandboxService.wsServer.clients.forEach((client) => {
+        SandboxService.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN)
                 client.send(JSON.stringify(data), { binary: false });
         });

@@ -38,6 +38,21 @@
     </div>
 
     <div class="flex text-xs justify-center mt-2">
+        <div class="w-[200px] flex">Namespace: </div>
+        <div class="w-[calc(100%-200px)] justify-end">
+            <input
+                class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
+                type="text"
+                placeholder="Defines whether the contract is part of a subdirectory"
+                v-model="selectedContract.namespace"
+                :disabled="selectedContract.options.moduleContract"
+            />
+
+            <div class="text-neutral-500 mt-1">Defines whether the contract belongs to a feature grouping.</div>
+        </div>
+    </div>
+
+    <div class="flex text-xs justify-center mt-2">
         <div class="w-[200px] flex">Subpath: </div>
         <div class="w-[calc(100%-200px)] justify-end">
             <input

@@ -82,6 +82,7 @@ export interface ContractExtraOptions {
 }
 
 export interface ContractOptions {
+    namespace?: string;
     controllerName: string;
     controllerCustomPath?: string;
     subPath?: string;
@@ -154,6 +155,7 @@ export interface ContractOptionsService {
     rootOnly?: boolean;
 }
 
+export const NAMESPACE_METADATA = Symbol('namespace_metadata');
 export const PUBLIC_METADATA = Symbol('public_metadata');
 export const CONTRACT_WATERMARK = Symbol('contract_watermark');
 export const CONTROLLER_NAME_METADATA = Symbol('controller_name_metadata');
@@ -193,6 +195,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
     if (options?.viewPage && !isValidClass(options.viewPage))
         throw new Error(`Invalid viewPage provided: ${options.viewPage}`);
 
+    const defaultNamespace = '';
     const defaultIsPublic = false;
     const defaultControllerName = 'DefaultContract';
     const defaultSubPath = '';
@@ -212,6 +215,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
     const defaultViewPage = null;
 
     const [
+        namespace,
         isPublic,
         controllerName,
         subPath,
@@ -231,6 +235,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
         viewPage,
     ] = !options
         ? [
+              defaultNamespace,
               defaultIsPublic,
               defaultControllerName,
               defaultSubPath,
@@ -250,6 +255,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
               defaultViewPage,
           ]
         : [
+              options.namespace || defaultNamespace,
               options.isPublic ?? defaultIsPublic,
               options.controllerName || defaultControllerName,
               options.subPath || defaultSubPath,
@@ -270,6 +276,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
           ];
 
     return (target: object) => {
+        Reflect.defineMetadata(NAMESPACE_METADATA, namespace, target);
         Reflect.defineMetadata(PUBLIC_METADATA, isPublic, target);
         Reflect.defineMetadata(CONTRACT_WATERMARK, true, target);
         Reflect.defineMetadata(

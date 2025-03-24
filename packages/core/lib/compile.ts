@@ -118,6 +118,9 @@ export class Compile {
     private generateContractDecorator(schema: IContract): string {
         let decorator = '@Contract({\n';
 
+        if (schema.namespace)
+            decorator += `    namespace: '${schema.namespace}',\n`;
+
         if (schema.isPublic) decorator += `    isPublic: true,\n`;
 
         decorator += `    controllerName: '${schema.controllerName}',\n`;

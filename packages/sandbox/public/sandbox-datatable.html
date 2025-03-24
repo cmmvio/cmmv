@@ -335,15 +335,31 @@
                             class="px-4 py-2.5 text-sm border-b border-neutral-800 align-top"
                         >
                             <template v-if="field && field?.propertyKey">
+                                <span v-if="dataTable.isLinkField(field) && record[field?.propertyKey]" :title="record[field?.propertyKey]">
+                                    <div class="flex items-center">
+                                        <span class="px-2 py-0.5 bg-blue-900/30 text-blue-300 rounded-full text-xs flex items-center">
+                                            <span>
+                                                {{ dataTable.getDisplayName(record[field?.propertyKey], dataTable.getEntityNameFromField(field)) }}
+                                            </span>
+                                            <span class="ml-1 text-xs text-blue-400">
+                                                (ID: {{ typeof record[field?.propertyKey] === 'string' ?
+                                                    (record[field?.propertyKey].length > 4 ?
+                                                        record[field?.propertyKey].substring(0, 4) + '...' :
+                                                        record[field?.propertyKey]) :
+                                                    record[field?.propertyKey] }})
+                                            </span>
+                                        </span>
+                                    </div>
+                                </span>
+
                                 <span
-                                    v-if="field?.protoType === 'boolean' || field?.protoType === 'bool'"
+                                    v-else-if="field?.protoType === 'boolean' || field?.protoType === 'bool'"
                                 >
                                     <span
                                         :class="record[field?.propertyKey] ? 'bg-green-900 text-green-100' : 'bg-neutral-700 text-neutral-300'"
                                         class="px-2 py-0.5 rounded-full text-xs"
                                     >
-                                        {{ record[field?.propertyKey] ? 'Yes' :
-                                        'No' }}
+                                        {{ record[field?.propertyKey] ? 'Yes' : 'No' }}
                                     </span>
                                 </span>
                                 <span
@@ -750,25 +766,30 @@
                                     class="text-red-500 ml-1"
                                     >*</span
                                 >
+                                <span v-if="dataTable.isLinkField(field)" class="bg-blue-800 px-2 py-0.5 rounded text-xs">
+                                    FK: {{ dataTable.getEntityNameFromField(field) }}.{{ field.link[0].field }} -> {{ selectedContract.controllerName }}.{{ field?.propertyKey }}
+                                </span>
                             </label>
 
-                            <div v-if="isLinkField(field)" class="relative">
-                                {{ dataTable.linkedEntities }}
+                            <div v-if="dataTable.isLinkField(field)" class="relative">
                                 <select
-                                    v-model="requestFormData[field.name]"
-                                    class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm"
-                                    :disabled="loadingLinks[getEntityNameFromField(field)]"
+                                    v-model="dataTable.editingRecord[field.propertyKey]"
+                                    class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-md text-sm focus:outline-none focus:border-blue-500"
+                                    :class="{ 'border-red-500': dataTable.isRequiredField(field) && !dataTable.editingRecord[field.propertyKey] }"
+                                    :disabled="dataTable.loadingLinks[dataTable.getEntityNameFromField(field)]"
+                                    @change="dataTable.checkRequiredFields()"
                                 >
-                                    <option value="">-- Select {{ getEntityNameFromField(field) }} --</option>
+                                    <option value="">-- Selecione {{ dataTable.getEntityNameFromField(field) }} --</option>
                                     <option
-                                        v-for="item in dataTable.linkedEntities[getEntityNameFromField(field)] || []"
+                                        v-for="item in dataTable.linkedEntities[dataTable.getEntityNameFromField(field)] || []"
                                         :key="item.id"
                                         :value="item.id"
+                                        :selected="dataTable.editingRecord[field.propertyKey] === item.id"
                                     >
-                                        {{ getDisplayField(item) }} (ID: {{ item.id.substring(0, 8) }}...)
+                                        {{ dataTable.getDisplayField(item) }} (ID: {{ typeof item.id === 'string' && item.id.length > 8 ? item.id.substring(0, 8) + '...' : item.id }})
                                     </option>
                                 </select>
-                                <div v-if="loadingLinks[getEntityNameFromField(field)]" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                <div v-if="dataTable.loadingLinks[dataTable.getEntityNameFromField(field)]" class="absolute right-3 top-1/2 transform -translate-y-1/2">
                                     <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

@@ -20,6 +20,7 @@ import {
 } from '.';
 
 import {
+    NAMESPACE_METADATA,
     CONTROLLER_NAME_METADATA,
     FIELD_METADATA,
     MESSAGE_METADATA,
@@ -455,6 +456,11 @@ export class Application {
                 const target = contract.constructor || contract;
                 const prototype = target.prototype || contract.prototype;
 
+                const namespace = Reflect.getMetadata(
+                    NAMESPACE_METADATA,
+                    contract.constructor,
+                );
+
                 const isPublic = Reflect.getMetadata(
                     PUBLIC_METADATA,
                     contract.constructor,
@@ -532,6 +538,7 @@ export class Application {
                 );
 
                 const contractStructure = {
+                    namespace,
                     isPublic,
                     contractName: contract.constructor.name,
                     controllerName,

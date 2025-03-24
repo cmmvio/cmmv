@@ -9,6 +9,7 @@ import {
 } from '../decorators/contract.decorator';
 
 export class IContract {
+    namespace?: string;
     isPublic?: boolean;
     contractName: string;
     controllerName: string;
