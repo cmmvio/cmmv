@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/sandbox",
-    "version": "0.9.7",
+    "version": "0.9.8",
     "description": "Sandbox for creating contracts in visual mode",
     "keywords": [
         "cmmv",
@@ -21,11 +21,7 @@
     },
     "homepage": "https://cmmv.io",
     "files": [
-        "public",
-        "src",
-        "index.js",
-        "package.json",
-        "README.md"
+        "public"
     ],
     "dependencies": {
         "@cmmv/auth": "latest",
