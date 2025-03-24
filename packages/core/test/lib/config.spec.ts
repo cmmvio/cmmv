@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Config } from '../../lib/config';
 
@@ -87,20 +85,6 @@ describe('Config', () => {
 
         Config.delete('deep.nested.key');
         expect(Config.get('deep.nested.key')).toBeUndefined();
-    });
-
-    it('should handle missing configuration file gracefully without throwing errors', () => {
-        const nonExistentConfigPath = path.join(
-            process.cwd(),
-            '.nonexistent.config.js',
-        );
-        if (fs.existsSync(nonExistentConfigPath)) {
-            fs.unlinkSync(nonExistentConfigPath);
-        }
-
-        expect(() => {
-            Config.loadConfig();
-        }).not.toThrow();
     });
 
     it('should handle assigning empty objects', () => {

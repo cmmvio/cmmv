@@ -23,5 +23,8 @@ export default defineConfig({
         globals: true,
         environment: 'node',
         setupFiles: ['reflect-metadata', 'fast-json-stringify', 'fast-glob'],
+        env: {
+            NODE_ENV: 'test',
+        },
     },
 });

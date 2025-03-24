@@ -12,7 +12,6 @@ import { GraphQLModule } from '@cmmv/graphql';
 import { SandoxModule } from '@cmmv/sandbox';
 import { InspectorModule } from '@cmmv/inspector';
 
-
 Application.create({
     httpAdapter: DefaultAdapter,
     wsAdapter: WSAdapter,
@@ -28,7 +27,6 @@ Application.create({
         OpenAPIModule,
         GraphQLModule,
         SandoxModule,
-        InspectorModule
-    ],
+        InspectorModule],
     providers: [Repository, SchedulingService],
 });

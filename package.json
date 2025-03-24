@@ -24,7 +24,7 @@
 		"clean:packages": "find ./packages -name 'node_modules' -prune -o -type f \\( -name '*.d.ts' -o -name '*.js' \\) -exec rm -f {} +",
 		"clean": "pnpm run clean:tsfiles && pnpm run clean:packages > /dev/null 2>&1",
 		"format": "prettier \"**/*.ts\" \"packages/**/*.json\" --ignore-path ./.prettierignore --write && git status",
-		"test": "vitest",
+		"test": "NODE_ENV=test vitest",
 		"lint": "concurrently 'pnpm run lint:packages' 'pnpm run lint:spec'",
 		"lint:fix": "concurrently 'pnpm run lint:packages -- --fix' 'pnpm run lint:spec -- --fix'",
 		"lint:packages": "eslint 'packages/**/**.ts' --no-ignore",

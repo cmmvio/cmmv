@@ -4,27 +4,70 @@ import { Config } from '@cmmv/core';
 import { ObjectId } from 'mongodb';
 import { RepositorySchema } from '../lib/repository.service';
 
-// Mock para dependências externas
-vi.mock('@cmmv/core', () => ({
-    AbstractService: class MockAbstractService {
-        constructor() {}
-        validate() {
-            return true;
-        }
-        beforeSave() {
-            return true;
-        }
-        afterSave() {
-            return true;
-        }
-        fixIds(item: any) {
-            return item;
-        }
-    },
-    Config: {
-        get: vi.fn(),
-    },
-}));
+vi.mock('@cmmv/core', () => {
+    const createDecorator = () => {
+        const decorator = (...args: any[]) => {
+            // Se chamado como factory (@Decorator())
+            if (
+                args.length === 0 ||
+                (args.length === 1 && typeof args[0] !== 'function')
+            ) {
+                return (...innerArgs: any[]) => decorator(...innerArgs);
+            }
+            // Se chamado diretamente (@Decorator)
+            return args[0];
+        };
+        return decorator;
+    };
+
+    return {
+        AbstractService: class MockAbstractService {
+            constructor() {}
+            validate() {
+                return true;
+            }
+            beforeSave() {
+                return true;
+            }
+            afterSave() {
+                return true;
+            }
+            fixIds(item: any) {
+                return item;
+            }
+        },
+        Logger: vi.fn().mockImplementation(() => ({
+            info: vi.fn(),
+            error: vi.fn(),
+            debug: vi.fn(),
+            warn: vi.fn(),
+        })),
+        Singleton: class MockSingleton {
+            static _instance: any;
+            static getInstance() {
+                return this._instance || (this._instance = new this());
+            }
+        },
+        Config: {
+            get: vi.fn(),
+        },
+        Hook: createDecorator(),
+        Hooks: {
+            HooksType: {
+                BEFORE_SAVE: 'BEFORE_SAVE',
+                AFTER_SAVE: 'AFTER_SAVE',
+            },
+        },
+        HooksType: {
+            onPreInitialize: 'onPreInitialize',
+            onInitialize: 'onInitialize',
+            onListen: 'onListen',
+            onError: 'onError',
+            onHTTPServerInit: 'onHTTPServerInit',
+            Log: 'Log',
+        },
+    };
+});
 
 vi.mock('./repository.service', () => ({
     RepositorySchema: class MockRepositorySchema {
@@ -32,7 +75,6 @@ vi.mock('./repository.service', () => ({
     },
 }));
 
-// Classe concreta para testar a classe abstrata
 class TestRepositoryService extends AbstractRepositoryService {
     constructor() {
         super(); //@ts-ignore
