@@ -1,12 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import * as archiver from 'archiver';
+//import * as archiver from 'archiver';
 import * as fg from 'fast-glob';
 
 import { Service } from '@cmmv/core';
 import { Repository } from '@cmmv/repository';
 import { Logger } from '@cmmv/core';
+
+const archiver = require('archiver');
 
 @Service('backup')
 export class BackupService {

@@ -1,18 +1,18 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import axios from 'axios';
-import { compare as semverCompare } from 'semver';
+//import { compare as semverCompare } from 'semver';
 
 import { Service, Logger } from '@cmmv/core';
 
-interface ModuleImport {
+export interface ModuleImport {
     import: string | string[];
     path: string;
     modules: string[];
     providers?: string[];
 }
 
-interface ModuleInfo {
+export interface ModuleInfo {
     name: string;
     installed: boolean;
     version?: string;
@@ -28,13 +28,15 @@ interface ModuleInfo {
     isEnabled?: boolean;
 }
 
-interface SubmoduleInfo {
+export interface SubmoduleInfo {
     name: string;
     installed: boolean;
     description: string;
     packageName?: string;
     version?: string;
 }
+
+const semver = require('semver');
 
 @Service('modules')
 export class ModulesService {
@@ -551,8 +553,10 @@ export class ModulesService {
                     if (installedVersion && latestVersion) {
                         try {
                             module.updateAvailable =
-                                semverCompare(latestVersion, installedVersion) >
-                                0;
+                                semver.compare(
+                                    latestVersion,
+                                    installedVersion,
+                                ) > 0;
                         } catch (err) {
                             this.logger.log(
                                 `Error comparing versions for ${module.name}: ${err.message}`,
@@ -599,7 +603,7 @@ export class ModulesService {
      * Get all modules
      * @returns The modules
      */
-    async getAllModules(): Promise<ModuleInfo[]> {
+    public async getAllModules(): Promise<ModuleInfo[]> {
         const packageJson = this.readPackageJson();
         this.updateInstalledStatus(packageJson);
 
