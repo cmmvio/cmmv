@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/sandbox",
-    "version": "0.9.8",
+    "version": "0.9.9",
     "description": "Sandbox for creating contracts in visual mode",
     "keywords": [
         "cmmv",
@@ -20,9 +20,6 @@
         "url": "https://github.com/cmmvio/cmmv/issues"
     },
     "homepage": "https://cmmv.io",
-    "files": [
-        "public"
-    ],
     "dependencies": {
         "@cmmv/auth": "latest",
         "@cmmv/core": "latest",
