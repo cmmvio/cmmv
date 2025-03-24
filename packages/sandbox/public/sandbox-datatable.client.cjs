@@ -43,7 +43,10 @@ const useDataTable = () => {
             success: 0,
             failed: 0
         },
-        searchField: ''
+        searchField: '',
+        linkedEntities: {},
+        loadingLinks: {},
+        schema: null
     });
 
     const recordsRef = ref([]);
@@ -193,9 +196,10 @@ const useDataTable = () => {
         }
     }
 
-    async function initialize(contract) {
+    async function initialize(contract, schema) {
         state.contract = contract;
         state.fields = contract.fields || [];
+        state.schema = schema;
 
         const hasLoadedState = loadStateFromLocalStorage();
 
@@ -212,6 +216,7 @@ const useDataTable = () => {
             state.totalPages = 1;
         }
 
+        await initLinkedEntities();
         await fetchData();
     }
 
@@ -420,6 +425,18 @@ const useDataTable = () => {
             }
         });
 
+        state.fields.forEach(field => {
+            if (isLinkField(field) && field.propertyKey) {
+                if (!(field.propertyKey in state.editingRecord)) {
+                    state.editingRecord[field.propertyKey] = '';
+                }
+
+                if (!state.linkedEntities[getEntityNameFromField(field)]) {
+                    fetchLinkedEntityRecords(field, state.contract.contractName);
+                }
+            }
+        });
+
         state.editModalOpen = true;
 
         checkRequiredFields();
@@ -446,6 +463,16 @@ const useDataTable = () => {
                 state.editingRecord[field.propertyKey] = new Date().toISOString();
             } else {
                 state.editingRecord[field.propertyKey] = '';
+            }
+        });
+
+        state.fields.forEach(field => {
+            if (isLinkField(field) && field.propertyKey) {
+                state.editingRecord[field.propertyKey] = '';
+
+                if (!state.linkedEntities[getEntityNameFromField(field)]) {
+                    fetchLinkedEntityRecords(field, state.contract.contractName);
+                }
             }
         });
 
@@ -487,7 +514,8 @@ const useDataTable = () => {
 
             const response = await fetch(url, {
                 method: method,
-                headers: getAuthHeaders()
+                headers: getAuthHeaders(),
+                body: JSON.stringify(recordToSave)
             });
 
             if (!response.ok) {
@@ -583,10 +611,9 @@ const useDataTable = () => {
         });
     }
 
-    function init(contract) {
-        if (contract) {
-            initialize(contract);
-        }
+    function init(contract, schema) {
+        if (contract)
+            initialize(contract, schema);
     }
 
     function openImportModal() {
@@ -741,6 +768,142 @@ const useDataTable = () => {
         fetchData();
     }
 
+    function isLinkField(field) {
+        if (!field || !field.propertyKey) return false;
+
+        return (field.propertyKey.endsWith('Id') ||
+                field.propertyKey.endsWith('_id') ||
+                field.relation ||
+                (field.link && Array.isArray(field.link) && field.link.length > 0));
+    }
+
+    function getEntityNameFromField(field) {
+        if (field.link && Array.isArray(field.link) && field.link.length > 0) {
+            const linkInfo = field.link[0];
+            return linkInfo.entityName || linkInfo.contract || '';
+        }
+
+        if (field.relation) return field.relation;
+
+        let name = field.propertyKey || '';
+
+        if (name.endsWith('Id')) {
+            return name.substring(0, name.length - 2);
+        }
+
+        if (name.endsWith('_id')) {
+            return name.substring(0, name.length - 3);
+        }
+
+        return name;
+    }
+
+    function getContractNameFromField(field) {
+        if (field.link && Array.isArray(field.link) && field.link.length > 0) {
+            const linkInfo = field.link[0];
+            return linkInfo.contract || '';
+        }
+        return null;
+    }
+
+    async function fetchLinkedEntityRecords(field, contractName) {
+        const entityName = getEntityNameFromField(field);
+
+        if (state.linkedEntities[entityName])
+            return state.linkedEntities[entityName];
+
+        state.loadingLinks[entityName] = true;
+
+        try {
+            let targetContract = null;
+            let apiPath = '';
+
+            for (const key in state.schema) {
+                const contract = state.schema[key];
+
+                if(contractName){
+                    if (
+                        contract.controllerName?.toLowerCase() === entityName.toLowerCase() ||
+                        contract.contractName?.toLowerCase() === `${entityName}Contract`.toLowerCase() ||
+                        contract.contractName?.toLowerCase() === entityName.toLowerCase()
+                    ) {
+                        targetContract = contract;
+                        break;
+                    }
+                }
+            }
+
+            //console.log(targetContract);
+
+            if (targetContract) {
+                apiPath = targetContract.controllerCustomPath ||
+                        (targetContract.controllerName ? targetContract.controllerName.toLowerCase() : '');
+            } else {
+                console.warn(`Contract for entity "${entityName}" not found, using entity name as fallback`);
+                apiPath = entityName.toLowerCase();
+            }
+
+            apiPath = apiPath.replace(/^\/+/, '').replace(/\/+/g, '/');
+
+            const baseUrl = window.location.origin;
+            const apiUrl = `${baseUrl}/${apiPath}`;
+           //console.log(apiUrl);
+
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok)
+                throw new Error(`Failed to fetch linked entity ${entityName}: ${response.statusText}`);
+
+            const data = await response.json();
+
+            const records = data.result?.data ||
+                          data.result?.items ||
+                          data.result ||
+                          data.records ||
+                          data.items ||
+                          data;
+
+            state.linkedEntities[entityName] = Array.isArray(records) ? records : [];
+            return state.linkedEntities[entityName];
+        } catch (error) {
+            console.error(`Error loading linked entity ${entityName}:`, error);
+            state.linkedEntities[entityName] = [];
+            return [];
+        } finally {
+            state.loadingLinks[entityName] = false;
+        }
+    }
+
+    function getDisplayField(record) {
+        if (!record) return '';
+
+        const nameField = Object.keys(record).find(key =>
+            ['name', 'title', 'label', 'description', 'nome', 'titulo'].includes(key.toLowerCase())
+        );
+
+        if (nameField) return record[nameField];
+
+        const nonIdFields = Object.keys(record).filter(key =>
+            !['id', '_id', 'uuid', 'createdAt', 'updatedAt', 'deletedAt'].includes(key)
+        );
+
+        if (nonIdFields.length > 0) return record[nonIdFields[0]];
+
+        return record.id || record._id || JSON.stringify(record);
+    }
+
+    async function initLinkedEntities() {
+        if (!state.fields) return;
+
+        for (const field of state.fields) {
+            if (isLinkField(field))
+                await fetchLinkedEntityRecords(field, state.contract.contractName);
+        }
+    }
+
     return {
         ...toRefs(state),
         records: recordsRef,
@@ -777,6 +940,11 @@ const useDataTable = () => {
         closeImportModal,
         formatImportData,
         importRecords,
-        setAuthErrorHandler
+        setAuthErrorHandler,
+        isLinkField,
+        getEntityNameFromField,
+        fetchLinkedEntityRecords,
+        getDisplayField,
+        initLinkedEntities
     };
 };

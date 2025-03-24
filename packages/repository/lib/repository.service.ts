@@ -82,7 +82,7 @@ export class Repository extends Singleton {
 
             instance.dataSource = await AppDataSource.initialize();
         } catch (error) {
-            this.logger.error('Database connection error:', error);
+            //this.logger.error('Database connection error:', error);
 
             const AppDataSource = new DataSource({
                 ...config,

@@ -53,7 +53,6 @@ export class SessionsContract extends AbstractContract {
                 contractName: 'UserContract',
                 entityName: 'user',
                 field: '_id',
-                array: true,
             },
         ],
     })

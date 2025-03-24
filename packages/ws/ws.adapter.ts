@@ -23,6 +23,7 @@ export class WSAdapter extends AbstractWSAdapter {
     private logger: Logger = new Logger('WSAdapter');
 
     private application: Application;
+    protected wsServer: typeof WebSocketServer | null = null;
 
     private registeredMessages: Map<
         string,
@@ -50,13 +51,15 @@ export class WSAdapter extends AbstractWSAdapter {
             ...options,
         });
 
-        this.bindClientConnect(wsServer, socket => {
+        this.wsServer = wsServer;
+
+        this.bindClientConnect(wsServer, (socket) => {
             const id = uuidv4();
             socket.id = id;
             this.application.wSConnections.set(id, socket);
             this.logger.log(`WS Connection: ${id}`);
 
-            socket.on('message', data => this.interceptor(socket, data));
+            socket.on('message', (data) => this.interceptor(socket, data));
 
             //socket.on("error", () => this.wSConnections.delete(id));
             //socket.on("close", () => this.wSConnections.delete(id));
@@ -97,7 +100,7 @@ export class WSAdapter extends AbstractWSAdapter {
 
             const args = params
                 .sort((a, b) => a.index - b.index)
-                .map(param => {
+                .map((param) => {
                     switch (param.paramType) {
                         case 'data':
                             return realMessage;
@@ -136,5 +139,9 @@ export class WSAdapter extends AbstractWSAdapter {
                 });
             });
         });
+    }
+
+    public close() {
+        this.wsServer.close();
     }
 }

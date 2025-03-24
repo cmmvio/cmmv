@@ -29,7 +29,8 @@ export class SandboxService {
     public static logger: Logger = new Logger('Repository');
     public static chokidar;
     public static port: number;
-
+    public static clients: any[] = [];
+    public static wsServer: any;
     /**
      * Define the public directory
      */
@@ -44,35 +45,11 @@ export class SandboxService {
      * Load the config
      */
     public static async loadConfig(): Promise<void> {
-        const clients = [];
         const portDefault = 59885;
         const port = Config.get<number>('sandbox.port', portDefault);
         SandboxService.port = port;
 
-        const wsServer = new WebSocketServer({
-            port,
-            perMessageDeflate: {
-                zlibDeflateOptions: {
-                    chunkSize: 1024,
-                    memLevel: 7,
-                    level: 3,
-                },
-                serverMaxWindowBits: 10,
-                concurrencyLimit: 10,
-                threshold: 1024,
-            },
-        });
-
-        wsServer.on('connection', function connection(ws) {
-            clients.push(ws);
-        });
-
-        const broadcast = (data) => {
-            wsServer.clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN)
-                    client.send(JSON.stringify(data), { binary: false });
-            });
-        };
+        SandboxService.createWebsocket();
 
         const files = await fg([
             path.resolve(__dirname, '../public/sandbox.client.cjs'),
@@ -94,14 +71,51 @@ export class SandboxService {
                 },
             })
             .on('change', (filePath) => {
-                broadcast({ event: 'change', filePath });
+                SandboxService.broadcast({ event: 'change', filePath });
             })
             .on('unlink', (filePath) => {
-                broadcast({ event: 'unlink', filePath });
+                SandboxService.broadcast({ event: 'unlink', filePath });
             })
             .on('error', (error) => {
                 console.error('Erro no Chokidar:', error);
             });
+    }
+
+    public static createWebsocket() {
+        SandboxService.clients = [];
+
+        SandboxService.wsServer = new WebSocketServer({
+            port: SandboxService.port,
+            perMessageDeflate: {
+                zlibDeflateOptions: {
+                    chunkSize: 1024,
+                    memLevel: 7,
+                    level: 3,
+                },
+                serverMaxWindowBits: 10,
+                concurrencyLimit: 10,
+                threshold: 1024,
+            },
+        });
+
+        SandboxService.wsServer.on('connection', function connection(ws) {
+            SandboxService.clients.push(ws);
+        });
+    }
+
+    public static broadcast(data: any) {
+        SandboxService.wsServer.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN)
+                client.send(JSON.stringify(data), { binary: false });
+        });
+    }
+
+    public static closeWebsocket() {
+        SandboxService.clients.forEach((client) => {
+            client.close();
+        });
+
+        SandboxService.wsServer.close();
     }
 
     /**
@@ -138,9 +152,9 @@ export class SandboxService {
             'contracts',
             filanameRaw + '.ts',
         );
-        const outputDir = path.dirname(schemaFilename);
+
         fs.writeFileSync(
-            schemaFilename.replace('.ts', '.json'),
+            schemaFilename.replace('.ts', '.metadata.json'),
             JSON.stringify(schema, null, 4),
         );
 
@@ -311,5 +325,15 @@ export class SandboxService {
         }
 
         return { success: true, message: 'Contract deleted successfully' };
+    }
+
+    /**
+     * Restart the application
+     * @returns The success and message of the operation
+     */
+    public async restartApplication() {
+        SandboxService.closeWebsocket();
+        await Application.instance.restart();
+        SandboxService.createWebsocket();
     }
 }

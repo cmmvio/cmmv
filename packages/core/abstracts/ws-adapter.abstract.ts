@@ -15,6 +15,8 @@ export abstract class AbstractWSAdapter {
         application: Application,
         options?: any,
     );
+
+    public abstract close(): void;
     public abstract bindClientConnect(server, callback: Function): any;
     public abstract bindCustomMessageHandler(server, callback: Function): any;
 }

@@ -73,6 +73,8 @@ export class Application {
         httpAfterRender: [],
     };
 
+    protected settings: IApplicationSettings;
+    protected compile: boolean;
     protected httpAdapter: AbstractHttpAdapter;
     protected httpBind: string;
     protected httpOptions: IHTTPSettings;
@@ -100,44 +102,50 @@ export class Application {
         this.logger.log('Initialize application');
         Config.loadConfig();
 
-        const env = Config.get<string>('env');
-        this.httpOptions = (settings && settings.httpOptions) || {};
+        this.settings = settings;
+        this.compile = compile;
+        this.preInitialize();
+
+        Application.instance = this;
+    }
+
+    protected preInitialize() {
+        this.httpOptions = (this.settings && this.settings.httpOptions) || {};
         this.httpAdapter =
-            settings && settings.httpAdapter
-                ? new settings.httpAdapter()
+            this.settings && this.settings.httpAdapter
+                ? new this.settings.httpAdapter()
                 : null;
 
-        if (this.httpAdapter && !compile) {
-            if (settings.wsAdapter)
-                this.wsAdapter = new settings.wsAdapter(this.httpAdapter);
+        if (this.httpAdapter && !this.compile) {
+            if (this.settings.wsAdapter)
+                this.wsAdapter = new this.settings.wsAdapter(this.httpAdapter);
 
             this.host = Config.get<string>('server.host') || '0.0.0.0';
             this.port = Config.get<number>('server.port') || 3000;
 
-            Application.contractsCls = settings.contracts || [];
-            this.transpilers = settings.transpilers || [];
-            this.modules = settings.modules || [];
-            this.resolvers = settings.resolvers || [];
+            Application.contractsCls = this.settings.contracts || [];
+            this.transpilers = this.settings.transpilers || [];
+            this.modules = this.settings.modules || [];
+            this.resolvers = this.settings.resolvers || [];
             this.contracts =
-                settings.contracts?.map(
+                this.settings.contracts?.map(
                     (contractClass) => new contractClass(),
                 ) || [];
-            this.initialize(settings, compile);
-        } else if (settings && settings.contracts?.length > 0) {
-            Application.contractsCls = settings.contracts || [];
-            this.transpilers = (settings && settings.transpilers) || [];
-            this.modules = (settings && settings.modules) || [];
-            this.resolvers = settings.resolvers || [];
+            this.initialize(this.settings, this.compile);
+        } else if (this.settings && this.settings.contracts?.length > 0) {
+            Application.contractsCls = this.settings.contracts || [];
+            this.transpilers =
+                (this.settings && this.settings.transpilers) || [];
+            this.modules = (this.settings && this.settings.modules) || [];
+            this.resolvers = this.settings.resolvers || [];
             this.contracts =
-                (settings &&
-                    settings.contracts?.map(
+                (this.settings &&
+                    this.settings.contracts?.map(
                         (contractClass) => new contractClass(),
                     )) ||
                 [];
-            this.initialize(settings, compile);
+            this.initialize(this.settings, this.compile);
         }
-
-        Application.instance = this;
     }
 
     protected async initialize(
@@ -145,6 +153,7 @@ export class Application {
         compile: boolean = false,
     ): Promise<void> {
         try {
+            this.settings = settings;
             await Hooks.execute(HooksType.onPreInitialize);
             const env = Config.get<string>('env', process.env.NODE_ENV);
             this.loadModules(this.modules);
@@ -261,6 +270,15 @@ export class Application {
         }
 
         if (compile) this.logger.log(`Compilation process complete!`);
+    }
+
+    public async restart() {
+        if (this.httpAdapter) this.httpAdapter.close();
+
+        if (this.wsAdapter) this.wsAdapter.close();
+
+        this.preInitialize();
+        return true;
     }
 
     protected async execProcess(settings: IApplicationSettings) {
@@ -591,7 +609,8 @@ export class Application {
         ]);
 
         for (const contract of contracts) {
-            const contractContent = await import(contract);
+            const contractPath = path.relative(__dirname, contract);
+            const contractContent = await import(contractPath);
 
             for (const key in contractContent) {
                 if (key.includes('Contract')) {

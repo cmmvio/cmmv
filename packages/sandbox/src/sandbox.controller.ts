@@ -110,4 +110,10 @@ export class SanboxController {
         await this.sandboxService.deleteContract(contractName);
         return 'ok';
     }
+
+    @Post('restart')
+    async handlerRestart() {
+        await this.sandboxService.restartApplication();
+        return 'ok';
+    }
 }

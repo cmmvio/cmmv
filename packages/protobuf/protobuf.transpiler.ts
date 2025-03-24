@@ -150,23 +150,25 @@ export class ProtobufTranspile extends AbstractTranspile implements ITranspile {
         contract.fields.forEach((field: any, index: number) => {
             if (field.link) {
                 field.link.forEach((link: any) => {
-                    const contractInstance = new link.contract();
-                    const controllerName = Reflect.getMetadata(
-                        CONTROLLER_NAME_METADATA,
-                        contractInstance.constructor,
-                    );
+                    if (link.contract) {
+                        const contractInstance = new link.contract();
+                        const controllerName = Reflect.getMetadata(
+                            CONTROLLER_NAME_METADATA,
+                            contractInstance.constructor,
+                        );
 
-                    const entityName = controllerName;
-                    const importPath = this.getImportPathRelative(
-                        link.contract,
-                        contract,
-                        'protos',
-                        `${entityName.toLowerCase()}.proto`,
-                    );
+                        const entityName = controllerName;
+                        const importPath = this.getImportPathRelative(
+                            link.contract,
+                            contract,
+                            'protos',
+                            `${entityName.toLowerCase()}.proto`,
+                        );
 
-                    if (importPath) {
-                        const linkedEntityImport = `import \"${importPath}\";`;
-                        lines.push(linkedEntityImport);
+                        if (importPath) {
+                            const linkedEntityImport = `import \"${importPath}\";`;
+                            lines.push(linkedEntityImport);
+                        }
                     }
                 });
             }
@@ -182,13 +184,15 @@ export class ProtobufTranspile extends AbstractTranspile implements ITranspile {
 
             if (field.link) {
                 field.link.forEach((link: any) => {
-                    const contractInstance = new link.contract();
-                    const controllerName = Reflect.getMetadata(
-                        CONTROLLER_NAME_METADATA,
-                        contractInstance.constructor,
-                    );
-                    const entityName = controllerName;
-                    fieldType = entityName;
+                    if (link.contract) {
+                        const contractInstance = new link.contract();
+                        const controllerName = Reflect.getMetadata(
+                            CONTROLLER_NAME_METADATA,
+                            contractInstance.constructor,
+                        );
+                        const entityName = controllerName;
+                        fieldType = entityName;
+                    }
                 });
             }
 
@@ -345,24 +349,26 @@ ${Object.entries(contract.messages[key].properties)
         contract.fields.forEach((field: any, index: number) => {
             if (field.link) {
                 field.link.forEach((link: any) => {
-                    const contractInstance = new link.contract();
-                    const controllerName = Reflect.getMetadata(
-                        CONTROLLER_NAME_METADATA,
-                        contractInstance.constructor,
-                    );
+                    if (link.contract) {
+                        const contractInstance = new link.contract();
+                        const controllerName = Reflect.getMetadata(
+                            CONTROLLER_NAME_METADATA,
+                            contractInstance.constructor,
+                        );
 
-                    const entityName = controllerName;
-                    const importPath = this.getImportPathRelative(
-                        link.contract,
-                        contract,
-                        'protos',
-                        `${entityName.toLowerCase()}.d`,
-                        '@protos',
-                    );
+                        const entityName = controllerName;
+                        const importPath = this.getImportPathRelative(
+                            link.contract,
+                            contract,
+                            'protos',
+                            `${entityName.toLowerCase()}.d`,
+                            '@protos',
+                        );
 
-                    if (importPath) {
-                        const linkedEntityImport = `import { ${entityName} } from \"${importPath}\";`;
-                        lines.push(linkedEntityImport);
+                        if (importPath) {
+                            const linkedEntityImport = `import { ${entityName} } from \"${importPath}\";`;
+                            lines.push(linkedEntityImport);
+                        }
                     }
                 });
             }
@@ -377,14 +383,15 @@ ${Object.entries(contract.messages[key].properties)
 
             if (field.link) {
                 field.link.forEach((link: any) => {
-                    const contractInstance = new link.contract();
-                    const controllerName = Reflect.getMetadata(
-                        CONTROLLER_NAME_METADATA,
-                        contractInstance.constructor,
-                    );
-                    const entityName = controllerName;
-
-                    tsType = entityName;
+                    if (link.contract) {
+                        const contractInstance = new link.contract();
+                        const controllerName = Reflect.getMetadata(
+                            CONTROLLER_NAME_METADATA,
+                            contractInstance.constructor,
+                        );
+                        const entityName = controllerName;
+                        tsType = entityName;
+                    }
                 });
             }
 
@@ -554,34 +561,36 @@ ${Object.entries(contract.messages[key].properties)
 
                 if (field.link) {
                     field.link.forEach((link: any) => {
-                        const contractInstance = new link.contract();
-                        const controllerName = Reflect.getMetadata(
-                            CONTROLLER_NAME_METADATA,
-                            contractInstance.constructor,
-                        );
+                        if (link.contract) {
+                            const contractInstance = new link.contract();
+                            const controllerName = Reflect.getMetadata(
+                                CONTROLLER_NAME_METADATA,
+                                contractInstance.constructor,
+                            );
 
-                        const entityName = controllerName;
-                        const protoOutputDir = this.getGeneratedPath(
-                            contract,
-                            'protos',
-                        );
-                        const importPath = path.relative(
-                            protoOutputDir,
-                            path.join(
-                                this.getGeneratedPath(
-                                    contractInstance,
-                                    'protos',
+                            const entityName = controllerName;
+                            const protoOutputDir = this.getGeneratedPath(
+                                contract,
+                                'protos',
+                            );
+                            const importPath = path.relative(
+                                protoOutputDir,
+                                path.join(
+                                    this.getGeneratedPath(
+                                        contractInstance,
+                                        'protos',
+                                    ),
+                                    `${entityName.toLowerCase()}.proto`,
                                 ),
-                                `${entityName.toLowerCase()}.proto`,
-                            ),
-                        );
+                            );
 
-                        if (importPath) {
-                            const linkedEntityImport = `import \"${importPath}\";`;
-                            this.addImport(linkedEntityImport);
+                            if (importPath) {
+                                const linkedEntityImport = `import \"${importPath}\";`;
+                                this.addImport(linkedEntityImport);
+                            }
+
+                            fieldType = entityName;
                         }
-
-                        fieldType = entityName;
                     });
                 }
 

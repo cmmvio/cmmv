@@ -205,24 +205,26 @@ export class ${resolverName}Generated {
         contract.fields?.forEach((field: any) => {
             if (field.link && field.link.length > 0) {
                 field.link.map((link) => {
-                    const contractInstance = new link.contract();
-                    const controllerName = Reflect.getMetadata(
-                        CONTROLLER_NAME_METADATA,
-                        contractInstance.constructor,
-                    );
-                    const entityName = controllerName;
-                    const entityFileName = `${entityName.toLowerCase()}.model`;
+                    if (link.contract) {
+                        const contractInstance = new link.contract();
+                        const controllerName = Reflect.getMetadata(
+                            CONTROLLER_NAME_METADATA,
+                            contractInstance.constructor,
+                        );
+                        const entityName = controllerName;
+                        const entityFileName = `${entityName.toLowerCase()}.model`;
 
-                    importEntitiesList.push({
-                        entityName: `${entityName}`,
-                        path: this.getImportPathRelative(
-                            contractInstance,
-                            contract,
-                            'models',
-                            entityFileName,
-                            '@models',
-                        ),
-                    });
+                        importEntitiesList.push({
+                            entityName: `${entityName}`,
+                            path: this.getImportPathRelative(
+                                contractInstance,
+                                contract,
+                                'models',
+                                entityFileName,
+                                '@models',
+                            ),
+                        });
+                    }
                 });
             }
         });

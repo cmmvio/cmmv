@@ -715,6 +715,44 @@ components:
         - iv
         - tag
         - ephemeral
+    I18nCurrencies:
+      properties:
+        id:
+          readOnly: true
+          type: string
+        name:
+          type: string
+          required: true
+        code:
+          type: string
+          required: true
+        prefix:
+          type: string
+          required: false
+        suffix:
+          type: string
+          required: false
+        includeThousandsSeparator:
+          type: boolean
+          required: true
+        thousandsSeparatorSymbol:
+          type: string
+          required: false
+        allowDecimal:
+          type: boolean
+          required: true
+        decimalSymbol:
+          type: string
+          required: false
+        decimalLimit:
+          type: number
+          required: true
+      required:
+        - name
+        - code
+        - includeThousandsSeparator
+        - allowDecimal
+        - decimalLimit
     I18nCountries:
       properties:
         id:
@@ -731,6 +769,21 @@ components:
           required: false
         numeric:
           type: string
+          required: false
+        ddi:
+          type: string
+          required: false
+        phoneMask:
+          type: string
+          required: false
+        dateMask:
+          type: string
+          required: false
+        timeMask:
+          type: string
+          required: false
+        currency:
+          type: object
           required: false
       required:
         - name
@@ -1121,6 +1174,22 @@ paths:
           required: true
           schema:
             type: string
+      security: []
+  /sandbox/restart:
+    post:
+      tags:
+        - Sanbox
+      summary: ''
+      externalDocs:
+        url: null
+      responses:
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
       security: []
   /groups:
     get:
@@ -1975,6 +2044,21 @@ paths:
                 numeric:
                   type: string
                   nullable: true
+                ddi:
+                  type: string
+                  nullable: true
+                phoneMask:
+                  type: string
+                  nullable: true
+                dateMask:
+                  type: string
+                  nullable: true
+                timeMask:
+                  type: string
+                  nullable: true
+                currency:
+                  type: string
+                  nullable: true
       responses:
         '401':
           description: >-
@@ -2102,6 +2186,21 @@ paths:
                 numeric:
                   type: string
                   nullable: true
+                ddi:
+                  type: string
+                  nullable: true
+                phoneMask:
+                  type: string
+                  nullable: true
+                dateMask:
+                  type: string
+                  nullable: true
+                timeMask:
+                  type: string
+                  nullable: true
+                currency:
+                  type: string
+                  nullable: true
       responses:
         '200':
           description: I18nCountries update response schema
@@ -2202,6 +2301,395 @@ paths:
       responses:
         '200':
           description: I18nCountries response schema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+  /i18n/currencies:
+    get:
+      tags:
+        - I18nCurrencies
+      summary: Returns I18nCurrencies records by filter
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: I18nCurrencies response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/I18nCurrencies'
+                      count:
+                        type: number
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: number
+                          offset:
+                            type: number
+                          sortBy:
+                            type: string
+                            default: id
+                          sort:
+                            type: string
+                            default: asc
+                          search:
+                            type: string
+                          searchField:
+                            type: string
+                          filters:
+                            type: object
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: *ref_1
+      security:
+        - BearerAuth: []
+    post:
+      tags:
+        - I18nCurrencies
+      summary: Insert new I18nCurrencies
+      externalDocs:
+        url: null
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: false
+                code:
+                  type: string
+                  nullable: false
+                  uniqueItems: true
+                prefix:
+                  type: string
+                  nullable: true
+                suffix:
+                  type: string
+                  nullable: true
+                includeThousandsSeparator:
+                  type: boolean
+                  nullable: false
+                thousandsSeparatorSymbol:
+                  type: string
+                  nullable: true
+                allowDecimal:
+                  type: boolean
+                  nullable: false
+                decimalSymbol:
+                  type: string
+                  nullable: true
+                decimalLimit:
+                  type: int32
+                  nullable: false
+      responses:
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security:
+        - BearerAuth: []
+  /i18n/currencies/{id}:
+    get:
+      tags:
+        - I18nCurrencies
+      summary: Returns I18nCurrencies record by ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: I18nCurrencies response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/I18nCurrencies'
+                      count:
+                        type: number
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: number
+                          offset:
+                            type: number
+                          sortBy:
+                            type: string
+                            default: id
+                          sort:
+                            type: string
+                            default: asc
+                          search:
+                            type: string
+                          searchField:
+                            type: string
+                          filters:
+                            type: object
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+    put:
+      tags:
+        - I18nCurrencies
+      summary: Update I18nCurrencies by ID
+      externalDocs:
+        url: null
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: false
+                code:
+                  type: string
+                  nullable: false
+                  uniqueItems: true
+                prefix:
+                  type: string
+                  nullable: true
+                suffix:
+                  type: string
+                  nullable: true
+                includeThousandsSeparator:
+                  type: boolean
+                  nullable: false
+                thousandsSeparatorSymbol:
+                  type: string
+                  nullable: true
+                allowDecimal:
+                  type: boolean
+                  nullable: false
+                decimalSymbol:
+                  type: string
+                  nullable: true
+                decimalLimit:
+                  type: int32
+                  nullable: false
+      responses:
+        '200':
+          description: I18nCurrencies update response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected:
+                    type: number
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+    delete:
+      tags:
+        - I18nCurrencies
+      summary: Delete I18nCurrencies by ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: I18nCurrencies delete response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected:
+                    type: number
+        '401':
+          description: >-
+            Unauthorized: The client must authenticate itself to get the
+            requested response.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Unauthorized
+        '403':
+          description: 'Forbidden: The client does not have access rights to the content.'
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Forbidden
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+  /i18n/currencies/{id}/raw:
+    get:
+      tags:
+        - I18nCurrencies
+      summary: Return I18nCurrencies record by raw ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: I18nCurrencies response schema
           content:
             application/json:
               schema:

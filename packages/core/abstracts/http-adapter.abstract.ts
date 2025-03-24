@@ -123,4 +123,8 @@ export abstract class AbstractHttpAdapter<
 
         return false;
     }
+
+    public close() {
+        this.instance.close();
+    }
 }

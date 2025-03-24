@@ -80,7 +80,8 @@ ${includeId}${contract.fields
                 let optional = field.nullable ? '?' : '';
 
                 if (field.link && field.link.length > 0) {
-                    return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};`;
+                    return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};
+    ${field.propertyKey}Id${optional}: string;`;
                 } else {
                     const fieldType = field.objectType
                         ? field.objectType
@@ -264,24 +265,26 @@ import {
                 //validationImports.add('ValidateNested');
 
                 field.link.map((link) => {
-                    const contractInstance = new link.contract();
-                    const controllerName = Reflect.getMetadata(
-                        CONTROLLER_NAME_METADATA,
-                        contractInstance.constructor,
-                    );
-                    const entityName = controllerName;
-                    const entityFileName = `${entityName.toLowerCase()}.model`;
+                    if (link.contract) {
+                        const contractInstance = new link.contract();
+                        const controllerName = Reflect.getMetadata(
+                            CONTROLLER_NAME_METADATA,
+                            contractInstance.constructor,
+                        );
+                        const entityName = controllerName;
+                        const entityFileName = `${entityName.toLowerCase()}.model`;
 
-                    importEntitiesList.push({
-                        entityName: `${entityName}, ${entityName}FastSchemaStructure`,
-                        path: this.getImportPathRelative(
-                            contractInstance,
-                            contract,
-                            'models',
-                            entityFileName,
-                            '@models',
-                        ),
-                    });
+                        importEntitiesList.push({
+                            entityName: `${entityName}, ${entityName}FastSchemaStructure`,
+                            path: this.getImportPathRelative(
+                                contractInstance,
+                                contract,
+                                'models',
+                                entityFileName,
+                                '@models',
+                            ),
+                        });
+                    }
                 });
             }
         });
@@ -310,165 +313,175 @@ import {
     }
 
     private generateClassField(field: any): string {
-        const hasOpenAPI = Module.hasModule('openapi');
-        const hasGraphQL = Module.hasModule('graphql');
-        const readOnlySting = field.readOnly ? 'readonly ' : '';
-        const decorators: string[] = [];
+        try {
+            if (field) {
+                const hasOpenAPI = Module.hasModule('openapi');
+                const hasGraphQL = Module.hasModule('graphql');
+                const readOnlySting = field.readOnly ? 'readonly ' : '';
+                const decorators: string[] = [];
 
-        if (field.exclude) {
-            decorators.push(
-                `    @Exclude(${field.toClassOnly ? `{ toClassOnly: true }` : ''}${field.toPlainOnly ? `{ toPlainOnly: true }` : ''})`,
-            );
-        } else {
-            decorators.push(`    @Expose()`);
-        }
-
-        if (field.nullable === false) decorators.push(`    @IsNotEmpty()`);
-
-        if (field.protoType === 'date')
-            decorators.push(`    @Type(() => Date)`);
-
-        if (field.customDecorator) {
-            for (let decoratorName in field.customDecorator) {
-                const options = field.customDecorator[decoratorName].options
-                    ? JSON.stringify(
-                          field.customDecorator[decoratorName].options,
-                      )
-                    : '';
-
-                decorators.push(`    @${decoratorName}(${options})`);
-            }
-        }
-
-        if (field.validations) {
-            field.validations?.forEach((validation: any) => {
-                const validationName = Array.isArray(validation.type)
-                    ? validation.type[0]
-                    : validation.type;
-
-                const validationParams = Array.isArray(validation.type)
-                    ? validation.type
-                          .slice(1)
-                          .map((param) => JSON.stringify(param))
-                          .join(', ')
-                    : validation.value !== undefined
-                      ? validation.value
-                      : '';
-
-                const options = [];
-
-                if (validation.message)
-                    options.push(`message: "${validation.message}"`);
-
-                if (validation.context) {
-                    const contextString = JSON.stringify(
-                        validation.context,
-                    ).replace(/"([^"]+)":/g, '$1:');
-                    options.push(`context: ${contextString}`);
+                if (field.exclude) {
+                    decorators.push(
+                        `    @Exclude(${field.toClassOnly ? `{ toClassOnly: true }` : ''}${field.toPlainOnly ? `{ toPlainOnly: true }` : ''})`,
+                    );
+                } else {
+                    decorators.push(`    @Expose()`);
                 }
 
-                let optionsString =
-                    options.length > 0 ? `{ ${options.join(', ')} }` : '';
+                if (field.nullable === false)
+                    decorators.push(`    @IsNotEmpty()`);
 
-                if (validationParams && optionsString)
-                    optionsString = ', ' + optionsString;
+                if (field.protoType === 'date')
+                    decorators.push(`    @Type(() => Date)`);
 
-                decorators.push(
-                    `    @${validationName}(${validationParams}${
-                        optionsString ? optionsString : ''
-                    })`,
-                );
-            });
-        }
+                if (field.customDecorator) {
+                    for (let decoratorName in field.customDecorator) {
+                        const options = field.customDecorator[decoratorName]
+                            .options
+                            ? JSON.stringify(
+                                  field.customDecorator[decoratorName].options,
+                              )
+                            : '';
 
-        let defaultValueString = ';';
-        let optional = field.nullable ? '?' : '';
+                        decorators.push(`    @${decoratorName}(${options})`);
+                    }
+                }
 
-        if (field.defaultValue !== undefined) {
-            const defaultValue =
-                typeof field.defaultValue === 'string'
-                    ? `"${field.defaultValue}"`
-                    : field.defaultValue;
+                if (field.validations) {
+                    field.validations?.forEach((validation: any) => {
+                        const validationName = Array.isArray(validation.type)
+                            ? validation.type[0]
+                            : validation.type;
 
-            defaultValueString = field.objectType
-                ? ` = ${field.defaultValue};`
-                : ` = ${defaultValue};`;
-        }
+                        const validationParams = Array.isArray(validation.type)
+                            ? validation.type
+                                  .slice(1)
+                                  .map((param) => JSON.stringify(param))
+                                  .join(', ')
+                            : validation.value !== undefined
+                              ? validation.value
+                              : '';
 
-        if (hasOpenAPI) {
-            const fieldType = field.modelName
-                ? field.modelName
-                : this.mapToTsTypeUpper(field.protoType);
+                        const options = [];
 
-            let apiType =
-                field.protoRepeated || field.array
-                    ? `[${fieldType}]`
-                    : `${fieldType}`;
+                        if (validation.message)
+                            options.push(`message: "${validation.message}"`);
 
-            if (field.type === 'simpleArray')
-                apiType = `[${this.mapToTsTypeUpper(field.arrayType)}]`;
-            else if (apiType === 'Any') apiType = 'object';
+                        if (validation.context) {
+                            const contextString = JSON.stringify(
+                                validation.context,
+                            ).replace(/"([^"]+)":/g, '$1:');
+                            options.push(`context: ${contextString}`);
+                        }
 
-            //OpenAPI
-            if (!field.exclude) {
-                if (optional) {
-                    decorators.push(`    @ApiPropertyOptional({
+                        let optionsString =
+                            options.length > 0
+                                ? `{ ${options.join(', ')} }`
+                                : '';
+
+                        if (validationParams && optionsString)
+                            optionsString = ', ' + optionsString;
+
+                        decorators.push(
+                            `    @${validationName}(${validationParams}${
+                                optionsString ? optionsString : ''
+                            })`,
+                        );
+                    });
+                }
+
+                let defaultValueString = ';';
+                let optional = field.nullable ? '?' : '';
+
+                if (field.defaultValue !== undefined) {
+                    const defaultValue =
+                        typeof field.defaultValue === 'string'
+                            ? `"${field.defaultValue}"`
+                            : field.defaultValue;
+
+                    defaultValueString = field.objectType
+                        ? ` = ${field.defaultValue};`
+                        : ` = ${defaultValue};`;
+                }
+
+                if (hasOpenAPI) {
+                    const fieldType = field.modelName
+                        ? field.modelName
+                        : this.mapToTsTypeUpper(field.protoType);
+
+                    let apiType =
+                        field.protoRepeated || field.array
+                            ? `[${fieldType}]`
+                            : `${fieldType}`;
+
+                    if (field.type === 'simpleArray')
+                        apiType = `[${this.mapToTsTypeUpper(field.arrayType)}]`;
+                    else if (apiType === 'Any') apiType = 'object';
+
+                    //OpenAPI
+                    if (!field.exclude) {
+                        if (optional) {
+                            decorators.push(`    @ApiPropertyOptional({
         type: ${apiType},
         readOnly: ${field?.readOnly ?? undefined},
         default: ${field.defaultValue ?? undefined}
     })`);
-                } else {
-                    decorators.push(`    @ApiProperty({
+                        } else {
+                            decorators.push(`    @ApiProperty({
         type: ${apiType},
         readOnly: ${field?.readOnly ?? undefined},
         required: true,
         default: ${field.defaultValue ?? undefined}
     })`);
+                        }
+                    } else {
+                        decorators.push(`    @ApiHideProperty()`);
+                    }
+
+                    //GraphQL
+                    if (!field.exclude && hasGraphQL) {
+                        decorators.push(
+                            `    @Field(() => ${apiType}, { nullable: ${field.nullable === true ? 'true' : 'false'} })`,
+                        );
+                    }
+
+                    //Transforms
+                    if (field.transform) {
+                        const cleanedTransform = field.transform
+                            .toString()
+                            .replace(/_([a-zA-Z]+)/g, ' $1');
+
+                        decorators.push(
+                            `    @Transform(${cleanedTransform}, { toClassOnly: true })`,
+                        );
+                    }
+
+                    if (field.toPlain) {
+                        const cleanedToPlain = field.toPlain
+                            .toString()
+                            .replace(/_([a-zA-Z]+)/g, ' $1');
+
+                        decorators.push(
+                            `    @Transform(${cleanedToPlain}, { toPlainOnly: true })`,
+                        );
+                    }
                 }
-            } else {
-                decorators.push(`    @ApiHideProperty()`);
+
+                if (field.link && field.link.length > 0) {
+                    decorators.push(
+                        `    @Type(() => ${field.entityType.replace('Entity', '')})`,
+                    );
+                    return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${field.entityType.replace('Entity', '')}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null;`;
+                } else {
+                    const fieldType = field.objectType
+                        ? field.objectType
+                        : this.mapToTsType(field.protoType);
+
+                    return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${fieldType}${defaultValueString}`;
+                }
             }
-
-            //GraphQL
-            if (!field.exclude && hasGraphQL) {
-                decorators.push(
-                    `    @Field(() => ${apiType}, { nullable: ${field.nullable === true ? 'true' : 'false'} })`,
-                );
-            }
-
-            //Transforms
-            if (field.transform) {
-                const cleanedTransform = field.transform
-                    .toString()
-                    .replace(/_([a-zA-Z]+)/g, ' $1');
-
-                decorators.push(
-                    `    @Transform(${cleanedTransform}, { toClassOnly: true })`,
-                );
-            }
-
-            if (field.toPlain) {
-                const cleanedToPlain = field.toPlain
-                    .toString()
-                    .replace(/_([a-zA-Z]+)/g, ' $1');
-
-                decorators.push(
-                    `    @Transform(${cleanedToPlain}, { toPlainOnly: true })`,
-                );
-            }
-        }
-
-        if (field.link && field.link.length > 0) {
-            decorators.push(
-                `    @Type(() => ${field.entityType.replace('Entity', '')})`,
-            );
-            return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${field.entityType.replace('Entity', '')}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null;`;
-        } else {
-            const fieldType = field.objectType
-                ? field.objectType
-                : this.mapToTsType(field.protoType);
-
-            return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${fieldType}${defaultValueString}`;
+        } catch (error) {
+            console.log(error);
         }
     }
 

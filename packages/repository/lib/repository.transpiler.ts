@@ -64,7 +64,7 @@ export class ${entityName}Entity implements I${entityName} {
     ${Config.get('repository.type') === 'mongodb' ? '@ObjectIdColumn()' : '@PrimaryGeneratedColumn("uuid")'}
     ${Config.get('repository.type') === 'mongodb' ? '_id: ObjectId' : 'id: string'};
 
-${contract.fields.map((field: any) => this.generateField(field)).join('\n\n')}${extraFields}
+${contract.fields.map((field: any) => this.generateField(field, contract)).join('\n\n')}${extraFields}
 }`;
 
         const outputDir = isModuleContract
@@ -235,8 +235,9 @@ ${contract.services
     /**
      * Generate the field
      * @param field - The field to generate
+     * @returns The field
      */
-    private generateField(field: any): string {
+    private generateField(field: any, contract: IContract): string {
         let tsType = this.mapToTsType(field.protoType, field);
         const columnOptions = this.generateColumnOptions(field);
         let decorators = [
@@ -245,60 +246,78 @@ ${contract.services
     })`,
         ];
         let optional = field.nullable ? '?' : '';
+        let linkedField = '';
 
         if (field.link) {
             decorators = [];
 
             field.link.map((link) => {
-                const contractInstance = new link.contract();
-                const controllerName = Reflect.getMetadata(
-                    CONTROLLER_NAME_METADATA,
-                    contractInstance.constructor,
-                );
-                const entityName = controllerName;
-                const isMongoDB = Config.get('repository.type') === 'mongodb';
-                const linkType = isMongoDB ? 'string' : 'varchar';
-                const linkField =
-                    link.field === '_id' && !isMongoDB ? 'id' : link.field;
+                if (link.contract) {
+                    const contractInstance = new link.contract();
+                    const controllerName = Reflect.getMetadata(
+                        CONTROLLER_NAME_METADATA,
+                        contractInstance.constructor,
+                    );
+                    const entityName = controllerName;
+                    const isMongoDB =
+                        Config.get('repository.type') === 'mongodb';
+                    const linkType = isMongoDB ? 'string' : 'varchar';
+                    const linkField =
+                        link.field === '_id' && !isMongoDB ? 'id' : link.field;
 
-                if (link.createRelationship !== false && !link.array) {
-                    decorators.push(
-                        `@ManyToOne(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${linkField}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
+                    if (link.createRelationship !== false && !link.array) {
+                        decorators.push(
+                            `@ManyToOne(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${linkField}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
     @Column({
-        type: "${field.protoRepeated ? 'simple-array' : linkType}",
+        type: "varchar",
         nullable: true
     })`,
-                    );
-                }
-                if (link.createRelationship !== false && link.array) {
-                    decorators.push(
-                        `@OneToMany(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${linkField}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
+                        );
+
+                        tsType = `${entityName}Entity | string | null`;
+
+                        const entityContract = contract.controllerName;
+                        linkedField = `\n\n    @RelationId((${entityContract.toLocaleLowerCase()}: ${entityContract}Entity) => ${entityContract.toLocaleLowerCase()}.${field.propertyKey})\n    ${field.propertyKey}Id: string;`;
+                    } else if (
+                        link.createRelationship !== false &&
+                        link.array
+                    ) {
+                        decorators.push(
+                            `@OneToMany(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${linkField}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
     @Column({
-        type: "${linkType}",
+        type: "varchar",
         nullable: true
     })`,
-                    );
-                } else {
-                    decorators.push(
-                        `@Column({
-        type: "${field.protoRepeated ? 'simple-array' : linkType}",
-        nullable: true
-    })`,
-                    );
+                        );
+
+                        tsType = `${entityName}Entity[] | string[] | null`;
+                    } else {
+                        decorators.push(
+                            `@Column({
+            type: "${field.protoRepeated ? 'simple-array' : linkType}",
+            nullable: true
+        })`,
+                        );
+
+                        tsType = `${entityName}Entity[] | string[] | null`;
+                    }
                 }
             });
 
-            tsType =
-                `${field.entityType}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null` ||
-                'object';
+            if (!field.link) {
+                tsType =
+                    `${field.entityType}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null` ||
+                    'object';
+            }
         }
 
-        return `    ${decorators.join(' ')}\n    ${field.propertyKey}${optional}: ${tsType};`;
+        return `    ${decorators.join(' ')}\n    ${field.propertyKey}${optional}: ${tsType};${linkedField}`;
     }
 
     /**
      * Generate the column options
      * @param field - The field to generate the column options for
+     * @returns The column options
      */
     private generateColumnOptions(field: any): string {
         const isMongoDB = Config.get('repository.type') === 'mongodb';
@@ -326,16 +345,32 @@ ${contract.services
      * Map the proto type to the ts type
      * @param protoType - The proto type
      * @param field - The field to map the proto type to
+     * @returns The ts type
      */
     private mapToTsType(protoType: string, field: any): string {
         const typeMapping: { [key: string]: string } = {
             string: 'string',
             bool: 'boolean',
+            boolean: 'boolean',
             int32: 'number',
+            int64: 'number',
+            uint32: 'number',
+            uint64: 'number',
+            sint32: 'number',
+            sint64: 'number',
+            fixed32: 'number',
+            fixed64: 'number',
             int: 'number',
             float: 'number',
             double: 'number',
             any: 'any',
+            text: 'string',
+            timestamp: 'string',
+            date: 'Date',
+            time: 'Date',
+            bytes: 'string',
+            json: 'object | string',
+            jsonb: 'object | string',
         };
 
         return (
@@ -348,6 +383,7 @@ ${contract.services
      * Map the proto type to the typeorm type
      * @param type - The type
      * @param field - The field to map the proto type to
+     * @returns The typeorm type
      */
     private mapToTypeORMType(type: string, field: any): string {
         const typeMapping: { [key: string]: string } = {
@@ -389,6 +425,7 @@ ${contract.services
     /**
      * Generate the typeorm imports
      * @param contract - The contract to generate the typeorm imports for
+     * @returns The typeorm imports
      */
     private generateTypeORMImports(contract: IContract) {
         let extraImport = [];
@@ -400,7 +437,7 @@ ${contract.services
 
         contract.fields.map((field) => {
             if (field.link && field.link.length > 0)
-                extraImport.push('ManyToOne', 'OneToMany');
+                extraImport.push('ManyToOne', 'OneToMany', 'RelationId');
         });
 
         extraImport = [...new Set(extraImport)];
@@ -412,6 +449,7 @@ ${contract.services
     /**
      * Generate the extra fields
      * @param contract - The contract to generate the extra fields for
+     * @returns The extra fields
      */
     private generateExtraFields(contract: IContract) {
         let extraFields = '';
@@ -478,24 +516,26 @@ ${contract.services
         contract.fields?.forEach((field: any) => {
             if (field.link && field.link.length > 0) {
                 field.link.map((link) => {
-                    const contractInstance = new link.contract();
-                    const controllerName = Reflect.getMetadata(
-                        CONTROLLER_NAME_METADATA,
-                        contractInstance.constructor,
-                    );
-                    const entityName = controllerName;
-                    const entityFileName = `${entityName.toLowerCase()}.entity`;
+                    if (link.contract) {
+                        const contractInstance = new link.contract();
+                        const controllerName = Reflect.getMetadata(
+                            CONTROLLER_NAME_METADATA,
+                            contractInstance.constructor,
+                        );
+                        const entityName = controllerName;
+                        const entityFileName = `${entityName.toLowerCase()}.entity`;
 
-                    importEntitiesList.push({
-                        entityName: `${entityName}Entity`,
-                        path: this.getImportPathRelative(
-                            contractInstance,
-                            contract,
-                            'entities',
-                            entityFileName,
-                            '@entities',
-                        ),
-                    });
+                        importEntitiesList.push({
+                            entityName: `${entityName}Entity`,
+                            path: this.getImportPathRelative(
+                                contractInstance,
+                                contract,
+                                'entities',
+                                entityFileName,
+                                '@entities',
+                            ),
+                        });
+                    }
                 });
             }
         });
@@ -528,6 +568,7 @@ ${contract.services
      * Generate the entities import
      * @param contract - The contract to generate the entities import for
      * @param extraImports - The extra imports to generate
+     * @returns The entities import
      */
     private generateEntitiesImport(
         contract: IContract,

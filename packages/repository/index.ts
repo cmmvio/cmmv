@@ -31,6 +31,7 @@ export {
     OneToOne,
     JoinColumn,
     JoinTable,
+    RelationId,
 
     // Control of timestamps
     CreateDateColumn,

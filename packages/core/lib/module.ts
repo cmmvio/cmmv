@@ -50,9 +50,13 @@ export class Module implements IModule {
         this.models = options.models || [];
         this.resolvers = options.resolvers || [];
         this.contractsCls = options.contracts || [];
-        this.contracts =
-            options.contracts?.map((contractClass) => new contractClass()) ||
-            [];
+
+        try {
+            this.contracts =
+                options.contracts?.map(
+                    (contractClass) => new contractClass(),
+                ) || [];
+        } catch {}
 
         Module.modules.set(name, this);
 

@@ -9,7 +9,6 @@ import {
 } from '../interfaces/contract.interface';
 
 import { Logger } from './logger';
-import { Application } from '..';
 
 export class Compile {
     private static instance: Compile;
@@ -185,7 +184,7 @@ export class Compile {
             decorator += '    ],\n';
         }
 
-        if (schema.cache) {
+        if (schema.cache && schema.cache.key) {
             decorator += '    cache: {\n';
 
             if (

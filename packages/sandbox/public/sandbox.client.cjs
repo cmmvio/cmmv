@@ -228,7 +228,9 @@ createApp({
             canScrollRight: false,
             pendingDataTableRefresh: false,
             contractTab: 'contract',
-            functionalTabDropdownOpen: false
+            functionalTabDropdownOpen: false,
+            linkedEntities: {}, // Armazena os registros relacionados por nome de entidade
+            loadingLinks: {}, // Controla estados de carregamento por campo
         }
     },
 
@@ -328,7 +330,7 @@ createApp({
         this.graphql.initQueryEditor();
 
         this.dataTable = useDataTable();
-        this.dataTable.init(this.selectedContract);
+        this.dataTable.init(this.selectedContract, this.schema);
 
         this.logViewer = useLogViewer();
         this.formBuilder = useFormBuilder();
@@ -344,6 +346,9 @@ createApp({
 
         // Add click outside listener for dropdown
         document.addEventListener('click', this.handleClickOutside);
+
+        // Adicione esta linha antes do final do método mounted
+        this.initLinkedEntities();
     },
 
     beforeUnmount() {
@@ -391,6 +396,11 @@ createApp({
                     setTimeout(() => {
                         this.updateFullRequestUrl();
                     }, 50);
+
+                    // Adicione esta linha para inicializar entidades vinculadas
+                    this.$nextTick(() => {
+                        this.initLinkedEntities();
+                    });
                 }
             }
         },
@@ -423,7 +433,6 @@ createApp({
             });
 
             this.socket.addEventListener("open", () => {
-                console.log("WebSocket Initialization");
                 this.loading = false;
 
                 if(reload)
@@ -1670,7 +1679,8 @@ createApp({
                             const paramInfo = {
                                 name: propName,
                                 type: prop.type || 'string',
-                                required: !!prop.required
+                                required: !!prop.required,
+                                link: prop.link || false
                             };
 
                             switch (paramType.toLowerCase()) {
@@ -1703,7 +1713,8 @@ createApp({
                     .map(field => ({
                         name: field.propertyKey,
                         type: field.protoType || 'string',
-                        required: !field.nullable && !field.defaultValue
+                        required: !field.nullable && !field.defaultValue,
+                        link: field.link || false
                     }));
             }
 
@@ -1879,6 +1890,11 @@ createApp({
                     this.syncInProgress = false;
                     this.syncModalOpen = false;
 
+                    await fetch('/sandbox/restart', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
                     setTimeout(() => {
                         this.ignoreContractChanges = false;
                     }, 500);
@@ -2008,13 +2024,11 @@ createApp({
                     const newHash = await this.generateContractHash(schema[key]);
 
                     if (storedHashes[key] && storedHashes[key] !== newHash) {
-                        console.log(`Contrato alterado: ${key}`);
                         schema[key].sync = false;
                         updatedContracts.push(key);
                         storedHashes[key] = newHash;
                     }
                     else if (!storedHashes[key]) {
-                        console.log(`Novo contrato: ${key}`);
                         schema[key].sync = false;
                         updatedContracts.push(key);
                         storedHashes[key] = newHash;
@@ -2046,12 +2060,10 @@ createApp({
                     hashes[key] = newHash;
                     this.saveContractHashes(hashes);
                     this.schemaToLocalStorege();
-
-                    console.log(`Contrato ${key} marcado como não sincronizado`);
                     return true;
                 }
             } catch (e) {
-                console.error(`Erro ao atualizar status de sincronização do contrato ${key}:`, e);
+                console.error(e);
             }
 
             return false;
@@ -2072,12 +2084,10 @@ createApp({
                         currentHashes[key] = currentHash;
 
                         if (contractHashes[key] && contractHashes[key] !== currentHash) {
-                            console.log(`Contrato ${key} foi modificado`);
                             contract.sync = false;
                             hasChanges = true;
                         }
                         else if (!contractHashes[key]) {
-                            console.log(`Novo contrato detectado: ${key}`);
                             contract.sync = false;
                             hasChanges = true;
                         }
@@ -2344,6 +2354,161 @@ createApp({
 
             // Salva a informação que a tabela de dados precisa ser recarregada após autenticação
             this.pendingDataTableRefresh = true;
+        },
+
+        // Verifica se um campo é um link para outra entidade
+        isLinkField(param) {
+            return (
+                param.type === 'string' ||
+                param.protoType === 'string'
+            ) && (
+                param.name?.endsWith('Id') ||
+                param.name?.endsWith('_id') ||
+                param.propertyKey?.endsWith('Id') ||
+                param.relation ||
+                param.link
+            );
+        },
+
+        // Extrai o nome da entidade a partir do campo
+        getEntityNameFromField(param) {
+            // Se tiver informações específicas de link, usar elas
+            if (param.link && Array.isArray(param.link) && param.link.length > 0) {
+                // Retornar o primeiro relacionamento (poderia ser melhorado para suportar múltiplos)
+                const linkInfo = param.link[0];
+                return linkInfo.entityName || linkInfo.contract || '';
+            }
+
+            // Se tiver configuração de relação direta
+            if (param.relation) return param.relation;
+
+            // Extrair do nome do campo
+            let name = param.name || param.propertyKey || '';
+
+            if (name.endsWith('Id')) {
+                return name.substring(0, name.length - 2);
+            }
+
+            if (name.endsWith('_id')) {
+                return name.substring(0, name.length - 3);
+            }
+
+            // Última opção: usar o próprio nome
+            return name;
+        },
+
+        getContractNameFromEntityName(param) {
+            if (param.link && Array.isArray(param.link) && param.link.length > 0) {
+                const linkInfo = param.link[0];
+                return linkInfo?.contract || '';
+            }
+
+            return null;
+        },
+
+        // Busca registros da entidade relacionada
+        async fetchLinkedEntityRecords(entityName, contractName) {
+            if (this.linkedEntities[entityName]) {
+                return this.linkedEntities[entityName];
+            }
+
+            this.loadingLinks[entityName] = true;
+
+            try {
+                // Encontrar o contrato correto no schema
+                let targetContract = null;
+                let apiPath = '';
+
+                // Procurar o contrato pelo nome da entidade (normalmente o nome do contrato sem "Contract")
+                for (const key in this.schema) {
+                    const contract = this.schema[key];
+
+                    if(contractName){
+                        if (
+                            contract.controllerName?.toLowerCase() === contractName.toLowerCase() ||
+                            contract.contractName?.toLowerCase() === `${contractName}Contract`.toLowerCase() ||
+                            contract.contractName?.toLowerCase() === contractName.toLowerCase()
+                        ) {
+                            targetContract = contract;
+                            break;
+                        }
+                    }
+                }
+
+                if (targetContract) {
+                    apiPath = targetContract.controllerCustomPath ||
+                             (targetContract.controllerName ? targetContract.controllerName.toLowerCase() : '');
+                } else {
+                    console.warn(`Contract for entity "${entityName}" not found, using entity name as fallback`);
+                    apiPath = entityName.toLowerCase();
+                }
+
+                apiPath = apiPath.replace(/^\/+/, '').replace(/\/+/g, '/');
+
+                const baseUrl = window.location.origin;
+                const apiUrl = `${baseUrl}/${apiPath}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(this.authData?.token ? {'Authorization': `Bearer ${this.authData.token}`} : {})
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch linked entity ${entityName}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Tentar encontrar os registros na resposta, tratando diversos formatos possíveis
+                const records = data.result?.data ||
+                              data.result?.items ||
+                              data.result ||
+                              data.records ||
+                              data.items ||
+                              data;
+
+                this.linkedEntities[entityName] = Array.isArray(records) ? records : [];
+                return this.linkedEntities[entityName];
+            } catch (error) {
+                console.error(`Error loading linked entity ${entityName}:`, error);
+                this.linkedEntities[entityName] = [];
+                return [];
+            } finally {
+                this.loadingLinks[entityName] = false;
+            }
+        },
+
+        getDisplayField(record) {
+            if (!record) return '';
+
+            const nameField = Object.keys(record).find(key =>
+                ['name', 'title', 'label', 'description', 'nome', 'titulo'].includes(key.toLowerCase())
+            );
+
+            if (nameField) return record[nameField];
+             // Caso não encontre, usa o primeiro campo que não seja ID
+            const nonIdFields = Object.keys(record).filter(key =>
+                !['id', '_id', 'uuid', 'createdAt', 'updatedAt', 'deletedAt'].includes(key)
+            );
+
+            if (nonIdFields.length > 0) return record[nonIdFields[0]];
+
+            return record.id || record._id || JSON.stringify(record);
+        },
+
+        initLinkedEntities() {
+            if (!this.bodyParams) return;
+
+            this.bodyParams.forEach(param => {
+                if (this.isLinkField(param)) {
+                    const entityName = this.getEntityNameFromField(param);
+                    const contractName = this.getContractNameFromEntityName(param);
+                    this.fetchLinkedEntityRecords(entityName, contractName);
+                }
+            });
         },
     }
 }).mount('#app')
