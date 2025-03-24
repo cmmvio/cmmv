@@ -26,7 +26,7 @@ export class ConfigController {
 
     @Get('modules')
     @Auth({ rootOnly: true })
-    async getModuleConfigs() {
+    public async getModuleConfigs() {
         try {
             const moduleConfigs = await this.configService.getModuleConfigs();
             return {
