@@ -17,7 +17,7 @@ import { IContract } from '@cmmv/core';
 import { SandboxService } from './sandbox.service';
 
 @Controller('sandbox')
-export class SanboxController {
+export class SandboxController {
     constructor(private readonly sandboxService: SandboxService) {}
 
     @Get({ exclude: true })

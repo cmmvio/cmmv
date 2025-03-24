@@ -1,6 +1,6 @@
 import { Module } from '@cmmv/core';
 
-import { SanboxController } from './sandbox.controller';
+import { SandboxController } from './sandbox.controller';
 import { SandboxService } from './sandbox.service';
 
 import { LogsController } from './logs.controller';
@@ -15,9 +15,9 @@ import { ModulesService } from './modules.service';
 import { ConfigController } from './config.controller';
 import { ConfigService } from './config.service';
 
-export const SandoxModule = new Module('sandbox', {
+export const SandboxModule = new Module('sandbox', {
     controllers: [
-        SanboxController,
+        SandboxController,
         LogsController,
         BackupController,
         ModulesController,
