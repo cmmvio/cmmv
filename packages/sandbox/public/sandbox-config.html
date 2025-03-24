@@ -1,0 +1,391 @@
+<div v-show="!configViewer.isFormView" class="flex flex-col h-full overflow-hidden relative">
+    <div class="flex border-b border-neutral-800 items-center">
+        <div class="text-lg font-medium text-neutral-300 flex items-center py-2 px-4 w-full">
+            <h2 class="mr-2">Configuration File</h2>
+
+            <div class="ml-auto flex items-center space-x-2">
+                <button
+                    @click="configViewer.saveConfigFile()"
+                    class="h-7 p-1.5 px-3 text-xs bg-blue-600 hover:bg-blue-700 rounded-md text-white flex items-center"
+                    :disabled="!configViewer.configFileChanged"
+                >
+                    <svg v-if="configViewer.saving" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ configViewer.saving ? 'Saving...' : 'Save Configuration File' }}</span>
+                </button>
+
+                <button
+                    @click="configViewer.toggleView()"
+                    class="h-7 p-1.5 px-3 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md text-neutral-300 flex items-center"
+                >
+                    <span>Switch to Form View</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-hidden">
+        <div id="configFileEditor" class="h-full w-full"></div>
+    </div>
+</div>
+
+<div class="flex flex-col h-full overflow-hidden relative" v-show="configViewer.isFormView">
+    <div class="flex border-b border-neutral-800 items-center">
+        <div class="text-lg font-medium text-neutral-300 flex items-center py-2 px-4 w-full">
+            <h2 class="mr-2">Settings (Read Only)</h2>
+
+            <div class="ml-auto flex items-center space-x-2">
+                <button
+                    @click="configViewer.toggleView()"
+                    class="h-7 p-1.5 px-3 text-xs bg-blue-600 hover:bg-blue-700 rounded-md text-white flex items-center"
+                >
+                    <span>Edit in File View</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-hidden flex">
+        <div class="w-56 border-r border-neutral-800 overflow-y-auto bg-neutral-900">
+            <div class="py-2">
+                <div class="text-xs uppercase text-neutral-500 font-semibold px-4 mb-1">
+                    Modules
+                </div>
+
+                <div
+                    v-for="module in configViewer.modules"
+                    :key="module.name"
+                    @click="configViewer.setActiveModule(module.name)"
+                    class="px-4 py-2 cursor-pointer flex items-center transition-colors"
+                    :class="[
+                        configViewer.activeModule === module.name
+                            ? 'bg-neutral-800 text-blue-400 border-l-2 border-blue-500'
+                            : 'hover:bg-neutral-800 text-neutral-300 border-l-2 border-transparent'
+                    ]"
+                >
+
+                    <span>{{ module.name }}</span>
+
+                    <span
+                        v-if="configViewer.validationErrors[module.name] && Object.keys(configViewer.validationErrors[module.name]).length > 0"
+                        class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                    >
+                        {{ Object.keys(configViewer.validationErrors[module.name]).length }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6">
+            <div
+                v-if="configViewer.saveSuccess"
+                class="bg-green-900/30 mb-6 p-4 rounded-md border border-green-800 flex items-start"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="flex-grow">
+                    <div class="text-green-300">{{ configViewer.saveSuccess.message }}</div>
+                </div>
+                <button @click="configViewer.clearNotifications()" class="text-green-400 hover:text-green-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div
+                v-if="configViewer.saveFailed"
+                class="bg-red-900/30 mb-6 p-4 rounded-md border border-red-800 flex items-start"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="flex-grow">
+                    <div class="text-red-300">{{ configViewer.saveFailed.message }}</div>
+                </div>
+                <button @click="configViewer.clearNotifications()" class="text-red-400 hover:text-red-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Loading state -->
+            <div v-if="configViewer.loading" class="flex justify-center items-center h-64">
+                <div class="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full mr-2"></div>
+                <span class="text-neutral-400">Loading configuration...</span>
+            </div>
+
+            <div v-else-if="configViewer.error" class="bg-red-900/30 p-4 rounded-md border border-red-800">
+                <div class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-red-300">{{ configViewer.error }}</span>
+                </div>
+            </div>
+
+            <template v-else-if="configViewer.activeModule && configViewer.getModuleMetadata(configViewer.activeModule)">
+                <div
+                    v-for="group in configViewer.getOptionGroups(configViewer.activeModule)"
+                    :key="group.name"
+                    class="mb-8"
+                >
+                    <h2 class="text-lg font-medium mb-4 pb-1 border-b border-neutral-800">
+                        {{ group.name }}
+                    </h2>
+
+                    <div class="space-y-6">
+                        <div
+                            v-for="option in group.options"
+                            :key="option.key"
+                            class="bg-neutral-800 rounded-md p-5"
+                        >
+                            <div class="flex justify-between items-start mb-1">
+                                <div class="font-medium text-sm flex items-center">
+                                    {{ option.key }}
+                                    <span v-if="option.required" class="ml-1 text-red-400">*</span>
+                                </div>
+                                <span
+                                    v-if="option.enum && option.enum.length > 0"
+                                    class="text-xs bg-blue-900/30 text-blue-300 px-2 py-0.5 rounded-full"
+                                >
+                                    Enum
+                                </span>
+                            </div>
+
+                            <p class="text-neutral-400 text-sm mb-3">{{ option.description }}</p>
+
+                            <!-- Mensagens de erro de validação -->
+                            <div
+                                v-if="configViewer.validationErrors[configViewer.activeModule] && configViewer.validationErrors[configViewer.activeModule][option.key]"
+                                class="mb-3 text-red-400 text-xs"
+                            >
+                                <div v-for="(error, i) in configViewer.validationErrors[configViewer.activeModule][option.key]" :key="i">
+                                    {{ error }}
+                                </div>
+                            </div>
+
+                            <!-- Inputs (todos com disabled) -->
+                            <input
+                                v-if="option.type === 'string' && (!option.enum || option.enum.length === 0)"
+                                type="text"
+                                disabled
+                                :placeholder="option.default !== undefined ? `Default: ${option.default}` : ''"
+                                :value="configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key]"
+                                class="w-full px-3 py-2 bg-neutral-900/50 border border-neutral-700 rounded-md text-sm focus:outline-none text-neutral-500 cursor-not-allowed"
+                            />
+
+                            <!-- Número -->
+                            <input
+                                v-else-if="option.type === 'number'"
+                                type="number"
+                                disabled
+                                :placeholder="option.default !== undefined ? `Default: ${option.default}` : ''"
+                                :value="configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key]"
+                                class="w-full px-3 py-2 bg-neutral-900/50 border border-neutral-700 rounded-md text-sm focus:outline-none text-neutral-500 cursor-not-allowed"
+                            />
+
+                            <!-- Booleano -->
+                            <div
+                                v-else-if="option.type === 'boolean'"
+                                class="flex items-center opacity-50 cursor-not-allowed"
+                            >
+                                <label class="flex items-center">
+                                    <div class="relative">
+                                        <input
+                                            type="checkbox"
+                                            class="sr-only"
+                                            disabled
+                                            :checked="configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key]"
+                                        />
+                                        <div class="block bg-neutral-700 w-10 h-6 rounded-full"></div>
+                                        <div
+                                            class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform"
+                                            :class="configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key] ? 'translate-x-4' : ''"
+                                        ></div>
+                                    </div>
+                                    <div class="ml-3 text-sm text-neutral-500">
+                                        {{ configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key] ? 'Enabled' : 'Disabled' }}
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Enum (select) -->
+                            <select
+                                v-else-if="option.type === 'string' && option.enum && option.enum.length > 0"
+                                disabled
+                                :value="configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key]"
+                                class="w-full px-3 py-2 bg-neutral-900/50 border border-neutral-700 rounded-md text-sm focus:outline-none text-neutral-500 cursor-not-allowed"
+                            >
+                                <option v-if="!option.required" value="">-- Select an option --</option>
+                                <option
+                                    v-for="enumValue in option.enum"
+                                    :key="enumValue"
+                                    :value="enumValue"
+                                >
+                                    {{ enumValue }}
+                                </option>
+                            </select>
+
+                            <!-- Array -->
+                            <div v-else-if="option.type === 'array'">
+                                <div v-if="Array.isArray(configViewer.formData[configViewer.activeModule][option.key])" class="space-y-2">
+                                    <div
+                                        v-for="(item, index) in configViewer.formData[configViewer.activeModule][option.key]"
+                                        :key="index"
+                                        class="flex items-center"
+                                    >
+                                        <input
+                                            type="text"
+                                            v-model="configViewer.formData[configViewer.activeModule][option.key][index]"
+                                            @input="configViewer.updateConfigValue(configViewer.activeModule, option.key, [...configViewer.formData[configViewer.activeModule][option.key]])"
+                                            class="flex-grow px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-md text-sm focus:outline-none focus:border-blue-500"
+                                        />
+                                        <button
+                                            @click="configViewer.formData[configViewer.activeModule][option.key].splice(index, 1); configViewer.updateConfigValue(configViewer.activeModule, option.key, [...configViewer.formData[configViewer.activeModule][option.key]]);"
+                                            class="ml-2 p-1 bg-red-900 hover:bg-red-800 text-red-100 rounded"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <button
+                                    @click="
+                                        if (!Array.isArray(configViewer.formData[configViewer.activeModule][option.key])) {
+                                            configViewer.formData[configViewer.activeModule][option.key] = [];
+                                        }
+                                        configViewer.formData[configViewer.activeModule][option.key].push('');
+                                        configViewer.updateConfigValue(configViewer.activeModule, option.key, [...configViewer.formData[configViewer.activeModule][option.key]]);
+                                    "
+                                    class="mt-2 px-3 py-1 bg-blue-700 hover:bg-blue-600 text-white rounded-md text-xs"
+                                >
+                                    Add Item
+                                </button>
+                            </div>
+
+                            <!-- Objeto com propriedades -->
+                            <div v-else-if="option.type === 'object' && option.properties" class="space-y-4 opacity-75">
+                                <div class="text-xs text-neutral-400 mb-2">{{ option.description }}</div>
+
+                                <div class="space-y-4 ml-4 border-l border-neutral-700 pl-4">
+                                    <div v-for="(propConfig, propKey) in option.properties"
+                                         :key="propKey"
+                                         class="mb-4">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <div class="font-medium text-sm flex items-center">
+                                                {{ propKey }}
+                                                <span v-if="propConfig.required" class="ml-1 text-red-400">*</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Inputs (todos com disabled) -->
+                                        <input
+                                            v-if="propConfig.type === 'string'"
+                                            type="text"
+                                            disabled
+                                            :value="configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key][propKey]"
+                                            class="w-full px-3 py-2 bg-neutral-900/50 border border-neutral-700 rounded-md text-sm focus:outline-none text-neutral-500 cursor-not-allowed"
+                                        />
+
+                                        <!-- Input para número -->
+                                        <input v-else-if="propConfig.type === 'number'"
+                                               type="number"
+                                               disabled
+                                               :value="configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key][propKey]"
+                                               class="w-full px-3 py-2 bg-neutral-900/50 border border-neutral-700 rounded-md text-sm focus:outline-none text-neutral-500 cursor-not-allowed"
+                                        />
+
+                                        <!-- Toggle para boolean -->
+                                        <div v-else-if="propConfig.type === 'boolean'"
+                                             class="flex items-center opacity-50 cursor-not-allowed">
+                                            <label class="flex items-center">
+                                                <div class="relative">
+                                                    <input type="checkbox"
+                                                           class="sr-only"
+                                                           disabled
+                                                           :checked="configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key][propKey]"
+                                                    />
+                                                    <div class="block bg-neutral-700 w-10 h-6 rounded-full"></div>
+                                                    <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform"
+                                                         :class="configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key][propKey] ? 'translate-x-4' : ''">
+                                                    </div>
+                                                </div>
+                                                <div class="ml-3 text-sm text-neutral-500">
+                                                    {{ configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key][propKey] ? 'Enabled' : 'Disabled' }}
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        <!-- Select para enum -->
+                                        <select v-else-if="propConfig.type === 'string' && propConfig.enum && propConfig.enum.length > 0"
+                                                :value="configViewer.formData[configViewer.activeModule][option.group || 'General'][option.key][propKey]"
+                                                @change="configViewer.updateNestedConfigValue(configViewer.activeModule, option.group, option.key, propKey, $event.target.value)"
+                                                class="w-full px-3 py-2 bg-neutral-900/50 border border-neutral-700 rounded-md text-sm focus:outline-none text-neutral-500 cursor-not-allowed">
+                                            <option v-if="!propConfig.required" value="">-- Select an option --</option>
+                                            <option v-for="enumValue in propConfig.enum"
+                                                    :key="enumValue"
+                                                    :value="enumValue">
+                                                {{ enumValue }}
+                                            </option>
+                                        </select>
+
+                                        <!-- Descrição da propriedade -->
+                                        <div v-if="propConfig.description" class="text-xs text-neutral-400 mt-1">
+                                            {{ propConfig.description }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Função (textarea) -->
+                            <div v-else-if="option.type === 'function'">
+                                <textarea
+                                    v-model="configViewer.formData[configViewer.activeModule][option.key]"
+                                    @input="configViewer.updateConfigValue(configViewer.activeModule, option.key, $event.target.value)"
+                                    placeholder="function() { ... }"
+                                    rows="5"
+                                    class="w-full px-3 py-2 bg-neutral-900/50 border border-neutral-700 rounded-md text-sm focus:outline-none text-neutral-500 cursor-not-allowed font-mono"
+                                ></textarea>
+                            </div>
+
+                            <!-- Valor do ambiente -->
+                            <div v-if="option.env" class="mt-2 text-xs text-blue-400">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>Also configurable via environment variable: <code class="bg-blue-900/30 px-1 py-0.5 rounded">{{ option.env }}</code></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Nenhum módulo selecionado -->
+            <div v-else-if="configViewer.modules.length > 0" class="text-center py-16 text-neutral-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <p>Please select a module from the sidebar</p>
+            </div>
+
+            <!-- Nenhum módulo disponível -->
+            <div v-else class="text-center py-16 text-neutral-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p>No configurable modules found</p>
+                <p class="text-sm mt-2">Make sure you have modules with configuration installed</p>
+            </div>
+        </div>
+    </div>
+</div>

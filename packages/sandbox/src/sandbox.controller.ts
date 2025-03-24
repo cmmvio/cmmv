@@ -118,6 +118,19 @@ export class SanboxController {
         );
     }
 
+    @Get('config.js', { exclude: true })
+    async handlerConfig(@Response() res) {
+        res.contentType('text/javascript').send(
+            await fs.readFileSync(
+                path.join(
+                    __dirname.replace('src', 'public'),
+                    'sandbox-config.client.cjs',
+                ),
+                'utf-8',
+            ),
+        );
+    }
+
     @Get('schema', { exclude: true })
     async handlerSchema() {
         const schemaFilename = path.join(cwd(), '.generated', 'schema.json');

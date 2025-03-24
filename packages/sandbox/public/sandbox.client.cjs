@@ -37,6 +37,7 @@ createApp({
                 { label: "Logs", active: false },
                 { label: "Backup", active: false },
                 { label: "Modules", active: false },
+                { label: "Settings", active: false },
             ],
             protoTypes: {
                 "int32": { key: "int32", label: "Integer (Int32)"},
@@ -216,6 +217,7 @@ createApp({
             formBuilder: null,
             backupViewer: null,
             modulesViewer: null,
+            configViewer: null,
             syncModalOpen: false,
             syncInProgress: false,
             syncProgress: 0,
@@ -335,6 +337,8 @@ createApp({
 
         this.backupViewer = useBackupViewer();
         this.modulesViewer = useModulesViewer();
+        this.configViewer = useConfigViewer();
+        this.configViewer.loadModules();
 
         this.$nextTick(() => {
             this.checkTabOverflow();

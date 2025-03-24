@@ -12,12 +12,22 @@ import { BackupService } from './backup.service';
 import { ModulesController } from './modules.controller';
 import { ModulesService } from './modules.service';
 
+import { ConfigController } from './config.controller';
+import { ConfigService } from './config.service';
+
 export const SandoxModule = new Module('sandbox', {
     controllers: [
         SanboxController,
         LogsController,
         BackupController,
         ModulesController,
+        ConfigController,
     ],
-    providers: [SandboxService, LogsService, BackupService, ModulesService],
+    providers: [
+        SandboxService,
+        LogsService,
+        BackupService,
+        ModulesService,
+        ConfigService,
+    ],
 });

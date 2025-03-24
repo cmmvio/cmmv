@@ -16,6 +16,7 @@ interface ModuleInfo {
     documentation?: string;
     latestVersion?: string;
     updateAvailable?: boolean;
+    versionSource?: string;
 }
 
 interface SubmoduleInfo {
