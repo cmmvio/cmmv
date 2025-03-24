@@ -215,6 +215,7 @@ createApp({
             logViewer: null,
             formBuilder: null,
             backupViewer: null,
+            modulesViewer: null,
             syncModalOpen: false,
             syncInProgress: false,
             syncProgress: 0,
@@ -333,6 +334,7 @@ createApp({
         this.formBuilder.init(this.selectedContract);
 
         this.backupViewer = useBackupViewer();
+        this.modulesViewer = useModulesViewer();
 
         this.$nextTick(() => {
             this.checkTabOverflow();

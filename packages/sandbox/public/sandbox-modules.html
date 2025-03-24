@@ -1,0 +1,484 @@
+<div class="flex flex-col h-full overflow-hidden relative" v-if="modulesViewer">
+    <div class="flex border-b border-neutral-800 justify-between items-center flex-wrap">
+        <div class="text-lg font-medium text-neutral-300 flex items-center border-b border-neutral-800 py-2 px-4 w-full">
+            <h2 class="mr-2">CMMV Modules</h2>
+
+            <span v-if="modulesViewer.packageManager" class="bg-neutral-700 text-neutral-300 text-xs px-2 py-1 rounded-md mr-3">
+                {{ modulesViewer.packageManager }}
+            </span>
+
+            <button
+                @click="modulesViewer.refreshData()"
+                class="h-7 p-1.5 px-3 ml-2 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md text-neutral-300 flex items-center"
+                title="Refresh Modules"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                </svg>
+                <span class="ml-1 hidden sm:inline">Refresh</span>
+            </button>
+
+            <button
+                @click="modulesViewer.toggleView()"
+                class="h-7 p-1.5 px-3 ml-2 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md text-neutral-300 flex items-center"
+                v-if="modulesViewer.view !== 'detail'"
+            >
+                <svg v-if="modulesViewer.view === 'grid'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span class="ml-1 hidden sm:inline">{{ modulesViewer.view === 'grid' ? 'List View' : 'Grid View' }}</span>
+            </button>
+
+            <button
+                @click="modulesViewer.goBack()"
+                class="h-7 p-1.5 px-3 ml-2 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md text-neutral-300 flex items-center"
+                v-if="modulesViewer.view === 'detail'"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span class="ml-1 hidden sm:inline">Back to Modules</span>
+            </button>
+        </div>
+
+        <div class="flex items-center space-x-3 flex-wrap gap-2 py-2 px-4 w-full border-b border-neutral-800" v-if="modulesViewer.view !== 'detail'">
+            <div class="relative flex-grow max-w-sm">
+                <input
+                    type="text"
+                    placeholder="Search modules..."
+                    class="h-9 w-full py-1.5 pl-8 pr-2 border border-neutral-700 bg-neutral-800 text-sm focus:outline-none focus:border-blue-500 rounded-md"
+                    v-model="modulesViewer.searchQuery"
+                />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                </svg>
+            </div>
+
+            <select
+                v-model="modulesViewer.selectedCategory"
+                class="h-9 py-1.5 px-3 border border-neutral-700 bg-neutral-800 text-sm focus:outline-none focus:border-blue-500 rounded-md"
+            >
+                <option
+                    v-for="category in modulesViewer.availableCategories"
+                    :key="category"
+                    :value="category"
+                >
+                    {{ category }}
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-auto">
+        <div
+            v-if="modulesViewer.installSuccess"
+            class="bg-green-900/30 m-4 p-6 rounded-md border border-green-800 flex items-start"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="flex-grow">
+                <div class="text-green-300">{{ modulesViewer.installSuccess.message }}</div>
+            </div>
+            <button @click="modulesViewer.clearInstallNotifications()" class="text-green-400 hover:text-green-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Notificação de erro na instalação -->
+        <div
+            v-if="modulesViewer.installError"
+            class="bg-red-900/30 m-4 p-4 rounded-md border border-red-800 flex items-start"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="flex-grow">
+                <div class="text-red-300">Installation failed for {{ modulesViewer.installError.module }}</div>
+                <div class="text-red-400 text-sm mt-1">{{ modulesViewer.installError.message }}</div>
+            </div>
+            <button @click="modulesViewer.clearInstallNotifications()" class="text-red-400 hover:text-red-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Notificação de sucesso na atualização -->
+        <div
+            v-if="modulesViewer.updateSuccess"
+            class="bg-green-900/30 m-4 p-6 rounded-md border border-green-800 flex items-start"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="flex-grow">
+                <div class="text-green-300">{{ modulesViewer.updateSuccess.message }}</div>
+            </div>
+            <button @click="modulesViewer.clearUpdateNotifications()" class="text-green-400 hover:text-green-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Notificação de erro na atualização -->
+        <div
+            v-if="modulesViewer.updateError"
+            class="bg-red-900/30 m-4 p-4 rounded-md border border-red-800 flex items-start"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="flex-grow">
+                <div class="text-red-300">Update failed for {{ modulesViewer.updateError.module }}</div>
+                <div class="text-red-400 text-sm mt-1">{{ modulesViewer.updateError.message }}</div>
+            </div>
+            <button @click="modulesViewer.clearUpdateNotifications()" class="text-red-400 hover:text-red-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div v-if="modulesViewer.loading" class="flex justify-center items-center h-64">
+            <div class="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full mr-2"></div>
+            <span class="text-neutral-400">Loading modules...</span>
+        </div>
+
+        <div v-else-if="modulesViewer.error" class="p-4 m-4 bg-red-900/30 border border-red-800 rounded-md text-red-300">
+            <div class="flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{{ modulesViewer.error }}</span>
+            </div>
+        </div>
+
+        <div v-else-if="modulesViewer.view === 'detail' && modulesViewer.selectedModule" class="p-6">
+            <div v-if="modulesViewer.selectedModule.documentation" class="bg-blue-900/20 border border-blue-800/30 rounded-md mb-4 p-4">
+                <div class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <p class="text-blue-300">Learn more about this module in the documentation:</p>
+                        <a
+                            :href="modulesViewer.selectedModule.documentation"
+                            class="text-blue-400 hover:underline mt-1 inline-block"
+                            target="_blank"
+                        >
+                            {{ modulesViewer.selectedModule.documentation }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-neutral-800 rounded-lg p-6 mb-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4">
+                    <span v-if="modulesViewer.selectedModule.installed && !modulesViewer.selectedModule.updateAvailable" class="bg-green-900/60 text-green-200 px-3 py-1 text-xs rounded-full">
+                        Installed
+                    </span>
+                    <button
+                        v-else-if="modulesViewer.selectedModule.installed && modulesViewer.selectedModule.updateAvailable"
+                        @click.stop="modulesViewer.updateModule(modulesViewer.selectedModule)"
+                        class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 text-xs rounded-full flex items-center"
+                        :disabled="modulesViewer.updating === modulesViewer.selectedModule.name"
+                    >
+                        <svg v-if="modulesViewer.updating === modulesViewer.selectedModule.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{{ modulesViewer.updating === modulesViewer.selectedModule.name ? 'Updating...' : 'Update Available' }}</span>
+                    </button>
+                    <button
+                        v-else
+                        @click.stop="modulesViewer.installModule(modulesViewer.selectedModule)"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded-full flex items-center"
+                        :disabled="modulesViewer.installing === modulesViewer.selectedModule.name"
+                    >
+                        <svg v-if="modulesViewer.installing === modulesViewer.selectedModule.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{{ modulesViewer.installing === modulesViewer.selectedModule.name ? 'Installing...' : 'Install Module' }}</span>
+                    </button>
+                </div>
+
+                <h2 class="text-2xl font-bold mb-2">{{ modulesViewer.selectedModule.name }}</h2>
+                <div class="mb-4">
+                    <span class="bg-blue-900/30 text-blue-300 px-2 py-1 text-xs rounded-full">
+                        {{ modulesViewer.selectedModule.category }}
+                    </span>
+                    <span v-if="modulesViewer.selectedModule.version" class="ml-2 bg-purple-900/30 text-purple-300 px-2 py-1 text-xs rounded-full">
+                        v{{ modulesViewer.selectedModule.version.replace(/[\^~]/, '') }}
+                        <span v-if="modulesViewer.selectedModule.latestVersion && modulesViewer.selectedModule.updateAvailable" class="ml-1 text-amber-300">
+                            → v{{ modulesViewer.selectedModule.latestVersion }}
+                        </span>
+                    </span>
+                </div>
+                <p class="text-neutral-300 mb-4">{{ modulesViewer.selectedModule.description }}</p>
+
+                <div v-if="modulesViewer.selectedModule.dependencies && modulesViewer.selectedModule.dependencies.length > 0" class="mb-4">
+                    <h3 class="text-sm font-semibold text-neutral-400 uppercase mb-2">Dependencies</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span v-for="dep in modulesViewer.selectedModule.dependencies" :key="dep"
+                              class="bg-neutral-700 text-neutral-300 px-2 py-1 text-xs rounded">
+                            {{ dep }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="modulesViewer.selectedModule.submodules && modulesViewer.selectedModule.submodules.length > 0" class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">Submodules</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div v-for="submodule in modulesViewer.selectedModule.submodules" :key="submodule.name"
+                         class="bg-neutral-800 p-4 rounded-md border border-neutral-700">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-medium">{{ submodule.name }}</h4>
+                            <span v-if="submodule.installed" class="bg-green-900/60 text-green-200 px-2 py-0.5 text-xs rounded-full">
+                                Installed
+                            </span>
+                            <button
+                                v-else
+                                @click.stop="modulesViewer.installSubmodule(modulesViewer.selectedModule, submodule)"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-0.5 text-xs rounded-full flex items-center"
+                                :disabled="modulesViewer.installing === submodule.name"
+                            >
+                                <svg v-if="modulesViewer.installing === submodule.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>{{ modulesViewer.installing === submodule.name ? 'Installing...' : 'Install' }}</span>
+                            </button>
+                        </div>
+                        <p class="text-sm text-neutral-400">{{ submodule.description }}</p>
+                        <div v-if="submodule.packageName" class="mt-2 text-xs text-neutral-500">
+                            Package: {{ submodule.packageName }}
+                        </div>
+                        <div v-if="submodule.version" class="mt-1 text-xs text-purple-400">
+                            Version: {{ submodule.version.replace(/[\^~]/, '') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template v-else>
+            <div v-if="modulesViewer.view === 'grid'" class="p-6">
+                <div v-if="modulesViewer.filteredModules.length === 0" class="text-center py-12">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zm12 0a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                    </svg>
+                    <p class="text-lg font-medium text-neutral-400">No modules found</p>
+                    <p v-if="modulesViewer.searchQuery" class="mt-1 text-sm text-neutral-500">
+                        No modules match your search "{{ modulesViewer.searchQuery }}"
+                    </p>
+                </div>
+
+                <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div
+                        v-for="module in modulesViewer.filteredModules"
+                        :key="module.name"
+                        class="bg-neutral-800 rounded-lg p-5 border border-neutral-700 hover:border-neutral-500 cursor-pointer transition-colors relative"
+                        @click="modulesViewer.selectModule(module)"
+                    >
+                        <div class="absolute top-0 right-0 mt-4 mr-4">
+                            <span v-if="module.installed && !module.updateAvailable" class="bg-green-900/60 text-green-200 px-2 py-0.5 text-xs rounded-full">
+                                Installed
+                            </span>
+                            <button
+                                v-else-if="module.installed && module.updateAvailable"
+                                @click.stop="modulesViewer.updateModule(module)"
+                                class="bg-amber-600 hover:bg-amber-700 text-white px-2 py-0.5 text-xs rounded-full flex items-center"
+                                :disabled="modulesViewer.updating === module.name"
+                            >
+                                <svg v-if="modulesViewer.updating === module.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>{{ modulesViewer.updating === module.name ? 'Updating...' : 'Update' }}</span>
+                            </button>
+                            <button
+                                v-else
+                                @click.stop="modulesViewer.installModule(module)"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-0.5 text-xs rounded-full flex items-center"
+                                :disabled="modulesViewer.installing === module.name"
+                            >
+                                <svg v-if="modulesViewer.installing === module.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>{{ modulesViewer.installing === module.name ? 'Installing...' : 'Install' }}</span>
+                            </button>
+                        </div>
+
+                        <h3 class="text-lg font-medium mb-2">{{ module.name }}</h3>
+
+                        <div class="flex items-center mb-3">
+                            <span class="bg-blue-900/30 text-blue-300 px-2 py-0.5 text-xs rounded-full">
+                                {{ module.category }}
+                            </span>
+                            <span v-if="module.version" class="ml-2 bg-purple-900/30 text-purple-300 px-2 py-0.5 text-xs rounded-full">
+                                v{{ module.version.replace(/[\^~]/, '') }}
+                                <span v-if="module.latestVersion && module.updateAvailable" class="ml-1 text-amber-300">
+                                    → v{{ module.latestVersion }}
+                                </span>
+                            </span>
+                        </div>
+
+                        <p class="text-neutral-400 text-sm mb-3">{{ module.description }}</p>
+
+                        <div v-if="module.submodules" class="flex flex-wrap gap-1 mt-2">
+                            <span
+                                v-for="submodule in module.submodules"
+                                :key="submodule.name"
+                                :class="[
+                                    'text-xs px-1.5 py-0.5 rounded',
+                                    submodule.installed ? 'bg-green-900/30 text-green-300' : 'bg-neutral-700 text-neutral-400'
+                                ]"
+                            >
+                                {{ submodule.name }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else class="overflow-auto">
+                <table class="min-w-full border-separate border-spacing-0">
+                    <thead class="bg-neutral-800 sticky top-0 z-20">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                                Name
+                            </th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                                Category
+                            </th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                                Description
+                            </th>
+                            <th class="px-4 py-2 text-center text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                                Status
+                            </th>
+                            <th class="px-4 py-2 text-center text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 whitespace-nowrap">
+                                Submodules
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-neutral-900 divide-y divide-neutral-800">
+                        <tr v-if="modulesViewer.filteredModules.length === 0">
+                            <td colspan="5" class="px-4 py-8 text-center text-neutral-400">
+                                <p class="text-lg font-medium">No modules found</p>
+                                <p v-if="modulesViewer.searchQuery" class="mt-1 text-sm text-neutral-500">
+                                    No modules match your search "{{ modulesViewer.searchQuery }}"
+                                </p>
+                            </td>
+                        </tr>
+
+                        <tr
+                            v-for="module in modulesViewer.filteredModules"
+                            :key="module.name"
+                            class="hover:bg-neutral-800 cursor-pointer transition-colors"
+                            @click="modulesViewer.selectModule(module)"
+                        >
+                            <td class="px-4 py-3 text-sm border-b border-neutral-800">
+                                <div class="font-medium">{{ module.name }}</div>
+                                <div v-if="module.version" class="text-xs text-purple-400 mt-1">
+                                    v{{ module.version.replace(/[\^~]/, '') }}
+                                    <span v-if="module.latestVersion && module.updateAvailable" class="ml-1 text-amber-300">
+                                        → v{{ module.latestVersion }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-sm border-b border-neutral-800">
+                                <span class="bg-blue-900/30 text-blue-300 px-2 py-0.5 text-xs rounded-full">
+                                    {{ module.category }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm border-b border-neutral-800 text-neutral-400">
+                                {{ module.description }}
+                            </td>
+                            <td class="px-4 py-3 text-sm border-b border-neutral-800 text-center">
+                                <span
+                                    v-if="module.installed && !module.updateAvailable"
+                                    class="px-2 py-0.5 text-xs rounded-full bg-green-900/60 text-green-200"
+                                >
+                                    Installed
+                                </span>
+                                <button
+                                    v-else-if="module.installed && module.updateAvailable"
+                                    @click.stop="modulesViewer.updateModule(module)"
+                                    class="px-2 py-0.5 text-xs rounded-full bg-amber-600 hover:bg-amber-700 text-white flex items-center mx-auto"
+                                    :disabled="modulesViewer.updating === module.name"
+                                >
+                                    <svg v-if="modulesViewer.updating === module.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span>{{ modulesViewer.updating === module.name ? 'Updating...' : 'Update' }}</span>
+                                </button>
+                                <button
+                                    v-else
+                                    @click.stop="modulesViewer.installModule(module)"
+                                    class="px-2 py-0.5 text-xs rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center mx-auto"
+                                    :disabled="modulesViewer.installing === module.name"
+                                >
+                                    <svg v-if="modulesViewer.installing === module.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span>{{ modulesViewer.installing === module.name ? 'Installing...' : 'Install' }}</span>
+                                </button>
+                            </td>
+                            <td class="px-4 py-3 text-sm border-b border-neutral-800">
+                                <div v-if="module.submodules" class="flex flex-wrap justify-center gap-1">
+                                    <span
+                                        v-for="submodule in module.submodules"
+                                        :key="submodule.name"
+                                        :class="[
+                                            'text-xs px-1.5 py-0.5 rounded',
+                                            submodule.installed ? 'bg-green-900/30 text-green-300' : 'bg-neutral-700 text-neutral-400'
+                                        ]"
+                                        :title="submodule.description"
+                                    >
+                                        {{ submodule.name }}
+                                    </span>
+                                </div>
+                                <span v-else class="text-neutral-600">-</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+    </div>
+</div>

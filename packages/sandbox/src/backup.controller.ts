@@ -1,10 +1,8 @@
-import { Controller, Get, Post, Param, Response, Request } from '@cmmv/http';
+import { Controller, Get, Post, Param, Response } from '@cmmv/http';
 
 import { Auth } from '@cmmv/auth';
 
 import { BackupService } from './backup.service';
-import * as path from 'path';
-import * as fs from 'fs';
 
 @Controller('backups')
 export class BackupController {

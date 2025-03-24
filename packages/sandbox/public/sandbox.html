@@ -300,6 +300,13 @@
                 >
                     <!-- include("@packages/sandbox/public/sandbox-backup.html"); -->
                 </div>
+
+                <div
+                    v-show="tabsMaster[selectedMasterTab].label === 'Modules'"
+                    class="flex-1 overflow-auto h-[calc(100%-50px)]"
+                >
+                    <!-- include("@packages/sandbox/public/sandbox-modules.html"); -->
+                </div>
             </div>
 
             <!-- Loading -->
@@ -330,6 +337,7 @@
         <script type="text/javascript" src="/sandbox/logs.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/formbuilder.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/backup.js" type="module"></script>
+        <script type="text/javascript" src="/sandbox/modules.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/client.js"></script>
 
         <script>

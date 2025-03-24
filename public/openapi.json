@@ -1901,6 +1901,423 @@
         "security": []
       }
     },
+    "/modules": {
+      "get": {
+        "tags": [
+          "Modules"
+        ],
+        "summary": "",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/modules/installed": {
+      "get": {
+        "tags": [
+          "Modules"
+        ],
+        "summary": "",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/modules/categories": {
+      "get": {
+        "tags": [
+          "Modules"
+        ],
+        "summary": "",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/modules/{name}": {
+      "get": {
+        "tags": [
+          "Modules"
+        ],
+        "summary": "",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/modules/install": {
+      "post": {
+        "tags": [
+          "Modules"
+        ],
+        "summary": "",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/modules/install-submodule": {
+      "post": {
+        "tags": [
+          "Modules"
+        ],
+        "summary": "",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/modules/package-manager": {
+      "get": {
+        "tags": [
+          "Modules"
+        ],
+        "summary": "",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/modules/update": {
+      "post": {
+        "tags": [
+          "Modules"
+        ],
+        "summary": "",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/groups": {
       "get": {
         "tags": [

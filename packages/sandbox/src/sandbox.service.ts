@@ -31,6 +31,7 @@ export class SandboxService {
     public static port: number;
     public static clients: any[] = [];
     public static wsServer: any;
+
     /**
      * Define the public directory
      */
@@ -43,6 +44,7 @@ export class SandboxService {
 
     /**
      * Load the config
+     * @returns The success and message of the operation
      */
     public static async loadConfig(): Promise<void> {
         const portDefault = 59885;
@@ -71,11 +73,9 @@ export class SandboxService {
                 },
             })
             .on('change', (filePath) => {
-                console.log('change', filePath);
                 SandboxService.broadcast({ event: 'change', filePath });
             })
             .on('unlink', (filePath) => {
-                console.log('unlink', filePath);
                 SandboxService.broadcast({ event: 'unlink', filePath });
             })
             .on('error', (error) => {
@@ -83,6 +83,9 @@ export class SandboxService {
             });
     }
 
+    /**
+     * Create the web socket
+     */
     public static createWebsocket() {
         SandboxService.clients = [];
 
@@ -105,6 +108,10 @@ export class SandboxService {
         });
     }
 
+    /**
+     * Broadcast the data to the clients
+     * @param data - The data to broadcast
+     */
     public static broadcast(data: any) {
         SandboxService.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN)
@@ -112,11 +119,11 @@ export class SandboxService {
         });
     }
 
+    /**
+     * Close the web socket
+     */
     public static closeWebsocket() {
-        SandboxService.clients.forEach((client) => {
-            client.close();
-        });
-
+        SandboxService.clients.forEach((client) => client.close());
         SandboxService.wsServer.close();
     }
 
