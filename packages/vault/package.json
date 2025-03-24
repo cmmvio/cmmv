@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/vault",
-    "version": "0.9.6",
+    "version": "0.9.7",
     "description": "Module for CMMV to store encrypted data",
     "keywords": [
         "cmmv",

@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/sandbox",
-    "version": "0.9.6",
+    "version": "0.9.7",
     "description": "Sandbox for creating contracts in visual mode",
     "keywords": [
         "cmmv",
@@ -33,6 +33,7 @@
         "@cmmv/http": "latest",
         "@cmmv/repository": "latest",
         "archiver": "^7.0.1",
+        "axios": "^1.8.4",
         "chokidar": "^4.0.3",
         "fast-glob": "^3.3.3",
         "semver": "^7.7.1",
