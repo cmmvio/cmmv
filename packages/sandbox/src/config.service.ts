@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import * as fg from 'fast-glob';
 import { Service, Logger } from '@cmmv/core';
 
-interface ConfigOption {
+export interface ConfigOption {
     key: string;
     type: string;
     default?: any;
@@ -18,7 +18,7 @@ interface ConfigOption {
     properties?: Record<string, ConfigSubOption>;
 }
 
-interface ConfigSubOption {
+export interface ConfigSubOption {
     type: string;
     default?: any;
     required?: boolean;
@@ -31,7 +31,7 @@ interface ConfigSubOption {
     properties?: Record<string, ConfigSubOption>;
 }
 
-interface ModuleConfig {
+export interface ModuleConfig {
     name: string;
     description: string;
     options: ConfigOption[];
@@ -133,7 +133,7 @@ export class ConfigService {
     /**
      * Localiza e lê os arquivos de configuração dos módulos
      */
-    async getModuleConfigs(): Promise<ModuleConfig[]> {
+    public async getModuleConfigs(): Promise<ModuleConfig[]> {
         const moduleConfigsMap = new Map<string, ModuleConfig>();
 
         // Primeiro procura nos módulos do monorepo
