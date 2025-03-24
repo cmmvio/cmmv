@@ -202,7 +202,24 @@
             </div>
 
             <div class="bg-neutral-800 rounded-lg p-6 mb-6 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4">
+                <div class="absolute top-0 right-0 p-4 flex items-center space-x-2">
+                    <button
+                        v-if="modulesViewer.selectedModule.installed"
+                        @click.stop="modulesViewer.toggleModuleStatus(modulesViewer.selectedModule)"
+                        :class="[
+                            'px-2 py-0.5 text-xs rounded-full flex items-center',
+                            modulesViewer.selectedModule.isEnabled
+                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                : 'bg-neutral-600 hover:bg-neutral-700 text-white'
+                        ]"
+                        :disabled="modulesViewer.togglingModule === modulesViewer.selectedModule.name"
+                    >
+                        <svg v-if="modulesViewer.togglingModule === modulesViewer.selectedModule.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{{ modulesViewer.selectedModule.isEnabled ? 'Active' : 'Inactive' }}</span>
+                    </button>
                     <span v-if="modulesViewer.selectedModule.installed && !modulesViewer.selectedModule.updateAvailable" class="bg-green-900/60 text-green-200 px-3 py-1 text-xs rounded-full">
                         Installed
                     </span>
@@ -311,14 +328,31 @@
                         class="bg-neutral-800 rounded-lg p-5 border border-neutral-700 hover:border-neutral-500 cursor-pointer transition-colors relative"
                         @click="modulesViewer.selectModule(module)"
                     >
-                        <div class="absolute top-0 right-0 mt-4 mr-4">
-                            <span v-if="module.installed && !module.updateAvailable" class="bg-green-900/60 text-green-200 px-2 py-0.5 text-xs rounded-full">
+                        <div class="absolute top-0 right-0 p-4 flex items-center space-x-2">
+                            <button
+                                v-if="module.installed"
+                                @click.stop="modulesViewer.toggleModuleStatus(module)"
+                                :class="[
+                                    'px-2 py-0.5 text-xs rounded-full flex items-center',
+                                    module.isEnabled
+                                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                                        : 'bg-neutral-600 hover:bg-neutral-700 text-white'
+                                ]"
+                                :disabled="modulesViewer.togglingModule === module.name"
+                            >
+                                <svg v-if="modulesViewer.togglingModule === module.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>{{ module.isEnabled ? 'Active' : 'Inactive' }}</span>
+                            </button>
+                            <span v-if="module.installed && !module.updateAvailable" class="bg-green-900/60 text-green-200 px-3 py-1 text-xs rounded-full">
                                 Installed
                             </span>
                             <button
                                 v-else-if="module.installed && module.updateAvailable"
                                 @click.stop="modulesViewer.updateModule(module)"
-                                class="bg-amber-600 hover:bg-amber-700 text-white px-2 py-0.5 text-xs rounded-full flex items-center"
+                                class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 text-xs rounded-full flex items-center"
                                 :disabled="modulesViewer.updating === module.name"
                             >
                                 <svg v-if="modulesViewer.updating === module.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -330,7 +364,7 @@
                             <button
                                 v-else
                                 @click.stop="modulesViewer.installModule(module)"
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-0.5 text-xs rounded-full flex items-center"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-xs rounded-full flex items-center"
                                 :disabled="modulesViewer.installing === module.name"
                             >
                                 <svg v-if="modulesViewer.installing === module.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -429,35 +463,22 @@
                             </td>
                             <td class="px-4 py-3 text-sm border-b border-neutral-800 text-center">
                                 <span
-                                    v-if="module.installed && !module.updateAvailable"
-                                    class="px-2 py-0.5 text-xs rounded-full bg-green-900/60 text-green-200"
+                                    v-if="module.installed"
+                                    @click.stop="modulesViewer.toggleModuleStatus(module)"
+                                    :class="[
+                                        'px-2 py-0.5 text-xs rounded-full flex items-center',
+                                        module.isEnabled
+                                            ? 'bg-green-600 hover:bg-green-700 text-white'
+                                            : 'bg-neutral-600 hover:bg-neutral-700 text-white'
+                                    ]"
+                                    :disabled="modulesViewer.togglingModule === module.name"
                                 >
-                                    Installed
+                                    <svg v-if="modulesViewer.togglingModule === module.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span>{{ module.isEnabled ? 'Active' : 'Inactive' }}</span>
                                 </span>
-                                <button
-                                    v-else-if="module.installed && module.updateAvailable"
-                                    @click.stop="modulesViewer.updateModule(module)"
-                                    class="px-2 py-0.5 text-xs rounded-full bg-amber-600 hover:bg-amber-700 text-white flex items-center mx-auto"
-                                    :disabled="modulesViewer.updating === module.name"
-                                >
-                                    <svg v-if="modulesViewer.updating === module.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    <span>{{ modulesViewer.updating === module.name ? 'Updating...' : 'Update' }}</span>
-                                </button>
-                                <button
-                                    v-else
-                                    @click.stop="modulesViewer.installModule(module)"
-                                    class="px-2 py-0.5 text-xs rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center mx-auto"
-                                    :disabled="modulesViewer.installing === module.name"
-                                >
-                                    <svg v-if="modulesViewer.installing === module.name" class="animate-spin h-3 w-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    <span>{{ modulesViewer.installing === module.name ? 'Installing...' : 'Install' }}</span>
-                                </button>
                             </td>
                             <td class="px-4 py-3 text-sm border-b border-neutral-800">
                                 <div v-if="module.submodules" class="flex flex-wrap justify-center gap-1">

@@ -5,6 +5,13 @@ import { compare as semverCompare } from 'semver';
 
 import { Service, Logger } from '@cmmv/core';
 
+interface ModuleImport {
+    import: string | string[];
+    path: string;
+    modules: string[];
+    providers?: string[];
+}
+
 interface ModuleInfo {
     name: string;
     installed: boolean;
@@ -17,6 +24,8 @@ interface ModuleInfo {
     latestVersion?: string;
     updateAvailable?: boolean;
     versionSource?: string;
+    moduleImport?: ModuleImport;
+    isEnabled?: boolean;
 }
 
 interface SubmoduleInfo {
@@ -31,6 +40,7 @@ interface SubmoduleInfo {
 export class ModulesService {
     private logger = new Logger('ModulesService');
     private readonly packageJsonPath = path.join(process.cwd(), 'package.json');
+    private readonly mainTsPath = path.join(process.cwd(), 'src', 'main.ts');
 
     private readonly availableModules: ModuleInfo[] = [
         {
@@ -54,6 +64,11 @@ export class ModulesService {
                 'speakeasy',
             ],
             documentation: 'https://cmmv.io/docs/modules/authentication',
+            moduleImport: {
+                import: 'AuthModule',
+                path: '@cmmv/auth',
+                modules: ['AuthModule'],
+            },
         },
         {
             name: 'Cache',
@@ -88,6 +103,11 @@ export class ModulesService {
             ],
             dependencies: ['@cmmv/cache', 'cache-manager'],
             documentation: 'https://cmmv.io/docs/modules/cache',
+            moduleImport: {
+                import: 'CacheModule',
+                path: '@cmmv/cache',
+                modules: ['CacheModule'],
+            },
         },
         {
             name: 'Elastic',
@@ -97,6 +117,11 @@ export class ModulesService {
             category: 'Integration',
             dependencies: ['@cmmv/elastic', '@elastic/elasticsearch'],
             documentation: 'https://cmmv.io/docs/modules/elastic',
+            moduleImport: {
+                import: 'ElasticModule',
+                path: '@cmmv/elastic',
+                modules: ['ElasticModule'],
+            },
         },
         {
             name: 'Email',
@@ -105,6 +130,11 @@ export class ModulesService {
             category: 'Communication',
             dependencies: ['@cmmv/email', 'aws-sdk', 'nodemailer'],
             documentation: 'https://cmmv.io/docs/modules/email',
+            moduleImport: {
+                import: 'EmailModule',
+                path: '@cmmv/email',
+                modules: ['EmailModule'],
+            },
         },
         {
             name: 'Encryptor',
@@ -120,6 +150,11 @@ export class ModulesService {
                 'tiny-secp256k1',
             ],
             documentation: 'https://cmmv.io/docs/modules/encryptor',
+            moduleImport: {
+                import: 'EncryptorModule',
+                path: '@cmmv/encryptor',
+                modules: ['EncryptorModule'],
+            },
         },
         {
             name: 'Events',
@@ -128,6 +163,11 @@ export class ModulesService {
             category: 'Architecture',
             dependencies: ['@cmmv/events', 'eventemitter2'],
             documentation: 'https://cmmv.io/docs/modules/events',
+            moduleImport: {
+                import: 'EventsModule',
+                path: '@cmmv/events',
+                modules: ['EventsModule'],
+            },
         },
         {
             name: 'Inspector',
@@ -136,6 +176,11 @@ export class ModulesService {
             category: 'Development',
             dependencies: ['@cmmv/inspector'],
             documentation: 'https://cmmv.io/docs/modules/inspector',
+            moduleImport: {
+                import: 'InspectorModule',
+                path: '@cmmv/inspector',
+                modules: ['InspectorModule'],
+            },
         },
         {
             name: 'Normalizer',
@@ -150,6 +195,11 @@ export class ModulesService {
                 'yaml',
             ],
             documentation: 'https://cmmv.io/docs/modules/normalizer',
+            moduleImport: {
+                import: 'NormalizerModule',
+                path: '@cmmv/normalizer',
+                modules: ['NormalizerModule'],
+            },
         },
         {
             name: 'OpenAPI',
@@ -158,6 +208,11 @@ export class ModulesService {
             category: 'Documentation',
             dependencies: ['@cmmv/openapi', 'js-yaml'],
             documentation: 'https://cmmv.io/docs/modules/openapi',
+            moduleImport: {
+                import: 'OpenAPIModule',
+                path: '@cmmv/openapi',
+                modules: ['OpenAPIModule'],
+            },
         },
         {
             name: 'Parallel',
@@ -170,6 +225,11 @@ export class ModulesService {
                 'fast-thread',
             ],
             documentation: 'https://cmmv.io/docs/modules/parallel',
+            moduleImport: {
+                import: 'ParallelModule',
+                path: '@cmmv/parallel',
+                modules: ['ParallelModule'],
+            },
         },
         {
             name: 'Queue',
@@ -198,6 +258,11 @@ export class ModulesService {
             ],
             dependencies: ['@cmmv/queue'],
             documentation: 'https://cmmv.io/docs/modules/queue',
+            moduleImport: {
+                import: 'QueueModule',
+                path: '@cmmv/queue',
+                modules: ['QueueModule'],
+            },
         },
         {
             name: 'Repository',
@@ -244,6 +309,12 @@ export class ModulesService {
             ],
             dependencies: ['@cmmv/repository', 'typeorm'],
             documentation: 'https://cmmv.io/docs/modules/repository',
+            moduleImport: {
+                import: ['RepositoryModule', 'Repository'],
+                path: '@cmmv/repository',
+                modules: ['RepositoryModule'],
+                providers: ['Repository'],
+            },
         },
         {
             name: 'Scheduling',
@@ -252,6 +323,12 @@ export class ModulesService {
             category: 'System',
             dependencies: ['@cmmv/scheduling', 'cron'],
             documentation: 'https://cmmv.io/docs/modules/scheduling',
+            moduleImport: {
+                import: ['SchedulingModule', 'SchedulingService'],
+                path: '@cmmv/scheduling',
+                modules: ['SchedulingModule'],
+                providers: ['SchedulingService'],
+            },
         },
         {
             name: 'Vault',
@@ -260,6 +337,11 @@ export class ModulesService {
             category: 'Security',
             dependencies: ['@cmmv/vault', '@cmmv/encryptor', 'elliptic'],
             documentation: 'https://cmmv.io/docs/modules/vault',
+            moduleImport: {
+                import: 'VaultModule',
+                path: '@cmmv/vault',
+                modules: ['VaultModule'],
+            },
         },
         {
             name: 'GraphQL',
@@ -275,6 +357,11 @@ export class ModulesService {
                 '@apollo/server',
             ],
             documentation: 'https://cmmv.io/docs/graphql/overview',
+            moduleImport: {
+                import: 'GraphQLModule',
+                path: '@cmmv/graphql',
+                modules: ['GraphQLModule'],
+            },
         },
         {
             name: 'Protobuf',
@@ -283,6 +370,11 @@ export class ModulesService {
             category: 'Integration',
             dependencies: ['@cmmv/protobuf', 'protobufjs'],
             documentation: 'https://cmmv.io/docs/rpc/proto',
+            moduleImport: {
+                import: 'ProtobufModule',
+                path: '@cmmv/protobuf',
+                modules: ['ProtobufModule'],
+            },
         },
         {
             name: 'WebSocket',
@@ -291,6 +383,11 @@ export class ModulesService {
             category: 'Integration',
             dependencies: ['@cmmv/websocket', 'ws'],
             documentation: 'https://cmmv.io/docs/rpc/websocket',
+            moduleImport: {
+                import: 'WebSocketModule',
+                path: '@cmmv/ws',
+                modules: ['WebSocketModule'],
+            },
         },
         {
             name: 'Keyv',
@@ -336,6 +433,11 @@ export class ModulesService {
                 },
             ],
             dependencies: ['@cmmv/keyv', 'keyv', '@keyv/compress-gzip'],
+            moduleImport: {
+                import: 'KeyvModule',
+                path: '@cmmv/keyv',
+                modules: ['KeyvModule'],
+            },
         },
         {
             name: 'Testing',
@@ -343,6 +445,11 @@ export class ModulesService {
             description: 'Testing framework and utilities',
             category: 'Development',
             dependencies: ['@cmmv/testing'],
+            moduleImport: {
+                import: 'TestingModule',
+                path: '@cmmv/testing',
+                modules: ['TestingModule'],
+            },
         },
     ];
 
@@ -379,33 +486,24 @@ export class ModulesService {
         };
 
         for (const module of this.availableModules) {
-            if (module.dependencies) {
-                const isInstalled = module.dependencies.some(
-                    (dep) => dep in installedDependencies,
-                );
-                module.installed = isInstalled;
+            // Verificar apenas o pacote principal do módulo (@cmmv/*)
+            const mainPackage = module.dependencies?.find(
+                (dep) =>
+                    dep.startsWith('@cmmv/') &&
+                    dep.toLowerCase() === `@cmmv/${module.name.toLowerCase()}`,
+            );
 
-                if (isInstalled) {
-                    const mainModulePattern = `@cmmv/${module.name.toLowerCase()}`;
-                    const cmmvMainDep = module.dependencies.find(
-                        (dep) => dep.toLowerCase() === mainModulePattern,
-                    );
-
-                    const cmmvDep =
-                        cmmvMainDep ||
-                        module.dependencies.find((dep) =>
-                            dep.startsWith('@cmmv/'),
-                        );
-
-                    const mainDep = cmmvDep || module.dependencies[0];
-
-                    if (mainDep && mainDep in installedDependencies) {
-                        module.version = installedDependencies[mainDep];
-                        module['versionSource'] = mainDep;
-                    }
-                }
+            if (mainPackage && mainPackage in installedDependencies) {
+                module.installed = true;
+                module.version = installedDependencies[mainPackage];
+                module.versionSource = mainPackage;
+            } else {
+                module.installed = false;
+                module.version = undefined;
+                module.versionSource = undefined;
             }
 
+            // Verificar submodules se existirem
             if (module.submodules) {
                 for (const submodule of module.submodules) {
                     const submodulePackage =
@@ -414,10 +512,12 @@ export class ModulesService {
 
                     submodule.installed =
                         submodulePackage in installedDependencies;
-
-                    if (submodule.installed)
+                    if (submodule.installed) {
                         submodule.version =
                             installedDependencies[submodulePackage];
+                    } else {
+                        submodule.version = undefined;
+                    }
                 }
             }
         }
@@ -503,11 +603,60 @@ export class ModulesService {
         const packageJson = this.readPackageJson();
         this.updateInstalledStatus(packageJson);
 
+        // Verificar status de ativação para cada módulo
+        for (const module of this.availableModules) {
+            if (module.installed) {
+                try {
+                    const mainTs = this.readMainTs();
+                    const isEnabled = this.checkModuleEnabled(mainTs, module);
+                    module.isEnabled = isEnabled;
+                } catch (error) {
+                    this.logger.error(
+                        `Error checking module status: ${error.message}`,
+                    );
+                    module.isEnabled = false;
+                }
+            } else {
+                module.isEnabled = false;
+            }
+        }
+
         this.checkForUpdates(this.availableModules).catch((err) =>
             this.logger.error(`Error checking updates: ${err.message}`),
         );
 
         return this.availableModules;
+    }
+
+    private checkModuleEnabled(mainTs: string, module: ModuleInfo): boolean {
+        if (!module?.moduleImport) {
+            return false;
+        }
+
+        const { moduleImport } = module;
+
+        // Verificar se os módulos estão presentes no array modules
+        const modulesPattern = /modules:\s*\[([\s\S]*?)\]/;
+        const modulesMatch = mainTs.match(modulesPattern);
+        const modulesContent = modulesMatch ? modulesMatch[1] : '';
+
+        const allModulesPresent = moduleImport.modules.every((modName) => {
+            return modulesContent.includes(modName);
+        });
+
+        // Verificar se os providers estão presentes (se existirem)
+        let allProvidersPresent = true;
+        if (moduleImport.providers?.length) {
+            const providersPattern = /providers:\s*\[([\s\S]*?)\]/;
+            const providersMatch = mainTs.match(providersPattern);
+            const providersContent = providersMatch ? providersMatch[1] : '';
+
+            allProvidersPresent = moduleImport.providers.every((provider) => {
+                return providersContent.includes(provider);
+            });
+        }
+
+        return allModulesPresent && allProvidersPresent;
     }
 
     /**
@@ -822,5 +971,220 @@ export class ModulesService {
             );
             throw error;
         }
+    }
+
+    /**
+     * Ler o arquivo main.ts
+     */
+    private readMainTs(): string {
+        try {
+            return fs.readFileSync(this.mainTsPath, 'utf8');
+        } catch (error) {
+            this.logger.error(`Error reading main.ts: ${error.message}`);
+            throw error;
+        }
+    }
+
+    /**
+     * Salvar o arquivo main.ts
+     */
+    private saveMainTs(content: string): void {
+        try {
+            // Criar backup
+            const backupPath = `${this.mainTsPath}.backup`;
+            fs.copyFileSync(this.mainTsPath, backupPath);
+
+            // Salvar novo conteúdo
+            fs.writeFileSync(this.mainTsPath, content, 'utf8');
+        } catch (error) {
+            this.logger.error(`Error saving main.ts: ${error.message}`);
+            throw error;
+        }
+    }
+
+    /**
+     * Verificar se um módulo está ativo na aplicação
+     */
+    async isModuleEnabled(moduleName: string): Promise<boolean> {
+        try {
+            const mainTs = this.readMainTs();
+            const module = this.availableModules.find(
+                (m) => m.name === moduleName,
+            );
+
+            if (!module?.moduleImport) {
+                return false;
+            }
+
+            const { moduleImport } = module;
+
+            // Extrair o conteúdo do array modules
+            const modulesMatch = mainTs.match(/modules:\s*\[([\s\S]*?)\]/);
+            if (!modulesMatch) {
+                return false;
+            }
+
+            const modulesContent = modulesMatch[1];
+
+            // Verificar se todos os módulos estão presentes
+            const allModulesPresent = moduleImport.modules.every((modName) => {
+                return modulesContent.includes(modName);
+            });
+
+            // Verificar se todos os providers estão presentes (se existirem)
+            let allProvidersPresent = true;
+            if (moduleImport.providers?.length) {
+                const providersMatch = mainTs.match(
+                    /providers:\s*\[([\s\S]*?)\]/,
+                );
+                if (providersMatch) {
+                    const providersContent = providersMatch[1];
+                    allProvidersPresent = moduleImport.providers.every(
+                        (provider) => {
+                            return providersContent.includes(provider);
+                        },
+                    );
+                } else {
+                    allProvidersPresent = false;
+                }
+            }
+
+            return allModulesPresent && allProvidersPresent;
+        } catch (error) {
+            this.logger.error(`Error checking module status: ${error.message}`);
+            return false;
+        }
+    }
+
+    /**
+     * Ativar ou desativar um módulo na aplicação
+     */
+    async toggleModule(moduleName: string, enable: boolean): Promise<boolean> {
+        try {
+            let mainTs = this.readMainTs();
+            const module = this.availableModules.find(
+                (m) => m.name === moduleName,
+            );
+
+            if (!module?.moduleImport) {
+                throw new Error(
+                    `No module import configuration found for ${moduleName}`,
+                );
+            }
+
+            const { moduleImport } = module;
+
+            if (enable) {
+                // Adicionar imports
+                if (Array.isArray(moduleImport.import)) {
+                    const importStatement = `import { ${moduleImport.import.join(', ')} } from '${moduleImport.path}';\n`;
+                    if (!mainTs.includes(importStatement)) {
+                        mainTs = this.insertImport(mainTs, importStatement);
+                    }
+                } else {
+                    const importStatement = `import { ${moduleImport.import} } from '${moduleImport.path}';\n`;
+                    if (!mainTs.includes(importStatement)) {
+                        mainTs = this.insertImport(mainTs, importStatement);
+                    }
+                }
+
+                // Adicionar módulos ao array modules
+                for (const moduleName of moduleImport.modules) {
+                    if (
+                        !mainTs.includes(`${moduleName},`) &&
+                        !mainTs.includes(`${moduleName}\n`)
+                    ) {
+                        mainTs = this.addModuleToArray(mainTs, moduleName);
+                    }
+                }
+
+                // Adicionar providers se existirem
+                if (moduleImport.providers?.length) {
+                    for (const provider of moduleImport.providers) {
+                        if (
+                            !mainTs.includes(`${provider},`) &&
+                            !mainTs.includes(`${provider}\n`)
+                        ) {
+                            mainTs = this.addProviderToArray(mainTs, provider);
+                        }
+                    }
+                }
+            } else {
+                // Remover imports
+                if (Array.isArray(moduleImport.import)) {
+                    const importPattern = `import\\s*{[^}]*${moduleImport.import.join('[^}]*')}[^}]*}\\s*from\\s*['"]${moduleImport.path}['"];?\n?`;
+                    mainTs = mainTs.replace(new RegExp(importPattern), '');
+                } else {
+                    const importPattern = `import\\s*{[^}]*${moduleImport.import}[^}]*}\\s*from\\s*['"]${moduleImport.path}['"];?\n?`;
+                    mainTs = mainTs.replace(new RegExp(importPattern), '');
+                }
+
+                // Remover módulos do array
+                for (const moduleName of moduleImport.modules) {
+                    mainTs = this.removeModuleFromArray(mainTs, moduleName);
+                }
+
+                // Remover providers se existirem
+                if (moduleImport.providers?.length) {
+                    for (const provider of moduleImport.providers) {
+                        mainTs = this.removeProviderFromArray(mainTs, provider);
+                    }
+                }
+            }
+
+            this.saveMainTs(mainTs);
+            return true;
+        } catch (error) {
+            this.logger.error(`Error toggling module: ${error.message}`);
+            throw error;
+        }
+    }
+
+    private insertImport(content: string, importStatement: string): string {
+        const lines = content.split('\n');
+        const lastImportIndex = lines.reduce((lastIndex, line, index) => {
+            return line.trim().startsWith('import') ? index : lastIndex;
+        }, -1);
+
+        lines.splice(lastImportIndex + 1, 0, importStatement);
+        return lines.join('\n');
+    }
+
+    private addModuleToArray(content: string, moduleName: string): string {
+        const moduleArrayRegex = /modules:\s*\[([\s\S]*?)\]/;
+        return content.replace(moduleArrayRegex, (match, moduleList) => {
+            const modules = moduleList.trim();
+            const newModuleList = modules
+                ? `${modules},\n        ${moduleName}`
+                : moduleName;
+            return `modules: [\n        ${newModuleList}\n    ]`;
+        });
+    }
+
+    private removeModuleFromArray(content: string, moduleName: string): string {
+        return content
+            .replace(new RegExp(`[\\s,]*${moduleName}[,\\s]*`), ',')
+            .replace(/,\s*,/g, ',')
+            .replace(/\[\s*,/, '[')
+            .replace(/,\s*\]/, ']');
+    }
+
+    private addProviderToArray(content: string, provider: string): string {
+        const providerArrayRegex = /providers:\s*\[([\s\S]*?)\]/;
+        return content.replace(providerArrayRegex, (match, providerList) => {
+            const providers = providerList.trim();
+            const newProviderList = providers
+                ? `${providers},\n        ${provider}`
+                : provider;
+            return `providers: [\n        ${newProviderList}\n    ]`;
+        });
+    }
+
+    private removeProviderFromArray(content: string, provider: string): string {
+        return content
+            .replace(new RegExp(`[\\s,]*${provider}[,\\s]*`), ',')
+            .replace(/,\s*,/g, ',')
+            .replace(/\[\s*,/, '[')
+            .replace(/,\s*\]/, ']');
     }
 }

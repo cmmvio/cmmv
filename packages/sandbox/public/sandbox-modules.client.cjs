@@ -20,6 +20,7 @@ const useModulesViewer = () => {
         updating: null,
         updateSuccess: null,
         updateError: null,
+        togglingModule: null
     });
 
     function checkIfRootUser() {
@@ -70,6 +71,12 @@ const useModulesViewer = () => {
 
             if (data.result) {
                 state.modules = data.result.data;
+                // Buscar status para cada módulo instalado
+                for (const module of state.modules) {
+                    if (module.installed) {
+                        await fetchModuleStatus(module.name);
+                    }
+                }
             } else {
                 state.modules = [];
             }
@@ -191,11 +198,11 @@ const useModulesViewer = () => {
         }
     };
 
-    const refreshData = () => {
-        fetchAllModules();
-        fetchInstalledModules();
-        fetchModulesByCategory();
-        fetchPackageManager();
+    const refreshData = async () => {
+        await fetchAllModules();
+        await fetchInstalledModules();
+        await fetchModulesByCategory();
+        await fetchPackageManager();
     };
 
     const filteredModules = computed(() => {
@@ -223,10 +230,66 @@ const useModulesViewer = () => {
         return ['All', ...Array.from(categories).sort()];
     });
 
+    const fetchModuleStatus = async (moduleName) => {
+        try {
+            const response = await fetch(`${state.baseUrl}/modules/${moduleName}/status`, {
+                headers: {
+                    'Authorization': getAuthToken()
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error fetching module status: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                state.moduleStatus[moduleName] = data.data.enabled;
+            }
+        } catch (error) {
+            console.error(`Error fetching status for module ${moduleName}:`, error);
+        }
+    };
+
+    const toggleModuleStatus = async (module) => {
+        if (!module || state.togglingModule === module.name) return;
+
+        try {
+            state.togglingModule = module.name;
+
+            const response = await fetch(`${state.baseUrl}/modules/${module.name}/toggle`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': getAuthToken(),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    enable: !module.isEnabled
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error toggling module: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                module.isEnabled = !module.isEnabled;
+                await refreshData(); // Recarregar dados para atualizar o estado
+            }
+        } catch (error) {
+            console.error(`Error toggling module ${module.name}:`, error);
+        } finally {
+            state.togglingModule = null;
+        }
+    };
+
     const initialize = () => {
         getAuthToken();
         refreshData();
-        console.log('Visualização inicial:', state.view);
+        state.modules.forEach(module => {
+            fetchModuleStatus(module.name);
+        });
     };
 
     // Nova função para instalar um módulo principal
@@ -462,6 +525,9 @@ const useModulesViewer = () => {
         toggleView,
         updateModule,
         clearUpdateNotifications,
-        clearAllNotifications
+        clearAllNotifications,
+        moduleStatus: computed(() => state.moduleStatus),
+        togglingModule: computed(() => state.togglingModule),
+        toggleModuleStatus
     };
 };

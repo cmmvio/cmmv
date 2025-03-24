@@ -184,4 +184,44 @@ export class ModulesController {
             };
         }
     }
+
+    @Get(':name/status')
+    @Auth({ rootOnly: true })
+    public async getModuleStatus(@Param('name') moduleName: string) {
+        try {
+            const isEnabled =
+                await this.modulesService.isModuleEnabled(moduleName);
+            return {
+                success: true,
+                data: { enabled: isEnabled },
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error checking module status',
+                error: error.message,
+            };
+        }
+    }
+
+    @Post(':name/toggle')
+    @Auth({ rootOnly: true })
+    public async toggleModule(
+        @Param('name') moduleName: string,
+        @Body() data: { enable: boolean },
+    ) {
+        try {
+            await this.modulesService.toggleModule(moduleName, data.enable);
+            return {
+                success: true,
+                message: `Module ${moduleName} ${data.enable ? 'enabled' : 'disabled'} successfully`,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: `Failed to ${data.enable ? 'enable' : 'disable'} module ${moduleName}`,
+                error: error.message,
+            };
+        }
+    }
 }
