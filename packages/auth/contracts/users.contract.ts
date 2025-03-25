@@ -16,6 +16,7 @@ import { GroupsContract } from './groups.contract';
     protoPackage: 'auth',
     subPath: '/auth',
     generateController: true,
+    generateBoilerplates: false,
     auth: true,
     rootOnly: true,
     imports: ['crypto'],

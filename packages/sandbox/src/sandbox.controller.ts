@@ -139,18 +139,18 @@ export class SandboxController {
             : {};
     }
 
-    @Post('compile')
+    @Post('compile', { exclude: true })
     async heandlerCompile(@Body() schema: IContract) {
         return await this.sandboxService.compileContract(schema);
     }
 
-    @Delete(':contractName')
+    @Delete(':contractName', { exclude: true })
     async handlerDelete(@Param('contractName') contractName: string) {
         await this.sandboxService.deleteContract(contractName);
         return 'ok';
     }
 
-    @Post('restart')
+    @Post('restart', { exclude: true })
     async handlerRestart() {
         await this.sandboxService.restartApplication();
         return 'ok';

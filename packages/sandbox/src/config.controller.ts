@@ -6,7 +6,7 @@ import { ConfigService } from './config.service';
 export class ConfigController {
     constructor(private readonly configService: ConfigService) {}
 
-    @Get()
+    @Get({ exclude: true })
     @Auth({ rootOnly: true })
     async getConfig() {
         try {
@@ -24,7 +24,7 @@ export class ConfigController {
         }
     }
 
-    @Get('modules')
+    @Get('modules', { exclude: true })
     @Auth({ rootOnly: true })
     public async getModuleConfigs() {
         try {
@@ -42,7 +42,7 @@ export class ConfigController {
         }
     }
 
-    @Get('file')
+    @Get('file', { exclude: true })
     @Auth({ rootOnly: true })
     async getConfigFile() {
         try {
@@ -60,7 +60,7 @@ export class ConfigController {
         }
     }
 
-    @Post('file')
+    @Post('file', { exclude: true })
     @Auth({ rootOnly: true })
     async saveConfigFile(@Body() body: { content: string }) {
         try {
@@ -80,7 +80,7 @@ export class ConfigController {
         }
     }
 
-    @Get(':module')
+    @Get(':module', { exclude: true })
     @Auth({ rootOnly: true })
     async getModuleConfig(@Param('module') moduleName: string) {
         try {
@@ -98,7 +98,7 @@ export class ConfigController {
         }
     }
 
-    @Post(':module')
+    @Post(':module', { exclude: true })
     @Auth({ rootOnly: true })
     async updateModuleConfig(
         @Param('module') moduleName: string,
@@ -130,7 +130,7 @@ export class ConfigController {
         }
     }
 
-    @Post(':module/:key')
+    @Post(':module/:key', { exclude: true })
     @Auth({ rootOnly: true })
     async setConfigValue(
         @Param('module') moduleName: string,

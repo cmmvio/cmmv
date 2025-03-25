@@ -8,7 +8,7 @@ import { BackupService } from './backup.service';
 export class BackupController {
     constructor(private readonly backupService: BackupService) {}
 
-    @Post()
+    @Post({ exclude: true })
     @Auth({ rootOnly: true })
     async createBackup() {
         try {
@@ -27,7 +27,7 @@ export class BackupController {
         }
     }
 
-    @Get()
+    @Get({ exclude: true })
     @Auth({ rootOnly: true })
     async listBackups() {
         try {
@@ -46,7 +46,7 @@ export class BackupController {
         }
     }
 
-    @Get('download/:filename')
+    @Get('download/:filename', { exclude: true })
     async downloadBackup(@Param('filename') filename: string, @Response() res) {
         try {
             return await this.backupService.downloadBackupFile(filename, res);

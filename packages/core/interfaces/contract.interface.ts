@@ -22,6 +22,7 @@ export class IContract {
     directMessage?: boolean;
     generateController?: boolean;
     generateEntities?: boolean;
+    generateBoilerplates?: boolean;
     auth?: boolean;
     rootOnly?: boolean;
     controllerCustomPath?: string;

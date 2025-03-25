@@ -1,3 +1,3 @@
-export * from './keyv.config';
-export * from './keyv.module';
-export * from './keyv.service';
+export * from './lib/keyv.config';
+export * from './lib/keyv.module';
+export * from './lib/keyv.service';

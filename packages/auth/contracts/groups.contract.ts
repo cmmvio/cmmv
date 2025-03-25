@@ -12,6 +12,7 @@ import {
     protoPackage: 'auth',
     subPath: '/auth',
     generateController: true,
+    generateBoilerplates: false,
     auth: true,
     rootOnly: true,
     options: {

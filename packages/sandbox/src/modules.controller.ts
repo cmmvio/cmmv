@@ -8,7 +8,7 @@ import { ModulesService } from './modules.service';
 export class ModulesController {
     constructor(private readonly modulesService: ModulesService) {}
 
-    @Get()
+    @Get({ exclude: true })
     @Auth({ rootOnly: true })
     public async getAllModules() {
         try {
@@ -26,7 +26,7 @@ export class ModulesController {
         }
     }
 
-    @Get('installed')
+    @Get('installed', { exclude: true })
     @Auth({ rootOnly: true })
     public async getInstalledModules() {
         try {
@@ -44,7 +44,7 @@ export class ModulesController {
         }
     }
 
-    @Get('categories')
+    @Get('categories', { exclude: true })
     @Auth({ rootOnly: true })
     public async getModulesByCategory() {
         try {
@@ -62,7 +62,7 @@ export class ModulesController {
         }
     }
 
-    @Get(':name')
+    @Get(':name', { exclude: true })
     @Auth({ rootOnly: true })
     public async getModuleDetails(@Param('name') moduleName: string) {
         try {
@@ -89,7 +89,7 @@ export class ModulesController {
         }
     }
 
-    @Post('install')
+    @Post('install', { exclude: true })
     @Auth({ rootOnly: true })
     public async installModule(
         @Body() data: { moduleName: string; dependencies: string[] },
@@ -113,7 +113,7 @@ export class ModulesController {
         }
     }
 
-    @Post('install-submodule')
+    @Post('install-submodule', { exclude: true })
     @Auth({ rootOnly: true })
     public async installSubmodule(
         @Body()
@@ -143,7 +143,7 @@ export class ModulesController {
         }
     }
 
-    @Get('package-manager')
+    @Get('package-manager', { exclude: true })
     @Auth({ rootOnly: true })
     public async getPackageManager() {
         try {
@@ -161,7 +161,7 @@ export class ModulesController {
         }
     }
 
-    @Post('update')
+    @Post('update', { exclude: true })
     @Auth({ rootOnly: true })
     public async updateModule(
         @Body() data: { moduleName: string; dependencies: string[] },
@@ -185,7 +185,7 @@ export class ModulesController {
         }
     }
 
-    @Get(':name/status')
+    @Get(':name/status', { exclude: true })
     @Auth({ rootOnly: true })
     public async getModuleStatus(@Param('name') moduleName: string) {
         try {
@@ -204,7 +204,7 @@ export class ModulesController {
         }
     }
 
-    @Post(':name/toggle')
+    @Post(':name/toggle', { exclude: true })
     @Auth({ rootOnly: true })
     public async toggleModule(
         @Param('name') moduleName: string,

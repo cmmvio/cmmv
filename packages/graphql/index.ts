@@ -1,9 +1,9 @@
-export * from './graphql.config';
-export * from './graphql.controller';
-export * from './graphql.module';
-export * from './graphql.service';
-export * from './graphql.transpiler';
-export * from './graphql.types';
+export * from './lib/graphql.config';
+export * from './lib/graphql.controller';
+export * from './lib/graphql.module';
+export * from './lib/graphql.service';
+export * from './lib/graphql.transpiler';
+export * from './lib/graphql.types';
 
 export {
     ObjectType,

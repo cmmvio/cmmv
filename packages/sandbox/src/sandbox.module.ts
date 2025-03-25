@@ -16,6 +16,7 @@ import { ConfigController } from './config.controller';
 import { ConfigService } from './config.service';
 
 export const SandboxModule = new Module('sandbox', {
+    devMode: true,
     controllers: [
         SandboxController,
         LogsController,

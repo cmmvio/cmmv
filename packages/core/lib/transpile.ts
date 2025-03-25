@@ -12,20 +12,28 @@ export interface ITranspile {
 export abstract class AbstractTranspile {
     abstract run(): Promise<any> | void;
 
-    public getRootPath(contract: any, context: string): string {
+    public getRootPath(
+        contract: any,
+        context: string,
+        createDirectory: boolean = true,
+    ): string {
         const rootDir = Config.get<string>('app.sourceDir', 'src');
 
         let outputDir = contract.subPath
             ? path.join(rootDir, context, contract.subPath)
             : path.join(rootDir, context);
 
-        if (!fs.existsSync(outputDir))
+        if (createDirectory && !fs.existsSync(outputDir))
             fs.mkdirSync(outputDir, { recursive: true });
 
         return outputDir;
     }
 
-    public getGeneratedPath(contract: any, context: string): string {
+    public getGeneratedPath(
+        contract: any,
+        context: string,
+        createDirectory: boolean = true,
+    ): string {
         const generatedDir = Config.get<string>(
             'app.generatedDir',
             '.generated',
@@ -35,7 +43,7 @@ export abstract class AbstractTranspile {
             ? path.join(generatedDir, context, contract.subPath)
             : path.join(generatedDir, context);
 
-        if (!fs.existsSync(outputDir))
+        if (createDirectory && !fs.existsSync(outputDir))
             fs.mkdirSync(outputDir, { recursive: true });
 
         return outputDir;
@@ -118,7 +126,7 @@ export abstract class AbstractTranspile {
     public removeTelemetry(code: string): string {
         const lines = code.split('\n');
         const filteredLines = lines.filter(
-            line =>
+            (line) =>
                 !line.includes('Telemetry.') && !line.includes('{ Telemetry }'),
         );
         return filteredLines.join('\n');
@@ -139,12 +147,14 @@ export class Transpile {
 
     public async transpile(): Promise<any[]> {
         try {
-            const transpilePromises = this.transpilers.map(TranspilerClass => {
-                if (typeof TranspilerClass == 'function') {
-                    const transpiler = new TranspilerClass();
-                    return transpiler.run();
-                }
-            });
+            const transpilePromises = this.transpilers.map(
+                (TranspilerClass) => {
+                    if (typeof TranspilerClass == 'function') {
+                        const transpiler = new TranspilerClass();
+                        return transpiler.run();
+                    }
+                },
+            );
 
             return Promise.all(transpilePromises);
         } catch (error) {

@@ -23,7 +23,6 @@
     },
     "homepage": "https://cmmv.io",
     "dependencies": {
-        "cron": "^3.1.7",
         "js-yaml": "^4.1.0"
     }
 }

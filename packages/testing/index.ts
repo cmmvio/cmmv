@@ -1,2 +1,2 @@
-export * from './application.mock';
-export * from './testing.service';
+export * from './lib/application.mock';
+export * from './lib/testing.service';

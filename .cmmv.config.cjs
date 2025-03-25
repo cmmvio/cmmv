@@ -181,5 +181,11 @@ module.exports = {
                 }
             }
         }
+    },
+
+    graphql: {
+        host: 'localhost',
+        port: 4000,
+        generateResolvers: true,
     }
 };

@@ -4,6 +4,7 @@ import { ConfigSchema } from '../interfaces/config-shema.interface';
 import { Scope } from './scope';
 
 export interface IModuleOptions {
+    devMode?: boolean;
     controllers?: Array<any>;
     providers?: Array<any>;
     transpilers?: Array<new () => ITranspile>;
@@ -29,6 +30,7 @@ export interface IModule {
 export class Module implements IModule {
     public static modules: Map<string, Module> = new Map<string, Module>();
 
+    public devMode: boolean;
     private controllers: Array<any>;
     private transpilers: Array<new () => ITranspile>;
     private submodules: Array<Module>;
@@ -41,6 +43,7 @@ export class Module implements IModule {
     private resolvers: Array<any>;
 
     constructor(name: string, options: IModuleOptions) {
+        this.devMode = options.devMode || false;
         this.providers = options.providers || [];
         this.controllers = options.controllers || [];
         this.transpilers = options.transpilers || [];

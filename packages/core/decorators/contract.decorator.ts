@@ -91,6 +91,7 @@ export interface ContractOptions {
     directMessage?: boolean;
     generateController?: boolean;
     generateEntities?: boolean;
+    generateBoilerplates?: boolean;
     auth?: boolean;
     rootOnly?: boolean;
     imports?: Array<string>;
@@ -172,6 +173,9 @@ export const GENERATE_CONTROLLER_METADATA = Symbol(
     'generate_controller_metadata',
 );
 export const GENERATE_ENTITIES_METADATA = Symbol('generate_entities_metadata');
+export const GENERATE_BOILERPLATES_METADATA = Symbol(
+    'generate_boilerplates_metadata',
+);
 export const AUTH_METADATA = Symbol('auth_metadata');
 export const ROOTONLY_METADATA = Symbol('rootonly_metadata');
 export const CONTROLLER_CUSTOM_PATH_METADATA = Symbol(
@@ -204,6 +208,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
     const defaultDirectMessage = false;
     const defaultGenerateController = true;
     const defaultGenerateEntities = true;
+    const defaultGenerateBoilerplates = true;
     const defaultAuth = true;
     const defaultRootOnly = false;
     const defaultControllerCustomPath = '';
@@ -224,6 +229,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
         protoPackage,
         generateController,
         generateEntities,
+        generateBoilerplates,
         auth,
         rootOnly,
         controllerCustomPath,
@@ -244,6 +250,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
               defaultProtoPackage,
               defaultGenerateController,
               defaultGenerateEntities,
+              defaultGenerateBoilerplates,
               defaultAuth,
               defaultRootOnly,
               defaultControllerCustomPath,
@@ -264,6 +271,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
               options.protoPackage || defaultProtoPackage,
               options.generateController ?? defaultGenerateController,
               options.generateEntities ?? defaultGenerateEntities,
+              options.generateBoilerplates ?? defaultGenerateBoilerplates,
               options.auth ?? defaultAuth,
               options.rootOnly ?? defaultRootOnly,
               options.controllerCustomPath || defaultControllerCustomPath,
@@ -296,6 +304,11 @@ export function Contract(options?: ContractOptions): ClassDecorator {
         Reflect.defineMetadata(
             GENERATE_ENTITIES_METADATA,
             generateEntities,
+            target,
+        );
+        Reflect.defineMetadata(
+            GENERATE_BOILERPLATES_METADATA,
+            generateBoilerplates,
             target,
         );
         Reflect.defineMetadata(AUTH_METADATA, auth, target);

@@ -39,6 +39,7 @@ export class DefaultHTTPTranspiler
     }
 
     private generateService(contract: IContract): void {
+        const generateBoilerplates = contract.generateBoilerplates === true;
         const serviceName = `${contract.controllerName}Service`;
         const modelName = `${contract.controllerName}`;
         const modelInterfaceName = `I${modelName}`;
@@ -157,7 +158,6 @@ export class ${serviceName}Generated extends AbstractService {
         .join('\n\n')}
 }`;
 
-        const outputDir = this.getRootPath(contract, 'services');
         const outputDirGenerated = this.getGeneratedPath(contract, 'services');
         const outputFilePath = path.join(
             outputDirGenerated,
@@ -171,7 +171,14 @@ export class ${serviceName}Generated extends AbstractService {
         );
 
         //Service
-        const serviceTemplate = `import { Service } from '@cmmv/core';
+        if (generateBoilerplates) {
+            const outputDir = this.getRootPath(contract, 'services');
+            const outputFileGenerated = path.join(
+                outputDirGenerated,
+                serviceFileNameGenerated,
+            );
+
+            const serviceTemplate = `import { Service } from '@cmmv/core';
 
 import {
    ${serviceName}Generated
@@ -189,13 +196,40 @@ ${contract.services
     .join('\n\n')}
 }`;
 
-        const outputFilePathFinal = path.join(outputDir, serviceFileName);
+            const outputFilePathFinal = path.join(outputDir, serviceFileName);
 
-        if (!fs.existsSync(outputFilePathFinal)) {
-            fs.writeFileSync(
-                outputFilePathFinal,
-                this.removeExtraSpaces(serviceTemplate),
-                'utf8',
+            if (fs.existsSync(outputFileGenerated))
+                fs.unlinkSync(outputFileGenerated);
+
+            if (!fs.existsSync(outputFilePathFinal)) {
+                fs.writeFileSync(
+                    outputFilePathFinal,
+                    this.removeExtraSpaces(serviceTemplate),
+                    'utf8',
+                );
+            }
+        } else {
+            const outputDir = this.getRootPath(contract, 'services', false);
+            const outputFilePathFinal = path.join(outputDir, serviceFileName);
+
+            if (fs.existsSync(outputFilePathFinal))
+                fs.unlinkSync(outputFilePathFinal);
+
+            fs.appendFileSync(
+                outputFilePath,
+                this.removeExtraSpaces(`
+
+@Service("${contract.controllerName.toLowerCase()}")
+export class ${serviceName} extends ${serviceName}Generated {
+${contract.services
+    .filter((service) => service.createBoilerplate === true)
+    .map((service) => {
+        return `    override async ${service.functionName}(payload: ${service.request}): Promise<${service.response}> {
+        throw new Error("Function ${service.functionName} not implemented");
+    }`;
+    })
+    .join('\n\n')}
+}`),
             );
         }
     }
@@ -220,6 +254,7 @@ ${contract.services
 
     private generateController(contract: IContract): void {
         const telemetry = Config.get<boolean>('app.telemetry');
+        const generateBoilerplates = contract.generateBoilerplates === true;
         const hasCacheModule = Module.hasModule('cache');
         const hasOpenAPIModule = Module.hasModule('openapi');
         const controllerName = `${contract.controllerName}Controller`;
@@ -379,7 +414,6 @@ ${contract.services
                 controllerTemplateGenerated,
             );
 
-        const outputDir = this.getRootPath(contract, 'controllers');
         const outputGeneratedDir = this.getGeneratedPath(
             contract,
             'controllers',
@@ -397,7 +431,7 @@ ${contract.services
         );
 
         const controllerTemplate = `import {
-   Controller
+    Controller
 } from "@cmmv/http";
 
 import {
@@ -407,12 +441,43 @@ import {
 @Controller('${controllerPath}')
 export class ${controllerName} extends ${controllerName}Generated {}`;
 
-        const outputFilePathFinal = path.join(outputDir, controllerFileName);
+        if (generateBoilerplates) {
+            const outputDir = this.getRootPath(contract, 'controllers');
+            const outputFileGenerated = path.join(
+                outputGeneratedDir,
+                controllerFileName,
+            );
+            const outputFilePathFinal = path.join(
+                outputDir,
+                controllerFileName,
+            );
 
-        if (!fs.existsSync(outputFilePathFinal)) {
-            fs.writeFileSync(
-                outputFilePathFinal,
-                this.removeExtraSpaces(controllerTemplate),
+            if (fs.existsSync(outputFileGenerated))
+                fs.unlinkSync(outputFileGenerated);
+
+            if (!fs.existsSync(outputFilePathFinal)) {
+                fs.writeFileSync(
+                    outputFilePathFinal,
+                    this.removeExtraSpaces(controllerTemplate),
+                    'utf8',
+                );
+            }
+        } else {
+            const outputDir = this.getRootPath(contract, 'controllers', false);
+            const outputFilePathFinal = path.join(
+                outputDir,
+                controllerFileName,
+            );
+
+            if (fs.existsSync(outputFilePathFinal))
+                fs.unlinkSync(outputFilePathFinal);
+
+            fs.appendFileSync(
+                outputFilePath,
+                this.removeExtraSpaces(`
+
+@Controller('${controllerPath}')
+export class ${controllerName} extends ${controllerName}Generated {}`),
                 'utf8',
             );
         }

@@ -67,9 +67,7 @@ export class ${entityName}Entity implements I${entityName} {
 ${contract.fields.map((field: any) => this.generateField(field, contract)).join('\n\n')}${extraFields}
 }`;
 
-        const outputDir = isModuleContract
-            ? this.getGeneratedPath(contract, 'entities')
-            : this.getRootPath(contract, 'entities');
+        const outputDir = this.getGeneratedPath(contract, 'entities');
         const outputFilePath = path.join(outputDir, entityFileName);
         fs.writeFileSync(outputFilePath, entityTemplate, 'utf8');
     }
@@ -79,6 +77,7 @@ ${contract.fields.map((field: any) => this.generateField(field, contract)).join(
      * @param contract - The contract to generate the services for
      */
     private generateServices(contract: IContract): void {
+        const generateBoilerplates = contract.generateBoilerplates === true;
         const telemetry = Config.get<boolean>('app.telemetry');
         const serviceName = `${contract.controllerName}Service`;
         const modelName = `${contract.controllerName}`;
@@ -113,6 +112,10 @@ ${contract.fields.map((field: any) => this.generateField(field, contract)).join(
     as it may be overwritten by the application.
     **********************************************
 **/
+
+import {
+    Service
+} from "@cmmv/core";
 
 import {
     AbstractRepositoryService,
@@ -177,18 +180,40 @@ ${contract.services
     })
     .join('\n\n')}}`;
 
-        if (!telemetry)
+        if (!telemetry) {
             serviceTemplateGenerated = this.removeTelemetry(
                 serviceTemplateGenerated,
             );
+        }
 
         const outputDir = this.getGeneratedPath(contract, 'services');
         const outputFilePath = path.join(outputDir, serviceFileNameGenerated);
+
         fs.writeFileSync(
             outputFilePath,
             this.removeExtraSpaces(serviceTemplateGenerated),
             'utf8',
         );
+
+        if (!generateBoilerplates) {
+            fs.appendFileSync(
+                outputFilePath,
+                this.removeExtraSpaces(`
+
+@Service("${contract.controllerName.toLowerCase()}")
+export class ${serviceName} extends ${serviceName}Generated {
+${contract.services
+    .filter((service) => service.createBoilerplate === true)
+    .map((service) => {
+        return `    override async ${service.functionName}(payload: ${service.request}): Promise<${service.response}> {
+        throw new Error("Function ${service.functionName} not implemented");
+    }`;
+    })
+    .join('\n\n')}
+}`),
+                'utf8',
+            );
+        }
     }
 
     /**
