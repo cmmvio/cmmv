@@ -11,6 +11,7 @@ import {
 import { GroupsContract } from './groups.contract';
 
 @Contract({
+    namespace: 'Auth',
     controllerName: 'User',
     protoPackage: 'auth',
     subPath: '/auth',

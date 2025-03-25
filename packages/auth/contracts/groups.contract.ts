@@ -7,6 +7,7 @@ import {
 } from '@cmmv/core';
 
 @Contract({
+    namespace: 'Auth',
     controllerName: 'Groups',
     protoPackage: 'auth',
     subPath: '/auth',

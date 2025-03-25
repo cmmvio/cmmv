@@ -235,7 +235,8 @@ createApp({
             functionalTabDropdownOpen: false,
             linkedEntities: {},
             loadingLinks: {},
-            authModalCallback: null
+            authModalCallback: null,
+            openNamespaces: {},
         }
     },
 
@@ -295,7 +296,60 @@ createApp({
                 'backup': 'Backup'
             };
             return labels[this.contractTab] || 'Contract';
-        }
+        },
+
+        groupedContracts() {
+            const groups = {};
+
+            if (!this.filteredContracts) return groups;
+
+            // First pass: group contracts by namespace
+            Object.entries(this.filteredContracts).forEach(([key, contract]) => {
+                // Skip contracts without namespace
+                const namespace = this.getContractNamespace(contract);
+                if (!namespace || namespace.trim() === '') return;
+
+                // Check if contract should be visible
+                const isVisible = (!this.hiddenModuleContracts || !contract.options.moduleContract) &&
+                                 !contract.directMessage &&
+                                 contract.expose !== false;
+
+                if (!isVisible) return;
+
+                if (!groups[namespace]) {
+                    groups[namespace] = {};
+                }
+                groups[namespace][key] = contract;
+            });
+
+            // Remove empty namespaces
+            Object.keys(groups).forEach(namespace => {
+                if (Object.keys(groups[namespace]).length === 0) {
+                    delete groups[namespace];
+                }
+            });
+
+            // Convert to array, sort namespaces, and convert back to object
+            const sortedGroups = {};
+            Object.keys(groups)
+                .sort((a, b) => {
+                    if (a === 'Default') return 1;
+                    if (b === 'Default') return -1;
+                    return a.localeCompare(b);
+                })
+                .forEach(namespace => {
+                    // Sort contracts within each namespace by controllerName
+                    const sortedContracts = {};
+                    Object.entries(groups[namespace])
+                        .sort(([,a], [,b]) => a.controllerName.localeCompare(b.controllerName))
+                        .forEach(([key, contract]) => {
+                            sortedContracts[key] = contract;
+                        });
+                    sortedGroups[namespace] = sortedContracts;
+                });
+
+            return sortedGroups;
+        },
     },
 
     mounted() {
@@ -416,6 +470,22 @@ createApp({
                 localStorage.setItem("sidebarOpen", newState);
             },
             immediate: true
+        },
+        'selectedContract.namespace': {
+            handler(newNamespace) {
+                if (this.selectedContract) {
+                    const key = Object.keys(this.schema).find(k =>
+                        this.schema[k].contractName === this.selectedContract.contractName
+                    );
+
+                    if (key) {
+                        // Update the schema to trigger reactivity
+                        this.schema[key] = { ...this.schema[key] };
+                        this.schemaToLocalStorege();
+                        this.filterContracts();
+                    }
+                }
+            }
         }
     },
 
@@ -483,6 +553,9 @@ createApp({
             this.migrateIndexes();
             this.migrateMessages();
             this.migrateServices();
+
+            // Load namespace state after schema is loaded
+            this.loadNamespaceState();
 
             await this.checkContractsForChanges();
         },
@@ -2453,6 +2526,56 @@ createApp({
                     this.fetchLinkedEntityRecords(entityName, contractName);
                 }
             });
+        },
+
+        getContractNamespace(contract) {
+            if (!contract) return '';
+
+            // First try to get namespace from the namespace field
+            if (contract.namespace && contract.namespace.trim() !== '') {
+                return contract.namespace.trim();
+            }
+
+            // Fallback to subPath
+            if (contract.subPath) {
+                const parts = contract.subPath.split('/');
+                const namespace = parts[0]?.trim() || '';
+                if (namespace !== '') return namespace;
+            }
+
+            // Last fallback to protoPackage
+            if (contract.protoPackage) {
+                const parts = contract.protoPackage.split('.');
+                const namespace = parts[0]?.trim() || '';
+                if (namespace !== '') return namespace;
+            }
+
+            return '';
+        },
+
+        toggleNamespace(namespace) {
+            this.openNamespaces[namespace] = !this.openNamespaces[namespace];
+            this.saveNamespaceState();
+        },
+
+        isNamespaceOpen(namespace) {
+            return this.openNamespaces[namespace] !== false;
+        },
+
+        saveNamespaceState() {
+            localStorage.setItem('openNamespaces', JSON.stringify(this.openNamespaces));
+        },
+
+        loadNamespaceState() {
+            const savedState = localStorage.getItem('openNamespaces');
+            if (savedState) {
+                try {
+                    this.openNamespaces = JSON.parse(savedState);
+                } catch (e) {
+                    console.error('Error loading namespace state:', e);
+                    this.openNamespaces = {};
+                }
+            }
         },
     }
 }).mount('#app')

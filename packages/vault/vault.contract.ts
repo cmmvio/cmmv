@@ -1,6 +1,7 @@
 import { AbstractContract, Contract, ContractField } from '@cmmv/core';
 
 @Contract({
+    namespace: 'Vault',
     controllerName: 'Vault',
     protoPackage: 'vault',
     generateController: false,

@@ -1,6 +1,7 @@
 import { AbstractContract, ContractField, Contract } from '@cmmv/core';
 
 @Contract({
+    namespace: 'Repository',
     controllerName: 'Migrations',
     controllerCustomPath: 'migrations',
     protoPath: 'migrations.proto',

@@ -9,6 +9,7 @@ import {
 import { UserContract } from './users.contract';
 
 @Contract({
+    namespace: 'Auth',
     controllerName: 'Sessions',
     protoPackage: 'auth',
     subPath: '/auth',

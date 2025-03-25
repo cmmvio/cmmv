@@ -1,6 +1,7 @@
 import { AbstractContract, Contract, ContractField } from '@cmmv/core';
 
 @Contract({
+    namespace: 'Auth',
     controllerName: 'OAuthTokens',
     protoPackage: 'auth',
     subPath: '/auth',
