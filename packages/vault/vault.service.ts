@@ -7,12 +7,11 @@ import { Service, AbstractService, Config, Logger, isJSON } from '@cmmv/core';
 import { IInsertResponse, Repository } from '@cmmv/repository';
 
 import { Encryptor } from '@cmmv/encryptor';
-import { HttpCode, HttpException, HttpStatus } from '@cmmv/http';
+
+import { HttpException, HttpStatus } from '@cmmv/http';
 
 @Service('vault')
 export class VaultService extends AbstractService {
-    private logger = new Logger('VaultService');
-
     async createKeys() {
         const recipientKeyPair = ec.genKeyPair();
         const recipientPrivateKey = recipientKeyPair.getPrivate('hex', false);

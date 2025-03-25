@@ -9,8 +9,9 @@ import { FormModule } from '@cmmv/form';
 import { VaultModule } from '@cmmv/vault';
 import { OpenAPIModule } from '@cmmv/openapi';
 import { GraphQLModule } from '@cmmv/graphql';
-import { SandoxModule } from '@cmmv/sandbox';
-import { InspectorModule } from '@cmmv/inspector';
+import { SandboxModule } from '@cmmv/sandbox';
+import { CacheModule } from '@cmmv/cache';
+
 
 Application.create({
     httpAdapter: DefaultAdapter,
@@ -26,7 +27,7 @@ Application.create({
         VaultModule,
         OpenAPIModule,
         GraphQLModule,
-        SandoxModule,
-        InspectorModule],
+        SandboxModule,
+    ],
     providers: [Repository, SchedulingService],
 });

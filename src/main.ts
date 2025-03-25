@@ -10,6 +10,9 @@ import { VaultModule } from '@cmmv/vault';
 import { OpenAPIModule } from '@cmmv/openapi';
 import { GraphQLModule } from '@cmmv/graphql';
 import { SandboxModule } from '@cmmv/sandbox';
+import { ThrottlerModule } from '@cmmv/throttler';
+
+import { IndexModule } from './index.module';
 
 Application.create({
     httpAdapter: DefaultAdapter,
@@ -26,6 +29,8 @@ Application.create({
         OpenAPIModule,
         GraphQLModule,
         SandboxModule,
+        ThrottlerModule,
+        IndexModule,
     ],
     providers: [Repository, SchedulingService],
 });

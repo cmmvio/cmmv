@@ -1,0 +1,18 @@
+{
+    "extends": "../tsconfig.build.json",
+    "compilerOptions": {
+        "outDir": ".",
+        "rootDir": ".",
+        "paths": {
+            "@cmmv/core": ["../core"],
+            "@cmmv/core/*": ["../core/*"],
+            "@cmmv/http": ["../http"],
+            "@cmmv/http/*": ["../http/*"]
+        }
+    },
+    "exclude": ["node_modules", "dist"],
+    "references": [
+        { "path": "../core/tsconfig.build.json" },
+        { "path": "../http/tsconfig.build.json" }
+    ]
+}

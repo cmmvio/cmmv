@@ -1,0 +1,26 @@
+{
+    "filename": "backup-1742865581601.zip",
+    "timestamp": 1742865581601,
+    "createdAt": "2025-03-25T01:19:41.602Z",
+    "finishedAt": "2025-03-25T01:19:41.746Z",
+    "duration": 144,
+    "entityCount": 12,
+    "recordCount": 702,
+    "entities": [
+        "I18nCountriesEntity",
+        "I18nCurrenciesEntity",
+        "UserEntity",
+        "GroupsEntity",
+        "VaultEntity",
+        "LogsEntity",
+        "OAuthTokensEntity",
+        "OAuthCodesEntity",
+        "OAuth2Entity",
+        "SessionsEntity",
+        "MigrationsEntity",
+        "OAuthClientsEntity"
+    ],
+    "sha256": "408d229f9c94c9a52e29b1238c1f1bd0844b63107e8b5875f35d61c5e3232c9d",
+    "fileSize": 32719,
+    "errors": []
+}

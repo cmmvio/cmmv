@@ -54,6 +54,8 @@
             "@cmmv/graphql/*": ["packages/graphql/*"],
             "@cmmv/vault": ["packages/vault"],
             "@cmmv/vault/*": ["packages/vault/*"],
+            "@cmmv/throttler": ["packages/throttler"],
+            "@cmmv/throttler/*": ["packages/throttler/*"],
             "@cmmv/openapi": ["packages/openapi"],
             "@cmmv/openapi/*": ["packages/openapi/*"],
             "@cmmv/sandbox": ["packages/sandbox"],

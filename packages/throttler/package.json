@@ -1,0 +1,25 @@
+{
+    "name": "@cmmv/throttler",
+    "version": "0.9.11",
+    "description": "CMMV rate-limit module for HTTP, RPC and GraphQL",
+    "keywords": [
+        "cmmv",
+        "framework",
+        "throttle",
+        "rate-limit"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cmmvio/cmmv.git"
+    },
+    "author": "Andre Ferreira",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/cmmvio/cmmv/issues"
+    },
+    "homepage": "https://cmmv.io",
+    "dependencies": {}
+}

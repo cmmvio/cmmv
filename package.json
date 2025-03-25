@@ -151,6 +151,7 @@
 	"dependencies": {
 		"@apollo/server": "^4.11.3",
 		"@cmmv/body-parser": "^0.9.5",
+		"@cmmv/cache": "^0.9.11",
 		"@cmmv/compression": "^0.9.5",
 		"@cmmv/cookie-parser": "^0.9.5",
 		"@cmmv/cors": "^0.9.5",
@@ -181,6 +182,7 @@
 		"js-yaml": "^4.1.0",
 		"jsonwebtoken": "^9.0.2",
 		"mongodb": "^6.14.2",
+		"pg": "^8.14.1",
 		"pnpm": "^10.6.5",
 		"protobufjs": "^7.4.0",
 		"qrcode": "^1.5.4",
