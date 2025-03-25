@@ -606,6 +606,8 @@ createApp({
         createContract(){
             if(this.newContractData.controllerName !== ''){
                 this.schema[`${this.newContractData.controllerName}Contract`] = {
+                    isPublic: this.newContractData.isPublic,
+                    namespace: this.newContractData.namespace,
                     contractName: `${this.newContractData.controllerName}Contract`,
                     controllerName: this.newContractData.controllerName,
                     controllerCustomPath: '',
@@ -621,7 +623,7 @@ createApp({
                     indexs: [],
                     directMessage: false,
                     generateController: true,
-                    generateEntities: true,
+                    generateEntities: this.newContractData.generateEntities,
                     auth: false,
                     cache: false,
                     rootOnly: false,
@@ -1594,9 +1596,8 @@ createApp({
                         }, 300);
                     }
 
-                    if (this.authModalCallback) {
+                    if (this.authModalCallback && typeof this.authModalCallback === 'function')
                         this.authModalCallback();
-                    }
                 } else {
                     alert('Authentication failed. Please check your credentials.');
                 }

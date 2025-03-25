@@ -9,27 +9,34 @@ export class ViewTranspile implements ITranspile {
     private logger: Logger = new Logger('ViewTranspile');
 
     run(): void {
-        const content = fs.readFileSync(
-            path.resolve(__dirname, '../templates/cmmv.frontend.cjs'),
-            'utf-8',
+        const useRPCMiddleware = Config.get<boolean>(
+            'rpc.injectMiddleware',
+            false,
         );
-        const outputDir = path.resolve('public/core');
 
-        if (!fs.existsSync(outputDir))
-            fs.mkdirSync(outputDir, { recursive: true });
+        if (useRPCMiddleware) {
+            const content = fs.readFileSync(
+                path.resolve(__dirname, '../templates/cmmv.frontend.cjs'),
+                'utf-8',
+            );
+            const outputDir = path.resolve('public/core');
 
-        const outputFile = path.resolve('public/core/1-cmmv.min.cjs');
-        const currentDate = new Date().toUTCString();
-        const minifiedJsContent = UglifyJS.minify(content).code;
-        fs.writeFileSync(
-            outputFile,
-            `/*!
- * cmmv.io (c) 2024, Andre Ferreira
- * compiled ${currentDate}
- * licensed under the MIT license
- * see: https://github.com/cmmvio/cmmv for details
- */\n ${minifiedJsContent}`,
-            'utf8',
-        );
+            if (!fs.existsSync(outputDir))
+                fs.mkdirSync(outputDir, { recursive: true });
+
+            const outputFile = path.resolve('public/core/1-cmmv.min.cjs');
+            const currentDate = new Date().toUTCString();
+            const minifiedJsContent = UglifyJS.minify(content).code;
+            fs.writeFileSync(
+                outputFile,
+                `/*!
+     * cmmv.io (c) 2024, Andre Ferreira
+     * compiled ${currentDate}
+     * licensed under the MIT license
+     * see: https://github.com/cmmvio/cmmv for details
+     */\n ${minifiedJsContent}`,
+                'utf8',
+            );
+        }
     }
 }

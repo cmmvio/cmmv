@@ -1,5 +1,5 @@
 <div
-    class="bg-neutral-900/50 fixed top-0 bottom-0 left-0 right-0 z-40 flex items-center justify-center"
+    class="bg-neutral-900/50 fixed top-0 bottom-0 left-0 right-0 z-50 flex items-center justify-center"
     style="backdrop-filter: blur(4px);"
     v-show="modalNewContract"
 >
@@ -17,7 +17,7 @@
         </div>
 
         <div class="text-xs p-4 flex-colums w-[420px]">
-            <div class="flex text-xs justify-center mt-2">
+            <div class="flex text-xs justify-center mt-2 mb-2">
                 <div class="w-[150px] flex items-center">Contract Name:</div>
                 <div class="w-[300px] text-left">
                     {{ `${newContractData.controllerName ?? ''}Contract` }}
@@ -33,18 +33,62 @@
                         placeholder="MyNew"
                         v-model="newContractData.controllerName"
                     />
+
+                    <div class="text-xs text-neutral-500 text-left">e.g. User, Group, Post, etc.</div>
                 </div>
             </div>
 
             <div class="flex text-xs justify-center mt-2">
                 <div class="w-[150px] flex items-center">Subpath: </div>
-                <div class="w-[300px] justify-end">
+                <div class="w-[300px] justify-start">
                     <input
                         class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
                         type="text"
                         placeholder="/path"
                         v-model="newContractData.subPath"
                     />
+
+                    <div class="text-xs text-neutral-500 text-left">e.g. /auth, /repository, /blog, etc.</div>
+                </div>
+            </div>
+
+            <div class="flex text-xs justify-center mt-2">
+                <div class="w-[150px] flex items-center">Namespace: </div>
+                <div class="w-[300px] justify-end">
+                    <input
+                        class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
+                        type="text"
+                        placeholder="Auth, Repository, Blog, etc."
+                        v-model="newContractData.namespace"
+                    />
+
+                    <div class="text-xs text-neutral-500 text-left">Define group of contracts</div>
+                </div>
+            </div>
+
+            <div class="flex text-xs justify-center mt-2">
+                <div class="w-[150px] flex items-center">Generate Entities: </div>
+                <div class="w-[300px] justify-start flex items-center">
+                    <input
+                        type="checkbox"
+                        class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
+                        v-model="newContractData.generateEntities"
+                    />
+
+                    <div class="text-xs text-neutral-500 text-left">Generate entities for this contract</div>
+                </div>
+            </div>
+
+            <div class="flex text-xs justify-center mt-2">
+                <div class="w-[150px] flex items-center">Public Contract: </div>
+                <div class="w-[300px] justify-start flex items-center">
+                    <input
+                        type="checkbox"
+                        class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
+                        v-model="newContractData.isPublic"
+                    />
+
+                    <div class="text-xs text-neutral-500 text-left">Make this contract public</div>
                 </div>
             </div>
         </div>

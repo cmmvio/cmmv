@@ -12,5 +12,10 @@ export const RPCConfig: ConfigSchema = {
             type: 'boolean',
             default: true,
         },
+        injectMiddleware: {
+            required: false,
+            type: 'boolean',
+            default: false,
+        },
     },
 };
