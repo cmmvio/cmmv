@@ -3,14 +3,11 @@
     class="flex flex-col h-full bg-neutral-800 text-white"
     v-if="formBuilder"
 >
-    <!-- Main Content -->
     <div class="flex-1 flex overflow-hidden">
-        <!-- Left: Components Panel - Hide when in read-only mode -->
         <div
             v-if="!formBuilder.isReadOnly"
             class="w-[240px] flex-shrink-0 border-r border-neutral-800 bg-neutral-900 overflow-y-auto"
         >
-            <!-- Tabs for Attributes/Styles -->
             <div class="flex border-b border-neutral-800">
                 <button
                     class="flex-1 h-[40px] px-4 py-2 text-sm select-none"
@@ -29,7 +26,6 @@
             </div>
 
             <div class="p-3 h-[calc(100%-330px)] overflow-y-auto">
-                <!-- Basic Inputs Section -->
                 <div class="mb-4" v-show="formBuilder.ui.activeElementsTab === 'fields'">
                     <h3
                         class="text-xs uppercase text-neutral-500 font-semibold mb-2"
@@ -379,7 +375,6 @@
                 </div>
             </div>
 
-            <!-- Contract Fields Section -->
             <div class="p-3 pb-0 border-t border-neutral-800">
                 <div class="flex justify-between items-center mb-2">
                     <h3
@@ -396,7 +391,6 @@
                     No fields found in contract
                 </div>
 
-                <!-- List of contract fields -->
                 <div v-else class="max-h-[200px] overflow-y-auto">
                     <div
                         v-for="field in formBuilder.contractFields"
@@ -436,7 +430,6 @@
             </div>
         </div>
 
-        <!-- Middle: Form Builder Canvas -->
         <div
             class="flex-1 flex justify-center bg-neutral-950 overflow-hidden"
         >
@@ -447,7 +440,6 @@
                 @dragleave="!formBuilder.isReadOnly && formBuilder.handleDragLeave($event)"
                 @drop="!formBuilder.isReadOnly && formBuilder.handleDrop($event)"
             >
-                <!-- Overlay for when dragging a new component from sidebar -->
                 <div
                     v-if="formBuilder.isDragging && formBuilder.ui.isDraggingNewComponent"
                     class="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg flex items-center justify-center z-40"
@@ -455,7 +447,6 @@
                     <div class="text-blue-400 text-lg font-medium">Release to add new component</div>
                 </div>
 
-                <!-- Loading indicator -->
                 <div
                     v-if="formBuilder.isLoading"
                     class="absolute inset-0 bg-neutral-900/80 flex items-center justify-center z-50"
@@ -485,7 +476,6 @@
                     </div>
                 </div>
 
-                <!-- Empty state for read-only contract with no form configuration -->
                 <div
                     v-if="formBuilder.isReadOnly"
                     class="border-2 border-dashed border-neutral-700 rounded-lg p-6 min-h-[300px]"
@@ -514,7 +504,6 @@
                     </div>
                 </div>
 
-                <!-- Regular empty state (not read-only) -->
                 <div
                     v-else-if="formBuilder.components.length === 0"
                     class="border-2 border-dashed border-neutral-700 rounded-lg p-6 min-h-[300px]"
@@ -549,14 +538,12 @@
                     </div>
                 </div>
 
-                <!-- Form Builder Canvas with components -->
                 <div
                     v-else
                     class="bg-white dark:bg-neutral-900 rounded-lg shadow-sm border border-neutral-800 p-6 relative w-full"
                     @dragover.prevent="!formBuilder.isReadOnly && !formBuilder.previewMode"
                     @drop.prevent.stop="!formBuilder.isReadOnly && !formBuilder.previewMode && formBuilder.handleCanvasDrop($event)"
                 >
-                    <!-- Overlay para quando arrastar sobre o canvas -->
                     <div
                         v-if="formBuilder.isDragging && formBuilder.ui.isDraggingNewComponent"
                         class="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-500 rounded-lg flex items-center justify-center z-40"
@@ -564,16 +551,13 @@
                         <div class="text-blue-400 text-lg font-medium">Solte para adicionar ao final</div>
                     </div>
 
-                    <!-- Indicador de inserção -->
                     <div
                         v-show="formBuilder.ui.draggedComponent && formBuilder.ui.dropPreviewPosition > 0"
                         class="absolute h-1.5 bg-blue-500 left-0 right-0 transition-all duration-100 z-50 rounded-full"
                         :style="{ top: formBuilder.ui.dropPreviewPosition + 'px' }"
                     ></div>
 
-                    <!-- Grid Container -->
                     <div class="grid grid-cols-12 gap-2 relative">
-                        <!-- Overlay de grade para mostrar colunas durante o redimensionamento -->
                         <div
                             v-if="formBuilder.components.some(c => c.isResizing)"
                             class="absolute inset-0 grid grid-cols-12 gap-4 pointer-events-none z-40"
@@ -585,7 +569,6 @@
                             ></div>
                         </div>
 
-                        <!-- Componentes do formulário -->
                         <div
                             v-for="(component, index) in formBuilder.components"
                             :key="component.id"
@@ -598,20 +581,17 @@
                             }"
                             :data-drop-position="formBuilder.ui.targetComponent && formBuilder.ui.targetComponent.id === component.id ? formBuilder.ui.dropPosition : ''"
                         >
-                            <!-- Visual indicator for drag handle (left side bar) -->
                             <div
                                 v-if="!formBuilder.isReadOnly && !formBuilder.previewMode"
                                 class="absolute left-0 top-0 bottom-0 w-1 bg-transparent rounded-l z-30"
                             ></div>
 
-                            <!-- Resize handle for grid size -->
                             <div
                                 v-if="!formBuilder.isReadOnly && !formBuilder.previewMode && component.type !== 'hidden'"
                                 class="resize-handle absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 w-4 h-4 bg-blue-500 border-2 border-white dark:border-neutral-800 rounded-sm cursor-col-resize z-50 shadow-md"
                                 @mousedown.stop.prevent="formBuilder.initResize($event, component)"
                             ></div>
 
-                            <!-- Overlay transparente para drag e drop -->
                             <div
                                 v-if="!formBuilder.isReadOnly && !formBuilder.previewMode"
                                 class="component-wrapper absolute inset-0 bg-transparent z-40 select-none cursor-move"
@@ -624,13 +604,11 @@
                                 @dragend.stop="!formBuilder.isReadOnly && !formBuilder.previewMode && formBuilder.handleComponentDragEnd($event, component)"
                             ></div>
 
-                            <!-- Conteúdo do componente -->
                             <div
                                 v-html="formBuilder.getComponentHtml(component, formBuilder.previewMode || formBuilder.isReadOnly)"
                                 class="z-20 relative"
                             ></div>
 
-                            <!-- Badges e botões de ação (mantidos como estavam) -->
                             <div
                                 v-if="component.contractFieldId && !formBuilder.previewMode && !formBuilder.isReadOnly"
                                 class="absolute top-0 right-3 mt-1 mr-1 bg-purple-500 text-white text-xs px-1.5 py-0.5 rounded z-20"
@@ -645,7 +623,6 @@
                                 Read-only
                             </div>
 
-                            <!-- Grid size badge -->
                             <div
                                 v-if="!formBuilder.isReadOnly && !formBuilder.previewMode && component.isResizing"
                                 class="absolute bottom-0 right-0 mb-2 mr-2 px-2 py-1 text-xs bg-blue-500 text-white rounded font-bold z-50"
@@ -690,7 +667,6 @@
                         </div>
                     </div>
 
-                    <!-- Submit button in preview mode -->
                     <div
                         v-if="formBuilder.previewMode || formBuilder.isReadOnly"
                         class="mt-6 flex justify-end"
@@ -706,14 +682,11 @@
             </div>
         </div>
 
-        <!-- Right: Properties Panel (hide in read-only mode) -->
         <div
             v-if="!formBuilder.isReadOnly"
             class="w-[300px] flex-shrink-0 border-l border-neutral-800 bg-neutral-900 overflow-y-auto"
         >
-            <!-- Component properties tabs -->
             <div v-if="formBuilder.selectedComponent && !formBuilder.previewMode">
-                <!-- Tabs for Attributes/Styles -->
                 <div class="flex border-b border-neutral-800">
                     <button
                         class="flex-1 h-[40px] px-4 py-2 text-sm select-none"
@@ -731,14 +704,12 @@
                     </button>
                 </div>
 
-                <!-- Attributes Content -->
                 <div v-show="formBuilder.ui.activePropertyTab === 'attributes'" class="p-4">
                     <div class="mb-4">
                         <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
                             General
                         </div>
 
-                        <!-- Contract Field Association -->
                         <div class="mb-3">
                             <label class="block text-xs text-neutral-400 mb-1">Contract Field</label>
                             <select
@@ -811,7 +782,6 @@
                             >
                         </div>
 
-                        <!-- Campos específicos para Textarea -->
                         <div v-if="formBuilder.selectedComponent.type === 'textarea'" class="mb-3">
                             <label class="block text-xs text-neutral-400 mb-1 select-none">Rows</label>
                             <input
@@ -823,7 +793,6 @@
                             />
                         </div>
 
-                        <!-- Campos específicos para Slider -->
                         <div v-if="formBuilder.selectedComponent.type === 'slider'" class="mt-4">
                             <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
                                 Slider Options
@@ -867,7 +836,6 @@
                             </div>
                         </div>
 
-                        <!-- Component-specific properties for Select/Checkbox/Radio -->
                         <div
                             v-if="['select', 'checkbox', 'radio'].includes(formBuilder.selectedComponent.type)"
                             class="mt-4"
@@ -918,7 +886,6 @@
                             </button>
                         </div>
 
-                        <!-- Grid Size -->
                         <div class="mb-4">
                             <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none flex justify-between">
                                 <span>Layout</span>
@@ -943,7 +910,6 @@
                             </div>
                         </div>
 
-                        <!-- Campo específico para Hidden Input -->
                         <div v-if="formBuilder.selectedComponent.type === 'hidden'" class="mb-3">
                             <label class="block text-xs text-neutral-400 mb-1 select-none">Default Value</label>
                             <input
@@ -957,7 +923,6 @@
                             </p>
                         </div>
 
-                        <!-- Configurações específicas para Heading -->
                         <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'heading'" class="mt-4">
                             <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
                                 Heading Options
@@ -988,7 +953,6 @@
                             </div>
                         </div>
 
-                        <!-- Configurações específicas para Divider -->
                         <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'divider'" class="mt-4">
                             <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
                                 Divider Options
@@ -1007,7 +971,6 @@
                             </div>
                         </div>
 
-                        <!-- Configurações específicas para Quote -->
                         <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'quote'" class="mt-4">
                             <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
                                 Quote Options
@@ -1033,7 +996,6 @@
                             </div>
                         </div>
 
-                        <!-- Configurações específicas para Alert -->
                         <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'alert'" class="mt-4">
                             <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
                                 Alert Options
@@ -1062,7 +1024,6 @@
                             </div>
                         </div>
 
-                        <!-- Configurações específicas para Image -->
                         <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'image'" class="mt-4">
                             <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
                                 Image Options
@@ -1112,7 +1073,6 @@
                             </div>
                         </div>
 
-                        <!-- Configurações específicas para Link -->
                         <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'link'" class="mt-4">
                             <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
                                 Link Options
@@ -1152,7 +1112,6 @@
                             </div>
                         </div>
 
-                        <!-- Configurações específicas para HTML -->
                         <div v-if="formBuilder.selectedComponent && formBuilder.selectedComponent.type === 'html'" class="mt-4">
                             <div class="text-xs font-semibold text-neutral-500 uppercase mb-2 select-none">
                                 HTML Content
@@ -1178,7 +1137,6 @@
                     </div>
                 </div>
 
-                <!-- Styles Content -->
                 <div v-show="formBuilder.ui.activePropertyTab === 'styles'" class="p-4">
                     <div class="mb-4">
                         <div class="text-xs font-semibold text-neutral-500 uppercase mb-2">
@@ -1279,7 +1237,6 @@
                 </div>
             </div>
 
-            <!-- Form settings (when no component selected) -->
             <div v-else-if="!formBuilder.previewMode" class="p-4">
                 <div class="mb-4">
                     <div
@@ -1320,7 +1277,6 @@
         class="border-t border-neutral-800 bg-neutral-900 p-3 flex justify-end items-center"
     >
         <div class="flex items-center gap-2">
-            <!-- Read-only badge for module contracts -->
             <div v-if="formBuilder.isReadOnly" class="px-2 py-1 bg-yellow-600 text-white text-xs rounded mr-2">
                 Read-only Mode
             </div>
@@ -1361,7 +1317,6 @@
         background-color: rgba(59, 130, 246, 0.1);
     }
 
-    /* Melhorar visualização da barra de inserção */
     .mb-4.relative[data-drop-position="before"]::before,
     .mb-4.relative[data-drop-position="after"]::before {
         content: '';
@@ -1383,19 +1338,16 @@
         bottom: -1px;
     }
 
-    /* Novos estilos para o container do canvas */
     #form-builder-canvas {
         transition: width 0.3s ease-out;
     }
 
-    /* Para telas pequenas, garantir que o canvas ocupe pelo menos 100% */
     @media (max-width: 1024px) {
         #form-builder-canvas {
             min-width: 100%;
         }
     }
 
-    /* Estilos para o redimensionamento */
     .resize-handle {
         transition: background-color 0.2s ease-out;
     }
@@ -1408,19 +1360,16 @@
         background-color: rgba(59, 130, 246, 0.5);
     }
 
-    /* Animação para mudanças de grid */
     .grid-component {
         transition: grid-column 0.2s ease-out;
     }
 
-    /* Larguras responsivas para grid em telas pequenas */
     @media (max-width: 640px) {
         .grid-component {
             grid-column: span 12 !important;
         }
     }
 
-    /* Feedback visual durante o redimensionamento */
     .resizing {
         user-select: none;
     }
@@ -1430,7 +1379,6 @@
         outline: 1px solid rgba(59, 130, 246, 0.5);
     }
 
-    /* Estilo para o manipulador de redimensionamento */
     .resize-handle {
         transition: all 0.15s ease-out;
         opacity: 0;
@@ -1440,7 +1388,6 @@
         opacity: 1;
     }
 
-    /* Animação de pulso para o manipulador durante hover */
     .grid-component:hover .resize-handle {
         animation: pulse 1.5s infinite;
     }
@@ -1457,7 +1404,6 @@
         }
     }
 
-    /* Estilo mais evidente para o hover */
     .resize-handle:hover {
         transform: translate(50%, -50%) scale(1.3) !important;
         box-shadow: 0 0 5px 2px rgba(59, 130, 246, 0.5);
