@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/sandbox",
-    "version": "0.9.13",
+    "version": "0.9.14",
     "description": "Sandbox for creating contracts in visual mode",
     "keywords": [
         "cmmv",
