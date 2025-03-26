@@ -34,7 +34,6 @@ export class RepositoryTranspile
         const entityName = contract.controllerName;
         const modelName = `${entityName}.Model`;
         const entityFileName = `${entityName.toLowerCase()}.entity.ts`;
-        const isModuleContract = contract.options?.moduleContract === true;
         const schemaName = contract.options?.databaseSchemaName
             ? contract.options?.databaseSchemaName
             : entityName.toLowerCase();

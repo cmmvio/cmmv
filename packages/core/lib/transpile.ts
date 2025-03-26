@@ -98,7 +98,7 @@ export abstract class AbstractTranspile {
     ) {
         const contractSubPath = Reflect.getMetadata(
             SUB_PATH_METADATA,
-            contract,
+            contract.constructor,
         );
 
         if (contractTo.subPath === contractSubPath) return `./${filename}`;
@@ -107,7 +107,7 @@ export abstract class AbstractTranspile {
             ? `${contractTo.subPath
                   .split('/')
                   .map(() => '../')
-                  .join('')}${context}${contractTo.subPath}/${filename}`
+                  .join('')}${context}${contractSubPath}/${filename}`
             : `../${context}/${filename}`;
 
         return alias

@@ -198,9 +198,6 @@ ${contract.services
             );
             const outputFilePathFinal = path.join(outputDir, gatewayFileName);
 
-            if (fs.existsSync(outputFileGenerated))
-                fs.unlinkSync(outputFileGenerated);
-
             if (!fs.existsSync(outputFilePathFinal)) {
                 fs.writeFileSync(
                     outputFilePathFinal,

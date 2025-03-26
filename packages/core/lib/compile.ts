@@ -61,6 +61,7 @@ export class Compile {
 
     private generateImports(schema: IContract): string {
         let imports = 'import {\n';
+        imports += '    Application,\n';
         imports += '    AbstractContract,\n';
         imports += '    Contract,\n';
         imports += '    ContractField,\n';
@@ -102,12 +103,12 @@ export class Compile {
             }
         });
 
-        if (linkedContracts.size > 0) {
+        /*if (linkedContracts.size > 0) {
             linkedContracts.forEach((contract) => {
                 imports += `import { ${contract} } from './${contract.replace('Contract', '').toLowerCase()}.contract';\n`;
             });
             imports += '\n';
-        }
+        }*/
 
         return imports;
     }
@@ -362,27 +363,29 @@ export class Compile {
             fieldCode += '        link: [\n';
 
             field.link.forEach((link, index) => {
-                fieldCode += '            {\n';
+                if (link.contract) {
+                    fieldCode += '            {\n';
 
-                if (link.createRelationship !== undefined)
-                    fieldCode += `                createRelationship: ${link.createRelationship},\n`;
+                    if (link.createRelationship !== undefined)
+                        fieldCode += `                createRelationship: ${link.createRelationship},\n`;
 
-                if (link.contract)
-                    fieldCode += `                contract: ${this.getContractName(link.contract)},\n`;
+                    if (link.contract)
+                        fieldCode += `                contract: Application.getContract("${link.contract}"),\n`;
 
-                if (link.entityName)
-                    fieldCode += `                entityName: '${link.entityName}',\n`;
+                    if (link.entityName)
+                        fieldCode += `                entityName: '${link.entityName}',\n`;
 
-                if (link.field)
-                    fieldCode += `                field: '${link.field}',\n`;
+                    if (link.field)
+                        fieldCode += `                field: '${link.field}',\n`;
 
-                if (link.array !== undefined)
-                    fieldCode += `                array: ${link.array},\n`;
+                    if (link.array !== undefined)
+                        fieldCode += `                array: ${link.array},\n`;
 
-                fieldCode += '            }';
+                    fieldCode += '            }';
 
-                if (index < field.link.length - 1) fieldCode += ',\n';
-                else fieldCode += '\n';
+                    if (index < field.link.length - 1) fieldCode += ',\n';
+                    else fieldCode += '\n';
+                }
             });
 
             fieldCode += '        ],\n';

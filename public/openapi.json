@@ -990,6 +990,70 @@
           "ephemeral"
         ]
       },
+      "Authors": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "required": false
+          }
+        },
+        "required": []
+      },
+      "I18nCurrencies": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "required": true
+          },
+          "code": {
+            "type": "string",
+            "required": true
+          },
+          "prefix": {
+            "type": "string",
+            "required": false
+          },
+          "suffix": {
+            "type": "string",
+            "required": false
+          },
+          "includeThousandsSeparator": {
+            "type": "boolean",
+            "required": true
+          },
+          "thousandsSeparatorSymbol": {
+            "type": "string",
+            "required": false
+          },
+          "allowDecimal": {
+            "type": "boolean",
+            "required": true
+          },
+          "decimalSymbol": {
+            "type": "string",
+            "required": false
+          },
+          "decimalLimit": {
+            "type": "number",
+            "required": true
+          }
+        },
+        "required": [
+          "name",
+          "code",
+          "includeThousandsSeparator",
+          "allowDecimal",
+          "decimalLimit"
+        ]
+      },
       "Catch": {
         "properties": {
           "status": {
@@ -2691,6 +2755,1094 @@
         "responses": {
           "200": {
             "description": "User response schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/authors": {
+      "get": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "Returns Authors records by filter",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "200": {
+            "description": "Authors response schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number"
+                    },
+                    "processingTime": {
+                      "type": "number"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Authors"
+                          }
+                        },
+                        "count": {
+                          "type": "number"
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "number"
+                            },
+                            "offset": {
+                              "type": "number"
+                            },
+                            "sortBy": {
+                              "type": "string",
+                              "default": "id"
+                            },
+                            "sort": {
+                              "type": "string",
+                              "default": "asc"
+                            },
+                            "search": {
+                              "type": "string"
+                            },
+                            "searchField": {
+                              "type": "string"
+                            },
+                            "filters": {
+                              "type": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "default": 10,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "default": 0,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "default": "id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "default": "asc",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchField",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      },
+      "post": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "Insert new Authors",
+        "externalDocs": {
+          "url": null
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": []
+      }
+    },
+    "/authors/{id}": {
+      "get": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "Returns Authors record by ID",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "200": {
+            "description": "Authors response schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number"
+                    },
+                    "processingTime": {
+                      "type": "number"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Authors"
+                          }
+                        },
+                        "count": {
+                          "type": "number"
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "number"
+                            },
+                            "offset": {
+                              "type": "number"
+                            },
+                            "sortBy": {
+                              "type": "string",
+                              "default": "id"
+                            },
+                            "sort": {
+                              "type": "string",
+                              "default": "asc"
+                            },
+                            "search": {
+                              "type": "string"
+                            },
+                            "searchField": {
+                              "type": "string"
+                            },
+                            "filters": {
+                              "type": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      },
+      "put": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "Update Authors by ID",
+        "externalDocs": {
+          "url": null
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authors update response schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "affected": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      },
+      "delete": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "Delete Authors by ID",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "200": {
+            "description": "Authors delete response schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "affected": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      }
+    },
+    "/authors/{id}/raw": {
+      "get": {
+        "tags": [
+          "Authors"
+        ],
+        "summary": "Return Authors record by raw ID",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "200": {
+            "description": "Authors response schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": []
+      }
+    },
+    "/i18n/currencies": {
+      "get": {
+        "tags": [
+          "I18nCurrencies"
+        ],
+        "summary": "Returns I18nCurrencies records by filter",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "200": {
+            "description": "I18nCurrencies response schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number"
+                    },
+                    "processingTime": {
+                      "type": "number"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/I18nCurrencies"
+                          }
+                        },
+                        "count": {
+                          "type": "number"
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "number"
+                            },
+                            "offset": {
+                              "type": "number"
+                            },
+                            "sortBy": {
+                              "type": "string",
+                              "default": "id"
+                            },
+                            "sort": {
+                              "type": "string",
+                              "default": "asc"
+                            },
+                            "search": {
+                              "type": "string"
+                            },
+                            "searchField": {
+                              "type": "string"
+                            },
+                            "filters": {
+                              "type": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "default": 10,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "default": 0,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "required": false,
+            "default": "id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "default": "asc",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchField",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "I18nCurrencies"
+        ],
+        "summary": "Insert new I18nCurrencies",
+        "externalDocs": {
+          "url": null
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "nullable": false
+                  },
+                  "code": {
+                    "type": "string",
+                    "nullable": false,
+                    "uniqueItems": true
+                  },
+                  "prefix": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "suffix": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "includeThousandsSeparator": {
+                    "type": "boolean",
+                    "nullable": false
+                  },
+                  "thousandsSeparatorSymbol": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "allowDecimal": {
+                    "type": "boolean",
+                    "nullable": false
+                  },
+                  "decimalSymbol": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "decimalLimit": {
+                    "type": "int32",
+                    "nullable": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/i18n/currencies/{id}": {
+      "get": {
+        "tags": [
+          "I18nCurrencies"
+        ],
+        "summary": "Returns I18nCurrencies record by ID",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "200": {
+            "description": "I18nCurrencies response schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number"
+                    },
+                    "processingTime": {
+                      "type": "number"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/I18nCurrencies"
+                          }
+                        },
+                        "count": {
+                          "type": "number"
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "number"
+                            },
+                            "offset": {
+                              "type": "number"
+                            },
+                            "sortBy": {
+                              "type": "string",
+                              "default": "id"
+                            },
+                            "sort": {
+                              "type": "string",
+                              "default": "asc"
+                            },
+                            "search": {
+                              "type": "string"
+                            },
+                            "searchField": {
+                              "type": "string"
+                            },
+                            "filters": {
+                              "type": "object"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "I18nCurrencies"
+        ],
+        "summary": "Update I18nCurrencies by ID",
+        "externalDocs": {
+          "url": null
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "nullable": false
+                  },
+                  "code": {
+                    "type": "string",
+                    "nullable": false,
+                    "uniqueItems": true
+                  },
+                  "prefix": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "suffix": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "includeThousandsSeparator": {
+                    "type": "boolean",
+                    "nullable": false
+                  },
+                  "thousandsSeparatorSymbol": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "allowDecimal": {
+                    "type": "boolean",
+                    "nullable": false
+                  },
+                  "decimalSymbol": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "decimalLimit": {
+                    "type": "int32",
+                    "nullable": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "I18nCurrencies update response schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "affected": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "I18nCurrencies"
+        ],
+        "summary": "Delete I18nCurrencies by ID",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "200": {
+            "description": "I18nCurrencies delete response schema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "affected": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized: The client must authenticate itself to get the requested response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: The client does not have access rights to the content.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/i18n/currencies/{id}/raw": {
+      "get": {
+        "tags": [
+          "I18nCurrencies"
+        ],
+        "summary": "Return I18nCurrencies record by raw ID",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "200": {
+            "description": "I18nCurrencies response schema",
             "content": {
               "application/json": {
                 "schema": {

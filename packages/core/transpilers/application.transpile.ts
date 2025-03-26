@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 import { AbstractTranspile, Config, ITranspile, Scope, Module } from '../lib';
 
@@ -313,175 +313,167 @@ import {
     }
 
     private generateClassField(field: any): string {
-        try {
-            if (field) {
-                const hasOpenAPI = Module.hasModule('openapi');
-                const hasGraphQL = Module.hasModule('graphql');
-                const readOnlySting = field.readOnly ? 'readonly ' : '';
-                const decorators: string[] = [];
+        if (field) {
+            const hasOpenAPI = Module.hasModule('openapi');
+            const hasGraphQL = Module.hasModule('graphql');
+            const readOnlySting = field.readOnly ? 'readonly ' : '';
+            const decorators: string[] = [];
 
-                if (field.exclude) {
-                    decorators.push(
-                        `    @Exclude(${field.toClassOnly ? `{ toClassOnly: true }` : ''}${field.toPlainOnly ? `{ toPlainOnly: true }` : ''})`,
-                    );
-                } else {
-                    decorators.push(`    @Expose()`);
-                }
+            if (field.exclude) {
+                decorators.push(
+                    `    @Exclude(${field.toClassOnly ? `{ toClassOnly: true }` : ''}${field.toPlainOnly ? `{ toPlainOnly: true }` : ''})`,
+                );
+            } else {
+                decorators.push(`    @Expose()`);
+            }
 
-                if (field.nullable === false)
-                    decorators.push(`    @IsNotEmpty()`);
+            if (field.nullable === false) decorators.push(`    @IsNotEmpty()`);
 
-                if (field.protoType === 'date')
-                    decorators.push(`    @Type(() => Date)`);
+            if (field.protoType === 'date')
+                decorators.push(`    @Type(() => Date)`);
 
-                if (field.customDecorator) {
-                    for (let decoratorName in field.customDecorator) {
-                        const options = field.customDecorator[decoratorName]
-                            .options
-                            ? JSON.stringify(
-                                  field.customDecorator[decoratorName].options,
-                              )
-                            : '';
+            if (field.customDecorator) {
+                for (let decoratorName in field.customDecorator) {
+                    const options = field.customDecorator[decoratorName].options
+                        ? JSON.stringify(
+                              field.customDecorator[decoratorName].options,
+                          )
+                        : '';
 
-                        decorators.push(`    @${decoratorName}(${options})`);
-                    }
-                }
-
-                if (field.validations) {
-                    field.validations?.forEach((validation: any) => {
-                        const validationName = Array.isArray(validation.type)
-                            ? validation.type[0]
-                            : validation.type;
-
-                        const validationParams = Array.isArray(validation.type)
-                            ? validation.type
-                                  .slice(1)
-                                  .map((param) => JSON.stringify(param))
-                                  .join(', ')
-                            : validation.value !== undefined
-                              ? validation.value
-                              : '';
-
-                        const options = [];
-
-                        if (validation.message)
-                            options.push(`message: "${validation.message}"`);
-
-                        if (validation.context) {
-                            const contextString = JSON.stringify(
-                                validation.context,
-                            ).replace(/"([^"]+)":/g, '$1:');
-                            options.push(`context: ${contextString}`);
-                        }
-
-                        let optionsString =
-                            options.length > 0
-                                ? `{ ${options.join(', ')} }`
-                                : '';
-
-                        if (validationParams && optionsString)
-                            optionsString = ', ' + optionsString;
-
-                        decorators.push(
-                            `    @${validationName}(${validationParams}${
-                                optionsString ? optionsString : ''
-                            })`,
-                        );
-                    });
-                }
-
-                let defaultValueString = ';';
-                let optional = field.nullable ? '?' : '';
-
-                if (field.defaultValue !== undefined) {
-                    const defaultValue =
-                        typeof field.defaultValue === 'string'
-                            ? `"${field.defaultValue}"`
-                            : field.defaultValue;
-
-                    defaultValueString = field.objectType
-                        ? ` = ${field.defaultValue};`
-                        : ` = ${defaultValue};`;
-                }
-
-                if (hasOpenAPI) {
-                    const fieldType = field.modelName
-                        ? field.modelName
-                        : this.mapToTsTypeUpper(field.protoType);
-
-                    let apiType =
-                        field.protoRepeated || field.array
-                            ? `[${fieldType}]`
-                            : `${fieldType}`;
-
-                    if (field.type === 'simpleArray')
-                        apiType = `[${this.mapToTsTypeUpper(field.arrayType)}]`;
-                    else if (apiType === 'Any') apiType = 'object';
-
-                    //OpenAPI
-                    if (!field.exclude) {
-                        if (optional) {
-                            decorators.push(`    @ApiPropertyOptional({
-        type: ${apiType},
-        readOnly: ${field?.readOnly ?? undefined},
-        default: ${field.defaultValue ?? undefined}
-    })`);
-                        } else {
-                            decorators.push(`    @ApiProperty({
-        type: ${apiType},
-        readOnly: ${field?.readOnly ?? undefined},
-        required: true,
-        default: ${field.defaultValue ?? undefined}
-    })`);
-                        }
-                    } else {
-                        decorators.push(`    @ApiHideProperty()`);
-                    }
-
-                    //GraphQL
-                    if (!field.exclude && hasGraphQL) {
-                        decorators.push(
-                            `    @Field(() => ${apiType}, { nullable: ${field.nullable === true ? 'true' : 'false'} })`,
-                        );
-                    }
-
-                    //Transforms
-                    if (field.transform) {
-                        const cleanedTransform = field.transform
-                            .toString()
-                            .replace(/_([a-zA-Z]+)/g, ' $1');
-
-                        decorators.push(
-                            `    @Transform(${cleanedTransform}, { toClassOnly: true })`,
-                        );
-                    }
-
-                    if (field.toPlain) {
-                        const cleanedToPlain = field.toPlain
-                            .toString()
-                            .replace(/_([a-zA-Z]+)/g, ' $1');
-
-                        decorators.push(
-                            `    @Transform(${cleanedToPlain}, { toPlainOnly: true })`,
-                        );
-                    }
-                }
-
-                if (field.link && field.link.length > 0) {
-                    decorators.push(
-                        `    @Type(() => ${field.entityType.replace('Entity', '')})`,
-                    );
-                    return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${field.entityType.replace('Entity', '')}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null;`;
-                } else {
-                    const fieldType = field.objectType
-                        ? field.objectType
-                        : this.mapToTsType(field.protoType);
-
-                    return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${fieldType}${defaultValueString}`;
+                    decorators.push(`    @${decoratorName}(${options})`);
                 }
             }
-        } catch (error) {
-            console.log(error);
+
+            if (field.validations) {
+                field.validations?.forEach((validation: any) => {
+                    const validationName = Array.isArray(validation.type)
+                        ? validation.type[0]
+                        : validation.type;
+
+                    const validationParams = Array.isArray(validation.type)
+                        ? validation.type
+                              .slice(1)
+                              .map((param) => JSON.stringify(param))
+                              .join(', ')
+                        : validation.value !== undefined
+                          ? validation.value
+                          : '';
+
+                    const options = [];
+
+                    if (validation.message)
+                        options.push(`message: "${validation.message}"`);
+
+                    if (validation.context) {
+                        const contextString = JSON.stringify(
+                            validation.context,
+                        ).replace(/"([^"]+)":/g, '$1:');
+                        options.push(`context: ${contextString}`);
+                    }
+
+                    let optionsString =
+                        options.length > 0 ? `{ ${options.join(', ')} }` : '';
+
+                    if (validationParams && optionsString)
+                        optionsString = ', ' + optionsString;
+
+                    decorators.push(
+                        `    @${validationName}(${validationParams}${
+                            optionsString ? optionsString : ''
+                        })`,
+                    );
+                });
+            }
+
+            let defaultValueString = ';';
+            let optional = field.nullable ? '?' : '';
+
+            if (field.defaultValue !== undefined) {
+                const defaultValue =
+                    typeof field.defaultValue === 'string'
+                        ? `"${field.defaultValue}"`
+                        : field.defaultValue;
+
+                defaultValueString = field.objectType
+                    ? ` = ${field.defaultValue};`
+                    : ` = ${defaultValue};`;
+            }
+
+            if (hasOpenAPI) {
+                const fieldType = field.modelName
+                    ? field.modelName
+                    : this.mapToTsTypeUpper(field.protoType);
+
+                let apiType =
+                    field.protoRepeated || field.array
+                        ? `[${fieldType}]`
+                        : `${fieldType}`;
+
+                if (field.type === 'simpleArray')
+                    apiType = `[${this.mapToTsTypeUpper(field.arrayType)}]`;
+                else if (apiType === 'Any') apiType = 'object';
+
+                //OpenAPI
+                if (!field.exclude) {
+                    if (optional) {
+                        decorators.push(`    @ApiPropertyOptional({
+    type: ${apiType},
+    readOnly: ${field?.readOnly ?? undefined},
+    default: ${field.defaultValue ?? undefined}
+})`);
+                    } else {
+                        decorators.push(`    @ApiProperty({
+    type: ${apiType},
+    readOnly: ${field?.readOnly ?? undefined},
+    required: true,
+    default: ${field.defaultValue ?? undefined}
+})`);
+                    }
+                } else {
+                    decorators.push(`    @ApiHideProperty()`);
+                }
+
+                //GraphQL
+                if (!field.exclude && hasGraphQL) {
+                    decorators.push(
+                        `    @Field(() => ${apiType}, { nullable: ${field.nullable === true ? 'true' : 'false'} })`,
+                    );
+                }
+
+                //Transforms
+                if (field.transform) {
+                    const cleanedTransform = field.transform
+                        .toString()
+                        .replace(/_([a-zA-Z]+)/g, ' $1');
+
+                    decorators.push(
+                        `    @Transform(${cleanedTransform}, { toClassOnly: true })`,
+                    );
+                }
+
+                if (field.toPlain) {
+                    const cleanedToPlain = field.toPlain
+                        .toString()
+                        .replace(/_([a-zA-Z]+)/g, ' $1');
+
+                    decorators.push(
+                        `    @Transform(${cleanedToPlain}, { toPlainOnly: true })`,
+                    );
+                }
+            }
+
+            if (field.link && field.link.length > 0 && field.entityType) {
+                decorators.push(
+                    `    @Type(() => ${field.entityType?.replace('Entity', '')})`,
+                );
+                return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${field.entityType.replace('Entity', '')}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null;`;
+            } else {
+                const fieldType = field.objectType
+                    ? field.objectType
+                    : this.mapToTsType(field.protoType);
+
+                return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${fieldType}${defaultValueString}`;
+            }
         }
     }
 

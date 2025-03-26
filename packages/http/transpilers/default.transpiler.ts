@@ -198,9 +198,6 @@ ${contract.services
 
             const outputFilePathFinal = path.join(outputDir, serviceFileName);
 
-            if (fs.existsSync(outputFileGenerated))
-                fs.unlinkSync(outputFileGenerated);
-
             if (!fs.existsSync(outputFilePathFinal)) {
                 fs.writeFileSync(
                     outputFilePathFinal,
@@ -409,10 +406,11 @@ ${contract.services
     })
     .join('\n\n')}}`;
 
-        if (!telemetry)
+        if (!telemetry) {
             controllerTemplateGenerated = this.removeTelemetry(
                 controllerTemplateGenerated,
             );
+        }
 
         const outputGeneratedDir = this.getGeneratedPath(
             contract,
@@ -451,9 +449,6 @@ export class ${controllerName} extends ${controllerName}Generated {}`;
                 outputDir,
                 controllerFileName,
             );
-
-            if (fs.existsSync(outputFileGenerated))
-                fs.unlinkSync(outputFileGenerated);
 
             if (!fs.existsSync(outputFilePathFinal)) {
                 fs.writeFileSync(
