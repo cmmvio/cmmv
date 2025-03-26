@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/scheduling",
-    "version": "0.9.18",
+    "version": "0.9.19",
     "description": "Scheduling module for CMMV",
     "keywords": [
         "cmmv",
@@ -24,5 +24,5 @@
     "dependencies": {
         "cron": "^3.1.7"
     },
-    "gitHead": "557abeb5cc999b99218c31312e965643bebc3434"
+    "gitHead": "1261ab5052bc0a575fe3ca20f109e7ace1dac394"
 }
