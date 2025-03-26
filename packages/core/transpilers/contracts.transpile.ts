@@ -23,6 +23,9 @@ export class ContractsTranspile
         );
         const outputFilename = path.join(generatedDir, 'schema.json');
 
+        if (!fs.existsSync(generatedDir))
+            fs.mkdirSync(generatedDir, { recursive: true });
+
         if (generateSchema) {
             let schema: any = {
                 contracts: {},
