@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/openapi",
-    "version": "0.9.16",
+    "version": "0.9.17",
     "description": "Module for automatic generation of OpenAPI schema for CMMV",
     "keywords": [
         "cmmv",
@@ -24,5 +24,6 @@
     "homepage": "https://cmmv.io",
     "dependencies": {
         "js-yaml": "^4.1.0"
-    }
+    },
+    "gitHead": "f6058e92729114206bc8d6dc010249d5849af077"
 }

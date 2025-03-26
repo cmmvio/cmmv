@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/http",
-    "version": "0.9.16",
+    "version": "0.9.17",
     "description": "HTTP module implementing controllers, using CMMV standard adapter",
     "keywords": [
         "cmmv",
@@ -34,5 +34,5 @@
         "html-minifier-terser": "^7.2.0",
         "uglify-js": "^3.19.2"
     },
-    "gitHead": "6592cb04b434730006720131534dbc2c551ea395"
+    "gitHead": "f6058e92729114206bc8d6dc010249d5849af077"
 }

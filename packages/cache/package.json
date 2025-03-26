@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/cache",
-    "version": "0.9.16",
+    "version": "0.9.17",
     "description": "Cache module using cache-manager for CMMV",
     "keywords": [
         "cmmv",
@@ -28,5 +28,5 @@
     "devDependencies": {
         "@types/cache-manager": "^4.0.6"
     },
-    "gitHead": "6592cb04b434730006720131534dbc2c551ea395"
+    "gitHead": "f6058e92729114206bc8d6dc010249d5849af077"
 }

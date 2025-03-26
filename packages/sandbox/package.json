@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/sandbox",
-    "version": "0.9.16",
+    "version": "0.9.17",
     "description": "Sandbox for creating contracts in visual mode",
     "keywords": [
         "cmmv",
@@ -39,5 +39,6 @@
             "skia-canvas",
             "sqlite3"
         ]
-    }
+    },
+    "gitHead": "f6058e92729114206bc8d6dc010249d5849af077"
 }

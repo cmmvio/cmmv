@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/ws",
-    "version": "0.9.16",
+    "version": "0.9.17",
     "description": "Websocket interaction module for creating Gateways and RPC in CMMV",
     "keywords": [
         "cmmv",
@@ -22,12 +22,12 @@
     },
     "homepage": "https://cmmv.io",
     "dependencies": {
-        "@cmmv/protobuf": "0.9.16",
+        "@cmmv/protobuf": "0.9.17",
         "class-transformer": "^0.5.1",
         "ws": "^8.18.0"
     },
     "devDependencies": {
         "@types/ws": "^8.5.12"
     },
-    "gitHead": "6592cb04b434730006720131534dbc2c551ea395"
+    "gitHead": "f6058e92729114206bc8d6dc010249d5849af077"
 }

@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/repository",
-    "version": "0.9.16",
+    "version": "0.9.17",
     "description": "Repository module using TypeORM for CMMV",
     "keywords": [
         "cmmv",
@@ -24,10 +24,10 @@
     },
     "homepage": "https://cmmv.io",
     "dependencies": {
-        "@cmmv/auth": "0.9.16",
+        "@cmmv/auth": "0.9.17",
         "mongodb": "^6.13.1",
         "sqlite3": "^5.1.7",
         "typeorm": "^0.3.20"
     },
-    "gitHead": "6592cb04b434730006720131534dbc2c551ea395"
+    "gitHead": "f6058e92729114206bc8d6dc010249d5849af077"
 }

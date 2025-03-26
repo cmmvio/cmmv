@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/throttler",
-    "version": "0.9.16",
+    "version": "0.9.17",
     "description": "CMMV rate-limit module for HTTP, RPC and GraphQL",
     "keywords": [
         "cmmv",
@@ -20,5 +20,6 @@
     "bugs": {
         "url": "https://github.com/cmmvio/cmmv/issues"
     },
-    "homepage": "https://cmmv.io"
+    "homepage": "https://cmmv.io",
+    "gitHead": "f6058e92729114206bc8d6dc010249d5849af077"
 }
