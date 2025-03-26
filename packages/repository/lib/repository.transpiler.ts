@@ -318,9 +318,9 @@ ${contract.services
                     } else {
                         decorators.push(
                             `@Column({
-            type: "${field.protoRepeated ? 'simple-array' : linkType}",
-            nullable: true
-        })`,
+        type: "${field.protoRepeated ? 'simple-array' : linkType}",
+        nullable: true
+    })`,
                         );
 
                         tsType = `${entityName}Entity[] | string[] | null`;

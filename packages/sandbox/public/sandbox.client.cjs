@@ -2363,7 +2363,7 @@ createApp({
             field.link.push({
                 createRelationship: false,
                 entityName: '',
-                field: '_id',
+                field: 'id',
                 array: false,
                 entityNullable: false,
                 contract: ''

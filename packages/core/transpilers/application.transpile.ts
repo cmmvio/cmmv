@@ -80,8 +80,12 @@ ${includeId}${contract.fields
                 let optional = field.nullable ? '?' : '';
 
                 if (field.link && field.link.length > 0) {
-                    return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};
+                    if (field.propertyKey.includes('Id')) {
+                        return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};`;
+                    } else {
+                        return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};
     ${field.propertyKey}Id${optional}: string;`;
+                    }
                 } else {
                     const fieldType = field.objectType
                         ? field.objectType
