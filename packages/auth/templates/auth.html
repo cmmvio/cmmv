@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication - CMMV</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/@vueuse/core"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --color-neutral-900: #171717;
+            --color-neutral-800: #262626;
+            --color-neutral-700: #404040;
+            --color-neutral-600: #525252;
+            --color-neutral-500: #737373;
+            --color-neutral-400: #a3a3a3;
+            --color-neutral-300: #d4d4d4;
+            --color-neutral-200: #e5e5e5;
+            --color-neutral-100: #f5f5f5;
+            --color-neutral-50: #fafafa;
+            --color-blue-700: #1d4ed8;
+            --color-blue-600: #2563eb;
+            --color-blue-500: #3b82f6;
+            --color-red-600: #dc2626;
+            --color-red-500: #ef4444;
+            --color-green-600: #16a34a;
+            --color-green-500: #22c55e;
+        }
+
+        body {
+            background-color: var(--color-neutral-900);
+            color: var(--color-neutral-200);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .auth-container {
+            width: 100%;
+            min-width: 380px;
+            max-width: 450px;
+            background-color: var(--color-neutral-800);
+            border-radius: 8px;
+            border: 1px solid var(--color-neutral-700);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .auth-header {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--color-neutral-700);
+            padding: 1.25rem 1.5rem;
+        }
+
+        .auth-header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .auth-content {
+            padding: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .input-control {
+            width: 100%;
+            background-color: var(--color-neutral-700);
+            border: 1px solid var(--color-neutral-600);
+            border-radius: 4px;
+            padding: 0.625rem 0.75rem;
+            font-size: 0.875rem;
+            color: var(--color-neutral-200);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .input-control:focus {
+            outline: none;
+            border-color: var(--color-blue-500);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .input-error {
+            border-color: var(--color-red-500);
+        }
+
+        .error-message {
+            color: var(--color-red-500);
+            font-size: 0.75rem;
+            margin-top: 0.375rem;
+        }
+
+        .auth-btn {
+            width: 100%;
+            background-color: var(--color-blue-600);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .auth-btn:hover {
+            background-color: var(--color-blue-700);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .auth-secondary-btn {
+            background-color: var(--color-neutral-600);
+        }
+
+        .auth-secondary-btn:hover {
+            background-color: var(--color-neutral-700);
+        }
+
+        .auth-link {
+            color: var(--color-blue-500);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .auth-link:hover {
+            color: var(--color-blue-600);
+            text-decoration: underline;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .checkbox-input {
+            margin-right: 0.5rem;
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid var(--color-neutral-600);
+            border-radius: 3px;
+            background-color: var(--color-neutral-700);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, border-color 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .checkbox-input:checked {
+            background-color: var(--color-blue-600);
+            border-color: var(--color-blue-600);
+        }
+
+        .checkbox-input:checked::after {
+            content: '';
+            position: absolute;
+            width: 0.35rem;
+            height: 0.6rem;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-top: -1px;
+        }
+
+        .checkbox-label {
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--color-neutral-700);
+        }
+
+        .divider-text {
+            padding: 0 0.75rem;
+            color: var(--color-neutral-500);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .success-message {
+            background-color: rgba(22, 163, 74, 0.2);
+            border: 1px solid var(--color-green-600);
+            color: var(--color-green-500);
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.875rem;
+        }
+
+        .error-alert {
+            background-color: rgba(220, 38, 38, 0.2);
+            border: 1px solid var(--color-red-600);
+            color: var(--color-red-500);
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.875rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(2px);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid transparent;
+            border-top-color: var(--color-blue-500);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--color-neutral-400);
+            cursor: pointer;
+        }
+
+        .password-toggle:hover {
+            color: var(--color-neutral-300);
+        }
+
+        .password-strength {
+            height: 4px;
+            margin-top: 8px;
+            border-radius: 2px;
+            transition: width 0.3s;
+            background-color: var(--color-neutral-700);
+        }
+
+        .strength-weak {
+            background-color: var(--color-red-500);
+            width: 33%;
+        }
+
+        .strength-medium {
+            background-color: #f59e0b;
+            width: 66%;
+        }
+
+        .strength-strong {
+            background-color: var(--color-green-500);
+            width: 100%;
+        }
+
+        *::-webkit-scrollbar {
+            height: 10px;
+            width: 4px;
+        }
+
+        *::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: #2E3035;
+        }
+
+        *::-webkit-scrollbar-track:hover {
+            background-color: #4C4C4C;
+        }
+
+        *::-webkit-scrollbar-track:active {
+            background-color: #4C4C4C;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: #5B5B5B;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background-color: #777777;
+        }
+
+        *::-webkit-scrollbar-thumb:active {
+            background-color: #777777;
+        }
+
+        .app-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+        }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            background-color: var(--color-blue-700);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .app-details {
+            flex: 1;
+        }
+
+        .scope-list {
+            margin-bottom: 1.5rem;
+        }
+
+        .scope-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            background-color: var(--color-neutral-700);
+        }
+
+        .scope-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 0.75rem;
+            color: var(--color-blue-500);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .button-group .auth-btn {
+            flex: 1;
+        }
+
+        .deny-btn {
+            background-color: var(--color-neutral-600);
+        }
+
+        .deny-btn:hover {
+            background-color: var(--color-neutral-700);
+        }
+    </style>
+</head>
+<body>
+    <div id="auth-app" v-clock>
+        <div class="loading-overlay" v-if="loading">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <div class="auth-container" >
+            <div class="auth-header">
+                <h1>{{ currentView === 'login' ? 'Sign In' :
+                       currentView === 'register' ? 'Create Account' :
+                       currentView === 'forgot' ? 'Reset Password' :
+                       currentView === 'reset' ? 'Set New Password' :
+                       currentView === 'approve' ? 'Authorize Application' : '' }}</h1>
+            </div>
+
+            <div class="auth-content">
+                <div v-if="errorMessage" class="error-alert">
+                    {{ errorMessage }}
+                </div>
+
+                <div v-if="successMessage" class="success-message">
+                    {{ successMessage }}
+                </div>
+
+                <!-- Login Form -->
+                <form v-if="currentView === 'login'" @submit.prevent="handleLogin">
+                    <div class="input-group">
+                        <label for="email">Email</label>
+                        <input
+                            type="text"
+                            id="username"
+                            v-model="loginForm.username"
+                            class="input-control"
+                            :class="{'input-error': errors.email}"
+                            placeholder="Enter your email"
+                            required
+                            autocomplete="email"
+                        >
+                        <div v-if="errors.email" class="error-message">{{ errors.email }}</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <div class="password-wrapper">
+                            <input
+                                :type="showPassword ? 'text' : 'password'"
+                                id="password"
+                                v-model="loginForm.password"
+                                class="input-control"
+                                :class="{'input-error': errors.password}"
+                                placeholder="Enter your password"
+                                required
+                                autocomplete="current-password"
+                            >
+                            <button type="button" class="password-toggle" @click="showPassword = !showPassword">
+                                <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                </svg>
+                                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div v-if="errors.password" class="error-message">{{ errors.password }}</div>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="remember" v-model="loginForm.rememberMe" class="checkbox-input">
+                            <label for="remember" class="checkbox-label">Remember me</label>
+                        </div>
+                        <a href="#" @click.prevent="currentView = 'forgot'" class="auth-link">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="auth-btn" :disabled="loading">Sign In</button>
+
+                    <div class="divider">
+                        <span class="divider-text">Don't have an account?</span>
+                    </div>
+
+                    <button type="button" @click="currentView = 'register'" class="auth-btn auth-secondary-btn">Create Account</button>
+                </form>
+
+                <!-- Approve Form -->
+                <div v-else-if="currentView === 'approve'">
+                    <div class="app-info">
+                        <div class="app-icon">
+                            {{ clientInfo.clientName ? clientInfo.clientName.charAt(0).toUpperCase() : 'A' }}
+                        </div>
+                        <div class="app-details">
+                            <h2 class="text-lg font-medium mb-1">{{ clientInfo.clientName || 'Application' }}</h2>
+                            <p class="text-sm text-neutral-400">wants to access your account</p>
+                        </div>
+
+                        <div>
+                            <button @click="handleLogout" class="text-neutral-400 hover:text-neutral-300 text-sm underline">
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="mb-4 text-sm">This will allow <strong>{{ clientInfo.clientName || 'the application' }}</strong> to:</p>
+
+                    <div class="scope-list">
+                        <div v-for="scope in requestedScopes" :key="scope" class="scope-item">
+                            <svg class="scope-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <p class="font-medium">{{ getScopeName(scope) }}</p>
+                                <p class="text-sm text-neutral-400">{{ getScopeDescription(scope) }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 text-sm text-neutral-400">
+                        By approving, you allow this app to use your information in accordance with their terms of service and privacy policy.
+                    </div>
+
+                    <div class="button-group">
+                        <button @click="denyAuthorization" class="auth-btn deny-btn">Deny</button>
+                        <button @click="approveAuthorization" class="auth-btn">Approve</button>
+                    </div>
+
+                    <div class="mt-6 text-center">
+                        <a href="#" @click.prevent="handleLogout" class="auth-link">
+                            Not you? Log out and sign in with a different account
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Register Form -->
+                <form v-else-if="currentView === 'register'" @submit.prevent="handleRegister">
+                    <div class="input-group">
+                        <label for="register-email">Email</label>
+                        <input
+                            type="email"
+                            id="register-email"
+                            v-model="registerForm.email"
+                            class="input-control"
+                            :class="{'input-error': errors.email}"
+                            placeholder="Enter your email"
+                            required
+                        >
+                        <div v-if="errors.email" class="error-message">{{ errors.email }}</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="register-username">Username</label>
+                        <input
+                            type="text"
+                            id="register-username"
+                            v-model="registerForm.username"
+                            class="input-control"
+                            :class="{'input-error': errors.username}"
+                            placeholder="Enter your username"
+                            required
+                        >
+                        <div v-if="errors.username" class="error-message">{{ errors.username }}</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="register-password">Password</label>
+                        <div class="password-wrapper">
+                            <input
+                                :type="showPassword ? 'text' : 'password'"
+                                id="register-password"
+                                v-model="registerForm.password"
+                                class="input-control"
+                                :class="{'input-error': errors.password}"
+                                placeholder="Create a password"
+                                required
+                                @keyup="checkPasswordStrength"
+                                @blur="checkPasswordStrength"
+                                @input="checkPasswordStrength"
+                            >
+                            <button type="button" class="password-toggle" @click="showPassword = !showPassword">
+                                <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                </svg>
+                                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="password-strength" :class="passwordStrengthClass"></div>
+                        <div v-if="errors.password" class="error-message">{{ errors.password }}</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input
+                                :type="showPassword ? 'text' : 'password'"
+                                id="confirm-password"
+                                v-model="registerForm.passwordConfirm"
+                                class="input-control"
+                                :class="{'input-error': errors.passwordConfirm}"
+                                placeholder="Confirm your password"
+                                required
+                            >
+                        </div>
+                        <div v-if="errors.passwordConfirm" class="error-message">{{ errors.passwordConfirm }}</div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms" v-model="registerForm.termsAccepted" class="checkbox-input">
+                        <label for="terms" class="checkbox-label">I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#" class="auth-link">Privacy Policy</a></label>
+                    </div>
+
+                    <button type="submit" class="auth-btn" :disabled="loading || !registerForm.termsAccepted">Create Account</button>
+
+                    <div class="mt-4 text-center">
+                        <a href="#" @click.prevent="currentView = 'login'" class="auth-link">Already have an account? Sign in</a>
+                    </div>
+                </form>
+
+                <!-- Forgot Password Form -->
+                <form v-else-if="currentView === 'forgot'" @submit.prevent="handleForgotPassword">
+                    <p class="mb-4 text-sm text-neutral-400">Enter your email address and we'll send you a link to reset your password.</p>
+
+                    <div class="input-group">
+                        <label for="forgot-email">Email</label>
+                        <input
+                            type="email"
+                            id="forgot-email"
+                            v-model="forgotForm.email"
+                            class="input-control"
+                            :class="{'input-error': errors.email}"
+                            placeholder="Enter your email"
+                            required
+                        >
+                        <div v-if="errors.email" class="error-message">{{ errors.email }}</div>
+                    </div>
+
+                    <button type="submit" class="auth-btn" :disabled="loading">Reset Password</button>
+
+                    <div class="mt-4 text-center">
+                        <a href="#" @click.prevent="currentView = 'login'" class="auth-link">Back to login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, watch, onMounted } = Vue;
+
+        const app = createApp({
+            setup() {
+                const currentView = ref('forgot');
+                const loading = ref(false);
+                const showPassword = ref(false);
+                const passwordStrength = ref(0);
+                const errorMessage = ref('');
+                const successMessage = ref('');
+                const errors = ref({});
+
+                const clientInfo = ref({});
+                const requestedScopes = ref([]);
+                const authParams = ref({
+                    client_id: '',
+                    redirect_uri: '',
+                    response_type: '',
+                    scope: '',
+                    state: ''
+                });
+
+                const loginForm = ref({
+                    username: '',
+                    password: '',
+                    rememberMe: false
+                });
+
+                const registerForm = ref({
+                    name: '',
+                    username: '',
+                    email: '',
+                    password: '',
+                    passwordConfirm: '',
+                    termsAccepted: false
+                });
+
+                const forgotForm = ref({
+                    email: ''
+                });
+
+                const resetForm = ref({
+                    password: '',
+                    passwordConfirm: '',
+                    token: ''
+                });
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const resetToken = urlParams.get('token');
+
+                if (resetToken) {
+                    resetForm.value.token = resetToken;
+                    currentView.value = 'reset';
+                }
+
+                const passwordStrengthClass = computed(() => {
+                    switch(passwordStrength.value) {
+                        case 1: return 'strength-weak';
+                        case 2: return 'strength-medium';
+                        case 3: return 'strength-strong';
+                        default: return '';
+                    }
+                });
+
+                onMounted(() => {
+                    checkAuthentication();
+                });
+
+                const checkAuthentication = () => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    authParams.value.client_id = urlParams.get('client_id') || '';
+                    authParams.value.redirect_uri = urlParams.get('redirect_uri') || '';
+                    authParams.value.response_type = urlParams.get('response_type') || 'code';
+                    authParams.value.scope = urlParams.get('scope') || '';
+                    authParams.value.state = urlParams.get('state') || '';
+
+                    if (authParams.value.scope)
+                        requestedScopes.value = authParams.value.scope.split(' ');
+
+                    const auth = localStorage.getItem('auth');
+
+                    if (auth) {
+                        try {
+                            const authData = JSON.parse(auth);
+
+                            if (authData.token) {
+                                fetchClientInfo(authParams.value.client_id);
+                                return;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing auth data', e);
+                        }
+                    }
+
+                    if (authParams.value.client_id)
+                        currentView.value = 'login';
+                };
+
+                const fetchClientInfo = async (clientId) => {
+                    if (!clientId) return;
+
+                    try {
+                        loading.value = true;
+
+                        const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+
+                        if (!auth.token) {
+                            currentView.value = 'login';
+                            return;
+                        }
+
+                        const response = await fetch('/oauth/client/' + clientId, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${auth.token}`
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch client info: ${response.statusText}`);
+                        }
+
+                        const data = await response.json();
+                        clientInfo.value = data.result;
+                        currentView.value = 'approve';
+                    } catch (err) {
+                        console.error('Error fetching client info:', err);
+                        errorMessage.value = 'Failed to load application details. Please try again.';
+
+                        if (err.message.includes('401') || err.message.includes('403')) {
+                            localStorage.removeItem('auth');
+                            currentView.value = 'login';
+                        }
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const validateEmail = (email) => {
+                    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                    return re.test(String(email).toLowerCase());
+                };
+
+                const checkPasswordStrength = () => {
+                    const password = currentView.value === 'register' ? registerForm.value.password : resetForm.value.password;
+
+                    console.log(password);
+
+                    if (!password) {
+                        passwordStrength.value = 0;
+                        return;
+                    }
+
+                    let score = 0;
+
+                    if (password.length >= 8) score++;
+
+                    if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+                    if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) score++;
+
+                    console.log(score);
+
+                    passwordStrength.value = score;
+                };
+
+                const validatePassword = (password) => {
+                    if(password.length < 8) return false;
+                    if(!/[A-Z]/.test(password) || !/[a-z]/.test(password)) return false;
+                    if(!/[0-9]/.test(password) || !/[^\A-Za-z0-9]/.test(password)) return false;
+                    return true;
+                };
+
+                const resetErrors = () => {
+                    errors.value = {};
+                    errorMessage.value = '';
+                    successMessage.value = '';
+                };
+
+                const handleLogin = async () => {
+
+                    resetErrors();
+
+                    if (!loginForm.value.username) {
+                        errors.value.username = 'Please enter a valid username';
+                        return;
+                    }
+
+                    if (!loginForm.value.password) {
+                        errors.value.password = 'Password is required';
+                        return;
+                    }
+
+                    try {
+                        loading.value = true;
+
+                        const response = await fetch('/auth/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                username: loginForm.value.username,
+                                password: loginForm.value.password
+                            })
+                        });
+
+                        if (!response.ok)
+                            throw new Error('Login failed');
+
+                        const data = await response.json();
+
+                        localStorage.setItem('auth', JSON.stringify({
+                            token: data.result.token,
+                            refreshToken: data.result.refreshToken
+                        }));
+
+                        await fetchClientInfo(authParams.value.client_id);
+                    } catch (err) {
+                        console.error('Login error:', err);
+                        errorMessage.value = 'Invalid email or password. Please try again.';
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const approveAuthorization = async () => {
+                    try {
+                        loading.value = true;
+
+                        const auth = JSON.parse(localStorage.getItem('auth') || '{}');
+
+                        if (!auth.token)
+                            throw new Error('Not authenticated');
+
+                        const response = await fetch('/oauth/approve', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${auth.token}`
+                            },
+                            body: JSON.stringify({
+                                client_id: authParams.value.client_id,
+                                redirect_uri: authParams.value.redirect_uri,
+                                response_type: authParams.value.response_type,
+                                state: authParams.value.state,
+                                scope: authParams.value.scope,
+                                origin: window.location.origin,
+                                referer: window.location.href,
+                                agent: navigator.userAgent
+                            })
+                        });
+
+                        if (!response.ok)
+                            throw new Error('Authorization failed');
+
+                        const result = await response.json();
+                        const data = result.result;
+
+                        let redirectUrl = authParams.value.redirect_uri;
+                        const separator = redirectUrl.includes('?') ? '&' : '?';
+
+                        if (authParams.value.response_type === 'code') {
+                            redirectUrl += separator + 'response_type=' + authParams.value.response_type + '&' + 'code=' + data.code + '&' + 'state=' + authParams.value.state;
+                        } else if (authParams.value.response_type === 'token') {
+                            redirectUrl += separator + 'response_type=' + authParams.value.response_type + '&' + 'access_token=' + data.access_token + '&' + 'token_type=bearer' + '&' + 'expires_in=' + data.expires_in + '&' + 'state=' + authParams.value.state;
+                        }
+
+                        if (window.opener) {
+                            window.opener.postMessage({
+                                type: 'oauth-approval',
+                                redirectUrl: redirectUrl,
+                                approved: true,
+                                state: authParams.value.state
+                            }, '*');
+
+                            successMessage.value = 'Authorization approved. This window will close automatically.';
+                            loading.value = false;
+
+                            setTimeout(() => {
+                                window.close();
+                            }, 200);
+                        } else {
+                            window.open(redirectUrl, '_blank');
+
+                            successMessage.value = 'Authorization successful! You can close this window.';
+                            loading.value = false;
+                        }
+                    } catch (err) {
+                        console.error('Authorization error:', err);
+                        errorMessage.value = 'Failed to authorize the application. Please try again.';
+                        loading.value = false;
+                    }
+                };
+
+                const denyAuthorization = () => {
+                    let redirectUrl = authParams.value.redirect_uri;
+                    const separator = redirectUrl.includes('?') ? '&' : '?';
+                    redirectUrl += '?error=access_denied&state=' + authParams.value.state;
+
+                    if (window.opener) {
+                        window.opener.postMessage({
+                            type: 'oauth-approval',
+                            redirectUrl: redirectUrl,
+                            approved: false,
+                            state: authParams.value.state
+                        }, '*');
+
+                        errorMessage.value = 'Authorization denied. This window will close automatically.';
+
+                        setTimeout(() => {
+                            window.close();
+                        }, 100);
+                    } else {
+                        window.open(redirectUrl, '_blank');
+                        errorMessage.value = 'Authorization denied. You can close this window.';
+                    }
+                };
+
+                const getScopeName = (scope) => {
+                    const scopeNames = {
+                        'read': 'Read-only access to your data',
+                        'write': 'Create, update, and delete your data',
+                        'email': 'View your email address',
+                        'profile': 'View your profile details',
+                        'admin': 'Full administrative control'
+                    };
+
+                    return scopeNames[scope] || `Access to ${scope}`;
+                };
+
+                const getScopeDescription = (scope) => {
+                    const scopeDescriptions = {
+                        'read': 'Read-only access to your data',
+                        'write': 'Create, update, and delete your data',
+                        'email': 'View your email address',
+                        'profile': 'View your profile details and preferences',
+                        'admin': 'Full administrative control'
+                    };
+
+                    return scopeDescriptions[scope] || 'Access with appropriate permissions';
+                };
+
+                const handleLogout = () => {
+                    localStorage.removeItem('auth');
+                    loginForm.value = {
+                        username: '',
+                        password: '',
+                        rememberMe: false
+                    };
+                    currentView.value = 'login';
+                    successMessage.value = 'You have been logged out successfully.';
+                    setTimeout(() => {
+                        successMessage.value = null;
+                    }, 3000);
+                };
+
+                const handleForgotPassword = async () => {
+                    console.log(forgotForm.value);
+                    if(!forgotForm.value.email) {
+                        errorMessage.value = 'Please enter a valid email address';
+                        return;
+                    }
+
+                    if(!validateEmail(forgotForm.value.email)) {
+                        errorMessage.value = 'Please enter a valid email address';
+                        return;
+                    }
+
+                    const response = await fetch('/auth/forgot-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(forgotForm.value)
+                    });
+
+                    if(!response.ok) {
+                        errorMessage.value = 'Failed to send reset password email';
+                        return;
+                    }
+
+                    successMessage.value = 'Reset password email sent successfully';
+                };
+
+                const handleRegister = async () => {
+                    if(!registerForm.value.password) {
+                        errorMessage.value = 'Please enter a valid password';
+                        return;
+                    }
+
+                    if(!validatePassword(registerForm.value.password)) {
+                        errorMessage.value = 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number';
+                        return;
+                    }
+
+                    if(registerForm.value.password !== registerForm.value.passwordConfirm) {
+                        errorMessage.value = 'Passwords do not match';
+                        return;
+                    }
+
+                    if(!registerForm.value.username) {
+                        errorMessage.value = 'Please enter a valid username';
+                        return;
+                    }
+
+                    if(!validateEmail(registerForm.value.email)) {
+                        errorMessage.value = 'Please enter a valid email address';
+                        return;
+                    }
+
+                    const response = await fetch('/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(registerForm.value)
+                    });
+
+                    if(!response.ok) {
+                        errorMessage.value = 'Username already exists';
+                        return;
+                    }
+
+                    const data = await response.json();
+                    successMessage.value = 'Account created successfully. Please login to continue.';
+                    currentView.value = 'login';
+                };
+
+                watch(currentView, () => {
+                    resetErrors();
+                });
+
+                return {
+                    currentView,
+                    loading,
+                    showPassword,
+                    passwordStrength,
+                    passwordStrengthClass,
+                    errorMessage,
+                    successMessage,
+                    errors,
+                    loginForm,
+                    registerForm,
+                    forgotForm,
+                    resetForm,
+                    clientInfo,
+                    requestedScopes,
+                    handleLogin,
+                    checkPasswordStrength,
+                    approveAuthorization,
+                    denyAuthorization,
+                    getScopeName,
+                    getScopeDescription,
+                    handleLogout,
+                    handleForgotPassword,
+                    handleRegister
+                };
+            }
+        });
+
+        app.mount('#auth-app');
+    </script>
+</body>
+</html>

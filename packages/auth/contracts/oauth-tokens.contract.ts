@@ -13,10 +13,6 @@ import { AbstractContract, Contract, ContractField } from '@cmmv/core';
         databaseSchemaName: 'auth_oauth_tokens',
         databaseTimestamps: true,
     },
-    index: [
-        { name: 'idx_token', fields: ['access_token'] },
-        { name: 'idx_refresh_token', fields: ['refresh_token'] },
-    ],
 })
 export class OAuthTokensContract extends AbstractContract {
     @ContractField({
@@ -25,7 +21,7 @@ export class OAuthTokensContract extends AbstractContract {
         nullable: false,
         index: true,
     })
-    access_token: string;
+    accessToken: string;
 
     @ContractField({
         protoType: 'string',
@@ -33,21 +29,21 @@ export class OAuthTokensContract extends AbstractContract {
         nullable: true,
         index: true,
     })
-    refresh_token?: string;
+    refreshToken?: string;
 
     @ContractField({
         protoType: 'string',
         nullable: false,
         index: true,
     })
-    client_id: string;
+    clientId: string;
 
     @ContractField({
         protoType: 'string',
         nullable: false,
         index: true,
     })
-    user_id: string;
+    userId: string;
 
     @ContractField({
         protoType: 'string',
@@ -59,5 +55,29 @@ export class OAuthTokensContract extends AbstractContract {
         protoType: 'int64',
         nullable: false,
     })
-    expires_at: number;
+    expiresAt: number;
+
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+    })
+    origin: string;
+
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+    })
+    referer: string;
+
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+    })
+    agent: string;
+
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+    })
+    state: string;
 }

@@ -101,6 +101,11 @@ module.exports = {
         recaptcha: {
             required: false,
             secret: process.env.RECAPTCHA_SECRET
+        },
+        oneTimeToken: {
+            enabled: true,
+            expiresIn: 60 * 10,
+            urlLink: 'http://localhost:3000/auth/one-time-token',
         }
     },
 
@@ -187,5 +192,18 @@ module.exports = {
         host: 'localhost',
         port: 4000,
         generateResolvers: true,
+    },
+
+    email: {
+        from: process.env.EMAIL_FROM,
+        secure: false,
+        ignoreTLS: true,
+        requireTLS: false,
+        debug: true,
+        SES: {
+            region: process.env.AWS_REGION,
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        }
     }
 };

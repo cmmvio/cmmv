@@ -418,6 +418,47 @@ export const AuthConfig: ConfigSchema = {
                 },
             },
         },
+        oneTimeToken: {
+            required: false,
+            type: 'object',
+            default: {},
+            properties: {
+                enabled: {
+                    required: false,
+                    type: 'boolean',
+                    default: false,
+                },
+                expiresIn: {
+                    required: false,
+                    type: 'number',
+                    default: 60 * 10,
+                },
+                urlLink: {
+                    required: false,
+                    type: 'string',
+                    default: 'http://localhost:3000/auth/one-time-token',
+                },
+            },
+        },
+        templates: {
+            required: false,
+            type: 'object',
+            default: {},
+            properties: {
+                auth: {
+                    required: false,
+                    type: 'string',
+                },
+                forgotPassword: {
+                    required: false,
+                    type: 'string',
+                },
+                confirmEmail: {
+                    required: false,
+                    type: 'string',
+                },
+            },
+        },
     },
 
     password: {

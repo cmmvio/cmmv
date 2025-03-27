@@ -559,7 +559,7 @@ export class Template {
             Telemetry.end('Request Process', data.requestId);
 
             if (process.env.NODE_ENV === 'dev') {
-                processedText = processedText.replace(
+                /*processedText = processedText.replace(
                     `<\/body>`,
                     `<script nonce="${self.nonce}">
                 (function(global) {
@@ -578,7 +578,7 @@ export class Template {
                 })(typeof window !== "undefined" ? window : global);
                 </script>
                 </body>`,
-                );
+                );*/
             }
 
             processedText = await self.extractInlineScripts(processedText);

@@ -109,6 +109,20 @@ export class SessionsContract extends AbstractContract {
     })
     refreshToken: string;
 
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+        readOnly: true,
+    })
+    referer: string;
+
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+        readOnly: true,
+    })
+    origin: string;
+
     @ContractMessage({
         name: 'GetSessionsRequest',
         properties: {

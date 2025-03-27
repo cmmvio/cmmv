@@ -385,6 +385,10 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                             this.logger.error(
                                 error.message || 'Internal Server Error',
                             );
+
+                            if (process.env.NODE_ENV === 'dev')
+                                console.error(error);
+
                             const processingTime = Date.now() - startTime;
                             Telemetry.end('Request Process', req.requestId);
                             const telemetry = Telemetry.getTelemetry(

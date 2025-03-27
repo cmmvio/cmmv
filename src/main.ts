@@ -6,13 +6,12 @@ import { RepositoryModule, Repository } from '@cmmv/repository';
 import { SchedulingModule, SchedulingService } from '@cmmv/scheduling';
 import { AuthModule } from '@cmmv/auth';
 import { FormModule } from '@cmmv/form';
-import { VaultModule } from '@cmmv/vault';
 import { OpenAPIModule } from '@cmmv/openapi';
 import { GraphQLModule } from '@cmmv/graphql';
 import { SandboxModule } from '@cmmv/sandbox';
-import { ThrottlerModule } from '@cmmv/throttler';
+import { EmailModule } from '@cmmv/email';
 
-import { IndexModule } from './index.module';
+import { IndexModule } from './modules/index.module';
 
 Application.create({
     httpAdapter: DefaultAdapter,
@@ -25,11 +24,11 @@ Application.create({
         SchedulingModule,
         AuthModule,
         FormModule,
-        VaultModule,
         OpenAPIModule,
         GraphQLModule,
         SandboxModule,
-        ThrottlerModule,
+        EmailModule,
+        //ThrottlerModule,
         IndexModule,
     ],
     providers: [Repository, SchedulingService],

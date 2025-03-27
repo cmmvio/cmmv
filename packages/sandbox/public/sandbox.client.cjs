@@ -37,6 +37,7 @@ createApp({
                 { label: "Logs", active: false },
                 { label: "Backup", active: false },
                 { label: "Modules", active: false },
+                { label: "OAuth", active: false },
                 { label: "Settings", active: false },
             ],
             protoTypes: {
@@ -218,6 +219,7 @@ createApp({
             backupViewer: null,
             modulesViewer: null,
             configViewer: null,
+            oAuthManager: null,
             syncModalOpen: false,
             syncInProgress: false,
             syncProgress: 0,
@@ -393,6 +395,8 @@ createApp({
         this.modulesViewer = useModulesViewer();
         this.configViewer = useConfigViewer();
         this.configViewer.loadModules();
+
+        this.oAuthManager = useOAuthManager();
 
         this.$nextTick(() => {
             this.checkTabOverflow();

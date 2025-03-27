@@ -1,4 +1,10 @@
-import { AbstractContract, Contract, ContractField } from '@cmmv/core';
+import {
+    AbstractContract,
+    Contract,
+    ContractField,
+    ContractMessage,
+    ContractService,
+} from '@cmmv/core';
 
 @Contract({
     namespace: 'Auth',
@@ -13,38 +19,161 @@ import { AbstractContract, Contract, ContractField } from '@cmmv/core';
         databaseSchemaName: 'auth_oauth_clients',
         databaseTimestamps: true,
     },
-    index: [{ name: 'idx_client', fields: ['client_id'] }],
 })
 export class OAuthClientsContract extends AbstractContract {
+    @ContractField({
+        protoType: 'string',
+        nullable: false,
+    })
+    clientName: string;
+
     @ContractField({
         protoType: 'string',
         unique: true,
         nullable: false,
         index: true,
     })
-    client_id: string;
+    clientId: string;
 
     @ContractField({
         protoType: 'string',
         nullable: false,
     })
-    client_secret: string;
+    clientSecret: string;
 
     @ContractField({
         protoType: 'string',
-        nullable: false,
+        defaultValue: '[]',
+        objectType: 'string[]',
+        protoRepeated: true,
+        nullable: true,
+        readOnly: true,
     })
-    redirect_uris: string[];
+    redirectUris: string[];
 
     @ContractField({
         protoType: 'string',
-        nullable: false,
+        defaultValue: '[]',
+        objectType: 'string[]',
+        protoRepeated: true,
+        nullable: true,
+        readOnly: true,
     })
-    scope: string;
+    allowedScopes: string[];
+
+    @ContractField({
+        protoType: 'string',
+        defaultValue: '[]',
+        objectType: 'string[]',
+        protoRepeated: true,
+        nullable: true,
+        readOnly: true,
+    })
+    allowedGrantTypes: string[];
+
+    @ContractField({
+        protoType: 'string',
+        defaultValue: '[]',
+        objectType: 'string[]',
+        protoRepeated: true,
+        nullable: true,
+        readOnly: true,
+    })
+    authorizedDomains: string[];
 
     @ContractField({
         protoType: 'bool',
         defaultValue: true,
     })
-    enabled: boolean;
+    isActive: boolean;
+
+    @ContractField({
+        protoType: 'int32',
+        nullable: false,
+    })
+    accessTokenLifetime: number;
+
+    @ContractField({
+        protoType: 'int32',
+        nullable: false,
+    })
+    refreshTokenLifetime: number;
+
+    //Get Clients
+    @ContractMessage({
+        name: 'OAuthClientsResponse',
+        properties: {
+            success: {
+                type: 'bool',
+                required: true,
+            },
+            message: {
+                type: 'string',
+                required: false,
+            },
+            data: {
+                type: 'json',
+                required: false,
+            },
+        },
+    })
+    OAuthClientsResponse: {
+        success: boolean;
+        message?: string;
+        data?: any;
+    };
+
+    @ContractService({
+        name: 'OAuthClientsGetAll',
+        path: 'oauth/clients',
+        method: 'GET',
+        auth: true,
+        rootOnly: true,
+        response: 'OAuthClientsGetAllResponse',
+        functionName: 'OAuthClientsGetAll',
+    })
+    OAuthClientsGetAll: Function;
+
+    //Create Client
+    @ContractMessage({
+        name: 'OAuthClientsCreateRequest',
+        properties: {
+            client_name: {
+                type: 'string',
+                required: true,
+            },
+            redirect_uris: {
+                type: 'simpleArray',
+                arrayType: 'string',
+                required: true,
+            },
+            authorized_domains: {
+                type: 'simpleArray',
+                arrayType: 'string',
+                required: true,
+            },
+            scope: {
+                type: 'string',
+                required: true,
+            },
+        },
+    })
+    OAuthClientsCreateRequest: {
+        client_name: string;
+        redirect_uris: string[];
+        authorized_domains: string[];
+        scope: string;
+    };
+
+    @ContractService({
+        name: 'OAuthClientsCreate',
+        path: 'oauth2/client',
+        method: 'POST',
+        auth: true,
+        rootOnly: true,
+        request: 'OAuthClientsCreateRequest',
+        response: 'OAuthClientsCreateResponse',
+        functionName: 'OAuthClientsCreate',
+    })
+    OAuthClientsCreate: Function;
 }

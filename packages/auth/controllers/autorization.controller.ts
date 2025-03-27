@@ -26,14 +26,16 @@ import {
     CheckUsernamePayloadSchema,
     RefreshTokenHeadersSchema,
     RefreshTokenReturnSchema,
+    ForgotPasswordPayloadSchema,
 } from '../lib/auth.interface';
 
 import { AuthAutorizationService } from '../services/autorization.service';
-
+import { AuthUsersService } from '../services/users.service';
 @Controller('auth')
 export class AutorizationController {
     constructor(
         private readonly autorizationService: AuthAutorizationService,
+        private readonly usersService: AuthUsersService,
     ) {}
 
     @Post('login', {
@@ -83,6 +85,16 @@ export class AutorizationController {
             return await this.autorizationService.register(payload);
 
         return false;
+    }
+
+    @Post('forgot-password', {
+        summary: 'Route to send a reset password email',
+        docs: {
+            body: ForgotPasswordPayloadSchema,
+        },
+    })
+    async handlerForgotPassword(@Body() payload) {
+        return await this.usersService.forgotPassword(payload.email);
     }
 
     @Get('check', {

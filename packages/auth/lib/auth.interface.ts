@@ -5,10 +5,64 @@ export interface LoginPayload {
     opt?: string;
 }
 
+export interface RegisterPayload {
+    username: string;
+    password: string;
+    email?: string;
+}
+
 export interface IAuthSettings {
     roles?: string[];
     groups?: string[];
     rootOnly?: boolean;
+}
+
+export interface ITokenReturn {
+    token: string;
+    refreshToken: string;
+}
+
+export interface IOAuthClient {
+    clientName: string;
+    clientId: string;
+    clientSecret: string;
+    redirectUris: string[];
+    allowedScopes: string[];
+    allowedGrantTypes: string[];
+    authorizedDomains: string[];
+    isActive: boolean;
+    accessTokenLifetime: number;
+    refreshTokenLifetime: number;
+}
+
+export interface IOAuthAuthQuery {
+    client_id: string;
+    redirect_uri: string;
+    response_type: string;
+    state: string;
+    scope: string;
+    origin: string;
+    referer: string;
+    agent: string;
+}
+
+export interface IOAuthAutorizeBody {
+    client_id: string;
+    redirect_uri: string;
+    response_type: string;
+    state: string;
+    scope: string;
+    origin: string;
+    referer: string;
+    agent: string;
+}
+
+export interface IOAuthHandlerQuery {
+    code: string;
+    state: string;
+    response_type: string;
+    redirect_uri: string;
+    client_secret: string;
 }
 
 export interface IJWTDecoded {
@@ -36,6 +90,12 @@ export interface GroupPayload {
 
 export interface GroupRolesPayload {
     roles: string | string[];
+}
+
+export enum ETokenType {
+    EMAIL_VALIDATION = 'email_validation',
+    PASSWORD_RESET = 'password_reset',
+    MAGIC_LINK = 'magic_link',
 }
 
 //Schemas
@@ -223,6 +283,20 @@ export const RefreshTokenReturnSchema = {
                             token: { type: 'string' },
                         },
                     },
+                },
+            },
+        },
+    },
+};
+
+export const ForgotPasswordPayloadSchema = {
+    required: true,
+    content: {
+        'application/json': {
+            schema: {
+                type: 'object',
+                properties: {
+                    email: { type: 'string' },
                 },
             },
         },

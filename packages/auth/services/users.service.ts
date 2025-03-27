@@ -1,14 +1,113 @@
-import { Service, AbstractService, Resolver, Application } from '@cmmv/core';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
+import {
+    Service,
+    AbstractService,
+    Resolver,
+    Application,
+    Config,
+    Module,
+} from '@cmmv/core';
 
 import { Repository } from '@cmmv/repository';
-import { HttpException, HttpStatus } from '@cmmv/http';
+import { CMMVRenderer, HttpException, HttpStatus } from '@cmmv/http';
 
 import { AuthGroupsService } from './groups.service';
+import { AuthOneTimeTokenService } from './one-time-token.service';
+import { ETokenType } from '../lib/auth.interface';
 
 @Service('auth_users')
 export class AuthUsersService extends AbstractService {
-    constructor(private readonly groupsService: AuthGroupsService) {
+    constructor(
+        private readonly groupsService: AuthGroupsService,
+        private readonly oneTimeTokenService: AuthOneTimeTokenService,
+    ) {
         super();
+    }
+
+    public async getUserById(userId: string) {
+        const UserEntity = Repository.getEntity('UserEntity');
+
+        return await Repository.findBy(UserEntity, {
+            id: userId,
+            blocked: false,
+        });
+    }
+
+    public async validateEmail(userId: string) {
+        const UserEntity = Repository.getEntity('UserEntity');
+
+        return await Repository.updateById(UserEntity, userId, {
+            verifyEmail: true,
+        });
+    }
+
+    public async forgotPassword(email: string) {
+        const UserEntity = Repository.getEntity('UserEntity');
+        const user = await Repository.findOne(UserEntity, { email });
+
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+        const generatedToken =
+            await this.oneTimeTokenService.createOneTimeToken(
+                user.id,
+                ETokenType.PASSWORD_RESET,
+            );
+        const customTemplate = Config.get<string>(
+            'auth.templates.forgotPassword',
+        );
+
+        const template = customTemplate
+            ? customTemplate
+            : path.join(__dirname, '..', 'templates', `forgotPassword.html`);
+
+        if (!fs.existsSync(template))
+            throw new HttpException('Template not found', HttpStatus.NOT_FOUND);
+
+        if (!Module.hasModule('email'))
+            throw new HttpException(
+                'Email module not found',
+                HttpStatus.NOT_FOUND,
+            );
+
+        //@ts-ignore
+        const { EmailService } = await import('@cmmv/email');
+        const emailService = Application.resolveProvider(EmailService);
+        const renderer = new CMMVRenderer();
+
+        const templateParsed: string = await new Promise((resolve, reject) => {
+            renderer.renderFile(
+                template,
+                {
+                    title: 'Reset Your Password',
+                    resetLink: generatedToken,
+                },
+                {},
+                (err, content) => {
+                    if (err) {
+                        console.error(err);
+                        throw new HttpException(
+                            'Failed to send reset password email',
+                            HttpStatus.INTERNAL_SERVER_ERROR,
+                        );
+                    }
+
+                    resolve(content);
+                },
+            );
+        });
+
+        //@ts-ignore
+        await emailService.send(
+            Config.get<string>('email.from'),
+            user.email,
+            'Reset Your Password',
+            templateParsed,
+        );
+
+        return { message: 'Reset password email sent successfully' };
     }
 
     /* Block */

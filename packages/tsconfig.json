@@ -4,6 +4,7 @@
         { "path": "./auth/tsconfig.build.json" },
         { "path": "./cache/tsconfig.build.json" },
         { "path": "./core/tsconfig.build.json" },
+        { "path": "./email/tsconfig.build.json" },
         { "path": "./graphql/tsconfig.build.json" },
         { "path": "./http/tsconfig.build.json" },
         { "path": "./keyv/tsconfig.build.json" },

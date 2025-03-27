@@ -323,9 +323,7 @@ const useDataTable = () => {
                     if (!state.linkedEntities[entityName]) {
                         try {
                             await fetchLinkedEntityRecords(field, getContractNameFromField(field));
-                        } catch (error) {
-                            console.warn(error);
-                        }
+                        } catch (error) {}
                     }
                 }
             }
@@ -927,7 +925,7 @@ const useDataTable = () => {
             state.linkedEntities[entityName] = Array.isArray(records) ? records : [];
             return state.linkedEntities[entityName];
         } catch (error) {
-            console.error(error);
+            //console.error(error);
             state.linkedEntities[entityName] = [];
             return [];
         } finally {

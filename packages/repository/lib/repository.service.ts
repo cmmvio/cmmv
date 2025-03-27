@@ -117,92 +117,108 @@ export class Repository extends Singleton {
         if (Repository.logEntity !== null) {
             const repository = this.getRepository(Repository.logEntity);
 
-            switch (message.context) {
-                case 'HTTP':
-                    const split = message.message.split(' ');
-                    const method = split[0];
-                    const url = split[1];
-                    const processTime = split[2]
-                        .replace('(', '')
-                        .replace(')', '');
-                    const status = split[3];
-                    const ip = split[4];
-                    let messageLog = '';
+            try {
+                switch (message.context) {
+                    case 'HTTP':
+                        const split = message.message.split(' ');
+                        const method = split[0];
+                        const url = split[1];
+                        const processTime = split[2]
+                            .replace('(', '')
+                            .replace(')', '');
+                        const status = split[3];
+                        const ip = split[4];
+                        let messageLog = '';
 
-                    switch (status) {
-                        case '200':
-                            messageLog = `connection authorized: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
-                            break;
-                        case '401':
-                            messageLog = `connection unauthorized: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
-                            break;
-                        case '403':
-                            messageLog = `connection forbidden: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
-                            break;
-                        case '404':
-                            messageLog = `connection not found: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
-                            break;
-                        case '500':
-                            messageLog = `connection error: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
-                            break;
-                    }
+                        switch (status) {
+                            case '200':
+                                messageLog = `connection authorized: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
+                                break;
+                            case '401':
+                                messageLog = `connection unauthorized: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
+                                break;
+                            case '403':
+                                messageLog = `connection forbidden: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
+                                break;
+                            case '404':
+                                messageLog = `connection not found: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
+                                break;
+                            case '500':
+                                messageLog = `connection error: method="${method}" url="${url}" ip="${ip}" process_time="${processTime}" status="${status}"`;
+                                break;
+                        }
 
-                    const newEntity = repository.create({
-                        message: messageLog,
-                        timestamp: message.timestamp,
-                        source: message.context,
-                        level: message.level,
-                        event: JSON.stringify({
-                            process_id: process.pid,
-                            method: method,
-                            url: url,
-                            process_time: processTime,
-                            status: status,
-                            connection_from: ip,
-                        }),
-                    });
+                        if (messageLog) {
+                            const newEntity = repository.create({
+                                message: messageLog,
+                                timestamp: message.timestamp,
+                                source: message.context,
+                                level: message.level,
+                                event: JSON.stringify({
+                                    process_id: process.pid,
+                                    method: method,
+                                    url: url,
+                                    process_time: processTime,
+                                    status: status,
+                                    connection_from: ip,
+                                }),
+                            });
 
-                    await repository.save(newEntity);
-                    break;
-                case 'DATABASE':
-                    const config = Config.get('repository');
-                    const newEntityDatabase = repository.create({
-                        message: `query: database="${config.database}" entity="${message.metadata?.entity}" total="${message.metadata?.total}"`,
-                        timestamp: message.timestamp,
-                        source: message.context,
-                        level: message.level,
-                        event: JSON.stringify({
-                            process_id: process.pid,
-                            process_time: message.metadata?.process_time,
-                        }),
-                        metadata: JSON.stringify(message.metadata ?? {}),
-                    });
+                            await repository.save(newEntity);
+                        }
 
-                    await repository.save(newEntityDatabase);
-                    break;
-                case 'AUTH':
-                    const newEntityAuth = repository.create({
-                        message: message.message,
-                        timestamp: message.timestamp,
-                        source: message.context,
-                        level: message.level,
-                        event: JSON.stringify(message.event ?? {}),
-                        metadata: JSON.stringify(message.metadata ?? {}),
-                    });
+                        break;
+                    case 'DATABASE':
+                        const config = Config.get('repository');
+                        const newEntityDatabase = repository.create({
+                            message: `query: database="${config.database}" entity="${message.metadata?.entity}" total="${message.metadata?.total}"`,
+                            timestamp: message.timestamp,
+                            source: message.context,
+                            level: message.level,
+                            event: JSON.stringify({
+                                process_id: process.pid,
+                                process_time: message.metadata?.process_time,
+                            }),
+                            metadata: JSON.stringify(message.metadata ?? {}),
+                        });
 
-                    await repository.save(newEntityAuth);
-                    break;
-                case 'EVENT':
-                    const newEntityDefault = repository.create({
-                        message: message.message,
-                        timestamp: message.timestamp,
-                        source: message.context,
-                        level: message.level,
-                        metadata: JSON.stringify(message.metadata ?? {}),
-                    });
+                        await repository.save(newEntityDatabase);
+                        break;
+                    case 'AUTH':
+                        if (message.message) {
+                            const newEntityAuth = repository.create({
+                                message: message.message,
+                                timestamp: message.timestamp,
+                                source: message.context,
+                                level: message.level,
+                                event: JSON.stringify(message.event ?? {}),
+                                metadata: JSON.stringify(
+                                    message.metadata ?? {},
+                                ),
+                            });
 
-                    await repository.save(newEntityDefault);
-                    break;
+                            await repository.save(newEntityAuth);
+                        }
+
+                        break;
+                    case 'EVENT':
+                        if (message.message) {
+                            const newEntityDefault = repository.create({
+                                message: message.message,
+                                timestamp: message.timestamp,
+                                source: message.context,
+                                level: message.level,
+                                metadata: JSON.stringify(
+                                    message.metadata ?? {},
+                                ),
+                            });
+
+                            await repository.save(newEntityDefault);
+                        }
+                        break;
+                }
+            } catch (e) {
+                Repository.logger.error('Error saving log:', e);
             }
         }
     }
@@ -398,6 +414,14 @@ export class Repository extends Singleton {
      * @param options - The options to find the entity by
      * @returns Entity | null
      */
+    public static async findOne<Entity>(
+        entity: new () => Entity,
+        criteria: FindOptionsWhere<Entity>,
+        options: FindOneOptions<Entity> = {},
+    ): Promise<Entity | null> {
+        return await this.findBy(entity, criteria, options);
+    }
+
     public static async findBy<Entity>(
         entity: new () => Entity,
         criteria: FindOptionsWhere<Entity>,

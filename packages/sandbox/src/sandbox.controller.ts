@@ -131,6 +131,19 @@ export class SandboxController {
         );
     }
 
+    @Get('oauth.js', { exclude: true })
+    async handlerOAuth(@Response() res) {
+        res.contentType('text/javascript').send(
+            await fs.readFileSync(
+                path.join(
+                    __dirname.replace('src', 'public'),
+                    'sandbox-oauth.client.cjs',
+                ),
+                'utf-8',
+            ),
+        );
+    }
+
     @Get('schema', { exclude: true })
     async handlerSchema() {
         const schemaFilename = path.join(cwd(), '.generated', 'schema.json');

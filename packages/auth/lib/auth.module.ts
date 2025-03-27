@@ -7,6 +7,7 @@ import {
     GroupsContract,
     UserContract,
     SessionsContract,
+    OneTimeTokenContract,
     OAuthClientsContract,
     OAuthCodesContract,
     OAuthTokensContract,
@@ -19,6 +20,7 @@ import {
     AuthAutorizationService,
     AuthGroupsService,
     AuthUsersService,
+    AuthOneTimeTokenService,
     OAuth2Service,
 } from '../services';
 
@@ -28,6 +30,7 @@ import {
     AuthSessionsController,
     AuthGroupsController,
     AuthUsersController,
+    AuthOneTimeTokensController,
     OAuth2Controller,
 } from '../controllers';
 
@@ -38,12 +41,14 @@ export const AuthModule = new Module('auth', {
         GroupsContract,
         UserContract,
         SessionsContract,
+        OneTimeTokenContract,
         OAuthClientsContract,
         OAuthCodesContract,
         OAuthTokensContract,
         OAuth2Contract,
     ],
     providers: [
+        AuthOneTimeTokenService,
         AuthAutorizationService,
         AuthOptService,
         AuthSessionsService,
@@ -57,6 +62,7 @@ export const AuthModule = new Module('auth', {
         AuthSessionsController,
         AuthGroupsController,
         AuthUsersController,
+        AuthOneTimeTokensController,
         OAuth2Controller,
     ],
 });

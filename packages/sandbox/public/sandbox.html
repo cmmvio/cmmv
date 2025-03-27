@@ -309,6 +309,13 @@
                 </div>
 
                 <div
+                    v-show="tabsMaster[selectedMasterTab].label === 'OAuth'"
+                    class="flex-1 overflow-auto h-[calc(100%-50px)]"
+                >
+                    <!-- include("@packages/sandbox/public/sandbox-oauth.html"); -->
+                </div>
+
+                <div
                     v-show="tabsMaster[selectedMasterTab].label === 'Settings'"
                     class="flex-1 overflow-auto h-[calc(100%-50px)]"
                 >
@@ -345,6 +352,7 @@
         <script type="text/javascript" src="/sandbox/formbuilder.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/backup.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/modules.js" type="module"></script>
+        <script type="text/javascript" src="/sandbox/oauth.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/config.js" type="module"></script>
         <script type="text/javascript" src="/sandbox/client.js"></script>
 

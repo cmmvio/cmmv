@@ -24,7 +24,6 @@ export class AuthSessionsService extends AbstractService {
 
         if (typeof user === 'string') {
             try {
-                // Se for uma string, assumimos que é um token JWT
                 const jwtSecret = Config.get<string>('auth.jwtSecret');
                 const verifyAsync = promisify(jwt.verify);
                 const decoded = (await verifyAsync(
@@ -144,11 +143,12 @@ export class AuthSessionsService extends AbstractService {
         refreshToken: string,
     ): Promise<boolean> {
         const SessionsEntity = Repository.getEntity('SessionsEntity');
-        const hasCacheModule = Module.hasModule('cache');
         const ipAddress =
             req.ip ||
             req.get('x-forwarded-for') ||
             req.connection.remoteAddress;
+        const referer = req.get('referer') || '';
+        const origin = req.get('origin') || '';
         const userAgent = req.get('user-agent') || 'Unknown';
         const device = this.extractDevice(userAgent);
         const browser = this.extractBrowser(userAgent);
@@ -176,6 +176,8 @@ export class AuthSessionsService extends AbstractService {
                     updatedAt: new Date(),
                     userAgent,
                     refreshToken: refreshTokenHash,
+                    referer,
+                    origin,
                 },
             );
 

@@ -30,17 +30,17 @@ export class GroupsContract extends AbstractContract {
         validations: [
             {
                 type: 'IsString',
-                message: 'Invalid name',
+                message: 'The name must be a string',
             },
             {
                 type: 'MinLength',
                 value: 3,
-                message: 'Invalid name',
+                message: 'The name must be at least 3 characters',
             },
             {
                 type: 'MaxLength',
                 value: 40,
-                message: 'Invalid name',
+                message: 'The name must be less than 40 characters',
             },
         ],
     })

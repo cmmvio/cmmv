@@ -292,10 +292,7 @@ ${contract.services
                     if (link.createRelationship !== false && !link.array) {
                         decorators.push(
                             `@ManyToOne(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${linkField}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
-    @Column({
-        type: "varchar",
-        nullable: true
-    })`,
+    @Column({ type: "varchar", nullable: true })`,
                         );
 
                         tsType = `${entityName}Entity | string | null`;
@@ -308,19 +305,13 @@ ${contract.services
                     ) {
                         decorators.push(
                             `@OneToMany(() => ${entityName}Entity, (${link.entityName}) => ${link.entityName}.${linkField}, { nullable: ${link?.entityNullable === true || false ? 'true' : 'false'} })
-    @Column({
-        type: "varchar",
-        nullable: true
-    })`,
+    @Column({ type: "varchar", nullable: true })`,
                         );
 
                         tsType = `${entityName}Entity[] | string[] | null`;
                     } else {
                         decorators.push(
-                            `@Column({
-        type: "${field.protoRepeated ? 'simple-array' : linkType}",
-        nullable: true
-    })`,
+                            `@Column({ type: "${field.protoRepeated ? 'simple-array' : linkType}", nullable: true })`,
                         );
 
                         tsType = `${entityName}Entity[] | string[] | null`;

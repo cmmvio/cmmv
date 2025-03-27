@@ -805,9 +805,11 @@ export let ApplicationModule = new Module("app", {
     ): T {
         const paramTypes =
             Reflect.getMetadata('design:paramtypes', providerCls) || [];
+
         const instances = paramTypes.map((paramType: any) =>
             Application.instance.providersMap.get(paramType.name),
         );
+
         const instance = new providerCls(...instances);
         return instance;
     }

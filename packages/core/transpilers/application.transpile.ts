@@ -84,7 +84,7 @@ ${includeId}${contract.fields
                         return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};`;
                     } else {
                         return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};
-    ${field.propertyKey}Id${optional}: string;`;
+    ${field.propertyKey}Id?: string;`;
                     }
                 } else {
                     const fieldType = field.objectType
@@ -421,17 +421,17 @@ import {
                 if (!field.exclude) {
                     if (optional) {
                         decorators.push(`    @ApiPropertyOptional({
-    type: ${apiType},
-    readOnly: ${field?.readOnly ?? undefined},
-    default: ${field.defaultValue ?? undefined}
-})`);
+        type: ${apiType},
+        readOnly: ${field?.readOnly ?? undefined},
+        default: ${field.defaultValue ?? undefined}
+    })`);
                     } else {
                         decorators.push(`    @ApiProperty({
-    type: ${apiType},
-    readOnly: ${field?.readOnly ?? undefined},
-    required: true,
-    default: ${field.defaultValue ?? undefined}
-})`);
+        type: ${apiType},
+        readOnly: ${field?.readOnly ?? undefined},
+        required: true,
+        default: ${field.defaultValue ?? undefined}
+    })`);
                     }
                 } else {
                     decorators.push(`    @ApiHideProperty()`);
@@ -600,6 +600,8 @@ import {
             int: 'integer',
             int32: 'integer',
             int64: 'integer',
+            integer: 'integer',
+            number: 'number',
             float: 'number',
             double: 'number',
             bytes: 'string',
@@ -613,16 +615,16 @@ import {
             time: 'string',
             simpleArray: 'array',
             simpleJson: 'object',
-            bigint: 'integer',
-            uint32: 'integer',
-            uint64: 'integer',
-            sint32: 'integer',
-            sint64: 'integer',
-            fixed32: 'integer',
-            fixed64: 'integer',
-            sfixed32: 'integer',
-            sfixed64: 'integer',
-            any: 'any',
+            bigint: 'number',
+            uint32: 'number',
+            uint64: 'number',
+            sint32: 'number',
+            sint64: 'number',
+            fixed32: 'number',
+            fixed64: 'number',
+            sfixed32: 'number',
+            sfixed64: 'number',
+            any: 'object',
         };
 
         return typeMapping[protoType] || 'any';
@@ -681,14 +683,6 @@ ${Object.entries(contract.messages[key].properties)
 
     public static fromPartial(partial: Partial<${contract.messages[key].name}DTO>): ${contract.messages[key].name}DTO{
         return plainToInstance(${contract.messages[key].name}DTO, partial, {
-            exposeUnsetFields: false,
-            enableImplicitConversion: true,
-            excludeExtraneousValues: true
-        })
-    }
-
-    public static fromEntity(entity: any): ${contract.messages[key].name}DTO {
-        return plainToInstance(${contract.messages[key].name}DTO, entity, {
             exposeUnsetFields: false,
             enableImplicitConversion: true,
             excludeExtraneousValues: true

@@ -23,7 +23,11 @@ import {
     decryptJWTData,
 } from '../lib/auth.utils';
 
-import { LoginPayload, IGetRolesResponse } from '../lib/auth.interface';
+import {
+    LoginPayload,
+    IGetRolesResponse,
+    RegisterPayload,
+} from '../lib/auth.interface';
 import { AuthSessionsService } from './sessions.service';
 import { AuthRecaptchaService } from './recaptcha.service';
 
@@ -53,37 +57,12 @@ export class AuthAutorizationService extends AbstractService {
     ) {
         const UserEntity = Repository.getEntity('UserEntity');
         const env = Config.get<string>('env', process.env.NODE_ENV);
-        const jwtSecret = Config.get<string>('auth.jwtSecret');
-        const jwtSecretRefresh = Config.get<string>(
-            'auth.jwtSecretRefresh',
-            jwtSecret,
-        );
-        const expiresIn = Config.get<number>('auth.expiresIn', 60 * 60 * 24);
-        const refreshCookieName = Config.get<string>(
-            'auth.refreshCookieName',
-            'refreshToken',
-        );
 
-        const sessionEnabled = Config.get<boolean>(
-            'server.session.enabled',
-            true,
-        );
-        const cookieName = Config.get<string>(
-            'server.session.options.sessionCookieName',
-            'token',
-        );
-        const cookieTTL = Config.get<number>(
-            'server.session.options.cookie.maxAge',
-            24 * 60 * 60 * 100,
-        );
-        const cookieSecure = Config.get<boolean>(
-            'server.session.options.cookie.secure',
-            process.env.NODE_ENV !== 'dev',
-        );
         const recaptchaRequired = Config.get<boolean>(
             'auth.recaptcha.required',
             false,
         );
+
         const recaptchaSecret = Config.get<boolean>('auth.recaptcha.secret');
 
         if (recaptchaRequired) {
@@ -110,10 +89,16 @@ export class AuthAutorizationService extends AbstractService {
             .update(payload.password)
             .digest('hex');
 
-        let user: any = await Repository.findBy(UserEntity, {
-            username: usernameHashed,
-            password: passwordHashed,
-        });
+        let user: any = await Repository.findBy(UserEntity, [
+            {
+                username: usernameHashed,
+                password: passwordHashed,
+            },
+            {
+                email: payload.username,
+                password: passwordHashed,
+            },
+        ]);
 
         if (
             (!user || !user?.data) &&
@@ -150,52 +135,78 @@ export class AuthAutorizationService extends AbstractService {
             );
         }
 
+        const { token, refreshToken } = await this.autorizeUser(
+            user,
+            req,
+            res,
+            session,
+        );
+
+        return {
+            result: { token, refreshToken },
+            user,
+        };
+    }
+
+    public async loginWithOneTimeToken(userId: string, req: any, res: any) {
+        const UserEntity = Repository.getEntity('UserEntity');
+        const user = await Repository.findBy(
+            UserEntity,
+            Repository.queryBuilder({
+                id: userId,
+            }),
+        );
+
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+
+        return this.autorizeUser(user, req, res, null);
+    }
+
+    public async autorizeUser(user: any, req: any, res: any, session: any) {
+        const cookieName = Config.get<string>(
+            'server.session.options.sessionCookieName',
+            'token',
+        );
+        const cookieTTL = Config.get<number>(
+            'server.session.options.cookie.maxAge',
+            24 * 60 * 60 * 100,
+        );
+        const cookieSecure = Config.get<boolean>(
+            'server.session.options.cookie.secure',
+            process.env.NODE_ENV !== 'dev',
+        );
+
+        const jwtSecret = Config.get<string>('auth.jwtSecret');
+        const jwtSecretRefresh = Config.get<string>(
+            'auth.jwtSecretRefresh',
+            jwtSecret,
+        );
+        const expiresIn = Config.get<number>('auth.expiresIn', 60 * 60 * 24);
+        const refreshCookieName = Config.get<string>(
+            'auth.refreshCookieName',
+            'refreshToken',
+        );
+
         const sesssionId = uuidv4();
-        const fingerprint = generateFingerprint(req.req || req, usernameHashed);
+        const fingerprint = generateFingerprint(req.req || req, user.username);
         const roles = await this.getGroupsRoles(user);
 
-        // Creating JWT token
-        const accessToken = jwt.sign(
-            {
-                id:
-                    Config.get('repository.type') === 'mongodb'
-                        ? user._id
-                        : user.id,
-                username: encryptJWTData(payload.username, jwtSecret),
-                fingerprint,
-                root: user.root || false,
-                roles: roles || [],
-            },
+        const accessToken = this.createAuthToken(
+            user,
             jwtSecret,
-            { expiresIn: user.root ? '1d' : '15m' },
+            fingerprint,
+            roles,
+            user.username,
         );
 
-        const refreshToken = jwt.sign(
-            {
-                u:
-                    Config.get('repository.type') === 'mongodb'
-                        ? user._id.toString()
-                        : user.id,
-                f: fingerprint,
-            },
+        const refreshToken = this.createRefreshToken(
+            user,
+            fingerprint,
             jwtSecretRefresh,
-            { expiresIn },
+            expiresIn,
         );
 
-        // Recording session
-        if (!user.root && this.sessionsService) {
-            await this.sessionsService.registrySession(
-                sesssionId,
-                req,
-                fingerprint,
-                Config.get('repository.type') === 'mongodb'
-                    ? user._id
-                    : user.id,
-                refreshToken,
-            );
-        }
-
-        // Preparing session cookie
         if (res) {
             res.cookie(cookieName, sesssionId, {
                 httpOnly: true,
@@ -212,51 +223,36 @@ export class AuthAutorizationService extends AbstractService {
             });
         }
 
-        // Creating a session if a session plugin is active
-        if (sessionEnabled && session) {
-            session.user = {
-                id:
-                    Config.get('repository.type') === 'mongodb'
-                        ? user._id
-                        : user.id,
-                username: payload.username,
+        if (!user.root) {
+            await this.registrySession(
+                sesssionId,
+                user,
+                req,
                 fingerprint,
-                token: accessToken,
-                refreshToken: refreshToken,
-                root: user.root || false,
-                roles: roles || [],
-                groups: user.groups || [],
-            };
+                refreshToken,
+            );
 
-            session.save();
+            await this.createSession(
+                user,
+                session,
+                user.username,
+                fingerprint,
+                accessToken,
+                refreshToken,
+                roles,
+                user.groups,
+            );
         }
 
-        Hooks.execute(HooksType.Log, {
-            message: `Authorized: method="${req.method.toUpperCase()}" path="${req.path}"`,
-            context: 'AUTH',
-            level: 'INFO',
-            timestamp: Date.now(),
-            metadata: {
-                method: req.method.toUpperCase(),
-                path: req.path,
-                token: accessToken,
-                refreshToken,
-                fingerprint,
-                ip: req.ip,
-                userAgent: req.headers['user-agent'],
-            },
-        });
+        await this.createLogHook(req, accessToken, refreshToken, fingerprint);
 
         return {
-            result: {
-                token: accessToken,
-                refreshToken,
-            },
-            user,
+            token: accessToken,
+            refreshToken,
         };
     }
 
-    public async register(payload: any) {
+    public async register(payload: RegisterPayload) {
         const User = Application.getModel('User');
         const UserEntity = Repository.getEntity('UserEntity');
         //@ts-ignore
@@ -266,6 +262,7 @@ export class AuthAutorizationService extends AbstractService {
         const result = await Repository.insert(UserEntity, {
             username: data.username,
             password: data.password,
+            email: data.email,
             root: false,
             blocked: false,
             validated: false,
@@ -456,6 +453,108 @@ export class AuthAutorizationService extends AbstractService {
         return roles;
     }
 
+    /* Session */
+    private async registrySession(
+        sesssionId: string,
+        user: any,
+        req: any,
+        fingerprint: string,
+        refreshToken: string,
+    ) {
+        if (!user.root && this.sessionsService) {
+            await this.sessionsService.registrySession(
+                sesssionId,
+                req,
+                fingerprint,
+                Config.get('repository.type') === 'mongodb'
+                    ? user._id
+                    : user.id,
+                refreshToken,
+            );
+        }
+    }
+
+    private async createSession(
+        user: any,
+        session: any,
+        username: string,
+        fingerprint: string,
+        accessToken: string,
+        refreshToken: string,
+        roles: string[],
+        groups: string[],
+    ) {
+        const sessionEnabled = Config.get<boolean>(
+            'server.session.enabled',
+            true,
+        );
+
+        if (sessionEnabled && session) {
+            session.user = {
+                id:
+                    Config.get('repository.type') === 'mongodb'
+                        ? user._id
+                        : user.id,
+                username,
+                fingerprint,
+                token: accessToken,
+                refreshToken: refreshToken,
+                root: user.root || false,
+                roles: roles || [],
+                groups: user.groups || [],
+            };
+
+            session.save();
+        }
+    }
+
+    /* Tokens */
+    private createAuthToken(
+        user: any,
+        jwtSecret: string,
+        fingerprint: string,
+        roles: string[],
+        username: string,
+    ) {
+        const accessToken = jwt.sign(
+            {
+                id:
+                    Config.get('repository.type') === 'mongodb'
+                        ? user._id
+                        : user.id,
+                username: encryptJWTData(username, jwtSecret),
+                fingerprint,
+                root: user.root || false,
+                roles: roles || [],
+            },
+            jwtSecret,
+            { expiresIn: user.root ? '1d' : '15m' },
+        );
+
+        return accessToken;
+    }
+
+    private createRefreshToken(
+        user: any,
+        fingerprint: string,
+        jwtSecretRefresh: string,
+        expiresIn: number,
+    ) {
+        const refreshToken = jwt.sign(
+            {
+                u:
+                    Config.get('repository.type') === 'mongodb'
+                        ? user._id.toString()
+                        : user.id,
+                f: fingerprint,
+            },
+            jwtSecretRefresh,
+            { expiresIn },
+        );
+
+        return refreshToken;
+    }
+
     /* Roles */
     public async getRoles(): Promise<IGetRolesResponse> {
         const contracts = Scope.getArray<any>('__contracts');
@@ -622,5 +721,29 @@ export class AuthAutorizationService extends AbstractService {
         }
 
         return { success: true, message: 'Roles removed successfully' };
+    }
+
+    /* Logs */
+    private async createLogHook(
+        req: any,
+        accessToken: string,
+        refreshToken: string,
+        fingerprint: string,
+    ) {
+        Hooks.execute(HooksType.Log, {
+            message: `Authorized: method="${req.method.toUpperCase()}" path="${req.path}"`,
+            context: 'AUTH',
+            level: 'INFO',
+            timestamp: Date.now(),
+            metadata: {
+                method: req.method.toUpperCase(),
+                path: req.path,
+                token: accessToken,
+                refreshToken,
+                fingerprint,
+                ip: req.ip,
+                userAgent: req.headers['user-agent'],
+            },
+        });
     }
 }

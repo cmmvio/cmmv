@@ -140,15 +140,15 @@ export interface ContractMessageProperty {
 
 export interface ContractOptionsMessage {
     name: string;
-    properties: Record<string, ContractMessageProperty>;
+    properties?: Record<string, ContractMessageProperty>;
 }
 
 export interface ContractOptionsService {
     path: string;
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS';
     name: string;
-    request: string;
-    response: string;
+    request?: string;
+    response?: string;
     auth?: boolean;
     createBoilerplate?: boolean;
     functionName: string;

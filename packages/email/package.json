@@ -1,0 +1,34 @@
+{
+    "name": "@cmmv/email",
+    "version": "0.9.19",
+    "description": "Module for sending emails with Nodemail for CMMV",
+    "keywords": [
+        "cmmv",
+        "framework",
+        "email",
+        "nodemailer"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cmmvio/cmmv.git"
+    },
+    "author": "Andre Ferreira",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/cmmvio/cmmv/issues"
+    },
+    "homepage": "https://cmmv.io",
+    "dependencies": {
+        "@aws-sdk/client-ses": "^3.775.0",
+        "@cmmv/core": "^0.9.19",
+        "nodemailer": "^6.10.0"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "aws-sdk"
+        ]
+    }
+}

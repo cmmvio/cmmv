@@ -229,14 +229,9 @@ export function Auth(
                             }
                         }
 
-                        const usernameHashed = crypto
-                            .createHash('sha1')
-                            .update(decoded.username)
-                            .digest('hex');
-
                         if (
                             decoded.fingerprint !==
-                            generateFingerprint(request.req, usernameHashed)
+                            generateFingerprint(request.req, decoded.username)
                         ) {
                             logger.warning(
                                 `${request.method.toUpperCase()} ${request.path} (0ms) 403 - ${request.req.socket.remoteAddress}`,

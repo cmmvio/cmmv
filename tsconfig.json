@@ -32,6 +32,8 @@
         "paths": {
             "@cmmv/core": ["packages/core"],
             "@cmmv/core/*": ["packages/core/*"],
+            "@cmmv/email": ["packages/email"],
+            "@cmmv/email/*": ["packages/email/*"],
             "@cmmv/http": ["packages/http"],
             "@cmmv/http/*": ["packages/http/*"],
             "@cmmv/protobuf": ["packages/protobuf"],

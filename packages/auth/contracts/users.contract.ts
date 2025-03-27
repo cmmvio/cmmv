@@ -40,23 +40,36 @@ export class UserContract extends AbstractContract {
         validations: [
             {
                 type: 'IsString',
-                message: 'Invalid username',
+                message: 'The username must be a string',
             },
             {
                 type: 'MinLength',
                 value: 4,
-                message: 'Invalid username',
+                message: 'The username must be at least 4 characters',
             },
             {
                 type: 'MaxLength',
                 value: 40,
-                message: 'Invalid username',
+                message: 'The username must be less than 40 characters',
             },
         ],
         afterValidation: (value) =>
             crypto.createHash('sha1').update(value).digest('hex'),
     })
     username: string;
+
+    @ContractField({
+        protoType: 'string',
+        unique: true,
+        nullable: true,
+        validations: [
+            {
+                type: 'IsEmail',
+                message: 'The email must be a valid email address',
+            },
+        ],
+    })
+    email: string;
 
     @ContractField({
         protoType: 'string',
@@ -71,7 +84,7 @@ export class UserContract extends AbstractContract {
         validations: [
             {
                 type: 'IsString',
-                message: 'Invalid password',
+                message: 'The password must be a string',
             },
         ],
         afterValidation: (value) =>
@@ -98,7 +111,7 @@ export class UserContract extends AbstractContract {
         readOnly: true,
         link: [
             {
-                createRelationship: false,
+                createRelationship: true,
                 contract: GroupsContract,
                 entityName: 'groups',
                 field: '_id',

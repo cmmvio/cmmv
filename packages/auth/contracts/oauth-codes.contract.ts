@@ -29,20 +29,20 @@ export class OAuthCodesContract extends AbstractContract {
         nullable: false,
         index: true,
     })
-    client_id: string;
+    clientId: string;
 
     @ContractField({
         protoType: 'string',
         nullable: false,
         index: true,
     })
-    user_id: string;
+    useId: string;
 
     @ContractField({
         protoType: 'string',
         nullable: false,
     })
-    redirect_uri: string;
+    redirectUri: string;
 
     @ContractField({
         protoType: 'string',
@@ -54,5 +54,30 @@ export class OAuthCodesContract extends AbstractContract {
         protoType: 'int64',
         nullable: false,
     })
-    expires_at: number;
+    expiresAt: number;
+
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+        index: true,
+    })
+    state: string;
+
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+    })
+    origin: string;
+
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+    })
+    referer: string;
+
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+    })
+    agent: string;
 }

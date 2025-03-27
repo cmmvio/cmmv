@@ -1,0 +1,549 @@
+<div class="flex flex-col h-full overflow-hidden relative" v-if="oAuthManager">
+    <div class="flex border-b border-neutral-800 justify-between items-center flex-wrap">
+        <div class="text-lg font-medium text-neutral-300 flex items-center border-b border-neutral-800 py-2 px-4 w-full">
+            <h2 class="mr-2">OAuth Management</h2>
+
+            <button
+                @click="oAuthManager.startCreatingClient()"
+                class="h-7 p-1.5 px-3 mr-2 ml-2 text-xs bg-blue-800 hover:bg-blue-700 rounded-md flex items-center text-white"
+                title="Create New Client"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span class="ml-1 hidden sm:inline">New Client</span>
+            </button>
+
+            <button
+                @click="oAuthManager.fetchClients()"
+                class="h-7 p-1.5 px-3 text-xs bg-neutral-800 hover:bg-neutral-700 rounded-md text-neutral-300 flex items-center"
+                title="Refresh Clients"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                </svg>
+                <span class="ml-1 hidden sm:inline">Refresh</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Estado de carregamento -->
+    <div v-if="oAuthManager.loading" class="flex-1 flex items-center justify-center">
+        <div class="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+    </div>
+
+    <!-- Mensagens de erro -->
+    <div v-if="oAuthManager.error" class="bg-red-900/30 border border-red-800 text-red-200 p-3 rounded-md m-4">
+        <div class="flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>{{ oAuthManager.error }}</div>
+        </div>
+    </div>
+
+    <!-- Mensagens de sucesso -->
+    <div v-if="oAuthManager.success" class="bg-green-900/30 border border-green-800 text-green-200 p-3 rounded-md m-4">
+        <div class="flex items-start">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div>{{ oAuthManager.success }}</div>
+        </div>
+    </div>
+
+    <!-- Lista de Clientes OAuth -->
+    <div v-if="!oAuthManager.isCreating && !oAuthManager.isEditing" class="flex-1 overflow-auto p-4">
+        <div class="bg-neutral-800/50 border border-neutral-700 rounded-md overflow-hidden">
+            <table class="min-w-full">
+                <thead class="bg-neutral-800">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700">Name</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700">Client ID</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700">Status</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700">Created</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-neutral-300 tracking-wider border-b border-neutral-700 w-5">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-neutral-900 divide-y divide-neutral-800">
+                    <tr v-if="oAuthManager.clients.length === 0" class="text-center">
+                        <td colspan="4" class="px-4 py-8 text-neutral-400">
+                            <div class="w-full flex justify-center">
+                                <div class="max-w-sm mx-auto flex flex-col items-center">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-12 w-12 mb-3 text-neutral-500"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                        />
+                                    </svg>
+                                    <p class="text-lg font-medium text-neutral-400">
+                                        No OAuth Clients Found
+                                    </p>
+                                    <p class="mt-1 text-sm text-center">
+                                        Click "New Client" to create your first OAuth client
+                                    </p>
+                                    <button
+                                        @click="oAuthManager.startCreatingClient()"
+                                        class="mt-4 px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded-md text-sm transition-colors"
+                                    >
+                                        Create Client
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr v-for="client in oAuthManager.clients" :key="client.id" class="hover:bg-neutral-800/50 transition-colors">
+                        <td class="px-4 py-3 text-sm whitespace-nowrap">
+                            {{ client.clientName }}
+                        </td>
+                        <td class="px-4 py-3 text-sm whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span class="font-mono text-xs truncate max-w-[120px]">{{ client.clientId }}</span>
+                                <button
+                                    @click="oAuthManager.copyToClipboard(client.clientId)"
+                                    class="ml-2 text-blue-500 hover:text-blue-400"
+                                    title="Copy Client ID"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-sm whitespace-nowrap">
+                            <span
+                                class="px-2 py-0.5 rounded-full text-xs font-medium"
+                                :class="client.isActive ? 'bg-green-900/60 text-green-200' : 'bg-red-900/60 text-red-200'"
+                            >
+                                {{ client.isActive ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm whitespace-nowrap text-neutral-400">
+                            {{ new Date(client.createdAt).toLocaleDateString() }}
+                        </td>
+                        <td class="px-4 py-3 text-sm whitespace-nowrap">
+                            <div class="flex">
+                                <button
+                                    @click="oAuthManager.showAuthDialog(client)"
+                                    class="text-blue-500 hover:text-blue-400 mr-2 cursor-pointer"
+                                    title="Show Auth Dialog"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path d="M18 1.5c2.9 0 5.25 2.35 5.25 5.25v3.75a.75.75 0 0 1-1.5 0V6.75a3.75 3.75 0 1 0-7.5 0v3a3 3 0 0 1 3 3v6.75a3 3 0 0 1-3 3H3.75a3 3 0 0 1-3-3v-6.75a3 3 0 0 1 3-3h9v-3c0-2.9 2.35-5.25 5.25-5.25Z"></path>
+                                    </svg>
+                                </button>
+                                <button
+                                    @click="oAuthManager.showSecretDialog(client)"
+                                    class="text-blue-500 hover:text-blue-400 mr-2 cursor-pointer"
+                                    title="Show Key"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                    </svg>
+                                </button>
+                                <button
+                                    @click="oAuthManager.selectClient(client.clientId)"
+                                    class="text-blue-500 hover:text-blue-400 mr-2 cursor-pointer"
+                                    title="Edit"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <button
+                                    @click="oAuthManager.showConfirmDialog(`Are you sure you want to delete client '${client.clientName}'?`, () => oAuthManager.deleteClient(client.clientId))"
+                                    class="text-red-500 hover:text-red-400 cursor-pointer"
+                                    title="Delete"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Formulário de Criação/Edição de Cliente -->
+    <div v-if="oAuthManager.isCreating || oAuthManager.isEditing" class="flex-1 overflow-auto p-4">
+        <div class="bg-neutral-800/50 border border-neutral-700 rounded-md overflow-hidden p-4">
+            <h3 class="text-lg font-medium mb-4">
+                {{ oAuthManager.isCreating ? 'Create New OAuth Client' : 'Edit OAuth Client' }}
+            </h3>
+
+            <!-- Basic Information -->
+            <div class="mb-6">
+                <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">Basic Information</h4>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-300 mb-1">Client Name</label>
+                        <input
+                            type="text"
+                            class="w-full bg-neutral-700 border border-neutral-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter client name"
+                            v-model="oAuthManager.currentClient.clientName"
+                        />
+                    </div>
+
+                    <!-- Mostrar clientId apenas na edição -->
+                    <div v-if="oAuthManager.isEditing">
+                        <label class="block text-sm font-medium text-neutral-300 mb-1">Client ID</label>
+                        <div class="flex w-full mb-1">
+                            <div class="flex flex-1 bg-neutral-700 border border-neutral-600 rounded-l-md overflow-hidden">
+                                <input
+                                    type="text"
+                                    class="flex-1 bg-transparent px-3 py-2 text-sm focus:outline-none"
+                                    :value="oAuthManager.currentClient.clientId"
+                                    readonly
+                                />
+                            </div>
+                            <button
+                                @click="oAuthManager.copyToClipboard(oAuthManager.currentClient.clientId)"
+                                class="bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-sm border-y border-r border-neutral-600 rounded-r-md"
+                                title="Copy Client ID"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="text-xs text-neutral-400 mt-1">Client ID is generated by the server and cannot be modified.</p>
+                    </div>
+
+                    <!-- Mostrar clientSecret apenas na edição - estilo Google -->
+                    <div v-if="oAuthManager.isEditing">
+                        <label class="block text-sm font-medium text-neutral-300 mb-1">Client Secret</label>
+                        <div class="flex w-full mb-1">
+                            <div class="flex flex-1 bg-neutral-700 border border-neutral-600 rounded-l-md overflow-hidden">
+                                <input
+                                    :type="oAuthManager.showSecret ? 'text' : 'password'"
+                                    class="flex-1 bg-transparent px-3 py-2 text-sm focus:outline-none font-mono"
+                                    :value="oAuthManager.currentClient.clientSecret"
+                                    readonly
+                                />
+                                <button
+                                    @click="oAuthManager.toggleSecret()"
+                                    class="bg-neutral-700 hover:bg-neutral-600 text-neutral-300 px-2"
+                                    :title="oAuthManager.showSecret ? 'Hide' : 'Show'"
+                                >
+                                    <svg v-if="oAuthManager.showSecret" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                    </svg>
+                                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <button
+                                @click="oAuthManager.copyToClipboard(oAuthManager.currentClient.clientSecret)"
+                                class="bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-sm border-y border-neutral-600"
+                                title="Copy Client Secret"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                            </button>
+                            <button
+                                @click="oAuthManager.resetClientSecret(oAuthManager.currentClient.id)"
+                                class="bg-blue-700 hover:bg-blue-600 text-white px-3 rounded-r-md text-sm border-y border-r border-blue-800"
+                                title="Reset Secret"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="text-xs text-neutral-400 mt-1">Keep this value secure. Resetting the client secret will invalidate all existing tokens.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Token Settings -->
+            <div class="mb-6">
+                <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">Token Settings</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-300 mb-1">Access Token Lifetime (seconds)</label>
+                        <input
+                            type="number"
+                            class="w-full bg-neutral-700 border border-neutral-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="3600"
+                            v-model="oAuthManager.currentClient.accessTokenLifetime"
+                            min="0"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-300 mb-1">Refresh Token Lifetime (seconds)</label>
+                        <input
+                            type="number"
+                            class="w-full bg-neutral-700 border border-neutral-600 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="86400"
+                            v-model="oAuthManager.currentClient.refreshTokenLifetime"
+                            min="0"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grant Types and Scopes -->
+            <div class="mb-6">
+                <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">Grant Types and Scopes</h4>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Allowed Grant Types</label>
+                    <div class="flex flex-wrap gap-2">
+                        <label
+                            v-for="grantType in oAuthManager.availableGrantTypes"
+                            :key="grantType.id"
+                            class="inline-flex items-center cursor-pointer border border-neutral-600 rounded-md px-3 py-2 text-sm hover:bg-neutral-700 transition-colors"
+                            :class="oAuthManager.currentClient.allowedGrantTypes.includes(grantType.id) ? 'bg-blue-900/50 border-blue-800' : ''"
+                        >
+                            <input
+                                type="checkbox"
+                                :value="grantType.id"
+                                v-model="oAuthManager.currentClient.allowedGrantTypes"
+                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-neutral-600 rounded mr-2"
+                            />
+                            {{ grantType.name }}
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-neutral-300 mb-2">Allowed Scopes</label>
+                    <div class="flex flex-wrap gap-2">
+                        <label
+                            v-for="scope in oAuthManager.availableScopes"
+                            :key="scope.id"
+                            class="inline-flex items-center cursor-pointer border border-neutral-600 rounded-md px-3 py-2 text-sm hover:bg-neutral-700 transition-colors"
+                            :class="oAuthManager.currentClient.allowedScopes.includes(scope.id) ? 'bg-blue-900/50 border-blue-800' : ''"
+                        >
+                            <input
+                                type="checkbox"
+                                :value="scope.id"
+                                v-model="oAuthManager.currentClient.allowedScopes"
+                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-neutral-600 rounded mr-2"
+                            />
+                            {{ scope.name }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Redirect URIs -->
+            <div class="mb-6">
+                <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">Redirect URIs</h4>
+                <div class="flex mb-2">
+                    <input
+                        type="text"
+                        class="flex-1 bg-neutral-700 border border-neutral-600 rounded-l-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="https://example.com/callback"
+                        v-model="oAuthManager.tempRedirectUri"
+                        @keyup.enter="oAuthManager.addRedirectUri()"
+                    />
+                    <button
+                        @click="oAuthManager.addRedirectUri()"
+                        class="bg-blue-700 hover:bg-blue-600 text-white px-3 rounded-r-md text-sm"
+                    >
+                        Add
+                    </button>
+                </div>
+                <div class="bg-neutral-700 rounded-md p-2 max-h-32 overflow-y-auto">
+                    <div
+                        v-if="!oAuthManager.currentClient || oAuthManager.currentClient.redirectUris.length === 0"
+                        class="text-sm text-neutral-400 text-center py-2"
+                    >
+                        No redirect URIs added yet
+                    </div>
+                    <div
+                        v-for="uri in oAuthManager.currentClient ? oAuthManager.currentClient.redirectUris : []"
+                        :key="uri"
+                        class="flex justify-between items-center py-1 px-2 rounded hover:bg-neutral-600"
+                    >
+                        <span class="text-sm font-mono truncate mr-2">{{ uri }}</span>
+                        <button
+                            @click="oAuthManager.removeRedirectUri(uri)"
+                            class="text-red-500 hover:text-red-400"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Authorized Domains -->
+            <div class="mb-6">
+                <h4 class="text-xs uppercase text-neutral-500 font-medium mb-2">Authorized Domains</h4>
+                <div class="flex mb-2">
+                    <input
+                        type="text"
+                        class="flex-1 bg-neutral-700 border border-neutral-600 rounded-l-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="example.com"
+                        v-model="oAuthManager.tempDomain"
+                        @keyup.enter="oAuthManager.addDomain()"
+                    />
+                    <button
+                        @click="oAuthManager.addDomain()"
+                        class="bg-blue-700 hover:bg-blue-600 text-white px-3 rounded-r-md text-sm"
+                    >
+                        Add
+                    </button>
+                </div>
+                <div class="bg-neutral-700 rounded-md p-2 max-h-32 overflow-y-auto">
+                    <div
+                        v-if="!oAuthManager.currentClient || oAuthManager.currentClient.authorizedDomains.length === 0"
+                        class="text-sm text-neutral-400 text-center py-2"
+                    >
+                        No authorized domains added yet
+                    </div>
+                    <div
+                        v-for="domain in oAuthManager.currentClient ? oAuthManager.currentClient.authorizedDomains : []"
+                        :key="domain"
+                        class="flex justify-between items-center py-1 px-2 rounded hover:bg-neutral-600"
+                    >
+                        <span class="text-sm font-mono">{{ domain }}</span>
+                        <button
+                            @click="oAuthManager.removeDomain(domain)"
+                            class="text-red-500 hover:text-red-400"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="flex justify-end space-x-3 mt-6">
+                <button
+                    @click="oAuthManager.cancelEdit()"
+                    class="bg-neutral-700 hover:bg-neutral-600 text-white px-4 py-2 rounded-md text-sm"
+                >
+                    Cancel
+                </button>
+                <button
+                    @click="oAuthManager.isCreating ? oAuthManager.createClient(oAuthManager.currentClient) : oAuthManager.updateClient()"
+                    class="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
+                >
+                    {{ oAuthManager.isCreating ? 'Create Client' : 'Update Client' }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dialog de Confirmação -->
+    <div
+        v-if="oAuthManager.confirmAction.show"
+        class="fixed inset-0 bg-neutral-900/70 z-50 flex items-center justify-center"
+        style="backdrop-filter: blur(2px)"
+    >
+        <div class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-md p-4">
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-2">Confirm Action</h3>
+                <p class="text-neutral-300">{{ oAuthManager.confirmAction.message }}</p>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button
+                    @click="oAuthManager.cancelDialog()"
+                    class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-md text-sm transition-colors"
+                >
+                    Cancel
+                </button>
+                <button
+                    @click="oAuthManager.confirmDialog()"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm transition-colors"
+                >
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secret Dialog -->
+    <div
+        v-if="oAuthManager.secretDialog.show"
+        class="fixed inset-0 bg-neutral-900/70 z-50 flex items-center justify-center"
+        style="backdrop-filter: blur(2px)"
+    >
+        <div class="bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg w-full max-w-md p-4">
+            <div class="mb-3">
+                <h3 class="text-lg font-medium mb-2">Client Secret</h3>
+                <p class="text-neutral-300 text-sm mb-4">
+                    <strong class="text-yellow-400">Security Warning:</strong> This is a sensitive credential that grants access to your API. Do not share it publicly and store it securely.
+                </p>
+
+                <div class="bg-neutral-800 p-3 rounded-md mb-4">
+                    <div class="flex mb-2">
+                        <div class="flex flex-1 bg-neutral-700 border border-neutral-600 rounded-l-md overflow-hidden">
+                            <input
+                                :type="oAuthManager.showSecret ? 'text' : 'password'"
+                                class="flex-1 bg-transparent px-3 py-2 text-sm focus:outline-none font-mono"
+                                :value="oAuthManager.secretDialog.client?.clientSecret"
+                                readonly
+                            />
+                            <button
+                                @click="oAuthManager.toggleSecret()"
+                                class="bg-neutral-700 hover:bg-neutral-600 text-neutral-300 px-2"
+                                :title="oAuthManager.showSecret ? 'Hide' : 'Show'"
+                            >
+                                <svg v-if="oAuthManager.showSecret" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                </svg>
+                                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <button
+                            @click="oAuthManager.copyToClipboard(oAuthManager.secretDialog.client?.clientSecret)"
+                            class="bg-neutral-600 hover:bg-neutral-500 text-white px-3 py-2 text-sm border-y border-r border-neutral-600 rounded-r-md"
+                            title="Copy Secret"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button
+                    @click="oAuthManager.closeSecretDialog()"
+                    class="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 text-white rounded-md text-sm transition-colors"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
