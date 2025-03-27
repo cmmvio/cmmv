@@ -12,6 +12,11 @@ import { HttpException, HttpStatus } from '@cmmv/http';
 
 @Service('auth_opt')
 export class AuthOptService extends AbstractService {
+    /**
+     * Generate an OPT secret
+     * @param token - The token
+     * @returns The QR code
+     */
     public async generateOptSecret(token: string) {
         const UserEntity = Repository.getEntity('UserEntity');
         const decoded: IJWTDecoded = await jwtVerify(token);
@@ -68,6 +73,12 @@ export class AuthOptService extends AbstractService {
         return qrCode.toDataUrl();
     }
 
+    /**
+     * Validate an OPT secret
+     * @param token - The token
+     * @param secret - The secret
+     * @returns The success
+     */
     public async validateOptSecret(token: string, secret: string) {
         const UserEntity = Repository.getEntity('UserEntity');
         const algorithm = Config.get('auth.optSecret.algorithm', 'sha1');
@@ -99,6 +110,12 @@ export class AuthOptService extends AbstractService {
         return { success: true };
     }
 
+    /**
+     * Update an OPT secret
+     * @param token - The token
+     * @param secret - The secret
+     * @returns The success
+     */
     public async updateOptSecret(token: string, secret: string) {
         const UserEntity = Repository.getEntity('UserEntity');
         const algorithm = Config.get('auth.optSecret.algorithm', 'sha1');
@@ -136,6 +153,12 @@ export class AuthOptService extends AbstractService {
         return { success: true };
     }
 
+    /**
+     * Remove an OPT secret
+     * @param token - The token
+     * @param secret - The secret
+     * @returns The success
+     */
     public async removeOptSecret(token: string, secret: string) {
         const UserEntity = Repository.getEntity('UserEntity');
         const algorithm = Config.get('auth.optSecret.algorithm', 'sha1');

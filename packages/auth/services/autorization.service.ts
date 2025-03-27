@@ -1,5 +1,7 @@
 import * as crypto from 'node:crypto';
 import * as jwt from 'jsonwebtoken';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { promisify } from 'util';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,10 +14,11 @@ import {
     Config,
     Hooks,
     HooksType,
+    Module,
 } from '@cmmv/core';
 
 import { Repository } from '@cmmv/repository';
-import { HttpException, HttpStatus } from '@cmmv/http';
+import { CMMVRenderer, HttpException, HttpStatus } from '@cmmv/http';
 
 import {
     generateFingerprint,
@@ -27,7 +30,9 @@ import {
     LoginPayload,
     IGetRolesResponse,
     RegisterPayload,
+    ETokenType,
 } from '../lib/auth.interface';
+
 import { AuthSessionsService } from './sessions.service';
 import { AuthRecaptchaService } from './recaptcha.service';
 
@@ -40,6 +45,11 @@ export class AuthAutorizationService extends AbstractService {
         super();
     }
 
+    /**
+     * Check if the request is from localhost
+     * @param req - The request
+     * @returns True if the request is from localhost, false otherwise
+     */
     private isLocalhost(req: any): boolean {
         const localIPs = ['127.0.0.1', '::1', 'localhost'];
         const clientIP =
@@ -49,6 +59,14 @@ export class AuthAutorizationService extends AbstractService {
         return localIPs.includes(clientIP);
     }
 
+    /**
+     * Login a user
+     * @param payload - The login payload
+     * @param req - The request
+     * @param res - The response
+     * @param session - The session
+     * @returns The login response
+     */
     public async login(
         payload: LoginPayload,
         req?: any,
@@ -60,6 +78,11 @@ export class AuthAutorizationService extends AbstractService {
 
         const recaptchaRequired = Config.get<boolean>(
             'auth.recaptcha.required',
+            false,
+        );
+
+        const requireEmailValidation = Config.get<boolean>(
+            'auth.requireEmailValidation',
             false,
         );
 
@@ -135,6 +158,15 @@ export class AuthAutorizationService extends AbstractService {
             );
         }
 
+        if (
+            (requireEmailValidation && !user.verifyEmail) ||
+            !requireEmailValidation
+        )
+            throw new HttpException(
+                'Email not validated',
+                HttpStatus.FORBIDDEN,
+            );
+
         const { token, refreshToken } = await this.autorizeUser(
             user,
             req,
@@ -148,6 +180,13 @@ export class AuthAutorizationService extends AbstractService {
         };
     }
 
+    /**
+     * Login a user with a one-time token
+     * @param userId - The user id
+     * @param req - The request
+     * @param res - The response
+     * @returns The login response
+     */
     public async loginWithOneTimeToken(userId: string, req: any, res: any) {
         const UserEntity = Repository.getEntity('UserEntity');
         const user = await Repository.findBy(
@@ -163,6 +202,14 @@ export class AuthAutorizationService extends AbstractService {
         return this.autorizeUser(user, req, res, null);
     }
 
+    /**
+     * Autorize a user
+     * @param user - The user
+     * @param req - The request
+     * @param res - The response
+     * @param session - The session
+     * @returns The autorization response
+     */
     public async autorizeUser(user: any, req: any, res: any, session: any) {
         const cookieName = Config.get<string>(
             'server.session.options.sessionCookieName',
@@ -252,12 +299,41 @@ export class AuthAutorizationService extends AbstractService {
         };
     }
 
+    /**
+     * Register a user
+     * @param payload - The register payload
+     * @returns The register response
+     */
     public async register(payload: RegisterPayload) {
         const User = Application.getModel('User');
         const UserEntity = Repository.getEntity('UserEntity');
         //@ts-ignore
         const newUser = User.fromPartial(payload) as User;
         const data: any = await this.validate(newUser);
+
+        if (newUser.email) {
+            const user = await Repository.findOne(UserEntity, {
+                email: newUser.email,
+            });
+
+            if (user)
+                throw new HttpException(
+                    'Email already in use',
+                    HttpStatus.BAD_REQUEST,
+                );
+        }
+
+        if (newUser.username) {
+            const user = await Repository.findOne(UserEntity, {
+                username: newUser.username,
+            });
+
+            if (user)
+                throw new HttpException(
+                    'Username already in use',
+                    HttpStatus.BAD_REQUEST,
+                );
+        }
 
         const result = await Repository.insert(UserEntity, {
             username: data.username,
@@ -275,9 +351,105 @@ export class AuthAutorizationService extends AbstractService {
             );
         }
 
+        if (Module.hasModule('email')) {
+            const customTemplate = Config.get<string>(
+                'auth.templates.emailConfirmation',
+            );
+
+            const template = customTemplate
+                ? customTemplate
+                : path.join(
+                      __dirname,
+                      '..',
+                      'templates',
+                      `emailConfirmation.html`,
+                  );
+
+            if (!fs.existsSync(template))
+                throw new HttpException(
+                    'Template not found',
+                    HttpStatus.NOT_FOUND,
+                );
+
+            //@ts-ignore
+            const { EmailService } = await import('@cmmv/email');
+            const emailService = Application.resolveProvider(EmailService);
+            //@ts-ignore
+            const pixelId = emailService.generatePixelId();
+            //@ts-ignore
+            const pixelUrl = emailService.getPixelUrl(pixelId);
+            //@ts-ignore
+            const unsubscribeLink = emailService.getUnsubscribeLink(
+                result.data.id,
+                pixelId,
+            );
+            const renderer = new CMMVRenderer();
+
+            const { AuthOneTimeTokenService } = await import(
+                '../services/one-time-token.service'
+            );
+            const oneTimeTokenService = Application.resolveProvider(
+                AuthOneTimeTokenService,
+            );
+
+            const confirmationLink =
+                await oneTimeTokenService.createOneTimeToken(
+                    result.data.id,
+                    ETokenType.EMAIL_VALIDATION,
+                    Date.now() + 60 * 60 * 1000,
+                );
+
+            const templateParsed: string = await new Promise(
+                (resolve, reject) => {
+                    renderer.renderFile(
+                        template,
+                        {
+                            title: 'Confirm Your Email',
+                            confirmationLink,
+                            pixelUrl,
+                            unsubscribeLink,
+                        },
+                        {},
+                        (err, content) => {
+                            if (err) {
+                                console.error(err);
+                                throw new HttpException(
+                                    'Failed to send reset password email',
+                                    HttpStatus.INTERNAL_SERVER_ERROR,
+                                );
+                            }
+
+                            resolve(content);
+                        },
+                    );
+                },
+            );
+
+            //@ts-ignore
+            await emailService.send(
+                Config.get<string>('email.from'),
+                data.email,
+                'Confirm Your Email',
+                templateParsed,
+                'Email Confirmation',
+                pixelId,
+                {
+                    unsubscribe: {
+                        url: unsubscribeLink,
+                        comment: 'Unsubscribe from newsletter',
+                    },
+                },
+            );
+        }
+
         return { message: 'User registered successfully!' };
     }
 
+    /**
+     * Check if a username exists
+     * @param username - The username
+     * @returns True if the username exists, false otherwise
+     */
     public async checkUsernameExists(username: string): Promise<boolean> {
         if (username.length >= 3) {
             const UserEntity = Repository.getEntity('UserEntity');
@@ -295,6 +467,12 @@ export class AuthAutorizationService extends AbstractService {
         }
     }
 
+    /**
+     * Refresh a token
+     * @param request - The request
+     * @param ctx - The context
+     * @returns The refresh token response
+     */
     public async refreshToken(request: any, ctx?: any) {
         const { authorization } =
             request.req?.headers || request.headers || ctx['token'];
@@ -417,6 +595,11 @@ export class AuthAutorizationService extends AbstractService {
         };
     }
 
+    /**
+     * Get the groups roles
+     * @param user - The user
+     * @returns The groups roles
+     */
     public async getGroupsRoles(user: any) {
         let roles = [];
 
@@ -454,6 +637,15 @@ export class AuthAutorizationService extends AbstractService {
     }
 
     /* Session */
+
+    /**
+     * Registry a session
+     * @param sesssionId - The session id
+     * @param user - The user
+     * @param req - The request
+     * @param fingerprint - The fingerprint
+     * @param refreshToken - The refresh token
+     */
     private async registrySession(
         sesssionId: string,
         user: any,
@@ -474,6 +666,17 @@ export class AuthAutorizationService extends AbstractService {
         }
     }
 
+    /**
+     * Create a session
+     * @param user - The user
+     * @param session - The session
+     * @param username - The username
+     * @param fingerprint - The fingerprint
+     * @param accessToken - The access token
+     * @param refreshToken - The refresh token
+     * @param roles - The roles
+     * @param groups - The groups
+     */
     private async createSession(
         user: any,
         session: any,
@@ -509,6 +712,15 @@ export class AuthAutorizationService extends AbstractService {
     }
 
     /* Tokens */
+
+    /**
+     * Create an access token
+     * @param user - The user
+     * @param jwtSecret - The jwt secret
+     * @param fingerprint - The fingerprint
+     * @param roles - The roles
+     * @param username - The username
+     */
     private createAuthToken(
         user: any,
         jwtSecret: string,
@@ -534,6 +746,14 @@ export class AuthAutorizationService extends AbstractService {
         return accessToken;
     }
 
+    /**
+     * Create a refresh token
+     * @param user - The user
+     * @param fingerprint - The fingerprint
+     * @param jwtSecretRefresh - The jwt secret refresh
+     * @param expiresIn - The expires in
+     * @returns The refresh token
+     */
     private createRefreshToken(
         user: any,
         fingerprint: string,
@@ -556,6 +776,11 @@ export class AuthAutorizationService extends AbstractService {
     }
 
     /* Roles */
+
+    /**
+     * Get the roles
+     * @returns The roles
+     */
     public async getRoles(): Promise<IGetRolesResponse> {
         const contracts = Scope.getArray<any>('__contracts');
         const rolesSufixs = [
@@ -600,6 +825,11 @@ export class AuthAutorizationService extends AbstractService {
         return { contracts: returnRoles };
     }
 
+    /**
+     * Check if the user has a role
+     * @param name - The role name
+     * @returns True if the user has the role, false otherwise
+     */
     public async hasRole(name: string | string[]): Promise<boolean> {
         const rolesObj = await this.getRoles();
         const allRoles = Object.values(rolesObj.contracts)
@@ -612,6 +842,12 @@ export class AuthAutorizationService extends AbstractService {
         return allRoles.includes(name);
     }
 
+    /**
+     * Assign roles to a user
+     * @param userId - The user id
+     * @param rolesInput - The roles input
+     * @returns The message
+     */
     public async assignRoles(
         userId: string,
         rolesInput: string | string[],
@@ -673,6 +909,12 @@ export class AuthAutorizationService extends AbstractService {
         return { message: 'Roles assigned successfully' };
     }
 
+    /**
+     * Remove roles from a user
+     * @param userId - The user id
+     * @param rolesInput - The roles input
+     * @returns The message
+     */
     public async removeRoles(
         userId: string,
         rolesInput: string | string[],
@@ -724,6 +966,14 @@ export class AuthAutorizationService extends AbstractService {
     }
 
     /* Logs */
+
+    /**
+     * Create a log hook
+     * @param req - The request
+     * @param accessToken - The access token
+     * @param refreshToken - The refresh token
+     * @param fingerprint - The fingerprint
+     */
     private async createLogHook(
         req: any,
         accessToken: string,

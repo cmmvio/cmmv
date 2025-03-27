@@ -432,6 +432,7 @@
                             placeholder="Enter your email"
                             required
                             autocomplete="email"
+                            tabindex="1"
                         >
                         <div v-if="errors.email" class="error-message">{{ errors.email }}</div>
                     </div>
@@ -448,6 +449,7 @@
                                 placeholder="Enter your password"
                                 required
                                 autocomplete="current-password"
+                                tabindex="2"
                             >
                             <button type="button" class="password-toggle" @click="showPassword = !showPassword">
                                 <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -470,7 +472,7 @@
                         <a href="#" @click.prevent="currentView = 'forgot'" class="auth-link">Forgot password?</a>
                     </div>
 
-                    <button type="submit" class="auth-btn" :disabled="loading">Sign In</button>
+                    <button type="submit" class="auth-btn" :disabled="loading" tabindex="3">Sign In</button>
 
                     <div class="divider">
                         <span class="divider-text">Don't have an account?</span>
@@ -539,6 +541,7 @@
                             :class="{'input-error': errors.email}"
                             placeholder="Enter your email"
                             required
+                            tabindex="1"
                         >
                         <div v-if="errors.email" class="error-message">{{ errors.email }}</div>
                     </div>
@@ -553,6 +556,7 @@
                             :class="{'input-error': errors.username}"
                             placeholder="Enter your username"
                             required
+                            tabindex="2"
                         >
                         <div v-if="errors.username" class="error-message">{{ errors.username }}</div>
                     </div>
@@ -571,6 +575,7 @@
                                 @keyup="checkPasswordStrength"
                                 @blur="checkPasswordStrength"
                                 @input="checkPasswordStrength"
+                                tabindex="3"
                             >
                             <button type="button" class="password-toggle" @click="showPassword = !showPassword">
                                 <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -597,17 +602,18 @@
                                 :class="{'input-error': errors.passwordConfirm}"
                                 placeholder="Confirm your password"
                                 required
+                                tabindex="4"
                             >
                         </div>
                         <div v-if="errors.passwordConfirm" class="error-message">{{ errors.passwordConfirm }}</div>
                     </div>
 
                     <div class="checkbox-group">
-                        <input type="checkbox" id="terms" v-model="registerForm.termsAccepted" class="checkbox-input">
+                        <input type="checkbox" id="terms" v-model="registerForm.termsAccepted" class="checkbox-input" tabindex="5">
                         <label for="terms" class="checkbox-label">I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#" class="auth-link">Privacy Policy</a></label>
                     </div>
 
-                    <button type="submit" class="auth-btn" :disabled="loading || !registerForm.termsAccepted">Create Account</button>
+                    <button type="submit" class="auth-btn" :disabled="loading || !registerForm.termsAccepted" tabindex="6">Create Account</button>
 
                     <div class="mt-4 text-center">
                         <a href="#" @click.prevent="currentView = 'login'" class="auth-link">Already have an account? Sign in</a>
@@ -790,8 +796,6 @@
                 const checkPasswordStrength = () => {
                     const password = currentView.value === 'register' ? registerForm.value.password : resetForm.value.password;
 
-                    console.log(password);
-
                     if (!password) {
                         passwordStrength.value = 0;
                         return;
@@ -803,8 +807,6 @@
 
                     if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
                     if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) score++;
-
-                    console.log(score);
 
                     passwordStrength.value = score;
                 };
@@ -1001,7 +1003,6 @@
                 };
 
                 const handleForgotPassword = async () => {
-                    console.log(forgotForm.value);
                     if(!forgotForm.value.email) {
                         errorMessage.value = 'Please enter a valid email address';
                         return;
@@ -1026,6 +1027,7 @@
                     }
 
                     successMessage.value = 'Reset password email sent successfully';
+                    currentView.value = 'login';
                 };
 
                 const handleRegister = async () => {

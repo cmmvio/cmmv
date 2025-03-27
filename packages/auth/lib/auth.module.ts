@@ -11,6 +11,7 @@ import {
     OAuthClientsContract,
     OAuthCodesContract,
     OAuthTokensContract,
+    OAuthAutorizationsContract,
     OAuth2Contract,
 } from '../contracts';
 
@@ -21,6 +22,8 @@ import {
     AuthGroupsService,
     AuthUsersService,
     AuthOneTimeTokenService,
+    AuthLocationService,
+    AuthEmailService,
     OAuth2Service,
 } from '../services';
 
@@ -45,6 +48,7 @@ export const AuthModule = new Module('auth', {
         OAuthClientsContract,
         OAuthCodesContract,
         OAuthTokensContract,
+        OAuthAutorizationsContract,
         OAuth2Contract,
     ],
     providers: [
@@ -54,6 +58,8 @@ export const AuthModule = new Module('auth', {
         AuthSessionsService,
         AuthGroupsService,
         AuthUsersService,
+        AuthLocationService,
+        AuthEmailService,
         OAuth2Service,
     ],
     controllers: [

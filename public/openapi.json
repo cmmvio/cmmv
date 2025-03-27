@@ -295,6 +295,22 @@
             "type": "string",
             "default": "{}",
             "required": false
+          },
+          "forgotPasswordToken": {
+            "type": "string",
+            "readOnly": true,
+            "required": false
+          },
+          "forgotSendAt": {
+            "type": "number",
+            "readOnly": true,
+            "required": false
+          },
+          "unsubscribeNewsletter": {
+            "type": "boolean",
+            "readOnly": true,
+            "default": false,
+            "required": false
           }
         },
         "required": [
@@ -916,14 +932,6 @@
             "type": "string",
             "required": true
           },
-          "clientId": {
-            "type": "string",
-            "required": true
-          },
-          "useId": {
-            "type": "string",
-            "required": true
-          },
           "redirectUri": {
             "type": "string",
             "required": true
@@ -955,8 +963,6 @@
         },
         "required": [
           "code",
-          "clientId",
-          "useId",
           "redirectUri",
           "expiresAt"
         ]
@@ -974,14 +980,6 @@
           "refreshToken": {
             "type": "string",
             "required": false
-          },
-          "clientId": {
-            "type": "string",
-            "required": true
-          },
-          "userId": {
-            "type": "string",
-            "required": true
           },
           "scope": {
             "type": "string",
@@ -1010,10 +1008,63 @@
         },
         "required": [
           "accessToken",
-          "clientId",
-          "userId",
           "scope",
           "expiresAt"
+        ]
+      },
+      "OAuthAutorizations": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "approvedAt": {
+            "type": "number",
+            "readOnly": true,
+            "required": true
+          },
+          "codeAutorization": {
+            "type": "string",
+            "readOnly": true,
+            "required": true
+          },
+          "scope": {
+            "type": "string",
+            "readOnly": true,
+            "required": true
+          },
+          "revoked": {
+            "type": "boolean",
+            "readOnly": true,
+            "required": true,
+            "default": false
+          },
+          "revokedAt": {
+            "type": "number",
+            "readOnly": true,
+            "required": false
+          },
+          "ip": {
+            "type": "string",
+            "readOnly": true,
+            "required": false
+          },
+          "location": {
+            "type": "string",
+            "readOnly": true,
+            "required": false
+          },
+          "agent": {
+            "type": "string",
+            "readOnly": true,
+            "required": false
+          }
+        },
+        "required": [
+          "approvedAt",
+          "codeAutorization",
+          "scope",
+          "revoked"
         ]
       },
       "OAuth2": {
@@ -1192,6 +1243,69 @@
         "required": [
           "success",
           "message"
+        ]
+      },
+      "EmailSending": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "readOnly": true,
+            "required": true
+          },
+          "messageId": {
+            "type": "string",
+            "readOnly": true,
+            "required": true
+          },
+          "subject": {
+            "type": "string",
+            "readOnly": true,
+            "required": true
+          },
+          "context": {
+            "type": "string",
+            "readOnly": true,
+            "required": true
+          },
+          "recived": {
+            "type": "boolean",
+            "readOnly": true,
+            "required": true,
+            "default": false
+          },
+          "recivedAt": {
+            "type": "number",
+            "readOnly": true,
+            "required": false
+          },
+          "opened": {
+            "type": "boolean",
+            "readOnly": true,
+            "required": true,
+            "default": false
+          },
+          "error": {
+            "type": "string",
+            "readOnly": true,
+            "required": false
+          },
+          "pixelId": {
+            "type": "string",
+            "readOnly": true,
+            "required": false
+          }
+        },
+        "required": [
+          "email",
+          "messageId",
+          "subject",
+          "context",
+          "recived",
+          "opened"
         ]
       },
       "Catch": {
@@ -1715,6 +1829,56 @@
             "BearerAuth": []
           }
         ]
+      }
+    },
+    "/email/pixel": {
+      "get": {
+        "tags": [
+          "Email"
+        ],
+        "summary": "",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": []
+      }
+    },
+    "/email/unsubscribe": {
+      "get": {
+        "tags": [
+          "Email"
+        ],
+        "summary": "",
+        "externalDocs": {
+          "url": null
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error: An unexpected error occurred on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catch"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [],
+        "security": []
       }
     },
     "/groups": {

@@ -11,13 +11,11 @@ import {
     protoPackage: 'auth',
     subPath: '/auth',
     generateController: false,
+    generateBoilerplates: false,
     auth: false,
     rootOnly: false,
     options: {
         tags: ['oauth2'],
-        moduleContract: true,
-        databaseSchemaName: 'auth_oauth2',
-        databaseTimestamps: true,
     },
 })
 export class OAuth2Contract extends AbstractContract {

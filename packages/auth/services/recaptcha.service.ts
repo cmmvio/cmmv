@@ -8,6 +8,12 @@ export class AuthRecaptchaService extends AbstractService {
         super();
     }
 
+    /**
+     * Validate a recaptcha
+     * @param secret - The secret
+     * @param validation - The validation
+     * @returns The success
+     */
     public async validateRecaptcha(
         secret: string,
         validation: string,

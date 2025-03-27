@@ -1,3 +1,6 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
 import { v4 as uuidv4 } from 'uuid';
 
 import { Service, AbstractService, Config, Application } from '@cmmv/core';
@@ -25,6 +28,8 @@ export class AuthOneTimeTokenService extends AbstractService {
     public async createOneTimeToken(
         userId: string,
         type: ETokenType = ETokenType.MAGIC_LINK,
+        expiresInDirect: number = 60 * 10,
+        extraData: any = {},
     ): Promise<string> {
         const oneTimeTokenEnable = Config.get<boolean>(
             'auth.oneTimeToken.enabled',
@@ -50,10 +55,13 @@ export class AuthOneTimeTokenService extends AbstractService {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
         const oneTimeTokenUrl = Config.get<string>('auth.oneTimeToken.urlLink');
-        const expiresIn = Config.get<number>(
+
+        let expiresIn = Config.get<number>(
             'auth.oneTimeToken.expiresIn',
             60 * 10,
         );
+
+        if (expiresInDirect != expiresIn) expiresIn = expiresInDirect;
 
         const OneTimeTokenEntity = Repository.getEntity('OneTimeTokenEntity');
         const token = uuidv4();
@@ -66,7 +74,11 @@ export class AuthOneTimeTokenService extends AbstractService {
 
         await Repository.insert(OneTimeTokenEntity, oneTimeToken);
 
-        return `${oneTimeTokenUrl}/${token}`;
+        const url = new URL(`${oneTimeTokenUrl}/${token}`);
+
+        for (let key in extraData) url.searchParams.set(key, extraData[key]);
+
+        return url.toString();
     }
 
     /**
@@ -99,32 +111,29 @@ export class AuthOneTimeTokenService extends AbstractService {
             token,
         });
 
-        if (!oneTimeToken)
+        if (!oneTimeToken) {
             throw new HttpException(
                 'One time token not found',
                 HttpStatus.NOT_FOUND,
             );
+        }
 
-        if (oneTimeToken.expireAt < Date.now())
+        if (oneTimeToken.expireAt < Date.now()) {
             throw new HttpException(
                 'One time token expired',
                 HttpStatus.BAD_REQUEST,
             );
-
-        await Repository.delete(OneTimeTokenEntity, oneTimeToken.id);
+        }
 
         if (oneTimeToken.tokenType === ETokenType.EMAIL_VALIDATION) {
+            await Repository.delete(OneTimeTokenEntity, oneTimeToken.id);
             const authUsersService =
                 Application.resolveProvider(AuthUsersService);
-            await authUsersService.validateEmail(oneTimeToken.user);
-
-            if (redirect) {
-                res.res.writeHead(302, { Location: redirect });
-                res.res.end();
-            }
-
+            await authUsersService.validateEmail(oneTimeToken.user, res);
             return false;
         } else if (oneTimeToken.tokenType === ETokenType.MAGIC_LINK) {
+            await Repository.delete(OneTimeTokenEntity, oneTimeToken.id);
+
             const tokens =
                 await this.authAutorizationService.loginWithOneTimeToken(
                     oneTimeToken.user,
@@ -151,9 +160,83 @@ export class AuthOneTimeTokenService extends AbstractService {
                 return tokens;
             }
         } else if (oneTimeToken.tokenType === ETokenType.PASSWORD_RESET) {
+            const customTemplate = Config.get<string>(
+                'auth.templates.forgotPassword',
+            );
+
+            const template = customTemplate
+                ? customTemplate
+                : path.join(
+                      __dirname,
+                      '..',
+                      'templates',
+                      `forgotPassword.html`,
+                  );
+
+            if (!fs.existsSync(template))
+                throw new HttpException(
+                    'Template not found',
+                    HttpStatus.NOT_FOUND,
+                );
+
+            const templateContent = fs.readFileSync(template, 'utf8');
+
+            res.setHeader('Content-Type', 'text/html');
+            res.setHeader('Content-Length', templateContent.length);
+            res.end(templateContent);
+            return false;
         }
 
         return false;
+    }
+
+    /**
+     * Change the password by link
+     * @param token - The token
+     * @param forgotPasswordToken - The forgot password token
+     * @param req - The request
+     * @param res - The response
+     */
+    public async changePasswordByLink(
+        token: string,
+        forgotPasswordToken: string,
+        newPassword: string,
+        req: any,
+    ) {
+        const OneTimeTokenEntity = Repository.getEntity('OneTimeTokenEntity');
+        const oneTimeToken = await Repository.findBy(OneTimeTokenEntity, {
+            token,
+        });
+
+        if (!oneTimeToken)
+            throw new HttpException(
+                'One time token not found',
+                HttpStatus.NOT_FOUND,
+            );
+
+        if (oneTimeToken.expireAt < Date.now())
+            throw new HttpException(
+                'One time token expired',
+                HttpStatus.BAD_REQUEST,
+            );
+
+        const authUsersService = Application.resolveProvider(AuthUsersService);
+        const user = await authUsersService.getUserById(oneTimeToken.user);
+
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+        if (user.forgotPasswordToken !== forgotPasswordToken)
+            throw new HttpException('Invalid token', HttpStatus.BAD_REQUEST);
+
+        await authUsersService.changePasswordByLink(
+            user.id,
+            user.email,
+            newPassword,
+            req,
+        );
+        await Repository.delete(OneTimeTokenEntity, oneTimeToken.id);
+        return { message: 'Password changed successfully' };
     }
 
     /**

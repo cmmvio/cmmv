@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsubscribe - CMMV</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/@vueuse/core"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --color-neutral-900: #171717;
+            --color-neutral-800: #262626;
+            --color-neutral-700: #404040;
+            --color-neutral-600: #525252;
+            --color-neutral-500: #737373;
+            --color-neutral-400: #a3a3a3;
+            --color-neutral-300: #d4d4d4;
+            --color-neutral-200: #e5e5e5;
+            --color-neutral-100: #f5f5f5;
+            --color-neutral-50: #fafafa;
+            --color-blue-700: #1d4ed8;
+            --color-blue-600: #2563eb;
+            --color-blue-500: #3b82f6;
+            --color-red-600: #dc2626;
+            --color-red-500: #ef4444;
+            --color-green-600: #16a34a;
+            --color-green-500: #22c55e;
+        }
+
+        body {
+            background-color: var(--color-neutral-900);
+            color: var(--color-neutral-200);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .auth-container {
+            width: 100%;
+            min-width: 380px;
+            max-width: 450px;
+            background-color: var(--color-neutral-800);
+            border-radius: 8px;
+            border: 1px solid var(--color-neutral-700);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .auth-header {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--color-neutral-700);
+            padding: 1.25rem 1.5rem;
+        }
+
+        .auth-header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .auth-content {
+            padding: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .input-control {
+            width: 100%;
+            background-color: var(--color-neutral-700);
+            border: 1px solid var(--color-neutral-600);
+            border-radius: 4px;
+            padding: 0.625rem 0.75rem;
+            font-size: 0.875rem;
+            color: var(--color-neutral-200);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .input-control:focus {
+            outline: none;
+            border-color: var(--color-blue-500);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .input-error {
+            border-color: var(--color-red-500);
+        }
+
+        .error-message {
+            color: var(--color-red-500);
+            font-size: 0.75rem;
+            margin-top: 0.375rem;
+        }
+
+        .auth-btn {
+            width: 100%;
+            background-color: var(--color-blue-600);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .auth-btn:hover {
+            background-color: var(--color-blue-700);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .auth-secondary-btn {
+            background-color: var(--color-neutral-600);
+        }
+
+        .auth-secondary-btn:hover {
+            background-color: var(--color-neutral-700);
+        }
+
+        .auth-link {
+            color: var(--color-blue-500);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .auth-link:hover {
+            color: var(--color-blue-600);
+            text-decoration: underline;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .checkbox-input {
+            margin-right: 0.5rem;
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid var(--color-neutral-600);
+            border-radius: 3px;
+            background-color: var(--color-neutral-700);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, border-color 0.2s;
+            cursor: pointer;
+            position: relative;
+            margin-top: 0.2rem;
+        }
+
+        .checkbox-input:checked {
+            background-color: var(--color-blue-600);
+            border-color: var(--color-blue-600);
+        }
+
+        .checkbox-input:checked::after {
+            content: '';
+            position: absolute;
+            width: 0.35rem;
+            height: 0.6rem;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-top: -1px;
+        }
+
+        .checkbox-label {
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .radio-group {
+            margin-bottom: 0.5rem;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .radio-input {
+            margin-right: 0.5rem;
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            border: 1px solid var(--color-neutral-600);
+            border-radius: 50%;
+            background-color: var(--color-neutral-700);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, border-color 0.2s;
+            cursor: pointer;
+            position: relative;
+            margin-top: 0.2rem;
+        }
+
+        .radio-input:checked {
+            border-color: var(--color-blue-600);
+            border-width: 4px;
+            background-color: var(--color-neutral-700);
+        }
+
+        .success-message {
+            background-color: rgba(22, 163, 74, 0.2);
+            border: 1px solid var(--color-green-600);
+            color: var(--color-green-500);
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.875rem;
+        }
+
+        .error-alert {
+            background-color: rgba(220, 38, 38, 0.2);
+            border: 1px solid var(--color-red-600);
+            color: var(--color-red-500);
+            border-radius: 4px;
+            padding: 0.75rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.875rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(2px);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid transparent;
+            border-top-color: var(--color-blue-500);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--color-neutral-700);
+        }
+
+        .divider-text {
+            padding: 0 0.75rem;
+            color: var(--color-neutral-500);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .channels-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .channel-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        textarea.input-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div id="unsubscribe-app" v-clock>
+        <div class="loading-overlay" v-if="loading">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>Manage Your Subscriptions</h1>
+            </div>
+
+            <div class="auth-content">
+                <div v-if="errorMessage" class="error-alert">
+                    {{ errorMessage }}
+                </div>
+
+                <div v-if="successMessage" class="success-message">
+                    {{ successMessage }}
+                </div>
+
+                <!-- Initial Unsubscribe Form -->
+                <form v-if="!showConfirmation" @submit.prevent="submitUnsubscribe">
+                    <p class="mb-4 text-sm text-neutral-400">Select which communications you'd like to unsubscribe from and let us know why you're leaving.</p>
+
+                    <div class="channels-section">
+                        <p class="channel-title">Unsubscribe from:</p>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="all-communications" v-model="unsubscribeForm.channels.all" class="checkbox-input" @change="toggleAllChannels">
+                            <label for="all-communications" class="checkbox-label">All communications</label>
+                        </div>
+
+                        <div class="checkbox-group" v-if="!unsubscribeForm.channels.all">
+                            <input type="checkbox" id="marketing-emails" v-model="unsubscribeForm.channels.marketing" class="checkbox-input">
+                            <label for="marketing-emails" class="checkbox-label">Marketing emails</label>
+                        </div>
+
+                        <div class="checkbox-group" v-if="!unsubscribeForm.channels.all">
+                            <input type="checkbox" id="product-updates" v-model="unsubscribeForm.channels.productUpdates" class="checkbox-input">
+                            <label for="product-updates" class="checkbox-label">Product updates</label>
+                        </div>
+
+                        <div class="checkbox-group" v-if="!unsubscribeForm.channels.all">
+                            <input type="checkbox" id="newsletters" v-model="unsubscribeForm.channels.newsletters" class="checkbox-input">
+                            <label for="newsletters" class="checkbox-label">Newsletters</label>
+                        </div>
+
+                        <div class="checkbox-group" v-if="!unsubscribeForm.channels.all">
+                            <input type="checkbox" id="events" v-model="unsubscribeForm.channels.events" class="checkbox-input">
+                            <label for="events" class="checkbox-label">Event notifications</label>
+                        </div>
+                    </div>
+
+                    <div class="divider">
+                        <span class="divider-text">Tell us why</span>
+                    </div>
+
+                    <div class="input-group">
+                        <p class="channel-title">Reason for unsubscribing:</p>
+
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="reason" value="too-many" v-model="unsubscribeForm.reason" class="radio-input">
+                                <span>I receive too many emails</span>
+                            </label>
+
+                            <label class="radio-label">
+                                <input type="radio" name="reason" value="not-relevant" v-model="unsubscribeForm.reason" class="radio-input">
+                                <span>The content is not relevant to me</span>
+                            </label>
+
+                            <label class="radio-label">
+                                <input type="radio" name="reason" value="not-subscribed" v-model="unsubscribeForm.reason" class="radio-input">
+                                <span>I don't remember subscribing</span>
+                            </label>
+
+                            <label class="radio-label">
+                                <input type="radio" name="reason" value="privacy" v-model="unsubscribeForm.reason" class="radio-input">
+                                <span>Privacy concerns</span>
+                            </label>
+
+                            <label class="radio-label">
+                                <input type="radio" name="reason" value="other" v-model="unsubscribeForm.reason" class="radio-input">
+                                <span>Other reason</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="input-group" v-if="unsubscribeForm.reason === 'other'">
+                        <label for="other-reason">Please specify:</label>
+                        <textarea
+                            id="other-reason"
+                            v-model="unsubscribeForm.otherReason"
+                            class="input-control"
+                            :class="{'input-error': errors.otherReason}"
+                            placeholder="Tell us why you're unsubscribing..."
+                        ></textarea>
+                        <div v-if="errors.otherReason" class="error-message">{{ errors.otherReason }}</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="email">Confirm your email address:</label>
+                        <input
+                            type="email"
+                            id="email"
+                            v-model="unsubscribeForm.email"
+                            class="input-control"
+                            :class="{'input-error': errors.email}"
+                            placeholder="Enter your email address"
+                            required
+                        >
+                        <div v-if="errors.email" class="error-message">{{ errors.email }}</div>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <button type="submit" class="auth-btn" :disabled="loading || !isFormValid">Unsubscribe</button>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <a href="/" @click.prevent="cancelUnsubscribe" class="auth-link">Cancel and return to site</a>
+                    </div>
+                </form>
+
+                <!-- Confirmation View -->
+                <div v-if="showConfirmation">
+                    <div class="text-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h2 class="text-xl font-semibold mb-2">Unsubscribed Successfully</h2>
+                        <p class="text-neutral-400 text-sm">Your preferences have been updated.</p>
+                    </div>
+
+                    <div class="mb-6 text-sm">
+                        <p>You have been unsubscribed from the following:</p>
+                        <ul class="list-disc pl-5 mt-2 text-neutral-300">
+                            <li v-if="unsubscribeForm.channels.all">All communications</li>
+                            <li v-else-if="unsubscribeForm.channels.marketing">Marketing emails</li>
+                            <li v-else-if="unsubscribeForm.channels.productUpdates">Product updates</li>
+                            <li v-else-if="unsubscribeForm.channels.newsletters">Newsletters</li>
+                            <li v-else-if="unsubscribeForm.channels.events">Event notifications</li>
+                        </ul>
+                    </div>
+
+                    <p class="text-sm mb-6">If you change your mind, you can update your communication preferences anytime in your account settings.</p>
+
+                    <button @click="returnToSite" class="auth-btn">Return to Site</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, watch } = Vue;
+
+        const app = createApp({
+            setup() {
+                const loading = ref(false);
+                const errorMessage = ref('');
+                const successMessage = ref('');
+                const errors = ref({});
+                const showConfirmation = ref(false);
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const emailFromUrl = urlParams.get('email') || '';
+                const token = urlParams.get('token') || '';
+
+                const unsubscribeForm = ref({
+                    email: emailFromUrl,
+                    token: token,
+                    channels: {
+                        all: false,
+                        marketing: false,
+                        productUpdates: false,
+                        newsletters: false,
+                        events: false
+                    },
+                    reason: '',
+                    otherReason: ''
+                });
+
+                const isFormValid = computed(() => {
+                    // Check if email is present and properly formatted
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(unsubscribeForm.value.email)) return false;
+
+                    // Check if at least one channel is selected
+                    const anyChannelSelected = unsubscribeForm.value.channels.all ||
+                                              unsubscribeForm.value.channels.marketing ||
+                                              unsubscribeForm.value.channels.productUpdates ||
+                                              unsubscribeForm.value.channels.newsletters ||
+                                              unsubscribeForm.value.channels.events;
+                    if (!anyChannelSelected) return false;
+
+                    // Check if a reason is selected
+                    if (!unsubscribeForm.value.reason) return false;
+
+                    // If "other" reason is selected, check if explanation is provided
+                    if (unsubscribeForm.value.reason === 'other' && !unsubscribeForm.value.otherReason.trim()) {
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                const toggleAllChannels = () => {
+                    if (unsubscribeForm.value.channels.all) {
+                        unsubscribeForm.value.channels.marketing = false;
+                        unsubscribeForm.value.channels.productUpdates = false;
+                        unsubscribeForm.value.channels.newsletters = false;
+                        unsubscribeForm.value.channels.events = false;
+                    }
+                };
+
+                const submitUnsubscribe = async () => {
+                    // Reset errors
+                    errors.value = {};
+                    errorMessage.value = '';
+
+                    // Validate form
+                    if (!isFormValid.value) {
+                        if (!unsubscribeForm.value.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(unsubscribeForm.value.email)) {
+                            errors.value.email = 'Please enter a valid email address';
+                        }
+
+                        if (unsubscribeForm.value.reason === 'other' && !unsubscribeForm.value.otherReason.trim()) {
+                            errors.value.otherReason = 'Please explain your reason for unsubscribing';
+                        }
+
+                        errorMessage.value = 'Please correct the errors in the form';
+                        return;
+                    }
+
+                    try {
+                        loading.value = true;
+
+                        // This would be your actual API call
+                        const response = await fetch('/api/unsubscribe', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: unsubscribeForm.value.email,
+                                token: unsubscribeForm.value.token,
+                                channels: unsubscribeForm.value.channels,
+                                reason: unsubscribeForm.value.reason,
+                                otherReason: unsubscribeForm.value.reason === 'other' ? unsubscribeForm.value.otherReason : ''
+                            })
+                        });
+
+                        // For demo purposes, simulate success
+                        // In a real implementation, you would check the response
+                        // if (!response.ok) throw new Error('Failed to unsubscribe');
+
+                        // Show confirmation screen
+                        showConfirmation.value = true;
+
+                    } catch (error) {
+                        console.error('Error during unsubscribe:', error);
+                        errorMessage.value = 'We encountered an error while processing your request. Please try again.';
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const cancelUnsubscribe = () => {
+                    // In a real implementation, redirect to homepage or previous page
+                    window.location.href = '/';
+                };
+
+                const returnToSite = () => {
+                    // In a real implementation, redirect to homepage
+                    window.location.href = '/';
+                };
+
+                return {
+                    loading,
+                    errorMessage,
+                    successMessage,
+                    errors,
+                    unsubscribeForm,
+                    showConfirmation,
+                    isFormValid,
+                    toggleAllChannels,
+                    submitUnsubscribe,
+                    cancelUnsubscribe,
+                    returnToSite
+                };
+            }
+        });
+
+        app.mount('#unsubscribe-app');
+    </script>
+</body>
+</html>

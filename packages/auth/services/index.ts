@@ -5,3 +5,7 @@ export * from './opt.service';
 export * from './sessions.service';
 export * from './users.service';
 export * from './one-time-token.service';
+
+//Utils
+export * from './email.service';
+export * from './location.service';

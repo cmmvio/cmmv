@@ -420,7 +420,9 @@ const useOAuthManager = () => {
                             console.log('Received access token:', data.token);
                             console.log('Received refresh token:', data.refreshToken);
                             state.success = `Authorization successful! Code: ${code}`;
-                            alert(`Authorization successful! Access token: ${data.token}`);
+                            setTimeout(() => {
+                                alert(`Authorization successful! Access token: ${data.token}`);
+                            }, 1000);
                         } else if (accessToken) {
                             console.log('Received access token:', accessToken);
                             state.success = 'Authorization successful! Token received.';

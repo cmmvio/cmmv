@@ -126,6 +126,9 @@ export function Auth(
                             }
                         }
 
+                        if (!decoded)
+                            return response.code(401).end('Unauthorized');
+
                         decoded.username = decryptJWTData(
                             decoded.username,
                             jwtSecret,

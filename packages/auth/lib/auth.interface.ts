@@ -95,6 +95,7 @@ export interface GroupRolesPayload {
 export enum ETokenType {
     EMAIL_VALIDATION = 'email_validation',
     PASSWORD_RESET = 'password_reset',
+    RECOVER_ACCOUNT = 'recover_account',
     MAGIC_LINK = 'magic_link',
 }
 

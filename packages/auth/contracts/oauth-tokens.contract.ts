@@ -1,5 +1,9 @@
 import { AbstractContract, Contract, ContractField } from '@cmmv/core';
 
+import { UserContract } from './users.contract';
+
+import { OAuthClientsContract } from './oauth-clients.contract';
+
 @Contract({
     namespace: 'Auth',
     controllerName: 'OAuthTokens',
@@ -9,6 +13,7 @@ import { AbstractContract, Contract, ContractField } from '@cmmv/core';
     auth: false,
     rootOnly: false,
     options: {
+        tags: ['oauth2'],
         moduleContract: true,
         databaseSchemaName: 'auth_oauth_tokens',
         databaseTimestamps: true,
@@ -33,17 +38,45 @@ export class OAuthTokensContract extends AbstractContract {
 
     @ContractField({
         protoType: 'string',
+        objectType: 'object',
+        entityType: 'OAuthClientsEntity',
+        protoRepeated: false,
         nullable: false,
         index: true,
+        exclude: true,
+        readOnly: true,
+        link: [
+            {
+                createRelationship: true,
+                contract: OAuthClientsContract,
+                contractName: 'OAuthClientsContract',
+                entityName: 'oauth_clients',
+                field: 'id',
+            },
+        ],
     })
-    clientId: string;
+    client: string;
 
     @ContractField({
         protoType: 'string',
+        objectType: 'object',
         nullable: false,
         index: true,
+        entityType: 'UserEntity',
+        protoRepeated: false,
+        exclude: true,
+        readOnly: true,
+        link: [
+            {
+                createRelationship: true,
+                contract: UserContract,
+                contractName: 'UserContract',
+                entityName: 'user',
+                field: 'id',
+            },
+        ],
     })
-    userId: string;
+    user: string;
 
     @ContractField({
         protoType: 'string',

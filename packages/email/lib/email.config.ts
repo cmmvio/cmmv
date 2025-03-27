@@ -53,6 +53,11 @@ export const EmailConfig: ConfigSchema = {
             required: false,
             default: false,
         },
+        telemetry: {
+            type: 'boolean',
+            required: false,
+            default: false,
+        },
         debug: {
             type: 'boolean',
             required: false,
@@ -194,6 +199,21 @@ export const EmailConfig: ConfigSchema = {
             type: 'number',
             required: false,
             default: 100,
+        },
+        pixelUrl: {
+            type: 'string',
+            required: false,
+            default: 'https://localhost:3000/email/pixel',
+        },
+        unsubscribeUrl: {
+            type: 'string',
+            required: false,
+            default: 'https://localhost:3000/email/unsubscribe',
+        },
+        unsubscribeLinkApi: {
+            type: 'string',
+            required: false,
+            default: 'https://localhost:3000/auth/unsubscribe',
         },
     },
 };

@@ -80,6 +80,7 @@ module.exports = {
         jwtSecret: process.env.JWT_SECRET || 'secret',
         jwtSecretRefresh: process.env.JWT_SECRET_REFRESH || 'secret',
         expiresIn: 60 * 60 * 24,
+        requireEmailValidation: true,
         google: {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -195,6 +196,9 @@ module.exports = {
     },
 
     email: {
+        pixelUrl: 'http://localhost:3000/email/pixel',
+        unsubscribeUrl: 'http://localhost:3000/email/unsubscribe',
+        unsubscribeLinkApi: 'http://localhost:3000/auth/unsubscribe',
         from: process.env.EMAIL_FROM,
         secure: false,
         ignoreTLS: true,

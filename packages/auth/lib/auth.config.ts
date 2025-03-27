@@ -32,6 +32,11 @@ export const AuthConfig: ConfigSchema = {
             type: 'number',
             default: 60 * 60 * 24,
         },
+        requireEmailValidation: {
+            required: false,
+            type: 'boolean',
+            default: false,
+        },
         google: {
             required: false,
             type: 'object',
@@ -449,11 +454,19 @@ export const AuthConfig: ConfigSchema = {
                     required: false,
                     type: 'string',
                 },
+                emailForgotPassword: {
+                    required: false,
+                    type: 'string',
+                },
                 forgotPassword: {
                     required: false,
                     type: 'string',
                 },
-                confirmEmail: {
+                emailConfirmation: {
+                    required: false,
+                    type: 'string',
+                },
+                unsubscribe: {
                     required: false,
                     type: 'string',
                 },

@@ -15,6 +15,7 @@ import {
     auth: false,
     rootOnly: false,
     options: {
+        tags: ['oauth2'],
         moduleContract: true,
         databaseSchemaName: 'auth_oauth_clients',
         databaseTimestamps: true,

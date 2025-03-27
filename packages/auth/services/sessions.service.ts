@@ -17,6 +17,11 @@ import { decryptJWTData } from '../lib/auth.utils';
 
 @Service('auth_sessions')
 export class AuthSessionsService extends AbstractService {
+    /**
+     * Validate a session
+     * @param user - The user
+     * @returns The success
+     */
     public static async validateSession(
         user: IJWTDecoded | string,
     ): Promise<boolean> {
@@ -55,6 +60,11 @@ export class AuthSessionsService extends AbstractService {
         return !!session;
     }
 
+    /**
+     * Validate a refresh token
+     * @param refreshToken - The refresh token
+     * @returns The success
+     */
     public static async validateRefreshToken(
         refreshToken: string,
     ): Promise<boolean> {
@@ -97,6 +107,11 @@ export class AuthSessionsService extends AbstractService {
         }
     }
 
+    /**
+     * Get a session from a refresh token
+     * @param refreshToken - The refresh token
+     * @returns The session
+     */
     public static async getSessionFromRefreshToken(
         refreshToken: string,
     ): Promise<any | null> {
@@ -135,6 +150,15 @@ export class AuthSessionsService extends AbstractService {
         }
     }
 
+    /**
+     * Registry a session
+     * @param sessionId - The session id
+     * @param req - The request
+     * @param fingerprint - The fingerprint
+     * @param user - The user
+     * @param refreshToken - The refresh token
+     * @returns The success
+     */
     public async registrySession(
         sessionId: string,
         req: any,
@@ -207,6 +231,12 @@ export class AuthSessionsService extends AbstractService {
         return true;
     }
 
+    /**
+     * Get sessions
+     * @param queries - The queries
+     * @param user - The user
+     * @returns The sessions
+     */
     public async getSessions(queries: any, user: IJWTDecoded) {
         const SessionsEntity = Repository.getEntity('SessionsEntity');
         const Sessions: any = Application.getModel('Sessions');
@@ -234,6 +264,12 @@ export class AuthSessionsService extends AbstractService {
         };
     }
 
+    /**
+     * Revoke a session
+     * @param sessionId - The session id
+     * @param user - The user
+     * @returns The success
+     */
     public async revokeSession(sessionId: string, user: IJWTDecoded) {
         const SessionsEntity = Repository.getEntity('SessionsEntity');
         let userId: any = user.id;
@@ -259,12 +295,22 @@ export class AuthSessionsService extends AbstractService {
         return true;
     }
 
+    /**
+     * Extract the device
+     * @param userAgent - The user agent
+     * @returns The device
+     */
     private extractDevice(userAgent: string): string {
         if (/mobile/i.test(userAgent)) return 'Mobile';
         if (/tablet/i.test(userAgent)) return 'Tablet';
         return 'Desktop';
     }
 
+    /**
+     * Extract the browser
+     * @param userAgent - The user agent
+     * @returns The browser
+     */
     private extractBrowser(userAgent: string): string {
         if (/chrome/i.test(userAgent)) return 'Chrome';
         if (/firefox/i.test(userAgent)) return 'Firefox';
@@ -274,6 +320,11 @@ export class AuthSessionsService extends AbstractService {
         return 'Unknown';
     }
 
+    /**
+     * Extract the OS
+     * @param userAgent - The user agent
+     * @returns The OS
+     */
     private extractOS(userAgent: string): string {
         if (/windows/i.test(userAgent)) return 'Windows';
         if (/mac/i.test(userAgent)) return 'MacOS';

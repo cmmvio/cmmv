@@ -6,6 +6,8 @@ import {
     Req,
     Res,
     Query,
+    Post,
+    Body,
 } from '@cmmv/http';
 
 import { OneTimeTokenContract } from '../contracts/one-time-tokens.contract';
@@ -47,6 +49,24 @@ export class AuthOneTimeTokensController {
             req,
             res,
             redirect,
+        );
+    }
+
+    @Post('one-time-token/:token', {
+        exclude: true,
+    })
+    async handlerOneTimeTokenChangePassword(
+        @Param('token') token: string,
+        @Query('token') forgotPasswordToken: string,
+        @Body() body: { password: string },
+        @Req() req: any,
+        @Res() res: any,
+    ) {
+        return this.oneTimeTokenService.changePasswordByLink(
+            token,
+            forgotPasswordToken,
+            body.password,
+            req,
         );
     }
 }

@@ -7,6 +7,10 @@ import { GroupPayload } from '../lib/auth.interface';
 
 @Service('auth_groups')
 export class AuthGroupsService extends AbstractService {
+    /**
+     * Get all groups
+     * @returns The groups
+     */
     public async getAllGroups() {
         const GroupsEntity = Repository.getEntity('GroupsEntity');
         const Groups: any = Application.getModel('Groups');
@@ -18,6 +22,11 @@ export class AuthGroupsService extends AbstractService {
         };
     }
 
+    /**
+     * Get groups in
+     * @param inArr - The groups in
+     * @returns The groups
+     */
     public async getGroupsIn(inArr: string[] | string) {
         if (!inArr)
             throw new HttpException(
@@ -42,6 +51,11 @@ export class AuthGroupsService extends AbstractService {
         };
     }
 
+    /**
+     * Create a group
+     * @param payload - The payload
+     * @returns The message
+     */
     public async createGroup(payload: GroupPayload) {
         const GroupsEntity = Repository.getEntity('GroupsEntity');
         const exists = await Repository.exists(GroupsEntity, {
@@ -73,6 +87,12 @@ export class AuthGroupsService extends AbstractService {
         return { message: 'Group created successfully' };
     }
 
+    /**
+     * Update a group
+     * @param groupId - The group id
+     * @param payload - The payload
+     * @returns The message
+     */
     public async updateGroup(groupId: string, payload: Partial<GroupPayload>) {
         const GroupsEntity = Repository.getEntity('GroupsEntity');
 
@@ -100,6 +120,11 @@ export class AuthGroupsService extends AbstractService {
         return { message: 'Group updated successfully' };
     }
 
+    /**
+     * Delete a group
+     * @param groupId - The group id
+     * @returns The message
+     */
     public async deleteGroup(groupId: string) {
         const GroupsEntity = Repository.getEntity('GroupsEntity');
 
@@ -120,6 +145,12 @@ export class AuthGroupsService extends AbstractService {
         return { message: 'Group deleted successfully' };
     }
 
+    /**
+     * Assign roles to a group
+     * @param groupId - The group id
+     * @param rolesInput - The roles input
+     * @returns The message
+     */
     public async assignRolesToGroup(
         groupId: string,
         rolesInput: string | string[],
@@ -148,6 +179,12 @@ export class AuthGroupsService extends AbstractService {
         return { message: 'Roles assigned to group successfully' };
     }
 
+    /**
+     * Remove roles from a group
+     * @param groupId - The group id
+     * @param rolesInput - The roles input
+     * @returns The message
+     */
     public async removeRolesFromGroup(
         groupId: string,
         rolesInput: string | string[],

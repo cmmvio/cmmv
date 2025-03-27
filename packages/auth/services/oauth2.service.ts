@@ -17,10 +17,13 @@ import {
 
 import { AuthAutorizationService } from './autorization.service';
 
+import { AuthLocationService } from './location.service';
+
 @Service('oauth2')
 export class OAuth2Service extends AbstractService {
     constructor(
         private readonly authAutorizationService: AuthAutorizationService,
+        private readonly authLocationService: AuthLocationService,
     ) {
         super();
     }
@@ -136,11 +139,12 @@ export class OAuth2Service extends AbstractService {
         if (!body.state)
             throw new HttpException('Invalid state', HttpStatus.BAD_REQUEST);
 
-        if (!client.allowedGrantTypes.includes('authorization_code'))
+        if (!client.allowedGrantTypes.includes('authorization_code')) {
             throw new HttpException(
                 'Invalid grant type',
                 HttpStatus.BAD_REQUEST,
             );
+        }
 
         const code = crypto.randomBytes(32).toString('hex');
 
@@ -148,21 +152,68 @@ export class OAuth2Service extends AbstractService {
             body.response_type === 'code' &&
             client.allowedGrantTypes.includes('authorization_code')
         ) {
+            //Generate the code
             const OAuthCodesEntity = Repository.getEntity('OAuthCodesEntity');
             const oauthCode = new OAuthCodesEntity();
 
             oauthCode.code = code;
-            oauthCode.clientId = clientId;
+            oauthCode.client = client.id;
             oauthCode.redirectUri = body.redirect_uri;
             oauthCode.scope = body.scope;
             oauthCode.expiresAt = Date.now() + 1000 * 60 * 10; // 10 minutes
-            oauthCode.useId = user.id;
+            oauthCode.user = user.id;
             oauthCode.state = body.state;
             oauthCode.origin = body.origin;
             oauthCode.referer = body.referer;
             oauthCode.agent = body.agent;
 
-            await Repository.insert(OAuthCodesEntity, oauthCode);
+            const resultGenerateCode = await Repository.insert(
+                OAuthCodesEntity,
+                oauthCode,
+            );
+
+            if (!resultGenerateCode.success)
+                throw new HttpException(
+                    'Failed to generate the code',
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                );
+
+            //Generate the authorization
+            const OAuthAutorizationsEntity = Repository.getEntity(
+                'OAuthAutorizationsEntity',
+            );
+            const oauthAutorization = new OAuthAutorizationsEntity();
+
+            oauthAutorization.code = code;
+            oauthAutorization.client = client.id;
+            oauthAutorization.user = user.id;
+            oauthAutorization.scope = body.scope;
+            oauthAutorization.approvedAt = Date.now();
+            oauthAutorization.codeAutorization = code;
+            oauthAutorization.ip = req.ip;
+            oauthAutorization.location =
+                req.ip !== '127.0.0.1' && req.ip !== '::1'
+                    ? await this.authLocationService.getLocation(req.ip)
+                    : 'locahost';
+            oauthAutorization.agent = req.headers['user-agent'];
+
+            const resultGenerateAuthorization = await Repository.insert(
+                OAuthAutorizationsEntity,
+                oauthAutorization,
+            );
+
+            if (!resultGenerateAuthorization.success)
+                throw new HttpException(
+                    'Failed to generate the authorization',
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                );
+
+            console.log({
+                code: code,
+                state: body.state,
+                response_type: body.response_type,
+                redirect_uri: body.redirect_uri,
+            });
 
             return {
                 code: code,
@@ -226,11 +277,14 @@ export class OAuth2Service extends AbstractService {
 
         const OAuthClientsEntity = Repository.getEntity('OAuthClientsEntity');
 
-        const client = await Repository.findBy(OAuthClientsEntity, {
-            clientId: oauthCode.clientId,
-            isActive: true,
-            clientSecret: payload.client_secret,
-        });
+        const client = await Repository.findBy(
+            OAuthClientsEntity,
+            Repository.queryBuilder({
+                id: oauthCode.clientId,
+                isActive: true,
+                clientSecret: payload.client_secret,
+            }),
+        );
 
         if (!client)
             throw new HttpException('Client not found', HttpStatus.NOT_FOUND);
@@ -270,7 +324,7 @@ export class OAuth2Service extends AbstractService {
             user = await Repository.findBy(
                 UserEntity,
                 {
-                    id: oauthCode.useId,
+                    id: oauthCode.userId,
                     blocked: false,
                 },
                 {
@@ -294,8 +348,8 @@ export class OAuth2Service extends AbstractService {
 
         oauthToken.accessToken = token.token;
         oauthToken.refreshToken = token.refreshToken;
-        oauthToken.clientId = oauthCode.clientId;
-        oauthToken.userId = user.id;
+        oauthToken.client = oauthCode.clientId;
+        oauthToken.user = user.id;
         oauthToken.scope = oauthCode.scope;
         oauthToken.expiresAt =
             Date.now() + 1000 * 60 * client.accessTokenLifetime;
@@ -354,18 +408,9 @@ export class OAuth2Service extends AbstractService {
 
         const client = await Repository.findBy(
             OAuthClientsEntity,
-            { clientId: clientId },
+            { clientId: clientId, isActive: true },
             {
-                select: [
-                    'clientId',
-                    'clientName',
-                    'redirectUris',
-                    'allowedScopes',
-                    'authorizedDomains',
-                    'isActive',
-                    'accessTokenLifetime',
-                    'refreshTokenLifetime',
-                ],
+                select: ['clientId', 'clientName', 'redirectUris'],
             },
         );
 

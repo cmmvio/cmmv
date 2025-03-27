@@ -218,6 +218,28 @@ export class UserContract extends AbstractContract {
     })
     profile: string;
 
+    @ContractField({
+        protoType: 'string',
+        nullable: true,
+        readOnly: true,
+    })
+    forgotPasswordToken: string;
+
+    @ContractField({
+        protoType: 'int32',
+        nullable: true,
+        readOnly: true,
+    })
+    forgotSendAt: number;
+
+    @ContractField({
+        protoType: 'bool',
+        nullable: true,
+        readOnly: true,
+        defaultValue: false,
+    })
+    unsubscribeNewsletter: boolean;
+
     // Login
     @ContractMessage({
         name: 'LoginRequest',

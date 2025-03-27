@@ -1,12 +1,12 @@
 import { AbstractContract, Contract, ContractField } from '@cmmv/core';
 
-import { OAuthClientsContract } from './oauth-clients.contract';
-
 import { UserContract } from './users.contract';
+
+import { OAuthClientsContract } from './oauth-clients.contract';
 
 @Contract({
     namespace: 'Auth',
-    controllerName: 'OAuthCodes',
+    controllerName: 'OAuthAutorizations',
     protoPackage: 'auth',
     subPath: '/auth',
     generateController: false,
@@ -15,20 +15,11 @@ import { UserContract } from './users.contract';
     options: {
         tags: ['oauth2'],
         moduleContract: true,
-        databaseSchemaName: 'auth_oauth_codes',
+        databaseSchemaName: 'auth_oauth_autorizations',
         databaseTimestamps: true,
     },
-    index: [{ name: 'idx_code', fields: ['code'] }],
 })
-export class OAuthCodesContract extends AbstractContract {
-    @ContractField({
-        protoType: 'string',
-        unique: true,
-        nullable: false,
-        index: true,
-    })
-    code: string;
-
+export class OAuthAutorizationsContract extends AbstractContract {
     @ContractField({
         protoType: 'string',
         objectType: 'object',
@@ -72,45 +63,59 @@ export class OAuthCodesContract extends AbstractContract {
     user: string;
 
     @ContractField({
-        protoType: 'string',
+        protoType: 'int64',
         nullable: false,
+        readOnly: true,
     })
-    redirectUri: string;
+    approvedAt: number;
 
     @ContractField({
         protoType: 'string',
-        nullable: true,
+        nullable: false,
+        readOnly: true,
+    })
+    codeAutorization: string;
+
+    @ContractField({
+        protoType: 'string',
+        nullable: false,
+        readOnly: true,
     })
     scope: string;
 
     @ContractField({
-        protoType: 'int64',
+        protoType: 'boolean',
         nullable: false,
+        readOnly: true,
+        defaultValue: false,
     })
-    expiresAt: number;
+    revoked: boolean;
+
+    @ContractField({
+        protoType: 'int64',
+        nullable: true,
+        readOnly: true,
+    })
+    revokedAt: number;
 
     @ContractField({
         protoType: 'string',
         nullable: true,
-        index: true,
+        readOnly: true,
     })
-    state: string;
+    ip: string;
 
     @ContractField({
         protoType: 'string',
         nullable: true,
+        readOnly: true,
     })
-    origin: string;
+    location: string;
 
     @ContractField({
         protoType: 'string',
         nullable: true,
-    })
-    referer: string;
-
-    @ContractField({
-        protoType: 'string',
-        nullable: true,
+        readOnly: true,
     })
     agent: string;
 }
