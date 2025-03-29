@@ -72,10 +72,11 @@ export class EmailService {
 
             const info = await EmailService.transporter.sendMail(message);
 
-            if (logger)
+            if (logger) {
                 EmailService.logger.log(
                     `Message sent to ${this.maskEmail(to)}: ${info.messageId}`,
                 );
+            }
 
             if (telemetry)
                 await this.telemetry(

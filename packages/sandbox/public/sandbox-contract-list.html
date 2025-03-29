@@ -1,4 +1,23 @@
-<!-- Contract Groups -->
+<div class="flex space-x-3 mb-2 font-normal pl-3">
+    <span class="text-sm text-neutral-500 dark:text-neutral-400 w-full">
+        <div class="flex justify-between items-center uppercase font-mono">
+            <span>CONTRACTS</span>
+
+            <button
+                @click="showRefreshConfirmation"
+                class="flex items-center text-neutral-400 hover:text-neutral-200 p-1 rounded hover:bg-neutral-800 transition-colors"
+                title="Refresh contract schema from API"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 4v6h6"></path>
+                    <path d="M23 20v-6h-6"></path>
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                </svg>
+            </button>
+        </div>
+    </span>
+</div>
+
 <div v-for="(contracts, namespace) in groupedContracts" :key="namespace" class="mb-2">
     <!-- Namespace Header -->
     <div
@@ -75,7 +94,6 @@
     </div>
 </div>
 
-<!-- Contracts without namespace -->
 <div v-for="(contract, key) in filteredContracts" :key="key" class="mb-2">
     <button
         v-if="!getContractNamespace(contract)"
@@ -145,4 +163,42 @@
         />
     </svg>
     No contracts found
+</div>
+
+<div
+    v-if="showRefreshModal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/50"
+    style="backdrop-filter: blur(4px);"
+>
+    <div class="bg-neutral-800 rounded-lg shadow-lg p-6 max-w-md w-full">
+        <div class="flex items-center mb-4 text-yellow-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-3">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <h3 class="text-lg font-medium">Refresh API Schema</h3>
+        </div>
+
+        <p class="mb-4 text-neutral-300">
+            This will download the latest schema from the API and overwrite your local cache. All unsaved changes and modifications will be lost.
+        </p>
+
+        <p class="mb-6 text-neutral-400 text-sm">
+            Are you sure you want to continue?
+        </p>
+
+        <div class="flex justify-end space-x-3">
+            <button
+                @click="hideRefreshConfirmation"
+                class="px-4 py-2 text-sm bg-neutral-700 hover:bg-neutral-600 text-white rounded-md transition-colors">
+                Cancel
+            </button>
+            <button
+                @click="refreshApiSchema"
+                class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+                Refresh Schema
+            </button>
+        </div>
+    </div>
 </div>

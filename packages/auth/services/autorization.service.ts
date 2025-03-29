@@ -35,12 +35,14 @@ import {
 
 import { AuthSessionsService } from './sessions.service';
 import { AuthRecaptchaService } from './recaptcha.service';
+import { AuthEmailService } from './email.service';
 
 @Service('auth')
 export class AuthAutorizationService extends AbstractService {
     constructor(
         private readonly sessionsService: AuthSessionsService,
         private readonly recaptchaService: AuthRecaptchaService,
+        private readonly emailService: AuthEmailService,
     ) {
         super();
     }
@@ -159,13 +161,15 @@ export class AuthAutorizationService extends AbstractService {
         }
 
         if (
-            (requireEmailValidation && !user.verifyEmail) ||
-            !requireEmailValidation
-        )
+            ((requireEmailValidation && !user.verifyEmail) ||
+                !requireEmailValidation) &&
+            !user.root
+        ) {
             throw new HttpException(
                 'Email not validated',
                 HttpStatus.FORBIDDEN,
             );
+        }
 
         const { token, refreshToken } = await this.autorizeUser(
             user,
@@ -351,40 +355,7 @@ export class AuthAutorizationService extends AbstractService {
             );
         }
 
-        if (Module.hasModule('email')) {
-            const customTemplate = Config.get<string>(
-                'auth.templates.emailConfirmation',
-            );
-
-            const template = customTemplate
-                ? customTemplate
-                : path.join(
-                      __dirname,
-                      '..',
-                      'templates',
-                      `emailConfirmation.html`,
-                  );
-
-            if (!fs.existsSync(template))
-                throw new HttpException(
-                    'Template not found',
-                    HttpStatus.NOT_FOUND,
-                );
-
-            //@ts-ignore
-            const { EmailService } = await import('@cmmv/email');
-            const emailService = Application.resolveProvider(EmailService);
-            //@ts-ignore
-            const pixelId = emailService.generatePixelId();
-            //@ts-ignore
-            const pixelUrl = emailService.getPixelUrl(pixelId);
-            //@ts-ignore
-            const unsubscribeLink = emailService.getUnsubscribeLink(
-                result.data.id,
-                pixelId,
-            );
-            const renderer = new CMMVRenderer();
-
+        if (process.env.NODE_ENV !== 'test') {
             const { AuthOneTimeTokenService } = await import(
                 '../services/one-time-token.service'
             );
@@ -399,45 +370,15 @@ export class AuthAutorizationService extends AbstractService {
                     Date.now() + 60 * 60 * 1000,
                 );
 
-            const templateParsed: string = await new Promise(
-                (resolve, reject) => {
-                    renderer.renderFile(
-                        template,
-                        {
-                            title: 'Confirm Your Email',
-                            confirmationLink,
-                            pixelUrl,
-                            unsubscribeLink,
-                        },
-                        {},
-                        (err, content) => {
-                            if (err) {
-                                console.error(err);
-                                throw new HttpException(
-                                    'Failed to send reset password email',
-                                    HttpStatus.INTERNAL_SERVER_ERROR,
-                                );
-                            }
-
-                            resolve(content);
-                        },
-                    );
-                },
-            );
-
-            //@ts-ignore
-            await emailService.send(
-                Config.get<string>('email.from'),
+            await this.emailService.sendEmail(
+                'emailConfirmation',
                 data.email,
                 'Confirm Your Email',
-                templateParsed,
                 'Email Confirmation',
-                pixelId,
+                result.data.id,
                 {
-                    unsubscribe: {
-                        url: unsubscribeLink,
-                        comment: 'Unsubscribe from newsletter',
-                    },
+                    title: 'Confirm Your Email',
+                    confirmationLink,
                 },
             );
         }

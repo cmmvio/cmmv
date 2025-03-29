@@ -105,7 +105,7 @@ export class OneTimeTokenContract extends AbstractContract {
     };
 
     @ContractService({
-        name: 'TokenGenerate',
+        name: 'Generate',
         path: 'auth/one-time-token/generate/:userId',
         method: 'GET',
         auth: true,
@@ -165,7 +165,7 @@ export class OneTimeTokenContract extends AbstractContract {
     };
 
     @ContractService({
-        name: 'TokenValidate',
+        name: 'Validate',
         path: 'auth/one-time-token/validate/:token',
         method: 'GET',
         auth: true,
@@ -175,4 +175,69 @@ export class OneTimeTokenContract extends AbstractContract {
         createBoilerplate: false,
     })
     OneTimeTokenValidate: Function;
+
+    // Change password using one time token
+    @ContractMessage({
+        name: 'OneTimeTokenChangePasswordRequest',
+        properties: {
+            token: {
+                type: 'string',
+                paramType: 'path',
+                required: true,
+            },
+            forgotPasswordToken: {
+                type: 'string',
+                paramType: 'query',
+                required: false,
+            },
+            password: {
+                type: 'string',
+                paramType: 'body',
+                required: true,
+            },
+        },
+    })
+    OneTimeTokenChangePasswordRequest: {
+        token: string;
+        forgotPasswordToken?: string;
+        password: string;
+    };
+
+    @ContractMessage({
+        name: 'OneTimeTokenChangePasswordResponse',
+        properties: {
+            success: {
+                type: 'bool',
+                paramType: 'body',
+                required: true,
+            },
+            message: {
+                type: 'string',
+                paramType: 'body',
+                required: false,
+            },
+            data: {
+                type: 'json',
+                paramType: 'body',
+                required: false,
+            },
+        },
+    })
+    OneTimeTokenChangePasswordResponse: {
+        success: boolean;
+        message?: string;
+        data?: object;
+    };
+
+    @ContractService({
+        name: 'ChangePassword',
+        path: 'auth/one-time-token/:token',
+        method: 'POST',
+        auth: false,
+        functionName: 'handlerOneTimeTokenChangePassword',
+        request: 'OneTimeTokenChangePasswordRequest',
+        response: 'OneTimeTokenChangePasswordResponse',
+        createBoilerplate: false,
+    })
+    OneTimeTokenChangePassword: Function;
 }

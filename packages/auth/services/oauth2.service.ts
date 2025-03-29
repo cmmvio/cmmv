@@ -202,18 +202,12 @@ export class OAuth2Service extends AbstractService {
                 oauthAutorization,
             );
 
-            if (!resultGenerateAuthorization.success)
+            if (!resultGenerateAuthorization.success) {
                 throw new HttpException(
                     'Failed to generate the authorization',
                     HttpStatus.INTERNAL_SERVER_ERROR,
                 );
-
-            console.log({
-                code: code,
-                state: body.state,
-                response_type: body.response_type,
-                redirect_uri: body.redirect_uri,
-            });
+            }
 
             return {
                 code: code,

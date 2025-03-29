@@ -99,9 +99,11 @@ export class AuthEmailService extends AbstractService {
                 context,
                 pixelId,
                 {
-                    unsubscribe: {
-                        url: unsubscribeLink,
-                        comment: 'Unsubscribe from newsletter',
+                    list: {
+                        unsubscribe: {
+                            url: unsubscribeLink,
+                            comment: 'Unsubscribe from newsletter',
+                        },
                     },
                 },
             );

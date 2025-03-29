@@ -47,9 +47,12 @@ export class AuthUsersController {
 
         const templateContent = fs.readFileSync(templatePath, 'utf8');
 
-        res.setHeader('Content-Type', 'text/html');
-        res.setHeader('Content-Length', templateContent.length);
-        res.send(templateContent);
+        res.res.writeHead(200, {
+            'Content-Type': 'text/html',
+            'Content-Length': templateContent.length,
+        });
+
+        res.res.end(templateContent);
 
         return false;
     }

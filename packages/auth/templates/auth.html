@@ -768,21 +768,16 @@
                             }
                         });
 
-                        if (!response.ok) {
+                        if (!response.ok)
                             throw new Error(`Failed to fetch client info: ${response.statusText}`);
-                        }
 
                         const data = await response.json();
                         clientInfo.value = data.result;
                         currentView.value = 'approve';
                     } catch (err) {
                         console.error('Error fetching client info:', err);
-                        errorMessage.value = 'Failed to load application details. Please try again.';
-
-                        if (err.message.includes('401') || err.message.includes('403')) {
-                            localStorage.removeItem('auth');
-                            currentView.value = 'login';
-                        }
+                        localStorage.removeItem('auth');
+                        currentView.value = 'login';
                     } finally {
                         loading.value = false;
                     }

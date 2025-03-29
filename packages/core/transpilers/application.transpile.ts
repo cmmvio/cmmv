@@ -577,7 +577,7 @@ import {
             if (field.link && field.link.length > 0) {
                 field.link.map((link) => {
                     parts.push(
-                        `    items: ${field.entityType.replace('Entity', '')}FastSchemaStructure`,
+                        `    items: ${field.entityType.replace('Entity', '').replace('Contract', '')}FastSchemaStructure`,
                     );
                 });
             } else {

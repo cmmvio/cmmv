@@ -141,14 +141,45 @@ components:
           required: true
       required:
         - name
+    GroupUpdatePayloadDTO:
+      properties:
+        groupId:
+          type: string
+          required: true
+        name:
+          type: string
+          required: true
+      required:
+        - groupId
+        - name
+    GroupDeletePayloadDTO:
+      properties:
+        groupId:
+          type: string
+          required: true
+      required:
+        - groupId
+    GroupGetInQueryDTO:
+      properties:
+        ids:
+          type: array
+          required: true
+          items:
+            type: string
+      required:
+        - ids
     GroupRolesPayloadDTO:
       properties:
+        groupId:
+          type: string
+          required: true
         roles:
           type: array
           required: true
           items:
             type: string
       required:
+        - groupId
         - roles
     GroupResponseDTO:
       properties:
@@ -571,6 +602,36 @@ components:
         - success
         - message
         - data
+    OneTimeTokenChangePasswordRequestDTO:
+      properties:
+        token:
+          type: string
+          required: true
+        forgotPasswordToken:
+          type: string
+          required: true
+        password:
+          type: string
+          required: true
+      required:
+        - token
+        - forgotPasswordToken
+        - password
+    OneTimeTokenChangePasswordResponseDTO:
+      properties:
+        success:
+          type: boolean
+          required: true
+        message:
+          type: string
+          required: true
+        data:
+          type: object
+          required: true
+      required:
+        - success
+        - message
+        - data
     OAuthClients:
       properties:
         id:
@@ -638,36 +699,127 @@ components:
         message:
           type: string
           required: true
-        data:
+        result:
           type: object
           required: true
       required:
         - success
         - message
-        - data
-    OAuthClientsCreateRequestDTO:
+        - result
+    OAuthClientsGetAllRequestDTO:
+      properties: {}
+      required: []
+    OAuthClientsGetByIdRequestDTO:
       properties:
-        client_name:
-          type: string
-          required: true
-        redirect_uris:
-          type: array
-          required: true
-          items:
-            type: string
-        authorized_domains:
-          type: array
-          required: true
-          items:
-            type: string
-        scope:
+        clientId:
           type: string
           required: true
       required:
-        - client_name
-        - redirect_uris
-        - authorized_domains
-        - scope
+        - clientId
+    OAuthClientsGetByIdAdminRequestDTO:
+      properties:
+        clientId:
+          type: string
+          required: true
+      required:
+        - clientId
+    OAuthClientsCreateRequestDTO:
+      properties:
+        clientName:
+          type: string
+          required: true
+        redirectUris:
+          type: array
+          required: true
+          items:
+            type: string
+        allowedScopes:
+          type: array
+          required: true
+          items:
+            type: string
+        allowedGrantTypes:
+          type: array
+          required: true
+          items:
+            type: string
+        authorizedDomains:
+          type: array
+          required: true
+          items:
+            type: string
+        isActive:
+          type: boolean
+          required: true
+        accessTokenLifetime:
+          type: number
+          required: true
+        refreshTokenLifetime:
+          type: number
+          required: true
+      required:
+        - clientName
+        - redirectUris
+        - allowedScopes
+        - allowedGrantTypes
+        - authorizedDomains
+        - isActive
+        - accessTokenLifetime
+        - refreshTokenLifetime
+    OAuthClientsUpdateRequestDTO:
+      properties:
+        clientId:
+          type: string
+          required: true
+        clientName:
+          type: string
+          required: true
+        redirectUris:
+          type: array
+          required: true
+          items:
+            type: string
+        allowedScopes:
+          type: array
+          required: true
+          items:
+            type: string
+        allowedGrantTypes:
+          type: array
+          required: true
+          items:
+            type: string
+        authorizedDomains:
+          type: array
+          required: true
+          items:
+            type: string
+        isActive:
+          type: boolean
+          required: true
+        accessTokenLifetime:
+          type: number
+          required: true
+        refreshTokenLifetime:
+          type: number
+          required: true
+      required:
+        - clientId
+        - clientName
+        - redirectUris
+        - allowedScopes
+        - allowedGrantTypes
+        - authorizedDomains
+        - isActive
+        - accessTokenLifetime
+        - refreshTokenLifetime
+    OAuthClientsDeleteRequestDTO:
+      properties:
+        clientId:
+          type: string
+          required: true
+      required:
+        - clientId
     OAuthCodes:
       properties:
         id:
@@ -783,15 +935,15 @@ components:
           readOnly: true
           type: string
       required: []
-    AuthorizationRequestDTO:
+    OAuthAuthQueryDTO:
       properties:
-        response_type:
-          type: string
-          required: true
         client_id:
           type: string
           required: true
         redirect_uri:
+          type: string
+          required: true
+        response_type:
           type: string
           required: true
         scope:
@@ -801,12 +953,69 @@ components:
           type: string
           required: true
       required:
-        - response_type
         - client_id
         - redirect_uri
+        - response_type
         - scope
         - state
-    AuthorizationResponseDTO:
+    OAuthAuthResponseDTO:
+      properties:
+        content:
+          type: string
+          required: true
+      required:
+        - content
+    OAuthApproveRequestDTO:
+      properties:
+        client_id:
+          type: string
+          required: true
+        redirect_uri:
+          type: string
+          required: true
+        response_type:
+          type: string
+          required: true
+        scope:
+          type: string
+          required: true
+        state:
+          type: string
+          required: true
+        origin:
+          type: string
+          required: true
+        referer:
+          type: string
+          required: true
+        agent:
+          type: string
+          required: true
+      required:
+        - client_id
+        - redirect_uri
+        - response_type
+        - scope
+        - state
+        - origin
+        - referer
+        - agent
+    OAuthApproveResponseDTO:
+      properties:
+        success:
+          type: boolean
+          required: true
+        message:
+          type: string
+          required: true
+        result:
+          type: object
+          required: true
+      required:
+        - success
+        - message
+        - result
+    OAuthHandlerQueryDTO:
       properties:
         code:
           type: string
@@ -814,9 +1023,28 @@ components:
         state:
           type: string
           required: true
+        client_secret:
+          type: string
+          required: true
+        redirect_uri:
+          type: string
+          required: true
       required:
         - code
         - state
+        - client_secret
+        - redirect_uri
+    OAuthHandlerResponseDTO:
+      properties:
+        token:
+          type: string
+          required: true
+        refreshToken:
+          type: string
+          required: true
+      required:
+        - token
+        - refreshToken
     TokenRequestDTO:
       properties:
         grant_type:

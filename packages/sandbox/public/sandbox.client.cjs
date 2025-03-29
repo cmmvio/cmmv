@@ -239,6 +239,7 @@ createApp({
             loadingLinks: {},
             authModalCallback: null,
             openNamespaces: {},
+            showRefreshModal: false,
         }
     },
 
@@ -305,13 +306,10 @@ createApp({
 
             if (!this.filteredContracts) return groups;
 
-            // First pass: group contracts by namespace
             Object.entries(this.filteredContracts).forEach(([key, contract]) => {
-                // Skip contracts without namespace
                 const namespace = this.getContractNamespace(contract);
                 if (!namespace || namespace.trim() === '') return;
 
-                // Check if contract should be visible
                 const isVisible = (!this.hiddenModuleContracts || !contract.options.moduleContract) &&
                                  !contract.directMessage &&
                                  contract.expose !== false;
@@ -324,14 +322,12 @@ createApp({
                 groups[namespace][key] = contract;
             });
 
-            // Remove empty namespaces
             Object.keys(groups).forEach(namespace => {
                 if (Object.keys(groups[namespace]).length === 0) {
                     delete groups[namespace];
                 }
             });
 
-            // Convert to array, sort namespaces, and convert back to object
             const sortedGroups = {};
             Object.keys(groups)
                 .sort((a, b) => {
@@ -483,7 +479,6 @@ createApp({
                     );
 
                     if (key) {
-                        // Update the schema to trigger reactivity
                         this.schema[key] = { ...this.schema[key] };
                         this.schemaToLocalStorege();
                         this.filterContracts();
@@ -557,8 +552,6 @@ createApp({
             this.migrateIndexes();
             this.migrateMessages();
             this.migrateServices();
-
-            // Load namespace state after schema is loaded
             this.loadNamespaceState();
 
             await this.checkContractsForChanges();
@@ -580,7 +573,7 @@ createApp({
             this.updateSchemaEditor();
         },
 
-        async selectContract(key){
+        async selectContract(key) {
             if (this.selectedContract) {
                 await this.updateContractSyncStatus(Object.keys(this.schema).find(k =>
                     this.schema[k].contractName === this.selectedContract.contractName));
@@ -599,6 +592,16 @@ createApp({
             this.migrateIndexes();
             this.migrateMessages();
             this.migrateServices();
+
+            if (this.selectedMasterTab !== 0) {
+                this.selectedTab = 0;
+                localStorage.setItem('selectedTab', 0);
+
+                this.contractTab = 'contract';
+                this.selectedMasterTab = 0;
+                localStorage.setItem('selectedMasterTab', 0);
+            }
+
             this.updateSchemaEditor();
         },
 
@@ -2412,13 +2415,11 @@ createApp({
 
             let name = param.name || param.propertyKey || '';
 
-            if (name.endsWith('Id')) {
+            if (name.endsWith('Id'))
                 return name.substring(0, name.length - 2);
-            }
 
-            if (name.endsWith('_id')) {
+            if (name.endsWith('_id'))
                 return name.substring(0, name.length - 3);
-            }
 
             return name;
         },
@@ -2536,19 +2537,15 @@ createApp({
         getContractNamespace(contract) {
             if (!contract) return '';
 
-            // First try to get namespace from the namespace field
-            if (contract.namespace && contract.namespace.trim() !== '') {
+            if (contract.namespace && contract.namespace.trim() !== '')
                 return contract.namespace.trim();
-            }
 
-            // Fallback to subPath
             if (contract.subPath) {
                 const parts = contract.subPath.split('/');
                 const namespace = parts[0]?.trim() || '';
                 if (namespace !== '') return namespace;
             }
 
-            // Last fallback to protoPackage
             if (contract.protoPackage) {
                 const parts = contract.protoPackage.split('.');
                 const namespace = parts[0]?.trim() || '';
@@ -2580,6 +2577,54 @@ createApp({
                     console.error('Error loading namespace state:', e);
                     this.openNamespaces = {};
                 }
+            }
+        },
+
+        showRefreshConfirmation() {
+            this.showRefreshModal = true;
+        },
+
+        hideRefreshConfirmation() {
+            this.showRefreshModal = false;
+        },
+
+        async refreshApiSchema() {
+            try {
+                this.loading = true;
+
+                const response = await fetch('/sandbox/schema');
+
+                if (!response.ok)
+                    throw new Error(`Failed to fetch API schema: ${response.statusText}`);
+
+                const data = await response.json();
+                this.schema = data.result.contracts;
+
+                this.schemaToLocalStorege();
+
+                if (this.selectedContract) {
+                    const currentContractKey = Object.keys(this.schema).find(k =>
+                        this.schema[k].contractName === this.selectedContract.contractName);
+
+                    if (currentContractKey) {
+                        await this.selectContract(currentContractKey);
+                    } else {
+                        const firstKey = Object.keys(this.schema)[0];
+                        if (firstKey) {
+                            await this.selectContract(firstKey);
+                        } else {
+                            this.selectedContract = null;
+                        }
+                    }
+                }
+
+                this.filteredContracts = this.schema;
+                this.hideRefreshConfirmation();
+            } catch (error) {
+                console.error('Error refreshing API schema:', error);
+                alert(`Error refreshing schema: ${error.message}`);
+            } finally {
+                this.loading = false;
             }
         },
     }

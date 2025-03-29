@@ -16,52 +16,153 @@ import {
     rootOnly: false,
     options: {
         tags: ['oauth2'],
+        moduleContract: true,
     },
 })
 export class OAuth2Contract extends AbstractContract {
+    // Auth Query para renderização da página de autenticação
     @ContractMessage({
-        name: 'AuthorizationRequest',
+        name: 'OAuthAuthQuery',
         properties: {
-            response_type: { type: 'string', required: true },
             client_id: { type: 'string', required: true },
             redirect_uri: { type: 'string', required: true },
+            response_type: { type: 'string', required: true },
             scope: { type: 'string', required: false },
-            state: { type: 'string', required: false },
+            state: { type: 'string', required: true },
         },
     })
-    AuthorizationRequest: {
-        response_type: string;
+    OAuthAuthQuery: {
         client_id: string;
         redirect_uri: string;
+        response_type: string;
         scope?: string;
-        state?: string;
+        state: string;
     };
 
     @ContractMessage({
-        name: 'AuthorizationResponse',
+        name: 'OAuthAuthResponse',
         properties: {
-            code: { type: 'string', required: true },
-            state: { type: 'string', required: false },
+            content: { type: 'string', required: true },
         },
     })
-    AuthorizationResponse: {
-        code: string;
-        state?: string;
+    OAuthAuthResponse: {
+        content: string;
     };
 
     @ContractService({
-        name: 'Authorize',
-        path: 'authorize',
+        name: 'Auth',
+        path: 'oauth/auth',
         method: 'GET',
         auth: false,
-        functionName: 'authorize',
-        request: 'AuthorizationRequest',
-        response: 'AuthorizationResponse',
+        functionName: 'auth',
+        request: 'OAuthAuthQuery',
+        response: 'OAuthAuthResponse',
         createBoilerplate: false,
     })
-    Authorize: Function;
+    OAuthAuth: Function;
 
-    // Token Request
+    // Aprovação de autorização
+    @ContractMessage({
+        name: 'OAuthApproveRequest',
+        properties: {
+            client_id: { type: 'string', required: true },
+            redirect_uri: { type: 'string', required: true },
+            response_type: { type: 'string', required: true },
+            scope: { type: 'string', required: true },
+            state: { type: 'string', required: true },
+            origin: { type: 'string', required: false },
+            referer: { type: 'string', required: false },
+            agent: { type: 'string', required: false },
+        },
+    })
+    OAuthApproveRequest: {
+        client_id: string;
+        redirect_uri: string;
+        response_type: string;
+        scope: string;
+        state: string;
+        origin?: string;
+        referer?: string;
+        agent?: string;
+    };
+
+    @ContractMessage({
+        name: 'OAuthApproveResponse',
+        properties: {
+            success: { type: 'bool', required: true },
+            message: { type: 'string', required: false },
+            result: {
+                type: 'json',
+                required: false,
+            },
+        },
+    })
+    OAuthApproveResponse: {
+        success: boolean;
+        message?: string;
+        result?: {
+            code?: string;
+            state?: string;
+            response_type?: string;
+            redirect_uri?: string;
+            access_token?: string;
+            token_type?: string;
+            expires_in?: number;
+        };
+    };
+
+    @ContractService({
+        name: 'Approve',
+        path: 'oauth/approve',
+        method: 'POST',
+        auth: true,
+        functionName: 'authorize',
+        request: 'OAuthApproveRequest',
+        response: 'OAuthApproveResponse',
+        createBoilerplate: false,
+    })
+    OAuthApprove: Function;
+
+    @ContractMessage({
+        name: 'OAuthHandlerQuery',
+        properties: {
+            code: { type: 'string', required: true },
+            state: { type: 'string', required: true },
+            client_secret: { type: 'string', required: true },
+            redirect_uri: { type: 'string', required: false },
+        },
+    })
+    OAuthHandlerQuery: {
+        code: string;
+        state: string;
+        client_secret: string;
+        redirect_uri?: string;
+    };
+
+    @ContractMessage({
+        name: 'OAuthHandlerResponse',
+        properties: {
+            token: { type: 'string', required: false },
+            refreshToken: { type: 'string', required: false },
+        },
+    })
+    OAuthHandlerResponse: {
+        token?: string;
+        refreshToken?: string;
+    };
+
+    @ContractService({
+        name: 'Handler',
+        path: 'oauth/handler',
+        method: 'GET',
+        auth: false,
+        functionName: 'handler',
+        request: 'OAuthHandlerQuery',
+        response: 'OAuthHandlerResponse',
+        createBoilerplate: false,
+    })
+    OAuthHandler: Function;
+
     @ContractMessage({
         name: 'TokenRequest',
         properties: {
@@ -82,13 +183,12 @@ export class OAuth2Contract extends AbstractContract {
         redirect_uri?: string;
     };
 
-    // Token Response
     @ContractMessage({
         name: 'TokenResponse',
         properties: {
             access_token: { type: 'string', required: true },
             token_type: { type: 'string', required: true, default: 'Bearer' },
-            expires_in: { type: 'int', required: true },
+            expires_in: { type: 'int32', required: true },
             refresh_token: { type: 'string', required: false },
         },
     })
@@ -101,7 +201,7 @@ export class OAuth2Contract extends AbstractContract {
 
     @ContractService({
         name: 'Token',
-        path: 'token',
+        path: 'oauth/token',
         method: 'POST',
         auth: false,
         functionName: 'token',
@@ -111,7 +211,6 @@ export class OAuth2Contract extends AbstractContract {
     })
     Token: Function;
 
-    // Token Validation Request
     @ContractMessage({
         name: 'TokenValidationRequest',
         properties: {
@@ -122,13 +221,12 @@ export class OAuth2Contract extends AbstractContract {
         token: string;
     };
 
-    // Token Validation Response
     @ContractMessage({
         name: 'TokenValidationResponse',
         properties: {
             valid: { type: 'bool', required: true },
             user_id: { type: 'string', required: false },
-            expires_in: { type: 'int', required: false },
+            expires_in: { type: 'int32', required: false },
         },
     })
     TokenValidationResponse: {
@@ -139,7 +237,7 @@ export class OAuth2Contract extends AbstractContract {
 
     @ContractService({
         name: 'ValidateToken',
-        path: 'validate',
+        path: 'oauth/validate',
         method: 'GET',
         auth: true,
         functionName: 'validateToken',
@@ -149,7 +247,6 @@ export class OAuth2Contract extends AbstractContract {
     })
     ValidateToken: Function;
 
-    // Token Revocation Request
     @ContractMessage({
         name: 'TokenRevocationRequest',
         properties: {
@@ -160,7 +257,6 @@ export class OAuth2Contract extends AbstractContract {
         token: string;
     };
 
-    // Token Revocation Response
     @ContractMessage({
         name: 'TokenRevocationResponse',
         properties: {
@@ -175,7 +271,7 @@ export class OAuth2Contract extends AbstractContract {
 
     @ContractService({
         name: 'RevokeToken',
-        path: 'revoke',
+        path: 'oauth/revoke',
         method: 'DELETE',
         auth: true,
         functionName: 'revokeToken',

@@ -93,14 +93,6 @@
                         @input="filterContracts"
                     />
 
-                    <div class="flex space-x-3 mb-2 font-normal px-3">
-                        <span class="text-sm text-neutral-500 dark:text-neutral-400 w-full">
-                            <div class="flex flex-col space-y-2 uppercase font-mono">
-                                <span>CONTRACTS</span>
-                            </div>
-                        </span>
-                    </div>
-
                     <!-- include("@packages/sandbox/public/sandbox-contract-list.html"); -->
                 </div>
 
@@ -121,9 +113,7 @@
                     class="overflow-hidden"
                 >
                     <div class="flex flex-col border-b border-neutral-800">
-                        <!-- Contract header with file icon and tabs side by side -->
                         <div class="flex px-2 items-center justify-between">
-                            <!-- Left side - Contract name with icon -->
                             <div class="flex items-center">
                                 <div class="flex mr-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -138,7 +128,6 @@
                                 </div>
                             </div>
 
-                            <!-- Right side - Original functional tabs for larger screens -->
                             <div class="hidden md:flex flex-1 ml-8 justify-end">
                                 <ul class="flex h-[40px] overflow-x-auto" id="functional-tabs">
                                     <li
@@ -150,7 +139,6 @@
                                 </ul>
                             </div>
 
-                            <!-- Dropdown for functional tabs on smaller screens -->
                             <div class="md:hidden flex-1 ml-4">
                                 <div class="relative inline-block text-left">
                                     <button
@@ -167,7 +155,6 @@
                                         </svg>
                                     </button>
 
-                                    <!-- Dropdown menu for functional tabs -->
                                     <div
                                         v-show="functionalTabDropdownOpen"
                                         class="origin-top-left absolute left-0 mt-2 w-[200px] rounded-md shadow-lg bg-neutral-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50"

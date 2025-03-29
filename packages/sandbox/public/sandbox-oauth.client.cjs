@@ -12,6 +12,8 @@ const useOAuthManager = () => {
         isActive: true
     });
 
+    const showRefreshModal = ref(false);
+
     const state = reactive({
         clients: [],
         selectedClient: null,
@@ -405,7 +407,6 @@ const useOAuthManager = () => {
                         url.searchParams.append('client_secret', client.clientSecret);
 
                         if (code) {
-                            //This is not secure, but it's only for testing
                             const response = await fetch(url.toString(), {
                                 method: 'GET',
                                 headers: {
@@ -445,7 +446,6 @@ const useOAuthManager = () => {
             }
         };
 
-        // Add the message event listener
         window.addEventListener('message', messageHandler);
 
         const authWindow = window.open(
@@ -457,14 +457,11 @@ const useOAuthManager = () => {
         if (authWindow) {
             authWindow.focus();
         } else {
-            // If popup blocked, show an error
             state.error = 'Pop-up window was blocked. Please allow pop-ups for this site.';
             setTimeout(() => { state.error = null; }, 5000);
-            // Clean up the event listener if the window failed to open
             window.removeEventListener('message', messageHandler);
         }
 
-        // Log the authorization URL for debugging
         console.log('OAuth authorization URL:', authUrl.toString());
     };
 
@@ -492,7 +489,7 @@ const useOAuthManager = () => {
     const showSecretDialog = (client) => {
         state.secretDialog.client = client;
         state.secretDialog.show = true;
-        state.showSecret = false; // Start with secret hidden
+        state.showSecret = false;
     };
 
     const closeSecretDialog = () => {
@@ -500,6 +497,7 @@ const useOAuthManager = () => {
         state.secretDialog.client = null;
         state.showSecret = false;
     };
+
 
     return {
         newClient,

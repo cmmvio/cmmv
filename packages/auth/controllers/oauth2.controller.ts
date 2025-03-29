@@ -51,7 +51,6 @@ export class OAuth2Controller {
     @Post('client', { exclude: true })
     @Auth({ rootOnly: true })
     public async createClient(@Body() payload: IOAuthClient) {
-        console.log(payload);
         return this.oauth2Service.createClient(payload);
     }
 

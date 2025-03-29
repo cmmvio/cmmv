@@ -14,6 +14,7 @@ describe('AuthAutorizationService - User Registration', () => {
         authService = new AuthAutorizationService(
             {} as any, // Mock das dependências
             {} as any,
+            {} as any,
         );
     });
 

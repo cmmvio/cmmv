@@ -71,8 +71,62 @@ export class GroupsContract extends AbstractContract {
     };
 
     @ContractMessage({
+        name: 'GroupUpdatePayload',
+        properties: {
+            groupId: {
+                type: 'string',
+                paramType: 'path',
+                required: true,
+            },
+            name: {
+                type: 'string',
+                paramType: 'body',
+                required: true,
+            },
+        },
+    })
+    GroupUpdatePayload: {
+        groupId: string;
+        name: string;
+    };
+
+    @ContractMessage({
+        name: 'GroupDeletePayload',
+        properties: {
+            groupId: {
+                type: 'string',
+                paramType: 'path',
+                required: true,
+            },
+        },
+    })
+    GroupDeletePayload: {
+        groupId: string;
+    };
+
+    @ContractMessage({
+        name: 'GroupGetInQuery',
+        properties: {
+            ids: {
+                type: 'simpleArray',
+                arrayType: 'string',
+                paramType: 'query',
+                required: true,
+            },
+        },
+    })
+    GroupGetInQuery: {
+        ids: string[] | string;
+    };
+
+    @ContractMessage({
         name: 'GroupRolesPayload',
         properties: {
+            groupId: {
+                type: 'string',
+                paramType: 'path',
+                required: true,
+            },
             roles: {
                 type: 'simpleArray',
                 arrayType: 'string',
@@ -82,6 +136,7 @@ export class GroupsContract extends AbstractContract {
         },
     })
     GroupRolesPayload: {
+        groupId: string;
         roles: string[];
     };
 
@@ -116,6 +171,7 @@ export class GroupsContract extends AbstractContract {
         path: 'auth/group-get-all',
         method: 'GET',
         auth: true,
+        rootOnly: true,
         functionName: 'handlerGroupGetAll',
         request: '',
         response: 'GroupResponse',
@@ -128,8 +184,9 @@ export class GroupsContract extends AbstractContract {
         path: 'auth/group-get-in',
         method: 'GET',
         auth: true,
+        rootOnly: true,
         functionName: 'handlerGroupGetIn',
-        request: '',
+        request: 'GroupGetInQuery',
         response: 'GroupResponse',
         createBoilerplate: false,
     })
@@ -140,6 +197,7 @@ export class GroupsContract extends AbstractContract {
         path: 'auth/group-create',
         method: 'POST',
         auth: true,
+        rootOnly: true,
         functionName: 'handlerCreateGroup',
         request: 'GroupPayload',
         response: 'GroupResponse',
@@ -152,8 +210,9 @@ export class GroupsContract extends AbstractContract {
         path: 'auth/group-update/:groupId',
         method: 'PUT',
         auth: true,
+        rootOnly: true,
         functionName: 'handlerUpdateGroup',
-        request: 'GroupPayload',
+        request: 'GroupUpdatePayload',
         response: 'GroupResponse',
         createBoilerplate: false,
     })
@@ -164,8 +223,9 @@ export class GroupsContract extends AbstractContract {
         path: 'auth/group-delete/:groupId',
         method: 'DELETE',
         auth: true,
+        rootOnly: true,
         functionName: 'handlerDeleteGroup',
-        request: '',
+        request: 'GroupDeletePayload',
         response: 'GroupResponse',
         createBoilerplate: false,
     })
@@ -176,6 +236,7 @@ export class GroupsContract extends AbstractContract {
         path: 'auth/group-assign-roles/:groupId',
         method: 'PUT',
         auth: true,
+        rootOnly: true,
         functionName: 'handlerAssignRolesToGroup',
         request: 'GroupRolesPayload',
         response: 'GroupResponse',
@@ -188,6 +249,7 @@ export class GroupsContract extends AbstractContract {
         path: 'auth/group-remove-roles/:groupId',
         method: 'PUT',
         auth: true,
+        rootOnly: true,
         functionName: 'handlerRemoveRolesFromGroup',
         request: 'GroupRolesPayload',
         response: 'GroupResponse',

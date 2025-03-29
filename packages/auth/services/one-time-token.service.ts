@@ -181,10 +181,12 @@ export class AuthOneTimeTokenService extends AbstractService {
 
             const templateContent = fs.readFileSync(template, 'utf8');
 
-            res.setHeader('Content-Type', 'text/html');
-            res.setHeader('Content-Length', templateContent.length);
-            res.end(templateContent);
-            return false;
+            res.res.writeHead(200, {
+                'Content-Type': 'text/html',
+                'Content-Length': templateContent.length,
+            });
+
+            res.res.end(templateContent);
         }
 
         return false;
