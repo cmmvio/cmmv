@@ -216,4 +216,80 @@ export class AuthGroupsService extends AbstractService {
 
         return { message: 'Roles removed from group successfully' };
     }
+
+    // GraphQL Handlers
+    public async handlerGroupGetAll(payload: any, req: any) {
+        const result = await this.getAllGroups();
+        return {
+            success: true,
+            data: result.data,
+        };
+    }
+
+    public async handlerGroupGetIn(
+        payload: { ids: string[] | string },
+        req: any,
+    ) {
+        const result = await this.getGroupsIn(payload.ids);
+        return {
+            success: true,
+            data: result.data,
+        };
+    }
+
+    public async handlerCreateGroup(payload: GroupPayload, req: any) {
+        const result = await this.createGroup(payload);
+        return {
+            success: true,
+            message: result.message,
+        };
+    }
+    public async handlerUpdateGroup(
+        payload: { groupId: string; name: string },
+        req: any,
+    ) {
+        const result = await this.updateGroup(payload.groupId, {
+            name: payload.name,
+        });
+        return {
+            success: true,
+            message: result.message,
+        };
+    }
+
+    public async handlerDeleteGroup(payload: { groupId: string }, req: any) {
+        const result = await this.deleteGroup(payload.groupId);
+        return {
+            success: true,
+            message: result.message,
+        };
+    }
+
+    public async handlerAssignRolesToGroup(
+        payload: { groupId: string; roles: string[] },
+        req: any,
+    ) {
+        const result = await this.assignRolesToGroup(
+            payload.groupId,
+            payload.roles,
+        );
+        return {
+            success: true,
+            message: result.message,
+        };
+    }
+
+    public async handlerRemoveRolesFromGroup(
+        payload: { groupId: string; roles: string[] },
+        req: any,
+    ) {
+        const result = await this.removeRolesFromGroup(
+            payload.groupId,
+            payload.roles,
+        );
+        return {
+            success: true,
+            message: result.message,
+        };
+    }
 }

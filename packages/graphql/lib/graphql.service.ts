@@ -16,6 +16,7 @@ import {
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { authChecker } from './auth-checker';
+import GraphQLJSON from 'graphql-type-json';
 
 @Service('graphql')
 export class GraphQLService extends AbstractService {
@@ -37,44 +38,77 @@ export class GraphQLService extends AbstractService {
             `${resolversGeneratedDir}/**/*.resolver.ts`,
         ]);
 
-        const resolvers = await Promise.all(
-            resolversFiles.map(async (file) => {
+        const resolvers = [];
+        for (const file of resolversFiles) {
+            try {
                 const resolverModule = await import(file);
-                const resolverContructor = Object.values(resolverModule)[0];
-                return resolverContructor;
-            }),
-        );
+
+                for (const key in resolverModule) {
+                    const resolverClass = resolverModule[key];
+
+                    if (
+                        typeof resolverClass === 'function' &&
+                        resolverClass.prototype
+                    )
+                        resolvers.push(resolverClass);
+                }
+            } catch (error) {
+                console.error(`Error loading resolver from ${file}:`, error);
+            }
+        }
 
         const modulesResolvers = Application.getResolvers();
         resolvers.push(...modulesResolvers);
 
-        const schema = await buildSchema({
-            //@ts-ignore
-            resolvers,
-            authChecker,
-        });
+        try {
+            const schema = await buildSchema({
+                resolvers: resolvers as [Function, ...Function[]],
+                authChecker,
+                nullableByDefault: true,
+                validate: false,
+                orphanedTypes: [GraphQLJSON as unknown as Function],
+            });
 
-        const server = new ApolloServer({ schema });
+            const server = new ApolloServer({
+                schema,
+                introspection: true,
+                includeStacktraceInErrorResponses: true,
+                formatError: (error) => {
+                    console.error('GraphQL Error:', error);
+                    return {
+                        message: error.message,
+                        path: error.path,
+                        extensions: error.extensions,
+                    };
+                },
+            });
 
-        const { url } = await startStandaloneServer(server, {
-            listen: {
-                port: serverPort,
-                backlog: blacklog ? 1000 : undefined,
-            },
-            context: async ({ req }) => {
-                return {
-                    token: req.headers.authorization,
-                    refreshToken:
-                        req.headers['refresh-token'] ||
-                        req.headers['RefreshToken'] ||
-                        req.headers['refreshtoken'],
-                    req,
-                };
-            },
-        });
+            const { url } = await startStandaloneServer(server, {
+                listen: {
+                    port: serverPort,
+                    backlog: blacklog ? 1000 : undefined,
+                },
+                context: async ({ req }) => {
+                    return {
+                        token: req.headers.authorization,
+                        refreshToken:
+                            req.headers['refresh-token'] ||
+                            req.headers['RefreshToken'] ||
+                            req.headers['refreshtoken'],
+                        req,
+                    };
+                },
+            });
 
-        new Logger('GraphQLService').log(
-            `Server GraphQL successfully started on ${url}`,
-        );
+            new Logger('GraphQLService').log(
+                `Server GraphQL successfully started on ${url}`,
+            );
+        } catch (error) {
+            console.error(
+                'Error building GraphQL schema or starting server:',
+                error,
+            );
+            throw error;
+        }
     }
 }

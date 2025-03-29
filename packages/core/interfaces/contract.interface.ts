@@ -82,6 +82,8 @@ export class IContractService {
     request: string;
     response: string;
     createBoilerplate?: boolean;
+    module?: string;
+    serviceName?: string;
 }
 
 export class IContractIndex {

@@ -26,6 +26,10 @@ export interface ModuleInfo {
     versionSource?: string;
     moduleImport?: ModuleImport;
     isEnabled?: boolean;
+    beta?: boolean;
+    experimental?: boolean;
+    official?: boolean;
+    plugin?: boolean;
 }
 
 export interface SubmoduleInfo {
@@ -36,6 +40,10 @@ export interface SubmoduleInfo {
     version?: string;
 }
 
+interface ModulesResponse {
+    modules: ModuleInfo[];
+}
+
 const semver = require('semver');
 
 @Service('modules')
@@ -44,429 +52,38 @@ export class ModulesService {
     private readonly packageJsonPath = path.join(process.cwd(), 'package.json');
     private readonly mainTsPath = path.join(process.cwd(), 'src', 'main.ts');
 
-    private readonly availableModules: ModuleInfo[] = [
-        {
-            name: 'AI',
-            installed: false,
-            description:
-                'Artificial Intelligence integration with multiple providers',
-            category: 'Integration',
-            dependencies: ['@cmmv/ai'],
-            documentation: 'https://cmmv.io/docs/modules/ai',
-        },
-        {
-            name: 'Authentication',
-            installed: false,
-            description: 'User authentication and authorization system',
-            category: 'Security',
-            dependencies: [
-                '@cmmv/auth',
-                '@loskir/styled-qr-code-node',
-                'jsonwebtoken',
-                'speakeasy',
-            ],
-            documentation: 'https://cmmv.io/docs/modules/authentication',
-            moduleImport: {
-                import: 'AuthModule',
-                path: '@cmmv/auth',
-                modules: ['AuthModule'],
-            },
-        },
-        {
-            name: 'Cache',
-            installed: false,
-            description: 'Caching system for improved performance',
-            category: 'Performance',
-            submodules: [
-                {
-                    name: 'Redis',
-                    installed: false,
-                    description: 'Redis cache adapter',
-                    packageName: '@tirke/node-cache-manager-ioredis',
-                },
-                {
-                    name: 'Memcached',
-                    installed: false,
-                    description: 'Memcached cache adapter',
-                    packageName: 'cache-manager-memcached-store',
-                },
-                {
-                    name: 'MongoDB',
-                    installed: false,
-                    description: 'MongoDB cache adapter',
-                    packageName: 'cache-manager-mongodb',
-                },
-                {
-                    name: 'Filesystem Binary',
-                    installed: false,
-                    description: 'Filesystem Binary cache adapter',
-                    packageName: 'cache-manager-fs-binary',
-                },
-            ],
-            dependencies: ['@cmmv/cache', 'cache-manager'],
-            documentation: 'https://cmmv.io/docs/modules/cache',
-            moduleImport: {
-                import: 'CacheModule',
-                path: '@cmmv/cache',
-                modules: ['CacheModule'],
-            },
-        },
-        {
-            name: 'Elastic',
-            installed: false,
-            description:
-                'Elasticsearch integration for advanced search capabilities',
-            category: 'Integration',
-            dependencies: ['@cmmv/elastic', '@elastic/elasticsearch'],
-            documentation: 'https://cmmv.io/docs/modules/elastic',
-            moduleImport: {
-                import: 'ElasticModule',
-                path: '@cmmv/elastic',
-                modules: ['ElasticModule'],
-            },
-        },
-        {
-            name: 'Email',
-            installed: false,
-            description: 'Email sending service with multiple provider support',
-            category: 'Communication',
-            dependencies: ['@cmmv/email', 'aws-sdk', 'nodemailer'],
-            documentation: 'https://cmmv.io/docs/modules/email',
-            moduleImport: {
-                import: 'EmailModule',
-                path: '@cmmv/email',
-                modules: ['EmailModule'],
-            },
-        },
-        {
-            name: 'Encryptor',
-            installed: false,
-            description: 'Data encryption and security utilities',
-            category: 'Security',
-            dependencies: [
-                '@cmmv/encryptor',
-                'bip32',
-                'bip39',
-                'bs58',
-                'elliptic',
-                'tiny-secp256k1',
-            ],
-            documentation: 'https://cmmv.io/docs/modules/encryptor',
-            moduleImport: {
-                import: 'EncryptorModule',
-                path: '@cmmv/encryptor',
-                modules: ['EncryptorModule'],
-            },
-        },
-        {
-            name: 'Events',
-            installed: false,
-            description: 'Event-driven architecture implementation',
-            category: 'Architecture',
-            dependencies: ['@cmmv/events', 'eventemitter2'],
-            documentation: 'https://cmmv.io/docs/modules/events',
-            moduleImport: {
-                import: 'EventsModule',
-                path: '@cmmv/events',
-                modules: ['EventsModule'],
-            },
-        },
-        {
-            name: 'GraphQL',
-            installed: false,
-            description: 'GraphQL API implementation',
-            category: 'Integration',
-            dependencies: [
-                '@cmmv/graphql',
-                'graphql',
-                'graphql-scalars',
-                'graphql-type-json',
-                'type-graphql',
-                '@apollo/server',
-            ],
-            documentation: 'https://cmmv.io/docs/graphql/overview',
-            moduleImport: {
-                import: 'GraphQLModule',
-                path: '@cmmv/graphql',
-                modules: ['GraphQLModule'],
-            },
-        },
-        {
-            name: 'Inspector',
-            installed: false,
-            description: 'Code and performance inspection tools',
-            category: 'Development',
-            dependencies: ['@cmmv/inspector'],
-            documentation: 'https://cmmv.io/docs/modules/inspector',
-            moduleImport: {
-                import: 'InspectorModule',
-                path: '@cmmv/inspector',
-                modules: ['InspectorModule'],
-            },
-        },
-        {
-            name: 'Keyv',
-            installed: false,
-            description: 'Key-value storage implementation',
-            category: 'Data Storage',
-            submodules: [
-                {
-                    name: 'Redis',
-                    installed: false,
-                    description: 'Redis key-value adapter',
-                    packageName: '@keyv/redis',
-                },
-                {
-                    name: 'Memcached',
-                    installed: false,
-                    description: 'Memcached key-value adapter',
-                    packageName: '@keyv/memcached',
-                },
-                {
-                    name: 'MongoDB',
-                    installed: false,
-                    description: 'MongoDB key-value adapter',
-                    packageName: '@keyv/mongodb',
-                },
-                {
-                    name: 'SQLite',
-                    installed: false,
-                    description: 'SQLite key-value adapter',
-                    packageName: '@keyv/sqlite',
-                },
-                {
-                    name: 'MySQL',
-                    installed: false,
-                    description: 'MySQL key-value adapter',
-                    packageName: '@keyv/mysql',
-                },
-                {
-                    name: 'PostgreSQL',
-                    installed: false,
-                    description: 'PostgreSQL key-value adapter',
-                    packageName: '@keyv/postgres',
-                },
-            ],
-            dependencies: ['@cmmv/keyv', 'keyv', '@keyv/compress-gzip'],
-            moduleImport: {
-                import: 'KeyvModule',
-                path: '@cmmv/keyv',
-                modules: ['KeyvModule'],
-            },
-        },
-        {
-            name: 'Normalizer',
-            installed: false,
-            description: 'Data normalization and transformation tools',
-            category: 'Data Processing',
-            dependencies: [
-                '@cmmv/normalizer',
-                'sax',
-                'fast-json-stringify',
-                'stream-json',
-                'yaml',
-            ],
-            documentation: 'https://cmmv.io/docs/modules/normalizer',
-            moduleImport: {
-                import: 'NormalizerModule',
-                path: '@cmmv/normalizer',
-                modules: ['NormalizerModule'],
-            },
-        },
-        {
-            name: 'OpenAPI',
-            installed: false,
-            description: 'OpenAPI/Swagger documentation generator',
-            category: 'Documentation',
-            dependencies: ['@cmmv/openapi', 'js-yaml'],
-            documentation: 'https://cmmv.io/docs/modules/openapi',
-            moduleImport: {
-                import: 'OpenAPIModule',
-                path: '@cmmv/openapi',
-                modules: ['OpenAPIModule'],
-            },
-        },
-        {
-            name: 'Parallel',
-            installed: false,
-            description: 'Parallel processing and multi-threading support',
-            category: 'Performance',
-            dependencies: [
-                '@cmmv/parallel',
-                '@bnaya/objectbuffer',
-                'fast-thread',
-            ],
-            documentation: 'https://cmmv.io/docs/modules/parallel',
-            moduleImport: {
-                import: 'ParallelModule',
-                path: '@cmmv/parallel',
-                modules: ['ParallelModule'],
-            },
-        },
-        {
-            name: 'Protobuf',
-            installed: false,
-            description: 'Protocol Buffers implementation',
-            category: 'Integration',
-            dependencies: ['@cmmv/protobuf', 'protobufjs'],
-            documentation: 'https://cmmv.io/docs/rpc/proto',
-            moduleImport: {
-                import: 'ProtobufModule',
-                path: '@cmmv/protobuf',
-                modules: ['ProtobufModule'],
-            },
-        },
-        {
-            name: 'Queue',
-            installed: false,
-            description: 'Message and job queuing system',
-            category: 'Architecture',
-            submodules: [
-                {
-                    name: 'Redis',
-                    installed: false,
-                    description: 'Redis queue adapter',
-                    packageName: 'ioredis',
-                },
-                {
-                    name: 'RabbitMQ',
-                    installed: false,
-                    description: 'RabbitMQ queue adapter',
-                    packageName: 'amqp-connection-manager',
-                },
-                {
-                    name: 'Kafka',
-                    installed: false,
-                    description: 'Kafka queue adapter',
-                    packageName: 'kafkajs',
-                },
-            ],
-            dependencies: ['@cmmv/queue'],
-            documentation: 'https://cmmv.io/docs/modules/queue',
-            moduleImport: {
-                import: 'QueueModule',
-                path: '@cmmv/queue',
-                modules: ['QueueModule'],
-            },
-        },
-        {
-            name: 'Repository',
-            installed: false,
-            description: 'Data persistence and ORM implementation',
-            category: 'Data Storage',
-            submodules: [
-                {
-                    name: 'MySQL',
-                    installed: false,
-                    description: 'MySQL/MariaDB adapter',
-                    packageName: 'mysql2',
-                },
-                {
-                    name: 'PostgreSQL',
-                    installed: false,
-                    description: 'PostgreSQL adapter',
-                    packageName: 'pg',
-                },
-                {
-                    name: 'MongoDB',
-                    installed: false,
-                    description: 'MongoDB adapter',
-                    packageName: 'mongodb',
-                },
-                {
-                    name: 'SQLite',
-                    installed: false,
-                    description: 'SQLite adapter',
-                    packageName: 'sqlite3',
-                },
-                {
-                    name: 'SQL Server',
-                    installed: false,
-                    description: 'SQL Server adapter',
-                    packageName: 'mssql',
-                },
-                {
-                    name: 'Oracle',
-                    installed: false,
-                    description: 'Oracle adapter',
-                    packageName: 'oracledb',
-                },
-            ],
-            dependencies: ['@cmmv/repository', 'typeorm'],
-            documentation: 'https://cmmv.io/docs/modules/repository',
-            moduleImport: {
-                import: ['RepositoryModule', 'Repository'],
-                path: '@cmmv/repository',
-                modules: ['RepositoryModule'],
-                providers: ['Repository'],
-            },
-        },
-        {
-            name: 'Scheduling',
-            installed: false,
-            description: 'Task scheduling and cron jobs',
-            category: 'System',
-            dependencies: ['@cmmv/scheduling', 'cron'],
-            documentation: 'https://cmmv.io/docs/modules/scheduling',
-            moduleImport: {
-                import: ['SchedulingModule', 'SchedulingService'],
-                path: '@cmmv/scheduling',
-                modules: ['SchedulingModule'],
-                providers: ['SchedulingService'],
-            },
-        },
-        {
-            name: 'Testing',
-            installed: false,
-            description: 'Testing framework and utilities',
-            category: 'Development',
-            dependencies: ['@cmmv/testing'],
-            moduleImport: {
-                import: 'TestingModule',
-                path: '@cmmv/testing',
-                modules: ['TestingModule'],
-            },
-        },
-        {
-            name: 'Throttler',
-            installed: false,
-            description: 'Throttling and rate limiting implementation',
-            category: 'Performance',
-            dependencies: ['@cmmv/throttler'],
-            documentation: 'https://cmmv.io/docs/modules/throttler',
-            moduleImport: {
-                import: 'ThrottlerModule',
-                path: '@cmmv/throttler',
-                modules: ['ThrottlerModule'],
-            },
-        },
-        {
-            name: 'Vault',
-            installed: false,
-            description: 'Secure credentials and secrets management',
-            category: 'Security',
-            dependencies: ['@cmmv/vault', '@cmmv/encryptor', 'elliptic'],
-            documentation: 'https://cmmv.io/docs/modules/vault',
-            moduleImport: {
-                import: 'VaultModule',
-                path: '@cmmv/vault',
-                modules: ['VaultModule'],
-            },
-        },
-        {
-            name: 'WebSocket',
-            installed: false,
-            description: 'WebSocket server and client implementation',
-            category: 'Integration',
-            dependencies: ['@cmmv/websocket', 'ws'],
-            documentation: 'https://cmmv.io/docs/rpc/websocket',
-            moduleImport: {
-                import: 'WebSocketModule',
-                path: '@cmmv/ws',
-                modules: ['WebSocketModule'],
-            },
-        },
-    ];
+    private availableModules: ModuleInfo[] = [];
+    private readonly modulesApiUrl =
+        'https://raw.githubusercontent.com/cmmvio/cmmv-plugins/main/modules.json';
+
+    constructor() {
+        this.fetchModules().catch((err) =>
+            this.logger.error(`Failed to fetch modules: ${err.message}`),
+        );
+    }
+
+    /**
+     * Fetch modules from the GitHub repository
+     */
+    private async fetchModules(): Promise<void> {
+        try {
+            const response = await axios.get<ModulesResponse>(
+                this.modulesApiUrl,
+            );
+
+            if (response.data && response.data.modules) {
+                this.availableModules = response.data.modules;
+                this.logger.log(
+                    `Successfully loaded ${this.availableModules.length} modules from remote repository`,
+                );
+            } else {
+                this.logger.error('Invalid response format from modules API');
+            }
+        } catch (error) {
+            this.logger.error(`Error fetching modules: ${error.message}`);
+            throw error;
+        }
+    }
 
     /**
      * Read the package.json file
@@ -505,7 +122,8 @@ export class ModulesService {
             const mainPackage = module.dependencies?.find(
                 (dep) =>
                     dep.startsWith('@cmmv/') &&
-                    dep.toLowerCase() === `@cmmv/${module.name.toLowerCase()}`,
+                    dep.toLowerCase() ===
+                        `@cmmv/${module.name.toLowerCase().replace('@cmmv/', '')}`,
             );
 
             if (mainPackage && mainPackage in installedDependencies) {
@@ -523,7 +141,7 @@ export class ModulesService {
                 for (const submodule of module.submodules) {
                     const submodulePackage =
                         submodule.packageName ||
-                        `@cmmv/${module.name.toLowerCase()}-${submodule.name.toLowerCase()}`;
+                        `@cmmv/${module.name.toLowerCase().replace('@cmmv/', '')}-${submodule.name.toLowerCase()}`;
 
                     submodule.installed =
                         submodulePackage in installedDependencies;
@@ -552,7 +170,7 @@ export class ModulesService {
                         (dep) =>
                             dep.startsWith('@cmmv/') &&
                             dep.toLowerCase() ===
-                                `@cmmv/${module.name.toLowerCase()}`,
+                                `@cmmv/${module.name.toLowerCase().replace('@cmmv/', '')}`,
                     ) || module.dependencies?.[0];
 
                 if (!mainPackage) continue;
@@ -617,6 +235,11 @@ export class ModulesService {
      * @returns The modules
      */
     public async getAllModules(): Promise<ModuleInfo[]> {
+        // If modules haven't been loaded yet, try fetching them
+        if (this.availableModules.length === 0) {
+            await this.fetchModules();
+        }
+
         const packageJson = this.readPackageJson();
         this.updateInstalledStatus(packageJson);
 

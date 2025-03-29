@@ -223,18 +223,6 @@
                 <div v-else class="flex flex-col h-full">
                     <div class="p-4 border-b border-neutral-800 bg-neutral-900">
                         <div class="flex items-center">
-                            <button
-                                class="flex items-center px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-md mr-3"
-                                @click="toggleAuthModal"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
-                                    :class="isAuthenticated ? 'text-green-400' : 'text-yellow-400'"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                                <span class="text-xs">{{ isAuthenticated ? 'Authenticated' : 'Authenticate' }}</span>
-                            </button>
-
                             <div
                                 class="text-xs px-3 py-1.5 rounded-md text-white font-mono font-bold mr-2"
                                 :class="{

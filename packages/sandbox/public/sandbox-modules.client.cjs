@@ -1,3 +1,53 @@
+// This assumes markdown-it is loaded via a script tag in the HTML
+
+const md = window.markdownit({
+  html: true,         // Enable HTML tags in source
+  linkify: true,      // Autoconvert URL-like text to links
+  typographer: true,  // Enable some language-neutral replacement + quotes beautification
+  breaks: true,       // Convert '\n' in paragraphs into <br>
+  highlight: function (str, lang) {
+    // Optional syntax highlighting
+    if (lang && window.hljs && window.hljs.getLanguage(lang)) {
+      try {
+        return `<pre class="bg-neutral-900 p-3 rounded-md overflow-x-auto my-4"><code class="language-${lang} text-neutral-300 text-sm">${window.hljs.highlight(str, { language: lang }).value}</code></pre>`;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    // Default styling if no highlighting
+    return `<pre class="bg-neutral-900 p-3 rounded-md overflow-x-auto my-4"><code class="text-neutral-300 text-sm">${md.utils.escapeHtml(str)}</code></pre>`;
+  }
+});
+
+// Add custom styling to rendered output
+const defaultRender = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
+  return self.renderToken(tokens, idx, options);
+};
+
+md.renderer.rules.link_open = function(tokens, idx, options, env, self) {
+  // Add target="_blank" and styling to all links
+  tokens[idx].attrPush(['class', 'text-blue-400 hover:underline']);
+  tokens[idx].attrPush(['target', '_blank']);
+  return defaultRender(tokens, idx, options, env, self);
+};
+
+// Configure tables
+md.renderer.rules.table_open = function() {
+  return '<table class="min-w-full border-collapse my-4">';
+};
+
+md.renderer.rules.thead_open = function() {
+  return '<thead class="bg-neutral-800">';
+};
+
+md.renderer.rules.th_open = function() {
+  return '<th class="border border-neutral-700 px-4 py-2 text-neutral-300 font-semibold">';
+};
+
+md.renderer.rules.td_open = function() {
+  return '<td class="border border-neutral-700 px-4 py-2">';
+};
+
 const useModulesViewer = () => {
     const { ref, reactive, computed, onMounted } = Vue;
 
@@ -20,7 +70,10 @@ const useModulesViewer = () => {
         updating: null,
         updateSuccess: null,
         updateError: null,
-        togglingModule: null
+        togglingModule: null,
+        readmeContent: null,
+        readmeLoading: false,
+        readmeError: null,
     });
 
     function checkIfRootUser() {
@@ -155,6 +208,7 @@ const useModulesViewer = () => {
             if (data.success && data.data) {
                 state.selectedModule = data.data;
                 state.view = 'detail';
+                fetchModuleReadme(data.data);
             } else {
                 throw new Error(data.message || 'Module not found');
             }
@@ -169,6 +223,7 @@ const useModulesViewer = () => {
     const selectModule = (module) => {
         state.selectedModule = module;
         state.view = 'detail';
+        fetchModuleReadme(module);
     };
 
     const goBack = () => {
@@ -218,7 +273,10 @@ const useModulesViewer = () => {
             const query = state.searchQuery.toLowerCase();
             result = result.filter(m =>
                 m.name.toLowerCase().includes(query) ||
-                m.description.toLowerCase().includes(query)
+                m.description.toLowerCase().includes(query) ||
+                (m.tags && Array.isArray(m.tags) && m.tags.some(tag =>
+                    tag.toLowerCase().includes(query)
+                ))
             );
         }
 
@@ -478,6 +536,95 @@ const useModulesViewer = () => {
         state.updateError = null;
     };
 
+    const fetchModuleReadme = async (module) => {
+        if (!module || !module.github) return;
+
+        try {
+            state.readmeLoading = true;
+            state.readmeError = null;
+            state.readmeContent = null;
+
+            // Extract organization and repo from GitHub URL
+            let repoUrl = module.github;
+            let isMonorepo = repoUrl.includes('/tree/');
+            let defaultBranch = 'main';
+            let subPath = '';
+
+            // Handle monorepo modules
+            if (isMonorepo) {
+                // Extract subpath from /tree/branch/path format
+                const treePathMatch = repoUrl.match(/\/tree\/([^/]+)\/(.+)/);
+                if (treePathMatch) {
+                    defaultBranch = treePathMatch[1];
+                    subPath = treePathMatch[2];
+                    // Remove the /tree/branch/path part to get base repo URL
+                    repoUrl = repoUrl.replace(/\/tree\/[^/]+\/.*$/, '');
+                }
+            }
+
+            // Convert GitHub URL to raw content URL base
+            let rawBaseUrl = repoUrl.replace('github.com', 'raw.githubusercontent.com');
+
+            // Try fetching README from different locations
+            const possiblePaths = [
+                // Main path (if in monorepo, this is the submodule README)
+                `${rawBaseUrl}/${defaultBranch}/${subPath ? subPath + '/' : ''}README.md`,
+                // Capital README
+                `${rawBaseUrl}/${defaultBranch}/${subPath ? subPath + '/' : ''}README.MD`,
+                // Lowercase readme
+                `${rawBaseUrl}/${defaultBranch}/${subPath ? subPath + '/' : ''}readme.md`,
+                // Try master branch if main fails
+                `${rawBaseUrl}/master/${subPath ? subPath + '/' : ''}README.md`,
+                // Try master branch with lowercase
+                `${rawBaseUrl}/master/${subPath ? subPath + '/' : ''}readme.md`
+            ];
+
+            // If it's a monorepo, also try the root README
+            if (isMonorepo) {
+                possiblePaths.push(`${rawBaseUrl}/${defaultBranch}/README.md`);
+                possiblePaths.push(`${rawBaseUrl}/master/README.md`);
+            }
+
+            let content = null;
+
+            // Try each possible path until one works
+            for (const path of possiblePaths) {
+                try {
+                    const response = await fetch(path);
+                    if (response.ok) {
+                        content = await response.text();
+                        break;
+                    }
+                } catch (err) {
+                    // Continue to next path
+                    console.log(`Failed to fetch README from ${path}`);
+                }
+            }
+
+            if (content) {
+                state.readmeContent = content;
+            } else {
+                throw new Error('No README found in any of the expected locations');
+            }
+        } catch (error) {
+            console.error('Error fetching module README:', error);
+            state.readmeError = `Failed to load README: ${error.message}`;
+        } finally {
+            state.readmeLoading = false;
+        }
+    };
+
+    const parsedReadmeContent = computed(() => {
+        if (!state.readmeContent) return '';
+
+        try {
+            return md.render(state.readmeContent);
+        } catch (error) {
+            console.error('Error rendering markdown:', error);
+            return `<p class="text-red-400">Error rendering markdown: ${error.message}</p>`;
+        }
+    });
+
     initialize();
 
     return {
@@ -528,6 +675,11 @@ const useModulesViewer = () => {
         clearAllNotifications,
         moduleStatus: computed(() => state.moduleStatus),
         togglingModule: computed(() => state.togglingModule),
-        toggleModuleStatus
+        toggleModuleStatus,
+        readmeContent: computed(() => state.readmeContent),
+        parsedReadmeContent,
+        readmeLoading: computed(() => state.readmeLoading),
+        readmeError: computed(() => state.readmeError),
+        fetchModuleReadme,
     };
 };

@@ -1182,6 +1182,33 @@ components:
         - context
         - recived
         - opened
+    categoria:
+      properties:
+        id:
+          readOnly: true
+          type: string
+        nome:
+          type: string
+          required: true
+      required:
+        - nome
+    produto:
+      properties:
+        id:
+          readOnly: true
+          type: string
+        name:
+          type: string
+          required: true
+        price:
+          type: number
+          required: true
+        categoria:
+          type: object
+          required: false
+      required:
+        - name
+        - price
     Catch:
       properties:
         status:
@@ -2321,4 +2348,490 @@ paths:
             type: string
       security:
         - BearerAuth: []
+  /categories:
+    get:
+      tags:
+        - categoria
+      summary: Returns categoria records by filter
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: categoria response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/categoria'
+                      count:
+                        type: number
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: number
+                          offset:
+                            type: number
+                          sortBy:
+                            type: string
+                            default: id
+                          sort:
+                            type: string
+                            default: asc
+                          search:
+                            type: string
+                          searchField:
+                            type: string
+                          filters:
+                            type: object
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: *ref_1
+      security: []
+    post:
+      tags:
+        - categoria
+      summary: Insert new categoria
+      externalDocs:
+        url: null
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                  nullable: false
+      responses:
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security: []
+  /categories/{id}:
+    get:
+      tags:
+        - categoria
+      summary: Returns categoria record by ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: categoria response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/categoria'
+                      count:
+                        type: number
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: number
+                          offset:
+                            type: number
+                          sortBy:
+                            type: string
+                            default: id
+                          sort:
+                            type: string
+                            default: asc
+                          search:
+                            type: string
+                          searchField:
+                            type: string
+                          filters:
+                            type: object
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security: []
+    put:
+      tags:
+        - categoria
+      summary: Update categoria by ID
+      externalDocs:
+        url: null
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                  nullable: false
+      responses:
+        '200':
+          description: categoria update response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected:
+                    type: number
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security: []
+    delete:
+      tags:
+        - categoria
+      summary: Delete categoria by ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: categoria delete response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected:
+                    type: number
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security: []
+  /categories/{id}/raw:
+    get:
+      tags:
+        - categoria
+      summary: Return categoria record by raw ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: categoria response schema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security: []
+  /products:
+    get:
+      tags:
+        - produto
+      summary: Returns produto records by filter
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: produto response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/produto'
+                      count:
+                        type: number
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: number
+                          offset:
+                            type: number
+                          sortBy:
+                            type: string
+                            default: id
+                          sort:
+                            type: string
+                            default: asc
+                          search:
+                            type: string
+                          searchField:
+                            type: string
+                          filters:
+                            type: object
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: *ref_1
+      security: []
+    post:
+      tags:
+        - produto
+      summary: Insert new produto
+      externalDocs:
+        url: null
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: false
+                price:
+                  type: float
+                  nullable: false
+                categoria:
+                  type: string
+                  nullable: true
+      responses:
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters: []
+      security: []
+  /products/{id}:
+    get:
+      tags:
+        - produto
+      summary: Returns produto record by ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: produto response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  processingTime:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/produto'
+                      count:
+                        type: number
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: number
+                          offset:
+                            type: number
+                          sortBy:
+                            type: string
+                            default: id
+                          sort:
+                            type: string
+                            default: asc
+                          search:
+                            type: string
+                          searchField:
+                            type: string
+                          filters:
+                            type: object
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security: []
+    put:
+      tags:
+        - produto
+      summary: Update produto by ID
+      externalDocs:
+        url: null
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  nullable: false
+                price:
+                  type: float
+                  nullable: false
+                categoria:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: produto update response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected:
+                    type: number
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security: []
+    delete:
+      tags:
+        - produto
+      summary: Delete produto by ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: produto delete response schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  affected:
+                    type: number
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security: []
+  /products/{id}/raw:
+    get:
+      tags:
+        - produto
+      summary: Return produto record by raw ID
+      externalDocs:
+        url: null
+      responses:
+        '200':
+          description: produto response schema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: 'Internal Server Error: An unexpected error occurred on the server.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Catch'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security: []
 security: []

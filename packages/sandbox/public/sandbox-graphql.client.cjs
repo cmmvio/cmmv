@@ -11,6 +11,7 @@ const useGraphQLExplorer = () => {
         loading: false,
         error: null,
         data: null,
+        skipped: false,
         queryTypes: [],
         mutationTypes: [],
         subscriptionTypes: [],
@@ -382,7 +383,50 @@ query {
             }
         }
 
-        query += `  ${operationField}${functionArgs} {\n`;
+        // Verificar se o método retorna um tipo escalar ou JSON
+        const isScalarReturn = isScalarReturnType(selection.rootOperation);
+
+        if (isScalarReturn) {
+            // Se for um tipo escalar, não adicione chaves
+            query += `  ${operationField}${functionArgs}\n`;
+        } else {
+            // Se for um tipo objeto, adicione chaves e os campos
+            query += `  ${operationField}${functionArgs} {\n`;
+
+            buildQueryStructure();
+
+            query += `  }\n`;
+        }
+
+        query += `}`;
+
+        editor.query = query;
+
+        updateQueryEditor();
+
+        updateVariablesPanel();
+
+        // Função auxiliar que verifica se o tipo de retorno é escalar
+        function isScalarReturnType(operation) {
+            // Se não tiver operation ou não tiver type, assume que não é escalar (será objeto)
+            if (!operation || !operation.type) return false;
+
+            const returnType = getNestedType(operation.type);
+
+            // Se não conseguir determinar o tipo ou não tiver fields, considera escalar
+            if (!returnType) return true;
+
+            // Se for um tipo escalar conhecido ou não tiver campos, é escalar
+            return returnType.kind === 'SCALAR' ||
+                   !returnType.fields ||
+                   returnType.fields.length === 0 ||
+                   returnType.name === 'JSON' ||
+                   returnType.name === 'Boolean' ||
+                   returnType.name === 'String' ||
+                   returnType.name === 'Int' ||
+                   returnType.name === 'Float' ||
+                   returnType.name === 'ID';
+        }
 
         function buildQueryStructure() {
             const processedPaths = new Set();
@@ -411,6 +455,9 @@ query {
                         query += `    ${field}\n`;
                     }
                 });
+            } else {
+                // Se não houver campos selecionados, adicione um comentário
+                query += `    # Select fields\n`;
             }
 
             function addObjectFieldToQuery(fieldName, parentPath, depth) {
@@ -479,16 +526,6 @@ query {
                 query += `${indent}}\n`;
             }
         }
-
-        buildQueryStructure();
-
-        query += `  }\n}`;
-
-        editor.query = query;
-
-        updateQueryEditor();
-
-        updateVariablesPanel();
     }
 
     function updateVariablesPanel() {
@@ -581,6 +618,14 @@ query {
     async function fetchSchema() {
         schema.loading = true;
         schema.error = null;
+        schema.skipped = false;
+
+        // Create a timeout promise
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => {
+                reject(new Error('Schema loading timeout (2s). The GraphQL endpoint might be unavailable.'));
+            }, 2000); // 2 second timeout
+        });
 
         try {
             const introspectionQuery = `
@@ -674,12 +719,14 @@ query {
 
             const headers = getAuthHeaders();
 
-            const response = await fetch(endpoint.value, {
+            // Race between the fetch and the timeout
+            const fetchPromise = fetch(endpoint.value, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({ query: introspectionQuery })
             });
 
+            const response = await Promise.race([fetchPromise, timeoutPromise]);
             const result = await response.json();
 
             if (result.errors) {
@@ -688,9 +735,21 @@ query {
 
             processSchema(result.data.__schema);
 
+            // After successfully processing the schema, initialize the UI
+            if (!ui.editorInitialized) {
+                setTimeout(() => {
+                    initQueryEditor();
+                }, 100);
+            }
+
         } catch (error) {
             console.error(error);
-            schema.error = error.message || 'Erro ao carregar schema';
+            schema.error = error.message || 'Error loading GraphQL schema. Make sure the GraphQL module is enabled.';
+
+            // Auto-continue if timeout occurs
+            if (error.message.includes('timeout')) {
+                skipSchemaLoading();
+            }
         } finally {
             schema.loading = false;
         }
@@ -801,6 +860,12 @@ query {
                 throw new Error(e);
             }
 
+            // Verificar se a consulta tem formatação válida
+            const queryText = editor.query.trim();
+            if (!queryText.startsWith('query') && !queryText.startsWith('mutation') && !queryText.startsWith('subscription')) {
+                throw new Error('Invalid query format. Query must start with query, mutation, or subscription.');
+            }
+
             const startTime = performance.now();
 
             const response = await fetch(endpoint.value, {
@@ -821,6 +886,16 @@ query {
 
             ui.activeTab = 'query';
 
+            // Se a resposta tiver sido bem-sucedida, verificar se há campos definidos
+            // Se não houver, podemos aprimorar a consulta para futuras execuções
+            if (result.data) {
+                const operationName = Object.keys(result.data)[0];
+                if (operationName && result.data[operationName] === null) {
+                    // A operação retornou null, provavelmente porque estamos tentando selecionar campos em um tipo escalar
+                    console.warn('The query might be trying to select fields on a scalar value. Consider removing {} from the query.');
+                }
+            }
+
         } catch (error) {
             console.error(error);
             editor.error = error.message || 'Erro ao executar consulta';
@@ -832,7 +907,16 @@ query {
 
     function prettifyQuery() {
         try {
-            let query = editor.query.trim()
+            // Tenta extrair informações antes de formatar
+            const queryText = editor.query.trim();
+            let isScalarOperation = false;
+
+            // Verifica se a consulta segue um padrão de operação escalar (sem chaves)
+            if (queryText.match(/(?:query|mutation)[^{]*{\s*\w+\([^)]*\)\s*\n*}/)) {
+                isScalarOperation = true;
+            }
+
+            let query = queryText
                 .replace(/\s+/g, ' ')
                 .replace(/\s*{\s*/g, ' {\n  ')
                 .replace(/\s*}\s*/g, '\n}\n')
@@ -842,9 +926,23 @@ query {
             let lines = query.split('\n');
             let indent = 0;
             let formattedLines = [];
+            let skipNextClosingBrace = false;
 
-            for (let line of lines) {
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
                 let trimmed = line.trim();
+
+                // Verifica se é uma linha de operação escalar
+                if (isScalarOperation &&
+                    trimmed.match(/^\w+\([^)]*\)$/) &&
+                    i < lines.length - 1 &&
+                    lines[i+1].trim() === '}') {
+                    // Se for uma operação escalar, não adiciona chaves
+                    skipNextClosingBrace = true;
+                    formattedLines.push(' '.repeat(indent * 2) + trimmed);
+                    continue;
+                }
+
                 if (trimmed.endsWith('}')) {
                     indent = Math.max(0, indent - 1);
                 }
@@ -855,6 +953,12 @@ query {
 
                 if (trimmed.endsWith('{')) {
                     indent++;
+                }
+
+                // Pula a próxima chave de fechamento se for uma operação escalar
+                if (skipNextClosingBrace && trimmed === '}') {
+                    skipNextClosingBrace = false;
+                    formattedLines.pop(); // Remove a última linha que contém o }
                 }
             }
 
@@ -1021,6 +1125,27 @@ query {
         ui.editorInitialized = false;
     }
 
+    function skipSchemaLoading() {
+        schema.loading = false;
+        schema.skipped = true;
+
+        if (!schema.data) {
+            schema.data = {
+                queryType: { name: 'Query' },
+                mutationType: { name: 'Mutation' },
+                subscriptionType: null
+            };
+        }
+
+        resetExplorer();
+
+        setTimeout(() => {
+            if (queryEditor) {
+                queryEditor.focus();
+            }
+        }, 100);
+    }
+
     onMounted(() => {
         fetchSchema();
     });
@@ -1042,6 +1167,7 @@ query {
         getAuthHeaders,
 
         fetchSchema,
+        skipSchemaLoading,
         navigateToType,
         selectType,
 

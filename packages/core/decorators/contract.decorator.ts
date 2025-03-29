@@ -154,6 +154,8 @@ export interface ContractOptionsService {
     functionName: string;
     cache?: CacheOptions;
     rootOnly?: boolean;
+    module?: string;
+    serviceName?: string;
 }
 
 export const NAMESPACE_METADATA = Symbol('namespace_metadata');

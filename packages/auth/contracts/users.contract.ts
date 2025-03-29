@@ -114,7 +114,7 @@ export class UserContract extends AbstractContract {
                 createRelationship: true,
                 contract: GroupsContract,
                 entityName: 'groups',
-                field: '_id',
+                field: 'id',
                 array: true,
             },
         ],
@@ -292,10 +292,12 @@ export class UserContract extends AbstractContract {
         path: 'auth/login',
         method: 'POST',
         auth: false,
-        functionName: 'login',
+        functionName: 'loginGraphQL',
         request: 'LoginRequest',
         response: 'LoginResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthAutorizationService',
     })
     Login: Function;
 
@@ -351,10 +353,12 @@ export class UserContract extends AbstractContract {
         path: 'auth/register',
         method: 'POST',
         auth: false,
-        functionName: 'register',
+        functionName: 'registerGraphQL',
         request: 'RegisterRequest',
         response: 'RegisterResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthAutorizationService',
     })
     Register: Function;
 
@@ -412,6 +416,8 @@ export class UserContract extends AbstractContract {
         request: 'GetCurrentUserRequest',
         response: 'GetCurrentUserResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthAutorizationService',
     })
     GetCurrentUser: Function;
 
@@ -453,6 +459,8 @@ export class UserContract extends AbstractContract {
         request: 'BlockUserRequest',
         response: 'BlockUserResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthUsersService',
     })
     BlockUser: Function;
 
@@ -494,6 +502,8 @@ export class UserContract extends AbstractContract {
         request: 'UnblockUserRequest',
         response: 'UnblockUserResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthUsersService',
     })
     UnblockUser: Function;
 
@@ -541,6 +551,8 @@ export class UserContract extends AbstractContract {
         request: 'AssignGroupsToUserRequest',
         response: 'AssignGroupsToUserResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthUsersService',
     })
     AssignGroupsToUser: Function;
 
@@ -594,6 +606,8 @@ export class UserContract extends AbstractContract {
         request: 'RemoveGroupsFromUserRequest',
         response: 'RemoveGroupsFromUserResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthUsersService',
     })
     RemoveGroupsFromUser: Function;
 }

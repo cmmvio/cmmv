@@ -3,7 +3,7 @@
     style="backdrop-filter: blur(4px);"
     v-if="syncModalOpen"
 >
-    <div class="relative max-w-[600px] w-full m-auto transition duration-200 c-card rounded-lg bg-neutral-900 border-black text-neutral-200 border-neutral-800 border shadow-lg">
+    <div class="relative max-w-[600px] w-full m-auto transition duration-200 c-card rounded-lg bg-neutral-900 border-black text-neutral-200 border-neutral-800 border shadow-lg sync-modal-content">
         <div class="border-b border-neutral-800 p-4 relative">
             <h2 class="text-xl font-medium">Synchronize Contracts</h2>
 
@@ -17,6 +17,20 @@
         </div>
 
         <div class="p-4">
+            <!-- Error Alert - displays when there are contracts with errors -->
+            <div v-if="contractsToSync.some(c => c.hasErrors)" class="mb-4 bg-red-900/20 border border-red-600 text-red-200 p-3 rounded-md text-sm">
+                <div class="flex items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    <div>
+                        <div class="font-medium mb-1">Contract validation errors detected</div>
+                        <p>One or more contracts contain validation errors that need to be fixed before synchronizing. Please fix these errors using the "Fix" buttons or by manually correcting the issues.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Standard warning alert -->
             <div class="mb-4 bg-amber-900/30 border border-amber-800 text-amber-200 p-3 rounded-md text-sm">
                 <div class="flex items-start">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -47,12 +61,37 @@
                             v-for="contract in contractsToSync"
                             :key="contract.name"
                             class="p-3 flex items-center justify-between"
+                            :class="{'bg-red-900/30 border-l-4 border-red-600': contract.hasErrors}"
                         >
-                            <div>
-                                <span class="font-medium">{{ contract.name }}</span>
-                                <span class="text-xs text-neutral-500 ml-2">{{ contract.status }}</span>
+                            <div class="flex items-center">
+                                <!-- Warning icon for contracts with errors -->
+                                <svg
+                                    v-if="contract.hasErrors"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5 text-red-500 mr-2"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                >
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                <div>
+                                    <span class="font-medium" :class="{'text-red-300': contract.hasErrors}">{{ contract.name }}</span>
+                                    <span class="text-xs text-neutral-500 ml-2">{{ contract.status }}</span>
+                                    <div v-if="contract.hasErrors" class="text-xs text-red-400 mt-1">
+                                        Contains validation errors
+                                    </div>
+                                </div>
                             </div>
                             <div class="flex items-center">
+                                <!-- Fix button for contracts with errors -->
+                                <button
+                                    v-if="contract.hasErrors"
+                                    @click="fixContractErrors(contract.key)"
+                                    class="text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded mr-2"
+                                >
+                                    Fix
+                                </button>
+
                                 <span v-if="contract.state === 'pending'" class="text-neutral-400">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
@@ -115,15 +154,32 @@
                     Cancel
                 </button>
                 <button
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center"
+                    class="px-4 py-2 text-white rounded-md transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    :class="contractsToSync.some(c => c.hasErrors) ?
+                        'bg-red-600 hover:bg-red-700' :
+                        'bg-blue-600 hover:bg-blue-700'"
                     @click="startSyncProcess"
-                    :disabled="syncInProgress || getUnsyncedContracts().length === 0"
-                    :class="{ 'opacity-50 cursor-not-allowed': syncInProgress || getUnsyncedContracts().length === 0 }"
+                    :disabled="syncInProgress || getUnsyncedContracts().length === 0 || contractsToSync.some(c => c.hasErrors)"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Start Synchronization
+                    <template v-if="contractsToSync.some(c => c.hasErrors)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Fix Errors to Sync</span>
+                    </template>
+                    <template v-else-if="syncInProgress">
+                        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Syncing... ({{ syncProgress }}%)</span>
+                    </template>
+                    <template v-else>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Start Synchronization</span>
+                    </template>
                 </button>
             </div>
         </div>

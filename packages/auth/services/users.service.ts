@@ -433,4 +433,46 @@ export class AuthUsersService extends AbstractService {
             message: 'Groups removed from user successfully',
         };
     }
+
+    // GraphQL Handlers
+    public async handlerBlockUser(payload: { userId: string }, req: any) {
+        const result = await this.blockUser(payload.userId);
+        return {
+            success: true,
+            message: result.message,
+        };
+    }
+
+    public async handlerUnblockUser(payload: { userId: string }, req: any) {
+        const result = await this.unblockUser(payload.userId);
+        return {
+            success: true,
+            message: result.message,
+        };
+    }
+
+    public async handlerAssignGroupsToUser(
+        payload: { userId: string; groups: string | string[] },
+        req: any,
+    ) {
+        const result = await this.assignGroupsToUser(
+            payload.userId,
+            payload.groups,
+        );
+        return {
+            success: true,
+            message: result.message,
+        };
+    }
+
+    public async handlerRemoveGroups(
+        payload: { userId: string; groups: string | string[] },
+        req: any,
+    ) {
+        const result = await this.removeGroupsFromUser(
+            payload.userId,
+            payload.groups,
+        );
+        return result;
+    }
 }

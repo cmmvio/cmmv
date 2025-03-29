@@ -117,6 +117,18 @@
         </div>
 
         <div class="absolute right-2 flex gap-x-4">
+            <button
+                @click="toggleAuthModal"
+                class="hover:text-white flex items-center"
+                :title="isAuthenticated ? 'Authenticated' : 'Authenticate'"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1"
+                    :class="isAuthenticated ? 'text-green-400' : 'text-yellow-400'"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </button>
+
             <a href="https://cmmv.io/docs" target="_blank" title="Docs" class="hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24">
                     <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z"></path>

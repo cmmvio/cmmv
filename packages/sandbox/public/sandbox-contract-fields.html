@@ -60,14 +60,45 @@
             </svg>
         </div>
 
-        <input
-            class="border-l pl-4 h-[42px] w-96 border-neutral-800 focus-none outline-none"
-            type="text"
-            placeholder="Name"
-            title="Name"
-            v-model="field.propertyKey"
-            :disabled="selectedContract.options.moduleContract"
-        />
+        <div class="relative flex-grow">
+            <input
+                class="border-l pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
+                :class="{
+                    'border-red-500 bg-red-900/10 text-red-300': field.nameError,
+                    'border-neutral-600 opacity-75': field.fromServer && ['id', '_id', 'ID', '_ID'].includes(field.propertyKey)
+                }"
+                type="text"
+                placeholder="Name"
+                title="Name"
+                v-model="field.propertyKey"
+                :disabled="selectedContract.options.moduleContract || (field.fromServer && ['id', '_id', 'ID', '_ID'].includes(field.propertyKey))"
+                @input="validateFieldName(field)"
+            />
+            <div
+                v-if="field.fromServer && ['id', '_id', 'ID', '_ID'].includes(field.propertyKey)"
+                class="absolute right-2 top-[10px] text-xs px-1.5 py-0.5 bg-blue-900/40 text-blue-300 rounded-sm border border-blue-800/50"
+            >
+                System Field
+            </div>
+            <div
+                v-if="field.nameError"
+                class="absolute left-0 -bottom-6 text-xs text-red-500 bg-neutral-900 px-2 py-1 z-10 whitespace-nowrap border border-red-500/30 flex items-center"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                <span>{{ field.nameErrorMessage }}</span>
+                <button
+                    @click="clearFieldNameError(field)"
+                    class="ml-2 text-red-400 hover:text-red-300"
+                    title="Fix this error"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
 
         <div class="flex justify-end mr-4 items-right h-[42px] w-full text-xs">
             <div class="items-center flex">
@@ -191,20 +222,7 @@
                         placeholder="Object Type"
                         title="Object Type"
                         v-model="field.objectType"
-                        :disabled="selectedContract.options.moduleContract"
-                    />
-                </div>
-            </div>
-            <div class="flex text-xs justify-center mt-2">
-                <div class="w-[200px] flex items-center">Entity Type:</div>
-                <div class="w-[calc(100%-200px)] justify-end">
-                    <input
-                        class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
-                        type="text"
-                        placeholder="Entity Type"
-                        title="Entity Type"
-                        v-model="field.entityType"
-                        :disabled="selectedContract.options.moduleContract"
+                        :disabled="selectedContract.options.moduleContract || (field.link && field.link.length > 0)"
                     />
                 </div>
             </div>
@@ -439,30 +457,18 @@
             </button>
         </div>
 
+        <div class="text-xs text-neutral-500 italic mb-2 mt-1">
+            Note: When relationships are added, Object Type is automatically set to 'object' and entityName is derived from the contract
+        </div>
+
         <div class="flex-col">
             <div
                 v-for="(relationship, relationshipIndex) in field.link || []"
                 class="mb-2 p-3 bg-neutral-800/30 border border-neutral-800 rounded"
             >
                 <div class="grid grid-cols-12 gap-3">
-                    <div class="flex flex-col col-span-2">
-                        <label class="text-xs mb-1 text-neutral-400"
-                            >Entity Name</label
-                        >
-                        <input
-                            class="p-2 h-[42px] w-full border border-neutral-800 rounded bg-neutral-900 text-neutral-200 focus:outline-none"
-                            type="text"
-                            placeholder="entityName"
-                            title="Entity Name"
-                            v-model="relationship.entityName"
-                            :disabled="selectedContract.options.moduleContract"
-                        />
-                    </div>
-
-                    <div class="flex flex-col col-span-2">
-                        <label class="text-xs mb-1 text-neutral-400"
-                            >Field</label
-                        >
+                    <div class="flex flex-col col-span-3">
+                        <label class="text-xs mb-1 text-neutral-400">Field</label>
                         <input
                             class="p-2 h-[42px] w-full border border-neutral-800 rounded bg-neutral-900 text-neutral-200 focus:outline-none"
                             type="text"
@@ -474,13 +480,12 @@
                     </div>
 
                     <div class="flex flex-col col-span-3">
-                        <label class="text-xs mb-1 text-neutral-400"
-                            >Contract</label
-                        >
+                        <label class="text-xs mb-1 text-neutral-400">Contract</label>
                         <select
                             class="p-2 h-[42px] w-full border border-neutral-800 rounded bg-neutral-900 text-neutral-200 focus:outline-none"
                             v-model="relationship.contract"
                             :disabled="selectedContract.options.moduleContract"
+                            @change="updateEntityName(relationship, field)"
                         >
                             <option value="">Select Contract</option>
                             <option
@@ -492,10 +497,8 @@
                         </select>
                     </div>
 
-                    <div class="flex flex-col col-span-4">
-                        <label class="text-xs mb-1 text-neutral-400"
-                            >Options</label
-                        >
+                    <div class="flex flex-col col-span-5">
+                        <label class="text-xs mb-1 text-neutral-400">Options</label>
                         <div
                             class="flex h-[42px] border border-neutral-800 rounded bg-neutral-900 items-center px-3 justify-between"
                         >
@@ -519,9 +522,7 @@
                                     v-model="relationship.createRelationship"
                                     :disabled="selectedContract.options.moduleContract"
                                 />
-                                <label class="text-xs"
-                                    >Create Relationship</label
-                                >
+                                <label class="text-xs">Create Relationship</label>
                             </div>
                         </div>
                     </div>

@@ -937,4 +937,87 @@ export class AuthAutorizationService extends AbstractService {
             },
         });
     }
+
+    // GraphQL Handlers
+    public async user(payload: any, req: any) {
+        const { id, username } = req.user || {};
+
+        if (!id)
+            throw new HttpException(
+                'User not authenticated',
+                HttpStatus.UNAUTHORIZED,
+            );
+
+        const UserEntity = Repository.getEntity('UserEntity');
+        const user = await Repository.findBy(UserEntity, { id });
+
+        if (!user)
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+        const roles = await this.getGroupsRoles(user);
+
+        return {
+            id,
+            username,
+            roles,
+            groups: user.groups,
+            profile: user.profile,
+        };
+    }
+
+    /**
+     * Handler específico para GraphQL - Login
+     * Este método é usado apenas pelo GraphQL resolver
+     *
+     * @param payload - Os dados de login do GraphQL
+     * @param req - O objeto de requisição GraphQL
+     * @returns Resposta formatada para GraphQL
+     */
+    public async loginGraphQL(payload: LoginPayload, req: any): Promise<any> {
+        try {
+            // Chama o método original
+            const result = await this.login(payload, req);
+
+            // Formata a resposta para GraphQL
+            return {
+                success: true,
+                token: result.result.token,
+                message: 'Login successful',
+            };
+        } catch (error) {
+            return {
+                success: false,
+                token: null,
+                message: error.message || 'Authentication failed',
+            };
+        }
+    }
+
+    /**
+     * Handler específico para GraphQL - Register
+     * Este método é usado apenas pelo GraphQL resolver
+     *
+     * @param payload - Os dados de registro do GraphQL
+     * @returns Resposta formatada para GraphQL
+     */
+    public async registerGraphQL(
+        payload: RegisterPayload,
+        req: any,
+    ): Promise<any> {
+        try {
+            // Chama o método original
+            const result = await this.register(payload);
+
+            // Formata a resposta para GraphQL
+            return {
+                success: true,
+                message: result.message,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error.message || 'Registration failed',
+            };
+        }
+    }
 }

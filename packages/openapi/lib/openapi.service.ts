@@ -202,6 +202,10 @@ export class OpenAPIService {
             '../../../public/openapi.json',
         );
 
+        const dirname = path.dirname(openAPIPath);
+
+        if (!fs.existsSync(dirname)) fs.mkdirSync(dirname, { recursive: true });
+
         fs.writeFileSync(openAPIPath, JSON.stringify(schema, null, 2));
 
         fs.writeFileSync(

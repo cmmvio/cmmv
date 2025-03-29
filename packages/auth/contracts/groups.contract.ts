@@ -176,6 +176,8 @@ export class GroupsContract extends AbstractContract {
         request: '',
         response: 'GroupResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthGroupsService',
     })
     GroupGetAll: Function;
 
@@ -189,6 +191,8 @@ export class GroupsContract extends AbstractContract {
         request: 'GroupGetInQuery',
         response: 'GroupResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthGroupsService',
     })
     GroupGetIn: Function;
 
@@ -202,6 +206,8 @@ export class GroupsContract extends AbstractContract {
         request: 'GroupPayload',
         response: 'GroupResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthGroupsService',
     })
     GroupCreate: Function;
 
@@ -215,6 +221,8 @@ export class GroupsContract extends AbstractContract {
         request: 'GroupUpdatePayload',
         response: 'GroupResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthGroupsService',
     })
     GroupUpdate: Function;
 
@@ -228,6 +236,8 @@ export class GroupsContract extends AbstractContract {
         request: 'GroupDeletePayload',
         response: 'GroupResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthGroupsService',
     })
     GroupDelete: Function;
 
@@ -241,6 +251,8 @@ export class GroupsContract extends AbstractContract {
         request: 'GroupRolesPayload',
         response: 'GroupResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthGroupsService',
     })
     GroupAssignRoles: Function;
 
@@ -254,6 +266,8 @@ export class GroupsContract extends AbstractContract {
         request: 'GroupRolesPayload',
         response: 'GroupResponse',
         createBoilerplate: false,
+        module: '@cmmv/auth',
+        serviceName: 'AuthGroupsService',
     })
     GroupRemoveRoles: Function;
 }
