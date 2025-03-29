@@ -35,6 +35,7 @@ describe('AuthService - Refresh Token', () => {
         authService = new AuthAutorizationService(
             {} as any, // Mock das dependências
             {} as any,
+            {} as any,
         );
 
         mockRequest = {

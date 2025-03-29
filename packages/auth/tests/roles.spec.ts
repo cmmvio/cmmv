@@ -21,6 +21,7 @@ describe('AuthAutorizationService - Roles Management', () => {
         authService = new AuthAutorizationService(
             {} as any, // Mock das dependências de sessão e recaptcha
             {} as any,
+            {} as any,
         );
     });
 

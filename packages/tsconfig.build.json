@@ -36,5 +36,6 @@
         { "path": "./throttler/tsconfig.build.json" },
         { "path": "./vault/tsconfig.build.json" },
         { "path": "./ws/tsconfig.build.json" }
-    ]
+    ],
+    "exclude": ["node_modules", "dist", "src/protos", "**/*.spec.ts"]
 }

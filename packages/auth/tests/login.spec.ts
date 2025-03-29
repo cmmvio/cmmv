@@ -23,6 +23,7 @@ describe('AuthService - User Login', () => {
         authService = new AuthAutorizationService(
             {} as any, // Mock das dependências
             {} as any,
+            {} as any,
         );
     });
 
