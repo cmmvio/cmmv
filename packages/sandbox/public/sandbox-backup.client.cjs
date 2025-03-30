@@ -51,11 +51,20 @@ const useBackupViewer = () => {
             state.loading = true;
             state.error = null;
 
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to view backups";
+                state.backups = [];
+                state.loading = false;
+                return;
+            }
+
             const url = `${state.baseUrl}/backups`;
 
             const response = await fetch(url, {
                 headers: {
-                    'Authorization': getAuthToken()
+                    'Authorization': authToken
                 }
             });
 
@@ -89,6 +98,13 @@ const useBackupViewer = () => {
 
     const createBackup = async () => {
         try {
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to create backups";
+                return;
+            }
+
             state.createLoading = true;
             state.currentAction = 'create';
             state.createSuccess = null;
@@ -99,7 +115,7 @@ const useBackupViewer = () => {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Authorization': getAuthToken(),
+                    'Authorization': authToken,
                     'Content-Type': 'application/json'
                 }
             });
@@ -354,12 +370,17 @@ const useBackupViewer = () => {
         fetchBackups();
     };
 
-    // Inicialização
     const initialize = () => {
-        getAuthToken();
+        const authToken = getAuthToken();
         setupAuthListener();
         listenForAuthChanges();
-        fetchBackups();
+
+        if (authToken) {
+            fetchBackups();
+        } else {
+            state.error = "Authentication required: Please log in as an administrator to view backups";
+            state.backups = [];
+        }
     };
 
     initialize();

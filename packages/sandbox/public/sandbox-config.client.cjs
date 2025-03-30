@@ -52,18 +52,24 @@ const useConfigViewer = () => {
         return '';
     }
 
-    /**
-     * Carregar todos os módulos e suas configurações
-     */
     const loadModules = async () => {
         console.log('loadModules');
         try {
             state.loading = true;
             state.error = null;
 
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to view configurations";
+                state.modules = [];
+                state.loading = false;
+                return;
+            }
+
             const response = await fetch(`${state.baseUrl}/config/modules`, {
                 headers: {
-                    'Authorization': getAuthToken()
+                    'Authorization': authToken
                 }
             });
 
@@ -80,7 +86,6 @@ const useConfigViewer = () => {
             const data = await response.json();
 
             if (data.status === 200) {
-                // Filtrar módulos que têm configurações
                 state.modules = data.result.data.filter(module =>
                     module.options && module.options.length > 0
                 );
@@ -101,20 +106,28 @@ const useConfigViewer = () => {
         }
     };
 
-    /**
-     * Carregar configuração completa
-     */
     const loadConfig = async () => {
         try {
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.config = {};
+                return;
+            }
+
             const response = await fetch(`${state.baseUrl}/config`, {
                 headers: {
-                    'Authorization': getAuthToken()
+                    'Authorization': authToken
                 }
             });
 
-            if (!response.ok) {
-                throw new Error(`Error fetching config: ${response.statusText}`);
+            if (response.status === 401 || response.status === 403) {
+                state.config = {};
+                return;
             }
+
+            if (!response.ok)
+                throw new Error(`Error fetching config: ${response.statusText}`);
 
             const data = await response.json();
 
@@ -124,12 +137,10 @@ const useConfigViewer = () => {
             }
         } catch (error) {
             console.error('Error loading config:', error);
+            state.config = {};
         }
     };
 
-    /**
-     * Inicializar os dados do formulário com os valores atuais
-     */
     const initializeFormData = () => {
         const formData = {};
 
@@ -139,13 +150,10 @@ const useConfigViewer = () => {
             for (const option of module.options || []) {
                 const group = option.group || 'General';
 
-                // Inicializa o grupo se não existir
-                if (!formData[module.name][group]) {
+                if (!formData[module.name][group])
                     formData[module.name][group] = {};
-                }
 
                 if (option.type === 'object' && option.properties) {
-                    // Inicializar objeto com suas propriedades
                     formData[module.name][group][option.key] = {};
 
                     for (const [propKey, propConfig] of Object.entries(option.properties)) {
@@ -154,7 +162,6 @@ const useConfigViewer = () => {
                             currentValue !== undefined ? currentValue : propConfig.default;
                     }
                 } else {
-                    // Para campos simples
                     const currentValue = state.config[module.name]?.[group]?.[option.key];
                     formData[module.name][group][option.key] =
                         currentValue !== undefined ? currentValue : option.default;
@@ -166,23 +173,15 @@ const useConfigViewer = () => {
         state.pendingChanges = false;
     };
 
-    /**
-     * Obter metadados de um módulo específico
-     */
     const getModuleMetadata = (moduleName) => {
         return state.modules.find(m => m.name === moduleName) || null;
     };
 
-    /**
-     * Definir o módulo ativo
-     */
+
     const setActiveModule = (moduleName) => {
         state.activeModule = moduleName;
     };
 
-    /**
-     * Obter opção de um módulo
-     */
     const getModuleOption = (moduleName, optionKey) => {
         const module = getModuleMetadata(moduleName);
         if (!module) return null;
@@ -190,9 +189,6 @@ const useConfigViewer = () => {
         return module.options.find(opt => opt.key === optionKey) || null;
     };
 
-    /**
-     * Atualizar valor de uma configuração
-     */
     const updateConfigValue = (moduleName, key, value) => {
         const option = getModuleOption(moduleName, key);
         const group = option?.group || 'General';
@@ -209,9 +205,6 @@ const useConfigViewer = () => {
         validateField(moduleName, key, value);
     };
 
-    /**
-     * Validar um campo
-     */
     const validateField = (moduleName, key, value, isJson = false, jsonError = null) => {
         const option = getModuleOption(moduleName, key);
         if (!option) return true;
@@ -223,24 +216,22 @@ const useConfigViewer = () => {
                 errors.push(`Invalid JSON: ${jsonError.message}`);
             } else if (value && value.trim() && option.type === 'object') {
                 try {
-                    JSON.parse(value); // Validar se é um JSON válido
+                    JSON.parse(value);
                 } catch (e) {
                     errors.push('Invalid JSON format');
                 }
             }
         }
 
-        // Validar tipo
         if (option.type && value !== undefined && value !== null) {
             const actualType = typeof value;
 
-            // Mapeamento de tipos para verificação
             const typeMap = {
                 'string': ['string'],
                 'number': ['number'],
                 'boolean': ['boolean'],
                 'object': ['object'],
-                'array': ['object'], // Arrays são objetos em JS
+                'array': ['object'],
                 'function': ['function']
             };
 
@@ -251,65 +242,49 @@ const useConfigViewer = () => {
             }
         }
 
-        // Validar enum
         if (option.enum && option.enum.length > 0 && value !== undefined && value !== null) {
             if (!option.enum.includes(value)) {
                 errors.push(`Value must be one of: ${option.enum.join(', ')}`);
             }
         }
 
-        // Validar min/max para números
         if (option.type === 'number') {
-            if (option.min !== undefined && value < option.min) {
+            if (option.min !== undefined && value < option.min)
                 errors.push(`Value must be at least ${option.min}`);
-            }
 
-            if (option.max !== undefined && value > option.max) {
+            if (option.max !== undefined && value > option.max)
                 errors.push(`Value must be at most ${option.max}`);
-            }
         }
 
-        // Validar min/max para strings
         if (option.type === 'string') {
-            if (option.min !== undefined && value.length < option.min) {
+            if (option.min !== undefined && value.length < option.min)
                 errors.push(`Value must be at least ${option.min} characters`);
-            }
 
-            if (option.max !== undefined && value.length > option.max) {
+            if (option.max !== undefined && value.length > option.max)
                 errors.push(`Value must be at most ${option.max} characters`);
-            }
         }
 
-        // Validar padrão (regex)
         if (option.pattern && option.type === 'string') {
             const regex = new RegExp(option.pattern);
-            if (!regex.test(value)) {
+
+            if (!regex.test(value))
                 errors.push(`Value does not match the required pattern: ${option.pattern}`);
-            }
         }
 
-        // Validar campo obrigatório
-        if (option.required && (value === undefined || value === null || value === '')) {
+        if (option.required && (value === undefined || value === null || value === ''))
             errors.push('This field is required');
-        }
 
-        // Atualizar erros de validação
-        if (!state.validationErrors[moduleName]) {
+        if (!state.validationErrors[moduleName])
             state.validationErrors[moduleName] = {};
-        }
 
-        if (errors.length > 0) {
+        if (errors.length > 0)
             state.validationErrors[moduleName][key] = errors;
-        } else {
+        else
             delete state.validationErrors[moduleName][key];
-        }
 
         return errors.length === 0;
     };
 
-    /**
-     * Verificar se há erros de validação
-     */
     const hasValidationErrors = () => {
         for (const module in state.validationErrors) {
             if (Object.keys(state.validationErrors[module]).length > 0) {
@@ -324,17 +299,16 @@ const useConfigViewer = () => {
         const moduleData = state.formData[moduleName];
 
         for (const [group, groupData] of Object.entries(moduleData)) {
-            if (!result[group]) {
+            if (!result[group])
                 result[group] = {};
-            }
 
-            for (const [key, value] of Object.entries(groupData)) {
+            for (const [key, value] of Object.entries(groupData))
                 result[group][key] = value;
-            }
         }
 
         return result;
     };
+
 
     const saveConfig = async () => {
         if (hasValidationErrors()) {
@@ -345,6 +319,15 @@ const useConfigViewer = () => {
         }
 
         try {
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.saveFailed = {
+                    message: "Authentication required: Please log in as an administrator to save configuration"
+                };
+                return;
+            }
+
             state.saving = true;
             state.saveSuccess = null;
             state.saveFailed = null;
@@ -355,11 +338,18 @@ const useConfigViewer = () => {
                 const response = await fetch(`${state.baseUrl}/config/${moduleName}`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': getAuthToken(),
+                        'Authorization': authToken,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(preparedConfig)
                 });
+
+                if (response.status === 401 || response.status === 403) {
+                    state.saveFailed = {
+                        message: "Restricted Access: Administrator privileges required"
+                    };
+                    return;
+                }
 
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -368,9 +358,11 @@ const useConfigViewer = () => {
             }
 
             await loadConfig();
+
             state.saveSuccess = {
                 message: 'Configuration saved successfully'
             };
+
             state.pendingChanges = false;
         } catch (error) {
             console.error('Error saving config:', error);
@@ -401,9 +393,8 @@ const useConfigViewer = () => {
         for (const option of module.options) {
             const groupName = option.group || 'General';
 
-            if (!groups[groupName]) {
+            if (!groups[groupName])
                 groups[groupName] = [];
-            }
 
             groups[groupName].push(option);
         }
@@ -428,15 +419,14 @@ const useConfigViewer = () => {
     };
 
     const updateNestedConfigValue = (moduleName, group, parentKey, key, value) => {
-        if (!state.formData[moduleName]) {
+        if (!state.formData[moduleName])
             state.formData[moduleName] = {};
-        }
-        if (!state.formData[moduleName][group]) {
+
+        if (!state.formData[moduleName][group])
             state.formData[moduleName][group] = {};
-        }
-        if (!state.formData[moduleName][group][parentKey]) {
+
+        if (!state.formData[moduleName][group][parentKey])
             state.formData[moduleName][group][parentKey] = {};
-        }
 
         state.formData[moduleName][group][parentKey][key] = value;
         state.pendingChanges = true;
@@ -511,7 +501,6 @@ const useConfigViewer = () => {
         if (!state.validationErrors[moduleName][group])
             state.validationErrors[moduleName][group] = {};
 
-
         const fullKey = `${parentKey}.${key}`;
 
         if (errors.length > 0)
@@ -551,9 +540,17 @@ const useConfigViewer = () => {
 
     const loadConfigFile = async () => {
         try {
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to view configuration file";
+                state.configFileContent = '';
+                return;
+            }
+
             const response = await fetch(`${state.baseUrl}/config/file`, {
                 headers: {
-                    'Authorization': getAuthToken()
+                    'Authorization': authToken
                 }
             });
 
@@ -562,9 +559,8 @@ const useConfigViewer = () => {
                 return;
             }
 
-            if (!response.ok) {
+            if (!response.ok)
                 throw new Error(`Error fetching config file: ${response.statusText}`);
-            }
 
             const data = await response.json();
 
@@ -583,10 +579,18 @@ const useConfigViewer = () => {
     };
 
     const saveConfigFile = async () => {
-
         if (!configFileEditor) return;
 
         try {
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.saveFailed = {
+                    message: "Authentication required: Please log in as an administrator to save configuration file"
+                };
+                return;
+            }
+
             state.saving = true;
             const content = configFileEditor.getValue();
 
@@ -594,7 +598,7 @@ const useConfigViewer = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': getAuthToken()
+                    'Authorization': authToken
                 },
                 body: JSON.stringify({ content })
             });
@@ -606,9 +610,8 @@ const useConfigViewer = () => {
                 return;
             }
 
-            if (!response.ok) {
+            if (!response.ok)
                 throw new Error(`Error saving config file: ${response.statusText}`);
-            }
 
             state.configFileChanged = false;
             state.saveSuccess = {
@@ -643,22 +646,29 @@ const useConfigViewer = () => {
         }
     };
 
-    onMounted(() => {
-        getAuthToken();
-        loadModules();
-        if (!state.isFormView) {
-            loadConfigFile().then(() => {
-                setTimeout(initConfigFileEditor, 100);
-            });
+    const initialize = () => {
+        const authToken = getAuthToken();
+
+        if (authToken) {
+            loadModules();
+            if (!state.isFormView) {
+                loadConfigFile().then(() => {
+                    setTimeout(initConfigFileEditor, 100);
+                });
+            }
+        } else {
+            state.error = "Authentication required: Please log in as an administrator to view configurations";
+            state.modules = [];
         }
 
-        // Adicionar cleanup quando o componente for desmontado
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined')
             window.addEventListener('beforeunload', cleanup);
-        }
+    };
+
+    onMounted(() => {
+        initialize();
     });
 
-    // Exportar API
     return {
         formatObjectValue,
         modules: computed(() => state.modules),

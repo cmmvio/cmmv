@@ -12,6 +12,8 @@ import {
     Param,
 } from '@cmmv/http';
 
+import { Auth } from '@cmmv/auth';
+
 import { IContract } from '@cmmv/core';
 
 import { SandboxService } from './sandbox.service';
@@ -153,11 +155,13 @@ export class SandboxController {
     }
 
     @Post('compile', { exclude: true })
+    @Auth({ rootOnly: true })
     async heandlerCompile(@Body() schema: IContract) {
         return await this.sandboxService.compileContract(schema);
     }
 
     @Delete(':contractName', { exclude: true })
+    @Auth({ rootOnly: true })
     async handlerDelete(@Param('contractName') contractName: string) {
         await this.sandboxService.deleteContract(contractName);
         return 'ok';

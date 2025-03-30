@@ -62,9 +62,6 @@ export class ModulesService {
         );
     }
 
-    /**
-     * Fetch modules from the GitHub repository
-     */
     private async fetchModules(): Promise<void> {
         try {
             const response = await axios.get<ModulesResponse>(
@@ -73,9 +70,6 @@ export class ModulesService {
 
             if (response.data && response.data.modules) {
                 this.availableModules = response.data.modules;
-                this.logger.log(
-                    `Successfully loaded ${this.availableModules.length} modules from remote repository`,
-                );
             } else {
                 this.logger.error('Invalid response format from modules API');
             }

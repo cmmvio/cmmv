@@ -217,13 +217,46 @@ const useDataTable = () => {
         }
 
         await initLinkedEntities();
-        await fetchData();
+
+        // Get the auth token and check if we should fetch data
+        const authToken = getAuthToken();
+
+        if (authToken) {
+            await fetchData();
+        } else {
+            state.error = "Authentication required: Please log in to access data";
+            state.records = [];
+
+            // Call auth error handler if provided
+            if (authErrorHandler && typeof authErrorHandler === 'function') {
+                authErrorHandler();
+            }
+        }
     }
 
     async function fetchData() {
         if (!state.contract) return;
 
         try {
+            // Get the auth token and check authentication first
+            const authToken = getAuthToken();
+
+            // Only attempt to fetch data if we have a token
+            if (!authToken) {
+                state.error = "Authentication required: Please log in to access data";
+                state.records = [];
+                state.totalRecords = 0;
+                state.totalPages = 1;
+                state.loading = false;
+
+                // Call auth error handler if provided
+                if (authErrorHandler && typeof authErrorHandler === 'function') {
+                    authErrorHandler();
+                }
+
+                return;
+            }
+
             state.loading = true;
             state.error = null;
 
@@ -253,10 +286,17 @@ const useDataTable = () => {
                 headers: getAuthHeaders()
             });
 
-            if (response.status === 401) {
+            if (response.status === 401 || response.status === 403) {
                 state.error = "Authentication required to access data";
                 state.records = [];
-                state.loading = false;
+                state.totalRecords = 0;
+                state.totalPages = 1;
+
+                // Call auth error handler if provided
+                if (authErrorHandler && typeof authErrorHandler === 'function') {
+                    authErrorHandler();
+                }
+
                 return;
             }
 
@@ -545,6 +585,20 @@ const useDataTable = () => {
         if (!state.editingRecord) return;
 
         try {
+            // Get the auth token and check authentication first
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                alert("Authentication required: Please log in to save records");
+
+                // Call auth error handler if provided
+                if (authErrorHandler && typeof authErrorHandler === 'function') {
+                    authErrorHandler();
+                }
+
+                return;
+            }
+
             state.saving = true;
 
             const recordToSave = { ...state.editingRecord };
@@ -564,6 +618,17 @@ const useDataTable = () => {
                 body: JSON.stringify(recordToSave)
             });
 
+            if (response.status === 401 || response.status === 403) {
+                alert("Authentication required: Please log in to save records");
+
+                // Call auth error handler if provided
+                if (authErrorHandler && typeof authErrorHandler === 'function') {
+                    authErrorHandler();
+                }
+
+                return;
+            }
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || `Error ${state.isCreating ? 'creating' : 'updating'} record`);
@@ -572,7 +637,6 @@ const useDataTable = () => {
             await fetchData();
 
             closeEditModal();
-
         } catch (error) {
             console.error(error);
             alert(`Error ${state.isCreating ? 'creating' : 'updating'} record: ${error.message}`);
@@ -596,6 +660,20 @@ const useDataTable = () => {
         if (!state.recordToDelete) return;
 
         try {
+            // Get the auth token and check authentication first
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                alert("Authentication required: Please log in to delete records");
+
+                // Call auth error handler if provided
+                if (authErrorHandler && typeof authErrorHandler === 'function') {
+                    authErrorHandler();
+                }
+
+                return;
+            }
+
             state.deleting = true;
 
             const endpoint = state.contract.controllerCustomPath ||
@@ -608,6 +686,17 @@ const useDataTable = () => {
                 headers: getAuthHeaders()
             });
 
+            if (response.status === 401 || response.status === 403) {
+                alert("Authentication required: Please log in to delete records");
+
+                // Call auth error handler if provided
+                if (authErrorHandler && typeof authErrorHandler === 'function') {
+                    authErrorHandler();
+                }
+
+                return;
+            }
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Error deleting record');
@@ -616,7 +705,6 @@ const useDataTable = () => {
             await fetchData();
 
             closeDeleteModal();
-
         } catch (error) {
             console.error(error);
             alert(`Error deleting record: ${error.message}`);
@@ -707,6 +795,20 @@ const useDataTable = () => {
         }
 
         try {
+            // Get the auth token and check authentication first
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.importError = "Authentication required: Please log in to import records";
+
+                // Call auth error handler if provided
+                if (authErrorHandler && typeof authErrorHandler === 'function') {
+                    authErrorHandler();
+                }
+
+                return;
+            }
+
             state.importing = true;
             state.importError = null;
 
@@ -728,9 +830,6 @@ const useDataTable = () => {
                              state.contract.controllerName.toLowerCase();
             const url = `${state.baseUrl}/${endpoint}`;
 
-            if (state.importOptions.clearExisting) {
-            }
-
             for (let i = 0; i < data.length; i++) {
                 const record = data[i];
 
@@ -740,6 +839,17 @@ const useDataTable = () => {
                         headers: getAuthHeaders(),
                         body: JSON.stringify(record)
                     });
+
+                    if (response.status === 401 || response.status === 403) {
+                        state.importError = "Authentication required: Please log in to import records";
+
+                        // Call auth error handler if provided
+                        if (authErrorHandler && typeof authErrorHandler === 'function') {
+                            authErrorHandler();
+                        }
+
+                        break;
+                    }
 
                     if (!response.ok) {
                         const errorData = await response.json();
@@ -768,7 +878,6 @@ const useDataTable = () => {
             }
 
             await fetchData();
-
         } catch (error) {
             console.error(error);
             state.importError = error.message || 'Failed to import data';
@@ -863,6 +972,15 @@ const useDataTable = () => {
         state.loadingLinks[entityName] = true;
 
         try {
+            // Get the auth token and check authentication first
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.linkedEntities[entityName] = [];
+                state.loadingLinks[entityName] = false;
+                return [];
+            }
+
             let targetContract = null;
             let apiPath = '';
 
@@ -905,13 +1023,18 @@ const useDataTable = () => {
                 headers: getAuthHeaders()
             });
 
+            if (response.status === 401 || response.status === 403) {
+                state.linkedEntities[entityName] = [];
+                return [];
+            }
+
             if (response.status === 404) {
                 state.linkedEntities[entityName] = [];
                 return [];
             }
 
             if (!response.ok)
-                throw new Error(`Falha ao buscar entidade relacionada ${entityName}: ${response.statusText}`);
+                throw new Error(`Failed to fetch linked entity ${entityName}: ${response.statusText}`);
 
             const data = await response.json();
 
@@ -925,7 +1048,6 @@ const useDataTable = () => {
             state.linkedEntities[entityName] = Array.isArray(records) ? records : [];
             return state.linkedEntities[entityName];
         } catch (error) {
-            //console.error(error);
             state.linkedEntities[entityName] = [];
             return [];
         } finally {

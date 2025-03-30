@@ -418,12 +418,16 @@ export class AuthAutorizationService extends AbstractService {
         const { authorization } =
             request.req?.headers || request.headers || ctx['token'];
 
+        console.log(authorization);
+
         if (!authorization) {
             throw new HttpException(
                 'Authorization header missing',
                 HttpStatus.UNAUTHORIZED,
             );
         }
+
+        console.log(authorization);
 
         const refreshCookieName = Config.get<string>(
             'auth.refreshCookieName',
@@ -453,6 +457,8 @@ export class AuthAutorizationService extends AbstractService {
 
         const refreshToken =
             request.cookies?.[refreshCookieName] || refreshTokenHeader;
+
+        console.log(refreshToken);
 
         if (!refreshToken || !token) {
             throw new HttpException(
@@ -966,19 +972,15 @@ export class AuthAutorizationService extends AbstractService {
     }
 
     /**
-     * Handler específico para GraphQL - Login
-     * Este método é usado apenas pelo GraphQL resolver
-     *
-     * @param payload - Os dados de login do GraphQL
-     * @param req - O objeto de requisição GraphQL
-     * @returns Resposta formatada para GraphQL
+     * Handler for graphql login
+     * @param payload
+     * @param req
+     * @returns
      */
     public async loginGraphQL(payload: LoginPayload, req: any): Promise<any> {
         try {
-            // Chama o método original
             const result = await this.login(payload, req);
 
-            // Formata a resposta para GraphQL
             return {
                 success: true,
                 token: result.result.token,
@@ -994,21 +996,18 @@ export class AuthAutorizationService extends AbstractService {
     }
 
     /**
-     * Handler específico para GraphQL - Register
-     * Este método é usado apenas pelo GraphQL resolver
-     *
-     * @param payload - Os dados de registro do GraphQL
-     * @returns Resposta formatada para GraphQL
+     * Handler for graphql register
+     * @param payload
+     * @param req
+     * @returns
      */
     public async registerGraphQL(
         payload: RegisterPayload,
         req: any,
     ): Promise<any> {
         try {
-            // Chama o método original
             const result = await this.register(payload);
 
-            // Formata a resposta para GraphQL
             return {
                 success: true,
                 message: result.message,

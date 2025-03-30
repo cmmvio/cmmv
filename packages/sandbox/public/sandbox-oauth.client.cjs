@@ -71,6 +71,16 @@ const useOAuthManager = () => {
 
     const fetchClients = async () => {
         try {
+            // Get the auth token and check authentication first
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to manage OAuth clients";
+                state.clients = [];
+                state.loading = false;
+                return;
+            }
+
             state.loading = true;
             state.error = null;
 
@@ -78,9 +88,15 @@ const useOAuthManager = () => {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': getAuthToken(),
+                    'Authorization': authToken,
                 },
             });
+
+            if (response.status === 401 || response.status === 403) {
+                state.error = "Restricted Access: Administrator privileges required";
+                state.clients = [];
+                return;
+            }
 
             if (!response.ok) {
                 throw new Error(`Failed to fetch OAuth clients: ${response.statusText}`);
@@ -98,15 +114,28 @@ const useOAuthManager = () => {
 
     const fetchClientDetails = async (clientId) => {
         try {
+            // Get the auth token and check authentication first
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to view client details";
+                return null;
+            }
+
             state.loading = true;
             state.error = null;
 
             const response = await fetch(`${state.baseUrl}/oauth/client/admin/${clientId}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': getAuthToken(),
+                    'Authorization': authToken,
                 },
             });
+
+            if (response.status === 401 || response.status === 403) {
+                state.error = "Restricted Access: Administrator privileges required";
+                return null;
+            }
 
             if (!response.ok)
                 throw new Error(`Failed to fetch client details: ${response.statusText}`);
@@ -138,6 +167,14 @@ const useOAuthManager = () => {
 
     const createClient = async (client) => {
         try {
+            // Get the auth token and check authentication first
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to create OAuth clients";
+                return;
+            }
+
             state.loading = true;
             state.error = null;
 
@@ -148,10 +185,15 @@ const useOAuthManager = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': getAuthToken(),
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify(client),
             });
+
+            if (response.status === 401 || response.status === 403) {
+                state.error = "Restricted Access: Administrator privileges required";
+                return;
+            }
 
             if (!response.ok)
                 throw new Error(`Failed to create client: ${response.statusText}`);
@@ -175,6 +217,14 @@ const useOAuthManager = () => {
 
     const updateClient = async () => {
         try {
+            // Get the auth token and check authentication first
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to update OAuth clients";
+                return;
+            }
+
             state.loading = true;
             state.error = null;
 
@@ -185,10 +235,15 @@ const useOAuthManager = () => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': getAuthToken(),
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify(state.selectedClient),
             });
+
+            if (response.status === 401 || response.status === 403) {
+                state.error = "Restricted Access: Administrator privileges required";
+                return;
+            }
 
             if (!response.ok) {
                 throw new Error(`Failed to update client: ${response.statusText}`);
@@ -211,6 +266,14 @@ const useOAuthManager = () => {
 
     const deleteClient = async (clientId) => {
         try {
+            // Get the auth token and check authentication first
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to delete OAuth clients";
+                return;
+            }
+
             state.loading = true;
             state.error = null;
 
@@ -218,9 +281,14 @@ const useOAuthManager = () => {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': getAuthToken(),
+                    'Authorization': authToken,
                 },
             });
+
+            if (response.status === 401 || response.status === 403) {
+                state.error = "Restricted Access: Administrator privileges required";
+                return;
+            }
 
             if (!response.ok)
                 throw new Error(`Failed to delete client: ${response.statusText}`);
@@ -466,7 +534,16 @@ const useOAuthManager = () => {
     };
 
     const initialize = () => {
-        fetchClients();
+        // Get auth token and check if user is authenticated
+        const authToken = getAuthToken();
+
+        // Only proceed with data fetching if authenticated
+        if (authToken) {
+            fetchClients();
+        } else {
+            state.error = "Authentication required: Please log in as an administrator to manage OAuth clients";
+            state.clients = [];
+        }
     };
 
     initialize();

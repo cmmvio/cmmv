@@ -1,51 +1,45 @@
-// This assumes markdown-it is loaded via a script tag in the HTML
-
 const md = window.markdownit({
-  html: true,         // Enable HTML tags in source
-  linkify: true,      // Autoconvert URL-like text to links
-  typographer: true,  // Enable some language-neutral replacement + quotes beautification
-  breaks: true,       // Convert '\n' in paragraphs into <br>
-  highlight: function (str, lang) {
-    // Optional syntax highlighting
-    if (lang && window.hljs && window.hljs.getLanguage(lang)) {
-      try {
-        return `<pre class="bg-neutral-900 p-3 rounded-md overflow-x-auto my-4"><code class="language-${lang} text-neutral-300 text-sm">${window.hljs.highlight(str, { language: lang }).value}</code></pre>`;
-      } catch (error) {
-        console.error(error);
-      }
+    html: true,
+    linkify: true,
+    typographer: true,
+    breaks: true,
+    highlight: function (str, lang) {
+        if (lang && window.hljs && window.hljs.getLanguage(lang)) {
+            try {
+                return `<pre class="bg-neutral-900 p-3 rounded-md overflow-x-auto my-4"><code class="language-${lang} text-neutral-300 text-sm">${window.hljs.highlight(str, { language: lang }).value}</code></pre>`;
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return `<pre class="bg-neutral-900 p-3 rounded-md overflow-x-auto my-4"><code class="text-neutral-300 text-sm">${md.utils.escapeHtml(str)}</code></pre>`;
     }
-    // Default styling if no highlighting
-    return `<pre class="bg-neutral-900 p-3 rounded-md overflow-x-auto my-4"><code class="text-neutral-300 text-sm">${md.utils.escapeHtml(str)}</code></pre>`;
-  }
 });
 
-// Add custom styling to rendered output
-const defaultRender = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
-  return self.renderToken(tokens, idx, options);
+const defaultRender = md.renderer.rules.link_open || function (tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options);
 };
 
-md.renderer.rules.link_open = function(tokens, idx, options, env, self) {
-  // Add target="_blank" and styling to all links
-  tokens[idx].attrPush(['class', 'text-blue-400 hover:underline']);
-  tokens[idx].attrPush(['target', '_blank']);
-  return defaultRender(tokens, idx, options, env, self);
+md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
+    tokens[idx].attrPush(['class', 'text-blue-400 hover:underline']);
+    tokens[idx].attrPush(['target', '_blank']);
+    return defaultRender(tokens, idx, options, env, self);
 };
 
-// Configure tables
-md.renderer.rules.table_open = function() {
-  return '<table class="min-w-full border-collapse my-4">';
+md.renderer.rules.table_open = function () {
+    return '<table class="min-w-full border-collapse my-4">';
 };
 
-md.renderer.rules.thead_open = function() {
-  return '<thead class="bg-neutral-800">';
+md.renderer.rules.thead_open = function () {
+    return '<thead class="bg-neutral-800">';
 };
 
-md.renderer.rules.th_open = function() {
-  return '<th class="border border-neutral-700 px-4 py-2 text-neutral-300 font-semibold">';
+md.renderer.rules.th_open = function () {
+    return '<th class="border border-neutral-700 px-4 py-2 text-neutral-300 font-semibold">';
 };
 
-md.renderer.rules.td_open = function() {
-  return '<td class="border border-neutral-700 px-4 py-2">';
+md.renderer.rules.td_open = function () {
+    return '<td class="border border-neutral-700 px-4 py-2">';
 };
 
 const useModulesViewer = () => {
@@ -110,11 +104,26 @@ const useModulesViewer = () => {
             state.loading = true;
             state.error = null;
 
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to view modules";
+                state.modules = [];
+                state.loading = false;
+                return;
+            }
+
             const response = await fetch(`${state.baseUrl}/modules`, {
                 headers: {
-                    'Authorization': getAuthToken()
+                    'Authorization': authToken
                 }
             });
+
+            if (response.status === 401 || response.status === 403) {
+                state.error = "Restricted Access: Administrator privileges required";
+                state.modules = [];
+                return;
+            }
 
             if (!response.ok) {
                 throw new Error(`Error fetching modules: ${response.statusText}`);
@@ -124,11 +133,10 @@ const useModulesViewer = () => {
 
             if (data.result) {
                 state.modules = data.result.data;
-                // Buscar status para cada módulo instalado
+
                 for (const module of state.modules) {
-                    if (module.installed) {
+                    if (module.installed)
                         await fetchModuleStatus(module.name);
-                    }
                 }
             } else {
                 state.modules = [];
@@ -143,15 +151,26 @@ const useModulesViewer = () => {
 
     const fetchInstalledModules = async () => {
         try {
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.installedModules = [];
+                return;
+            }
+
             const response = await fetch(`${state.baseUrl}/modules/installed`, {
                 headers: {
-                    'Authorization': getAuthToken()
+                    'Authorization': authToken
                 }
             });
 
-            if (!response.ok) {
-                throw new Error(`Error fetching installed modules: ${response.statusText}`);
+            if (response.status === 401 || response.status === 403) {
+                state.installedModules = [];
+                return;
             }
+
+            if (!response.ok)
+                throw new Error(`Error fetching installed modules: ${response.statusText}`);
 
             const data = await response.json();
 
@@ -162,20 +181,32 @@ const useModulesViewer = () => {
             }
         } catch (error) {
             console.error('Error fetching installed modules:', error);
+            state.installedModules = [];
         }
     };
 
     const fetchModulesByCategory = async () => {
         try {
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.modulesByCategory = {};
+                return;
+            }
+
             const response = await fetch(`${state.baseUrl}/modules/categories`, {
                 headers: {
-                    'Authorization': getAuthToken()
+                    'Authorization': authToken
                 }
             });
 
-            if (!response.ok) {
-                throw new Error(`Error fetching module categories: ${response.statusText}`);
+            if (response.status === 401 || response.status === 403) {
+                state.modulesByCategory = {};
+                return;
             }
+
+            if (!response.ok)
+                throw new Error(`Error fetching module categories: ${response.statusText}`);
 
             const data = await response.json();
 
@@ -186,6 +217,7 @@ const useModulesViewer = () => {
             }
         } catch (error) {
             console.error('Error fetching module categories:', error);
+            state.modulesByCategory = {};
         }
     };
 
@@ -263,12 +295,9 @@ const useModulesViewer = () => {
     const filteredModules = computed(() => {
         let result = [...state.modules];
 
-        // Filtrar por categoria
-        if (state.selectedCategory !== 'All') {
+        if (state.selectedCategory !== 'All')
             result = result.filter(m => m.category === state.selectedCategory);
-        }
 
-        // Filtrar por pesquisa
         if (state.searchQuery.trim() !== '') {
             const query = state.searchQuery.toLowerCase();
             result = result.filter(m =>
@@ -290,20 +319,27 @@ const useModulesViewer = () => {
 
     const fetchModuleStatus = async (moduleName) => {
         try {
+            const authToken = getAuthToken();
+
+            if (!authToken)
+                return;
+
             const response = await fetch(`${state.baseUrl}/modules/${moduleName}/status`, {
                 headers: {
-                    'Authorization': getAuthToken()
+                    'Authorization': authToken
                 }
             });
 
-            if (!response.ok) {
+            if (response.status === 401 || response.status === 403)
+                return;
+
+            if (!response.ok)
                 throw new Error(`Error fetching module status: ${response.statusText}`);
-            }
 
             const data = await response.json();
-            if (data.success) {
+
+            if (data.success)
                 state.moduleStatus[moduleName] = data.data.enabled;
-            }
         } catch (error) {
             console.error(`Error fetching status for module ${moduleName}:`, error);
         }
@@ -326,14 +362,14 @@ const useModulesViewer = () => {
                 })
             });
 
-            if (!response.ok) {
+            if (!response.ok)
                 throw new Error(`Error toggling module: ${response.statusText}`);
-            }
 
             const data = await response.json();
+
             if (data.success) {
                 module.isEnabled = !module.isEnabled;
-                await refreshData(); // Recarregar dados para atualizar o estado
+                await refreshData();
             }
         } catch (error) {
             console.error(`Error toggling module ${module.name}:`, error);
@@ -343,14 +379,19 @@ const useModulesViewer = () => {
     };
 
     const initialize = () => {
-        getAuthToken();
-        refreshData();
-        state.modules.forEach(module => {
-            fetchModuleStatus(module.name);
-        });
+        const authToken = getAuthToken();
+
+        if (authToken) {
+            refreshData();
+            state.modules.forEach(module => {
+                fetchModuleStatus(module.name);
+            });
+        } else {
+            state.error = "Authentication required: Please log in as an administrator to view modules";
+            state.modules = [];
+        }
     };
 
-    // Nova função para instalar um módulo principal
     const installModule = async (module) => {
         if (!module || module.installed) return;
 
@@ -373,9 +414,8 @@ const useModulesViewer = () => {
 
             const data = await response.json();
 
-            if (!response.ok) {
+            if (!response.ok)
                 throw new Error(data.message || 'Failed to install module');
-            }
 
             if (data.status === 200) {
                 state.installSuccess = {
@@ -402,7 +442,6 @@ const useModulesViewer = () => {
         }
     };
 
-    // Nova função para instalar um submódulo
     const installSubmodule = async (parentModule, submodule) => {
         if (!parentModule || !submodule || submodule.installed) return;
 
@@ -426,9 +465,8 @@ const useModulesViewer = () => {
 
             const data = await response.json();
 
-            if (!response.ok) {
+            if (!response.ok)
                 throw new Error(data.message || 'Failed to install submodule');
-            }
 
             if (data.status === 200) {
                 state.installSuccess = {
@@ -455,20 +493,15 @@ const useModulesViewer = () => {
         }
     };
 
-    // Adicionar notificação de sucesso/erro
     const clearInstallNotifications = () => {
         state.installSuccess = null;
         state.installError = null;
     };
 
-    // Adicione uma função explícita para alternar a visualização
     const toggleView = () => {
-        console.log('Alternando visualização. Atual:', state.view);
         state.view = state.view === 'grid' ? 'list' : 'grid';
-        console.log('Nova visualização:', state.view);
     };
 
-    // Adicionar função para atualizar um módulo
     const updateModule = async (module) => {
         if (!module || !module.installed || !module.updateAvailable) return;
 
@@ -491,9 +524,8 @@ const useModulesViewer = () => {
 
             const data = await response.json();
 
-            if (!response.ok) {
+            if (!response.ok)
                 throw new Error(data.message || 'Failed to update module');
-            }
 
             if (data.success) {
                 state.updateSuccess = {
@@ -501,10 +533,8 @@ const useModulesViewer = () => {
                     module: module.name
                 };
 
-                // Atualizar status do módulo
                 module.updateAvailable = false;
 
-                // Recarregar informações atualizadas
                 setTimeout(() => {
                     refreshData();
                 }, 1000);
@@ -522,13 +552,11 @@ const useModulesViewer = () => {
         }
     };
 
-    // Limpar notificações de atualização
     const clearUpdateNotifications = () => {
         state.updateSuccess = null;
         state.updateError = null;
     };
 
-    // Atualizar a função clearInstallNotifications para também limpar notificações de atualização
     const clearAllNotifications = () => {
         state.installSuccess = null;
         state.installError = null;
@@ -544,42 +572,31 @@ const useModulesViewer = () => {
             state.readmeError = null;
             state.readmeContent = null;
 
-            // Extract organization and repo from GitHub URL
             let repoUrl = module.github;
             let isMonorepo = repoUrl.includes('/tree/');
             let defaultBranch = 'main';
             let subPath = '';
 
-            // Handle monorepo modules
             if (isMonorepo) {
-                // Extract subpath from /tree/branch/path format
                 const treePathMatch = repoUrl.match(/\/tree\/([^/]+)\/(.+)/);
+
                 if (treePathMatch) {
                     defaultBranch = treePathMatch[1];
                     subPath = treePathMatch[2];
-                    // Remove the /tree/branch/path part to get base repo URL
                     repoUrl = repoUrl.replace(/\/tree\/[^/]+\/.*$/, '');
                 }
             }
 
-            // Convert GitHub URL to raw content URL base
             let rawBaseUrl = repoUrl.replace('github.com', 'raw.githubusercontent.com');
 
-            // Try fetching README from different locations
             const possiblePaths = [
-                // Main path (if in monorepo, this is the submodule README)
                 `${rawBaseUrl}/${defaultBranch}/${subPath ? subPath + '/' : ''}README.md`,
-                // Capital README
                 `${rawBaseUrl}/${defaultBranch}/${subPath ? subPath + '/' : ''}README.MD`,
-                // Lowercase readme
                 `${rawBaseUrl}/${defaultBranch}/${subPath ? subPath + '/' : ''}readme.md`,
-                // Try master branch if main fails
                 `${rawBaseUrl}/master/${subPath ? subPath + '/' : ''}README.md`,
-                // Try master branch with lowercase
                 `${rawBaseUrl}/master/${subPath ? subPath + '/' : ''}readme.md`
             ];
 
-            // If it's a monorepo, also try the root README
             if (isMonorepo) {
                 possiblePaths.push(`${rawBaseUrl}/${defaultBranch}/README.md`);
                 possiblePaths.push(`${rawBaseUrl}/master/README.md`);
@@ -587,7 +604,6 @@ const useModulesViewer = () => {
 
             let content = null;
 
-            // Try each possible path until one works
             for (const path of possiblePaths) {
                 try {
                     const response = await fetch(path);
@@ -596,7 +612,6 @@ const useModulesViewer = () => {
                         break;
                     }
                 } catch (err) {
-                    // Continue to next path
                     console.log(`Failed to fetch README from ${path}`);
                 }
             }

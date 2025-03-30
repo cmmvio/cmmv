@@ -194,7 +194,7 @@ createApp({
             apiSidebarOpen: true,
             isMobile: false,
             showAuthModal: false,
-            authTab: 'token',
+            authTab: 'login',
             bearerToken: '',
             loginCredentials: {
                 username: '',
@@ -202,8 +202,8 @@ createApp({
             },
             isLoggingIn: false,
             authData: {
-                token: '',
-                refreshToken: ''
+                token: null,
+                refreshToken: null
             },
             pathParams: [],
             queryParamValues: {},
@@ -310,6 +310,7 @@ createApp({
 
             Object.entries(this.filteredContracts).forEach(([key, contract]) => {
                 const namespace = this.getContractNamespace(contract);
+
                 if (!namespace || namespace.trim() === '') return;
 
                 const isVisible = (!this.hiddenModuleContracts || !contract.options.moduleContract) &&
@@ -318,9 +319,9 @@ createApp({
 
                 if (!isVisible) return;
 
-                if (!groups[namespace]) {
+                if (!groups[namespace])
                     groups[namespace] = {};
-                }
+
                 groups[namespace][key] = contract;
             });
 
@@ -331,6 +332,7 @@ createApp({
             });
 
             const sortedGroups = {};
+
             Object.keys(groups)
                 .sort((a, b) => {
                     if (a === 'Default') return 1;
@@ -338,7 +340,6 @@ createApp({
                     return a.localeCompare(b);
                 })
                 .forEach(namespace => {
-                    // Sort contracts within each namespace by controllerName
                     const sortedContracts = {};
                     Object.entries(groups[namespace])
                         .sort(([,a], [,b]) => a.controllerName.localeCompare(b.controllerName))
@@ -960,9 +961,19 @@ createApp({
                         this.selectedContract.fields = fields;
                         this.modalConfirm = false;
 
+                        // Find the contract key in the schema
                         const contractKey = Object.keys(this.schema).find(k =>
-                            this.schema[k].contractName === this.selectedContract.contractName);
+                            this.schema[k].contractName === this.selectedContract.contractName
+                        );
+
                         if (contractKey) {
+                            // Update the schema with the modified fields
+                            this.schema[contractKey].fields = fields;
+
+                            // Save changes to localStorage
+                            this.schemaToLocalStorege();
+
+                            // Mark the contract as needing synchronization
                             this.updateContractSyncStatus(contractKey);
                         }
                     }
@@ -1727,18 +1738,67 @@ createApp({
         },
 
         saveAuthDataToStorage() {
-            localStorage.setItem('apiExplorerAuth', JSON.stringify(this.authData));
+            if (this.authData.token && this.authData.refreshToken) {
+                localStorage.setItem('apiExplorerAuth', JSON.stringify(this.authData));
+            } else {
+                localStorage.removeItem('apiExplorerAuth');
+            }
         },
 
         loadAuthDataFromStorage() {
             const storedAuth = localStorage.getItem('apiExplorerAuth');
+
             if (storedAuth) {
                 try {
                     this.authData = JSON.parse(storedAuth);
-                } catch (e) {
-                    this.authData = { token: '', refreshToken: '' };
-                }
+                } catch (e) { }
             }
+
+            if (!this.authData.token || !this.authData.refreshToken)
+                return;
+
+            fetch(`${this.apiBaseUrl}/auth/check`, {
+                headers: {
+                    'Authorization': `Bearer ${this.authData.token}`
+                }
+            })
+            .catch(error => {
+                console.error('Error checking auth token:', error);
+                this.refreshAuthToken();
+            })
+            .then(data => {
+                console.log(data);
+                if (data.status !== 200)
+                    this.refreshAuthToken();
+            });
+        },
+
+        refreshAuthToken() {
+            if (!this.authData.refreshToken || !this.authData.token) {
+                this.authData = { token: null, refreshToken: null };
+                this.saveAuthDataToStorage();
+                return;
+            }
+
+            fetch(`${this.apiBaseUrl}/auth/refresh`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.authData.token}`,
+                    'Refresh-Token': this.authData.refreshToken
+                }
+            })
+            .catch(error => {
+                console.error('Error refreshing auth token:', error);
+                this.authData = { token: '', refreshToken: '' };
+                this.saveAuthDataToStorage();
+            })
+            .then(async data => {
+                if (data.result && data.status === 200) {
+                    const authData = await data.json();
+                    this.authData.token = data.result.token;
+                    this.saveAuthDataToStorage();
+                }
+            });
         },
 
         getDefaultValueForType(type) {

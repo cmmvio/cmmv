@@ -4,8 +4,8 @@ import {
     Controller,
     Post,
     Body,
-    Request,
-    Response,
+    Req,
+    Res,
     Get,
     Session,
     Put,
@@ -30,7 +30,9 @@ import {
 } from '../lib/auth.interface';
 
 import { AuthAutorizationService } from '../services/autorization.service';
+
 import { AuthUsersService } from '../services/users.service';
+
 @Controller('auth')
 export class AutorizationController {
     constructor(
@@ -49,8 +51,8 @@ export class AutorizationController {
     })
     async handlerLogin(
         @Body() payload: LoginPayload,
-        @Request() req,
-        @Response() res,
+        @Req() req,
+        @Res() res,
         @Session() session,
     ) {
         const localLogin = Config.get('auth.localLogin', false);
@@ -117,7 +119,7 @@ export class AutorizationController {
     })
     async handlerCheckUsername(
         @Body() payload: { username: string },
-        @Response() res,
+        @Res() res,
     ) {
         const exists = await this.autorizationService.checkUsernameExists(
             payload.username,
@@ -134,7 +136,8 @@ export class AutorizationController {
             return: RefreshTokenReturnSchema,
         },
     })
-    async handlerRefreshToken(@Request() req) {
+    async handlerRefreshToken(@Req() req) {
+        console.log(req.headers);
         return this.autorizationService.refreshToken(req);
     }
 

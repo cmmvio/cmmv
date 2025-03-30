@@ -150,6 +150,17 @@ const useLogViewer = () => {
             state.loading = true;
             state.error = null;
 
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to view logs";
+                state.logs = [];
+                state.totalLogs = 0;
+                state.totalPages = 1;
+                state.loading = false;
+                return;
+            }
+
             const queryParams = new URLSearchParams({
                 limit: state.pageSize,
                 offset: (state.currentPage - 1) * state.pageSize,
@@ -179,7 +190,7 @@ const useLogViewer = () => {
 
             const response = await fetch(url, {
                 headers: {
-                    'Authorization': getAuthToken()
+                    'Authorization': authToken
                 }
             });
 
@@ -192,7 +203,7 @@ const useLogViewer = () => {
             }
 
             if (!response.ok) {
-                throw new Error(`Erro ao buscar logs: ${response.statusText}`);
+                throw new Error(`Error fetching logs: ${response.statusText}`);
             }
 
             const data = await response.json();
@@ -223,10 +234,28 @@ const useLogViewer = () => {
         if (!logId) return;
 
         try {
+            const authToken = getAuthToken();
+
+            if (!authToken) {
+                state.error = "Authentication required: Please log in as an administrator to view log details";
+                state.logDetail = null;
+                return;
+            }
+
             state.detailLoading = true;
 
             const url = `${state.baseUrl}/logs/${logId}`;
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': authToken
+                }
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                state.error = "Restricted Access: Administrator privileges required";
+                state.logDetail = null;
+                return;
+            }
 
             if (!response.ok) {
                 throw new Error(`Error fetching log detail: ${response.statusText}`);
@@ -326,10 +355,19 @@ const useLogViewer = () => {
         initializeCalendarLabels();
         generateStartCalendarDays();
         generateEndCalendarDays();
-        getAuthToken();
+
+        const authToken = getAuthToken();
         setupAuthListener();
         listenForAuthChanges();
-        fetchLogs();
+
+        if (authToken) {
+            fetchLogs();
+        } else {
+            state.error = "Authentication required: Please log in as an administrator to view logs";
+            state.logs = [];
+            state.totalLogs = 0;
+            state.totalPages = 1;
+        }
     };
 
     initialize();

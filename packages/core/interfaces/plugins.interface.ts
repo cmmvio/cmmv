@@ -1,5 +1,21 @@
 import { AbstractContract } from '../abstracts';
 
+export enum PluginClientSupport {
+    VUE = 'vue',
+    REACT = 'react',
+    ANGULAR = 'angular',
+    SVELTE = 'svelte',
+    SOLID = 'solid',
+    QWIK = 'qwik',
+    SOLIDJS = 'solidjs',
+}
+
+export enum PluginAPISupport {
+    GRAPHQL = 'graphql',
+    REST = 'rest',
+    RPC = 'rpc',
+}
+
 export interface IPlugin {
     name: string;
     version: string;
@@ -9,6 +25,8 @@ export interface IPlugin {
     clients?: IPluginClient;
     contracts?: IPluginContract;
     dependencies: string[];
+    clientSupport: PluginClientSupport[];
+    apiSupport: PluginAPISupport[];
 }
 
 export interface IPluginContract {

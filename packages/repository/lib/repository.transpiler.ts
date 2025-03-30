@@ -344,9 +344,38 @@ ${contract.services
             field.defaultValue !== undefined &&
             (isMongoDB || typeField !== 'simple-array')
         ) {
-            options.push(
-                `        default: ${typeof field.defaultValue === 'object' ? JSON.stringify(field.defaultValue) : field.defaultValue}`,
-            );
+            let defaultValue = field.defaultValue;
+
+            switch (typeof defaultValue) {
+                case 'string':
+                    defaultValue = `"${defaultValue}"`;
+                    break;
+                case 'boolean':
+                case 'number':
+                    defaultValue = `${defaultValue}`;
+                    break;
+                case 'object':
+                    defaultValue = JSON.stringify(defaultValue);
+                    break;
+                case 'undefined':
+                    defaultValue = 'undefined';
+                    break;
+                case 'function':
+                    defaultValue = '() => {}';
+                    break;
+                case 'symbol':
+                    defaultValue = 'Symbol()';
+                    break;
+                case 'bigint':
+                    defaultValue = `${defaultValue}n`;
+                    break;
+            }
+
+            if (defaultValue === `"'{}'"`)
+                //Stuped bug fix
+                defaultValue = `"{}"`;
+
+            options.push(`        default: ${defaultValue}`);
         }
 
         options.push(
