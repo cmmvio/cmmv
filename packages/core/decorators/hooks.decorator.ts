@@ -1,9 +1,9 @@
 import { Hooks, HooksType } from '../lib/hooks';
 
-export function Hook(event: HooksType) {
+export function Hook(event: HooksType): MethodDecorator {
     return function (
         target: any,
-        propertyKey: string,
+        propertyKey: string | symbol,
         descriptor: PropertyDescriptor,
     ) {
         const originalMethod = descriptor.value;

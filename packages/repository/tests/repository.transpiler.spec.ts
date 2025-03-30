@@ -379,7 +379,7 @@ describe('RepositoryTranspile', () => {
             );
 
             expect(options).toContain('type: "varchar"');
-            expect(options).toContain('default: Default');
+            expect(options).toContain('default: "Default"');
             expect(options).toContain('nullable: false');
         });
     });
