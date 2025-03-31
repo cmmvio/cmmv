@@ -151,7 +151,7 @@
                 class="border p-2 -min-h-[60px] w-full border-neutral-800 focus-none outline-none"
                 type="text"
                 placeholder="Description of the usability of these contracts"
-                v-model="selectedContract.options?.description"
+                v-model="selectedContract.options.description"
                 :disabled="selectedContract.options?.moduleContract"
                 @change="updateContractOption('description', selectedContract.options?.description)"
                 @blur="updateContractOption('description', selectedContract.options?.description)"
@@ -303,7 +303,7 @@
                 class="border pl-4 h-[42px] w-full border-neutral-800 focus-none outline-none"
                 type="text"
                 placeholder="Set the name of the protobuf file that will be generated using .proto at the end"
-                v-model="selectedContract.options?.databaseSchemaName"
+                v-model="selectedContract.options.databaseSchemaName"
                 :disabled="selectedContract.options?.moduleContract"
                 @change="updateContractOption('databaseSchemaName', selectedContract.options?.databaseSchemaName)"
                 @blur="updateContractOption('databaseSchemaName', selectedContract.options?.databaseSchemaName)"
@@ -318,7 +318,7 @@
                 type="checkbox"
                 class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                 :disabled="selectedContract.options?.moduleContract"
-                v-model="selectedContract.options?.databaseTimestamps"
+                v-model="selectedContract.options.databaseTimestamps"
                 @change="updateContractOption('databaseTimestamps', selectedContract.options?.databaseTimestamps)"
             />
 
@@ -333,7 +333,7 @@
                 type="checkbox"
                 class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                 :disabled="selectedContract.options?.moduleContract"
-                v-model="selectedContract.options?.databaseUserAction"
+                v-model="selectedContract.options.databaseUserAction"
                 @change="updateContractOption('databaseUserAction', selectedContract.options?.databaseUserAction)"
             />
 
@@ -348,7 +348,7 @@
                 type="checkbox"
                 class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                 :disabled="selectedContract.options?.moduleContract"
-                v-model="selectedContract.options?.databaseFakeDelete"
+                v-model="selectedContract.options.databaseFakeDelete"
                 @change="updateContractOption('databaseFakeDelete', selectedContract.options?.databaseFakeDelete)"
             />
 
