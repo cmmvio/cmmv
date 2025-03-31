@@ -217,7 +217,7 @@ export function Contract(options?: ContractOptions): ClassDecorator {
     const defaultImports = [];
     const defaultIndexs = [];
     const defaultCache = null;
-    const defaultOptions = null;
+    const defaultOptions = {};
     const defaultViewForm = null;
     const defaultViewPage = null;
 

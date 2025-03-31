@@ -195,13 +195,12 @@
                             <div class="flex w-[120px]">
                                 <button
                                     class=" text-sm p-1 px-3 rounded-md"
-                                    :class="[selectedContract.options.moduleContract ? 'bg-neutral-800 text-neutral-400 cursor-not-allowed' : 'bg-green-800 hover:bg-green-700 cursor-pointer']"
+                                    :class="[selectedContract.options?.moduleContract ? 'bg-neutral-800 text-neutral-400 cursor-not-allowed' : 'bg-green-800 hover:bg-green-700 cursor-pointer']"
                                     @click="addField()"
                                 >
                                     New Field
                                 </button>
                             </div>
-
 
                             <div class="flex justify-end w-full items-center text-neutral-400">
                                 <ul class="flex flex-row gap-x-4 text-sm ml-4">

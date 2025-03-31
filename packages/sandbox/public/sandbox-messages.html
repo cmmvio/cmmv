@@ -2,7 +2,7 @@
     <div class="flex w-[120px]">
         <button
             class="text-sm p-1 px-3 rounded-md"
-            :class="[selectedContract.options.moduleContract ? 'bg-neutral-800 text-neutral-400 cursor-not-allowed' : 'bg-green-800 hover:bg-green-700 cursor-pointer']"
+            :class="[selectedContract.options?.moduleContract ? 'bg-neutral-800 text-neutral-400 cursor-not-allowed' : 'bg-green-800 hover:bg-green-700 cursor-pointer']"
             @click="addMessage()"
         >
             New DTO
@@ -35,8 +35,8 @@
     <button
         class="text-sm p-2 px-4 rounded-md bg-green-800 hover:bg-green-700 cursor-pointer transition-colors"
         @click="addMessage()"
-        :disabled="selectedContract.options.moduleContract"
-        :class="{'opacity-50 cursor-not-allowed': selectedContract.options.moduleContract}"
+        :disabled="selectedContract.options?.moduleContract"
+        :class="{'opacity-50 cursor-not-allowed': selectedContract.options?.moduleContract}"
     >
         Create Your First DTO
     </button>
@@ -53,7 +53,7 @@
             placeholder="DTO Name"
             title="DTO Name"
             v-model="message.name"
-            :disabled="selectedContract.options.moduleContract"
+            :disabled="selectedContract.options?.moduleContract"
         />
 
         <div class="flex p-1 border-l border-neutral-800 ml-auto" title="More">
@@ -80,7 +80,7 @@
         <div class="flex p-2 border-l border-neutral-800" title="More">
             <button
                 class="items-center justify-center flex select-none mt-1 ml-1"
-                :class="[selectedContract.options.moduleContract ? 'text-neutral-600 cursor-not-allowed' : 'text-red-500 cursor-pointer']"
+                :class="[selectedContract.options?.moduleContract ? 'text-neutral-600 cursor-not-allowed' : 'text-red-500 cursor-pointer']"
                 @click="removeMessage(message.name, messageKey)"
                 title="Remove Message"
             >
@@ -112,7 +112,7 @@
             <button
                 class="text-sm p-1 px-3 rounded-md bg-blue-800 hover:bg-blue-700 cursor-pointer text-white"
                 @click="addPropertyToMessage(message)"
-                :disabled="selectedContract.options.moduleContract"
+                :disabled="selectedContract.options?.moduleContract"
             >
                 Add Property
             </button>
@@ -129,7 +129,7 @@
                 <button
                     class="p-1 h-[28px] text-red-500 cursor-pointer flex-shrink-0"
                     @click="removePropertyFromMessage(message, propKey)"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                     title="Remove Property"
                 >
                     <svg
@@ -157,7 +157,7 @@
                         placeholder="Property Name"
                         :value="propKey"
                         @input="updatePropertyKey(message, propKey, $event.target.value)"
-                        :disabled="selectedContract.options.moduleContract"
+                        :disabled="selectedContract.options?.moduleContract"
                     />
                 </div>
             </div>
@@ -168,7 +168,7 @@
                     <select
                         class="border pl-4 h-[42px] w-full outline-none bg-neutral-900 border-neutral-800"
                         v-model="propValue.type"
-                        :disabled="selectedContract.options.moduleContract"
+                        :disabled="selectedContract.options?.moduleContract"
                     >
                         <option value="string">String</option>
                         <option value="bool">Boolean</option>
@@ -191,7 +191,7 @@
                     <select
                         class="border pl-4 h-[42px] w-full outline-none bg-neutral-900 border-neutral-800"
                         v-model="propValue.paramType"
-                        :disabled="selectedContract.options.moduleContract"
+                        :disabled="selectedContract.options?.moduleContract"
                     >
                         <option value="query">Query</option>
                         <option value="body">Body</option>
@@ -209,7 +209,7 @@
                         type="text"
                         placeholder="Default value (optional)"
                         v-model="propValue.default"
-                        :disabled="selectedContract.options.moduleContract"
+                        :disabled="selectedContract.options?.moduleContract"
                     />
                 </div>
             </div>
@@ -222,7 +222,7 @@
                         class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                         v-model="propValue.required"
                         title="Required"
-                        :disabled="selectedContract.options.moduleContract"
+                        :disabled="selectedContract.options?.moduleContract"
                     />
                 </div>
             </div>

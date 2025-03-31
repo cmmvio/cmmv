@@ -313,7 +313,7 @@ createApp({
 
                 if (!namespace || namespace.trim() === '') return;
 
-                const isVisible = (!this.hiddenModuleContracts || !contract.options.moduleContract) &&
+                const isVisible = (!this.hiddenModuleContracts || !contract.options?.moduleContract) &&
                                  !contract.directMessage &&
                                  contract.expose !== false;
 
@@ -773,11 +773,10 @@ createApp({
         },
 
         addIndex() {
-            if (this.selectedContract.options.moduleContract) return;
+            if (this.selectedContract.options?.moduleContract) return;
 
-            if (!this.selectedContract.indexs) {
+            if (!this.selectedContract.indexs)
                 this.selectedContract.indexs = [];
-            }
 
             this.selectedContract.indexs.push({
                 name: `index_${Date.now()}`,
@@ -798,7 +797,7 @@ createApp({
         },
 
         removeIndex(name, indexKey) {
-            if (this.selectedContract.options.moduleContract) return;
+            if (this.selectedContract.options?.moduleContract) return;
 
             this.modalContent = {
                 title: `Do you want to remove the index '${name}'?`,
@@ -814,7 +813,7 @@ createApp({
         },
 
         addFieldToIndex(index) {
-            if (this.selectedContract.options.moduleContract) return;
+            if (this.selectedContract.options?.moduleContract) return;
 
             if (!index.fields) {
                 index.fields = [];
@@ -824,7 +823,7 @@ createApp({
         },
 
         removeFieldFromIndex(index, fieldIndex) {
-            if (this.selectedContract.options.moduleContract) return;
+            if (this.selectedContract.options?.moduleContract) return;
             index.fields.splice(fieldIndex, 1);
         },
 
@@ -838,7 +837,7 @@ createApp({
         },
 
         addMessage() {
-            if (this.selectedContract.options.moduleContract) return;
+            if (this.selectedContract.options?.moduleContract) return;
 
             if (!this.selectedContract.messages) {
                 this.selectedContract.messages = [];
@@ -853,7 +852,7 @@ createApp({
         },
 
         removeMessage(name, messageKey) {
-            if (this.selectedContract.options.moduleContract) return;
+            if (this.selectedContract.options?.moduleContract) return;
 
             this.modalContent = {
                 title: `Do you want to remove the DTO '${name}'?`,
@@ -869,7 +868,7 @@ createApp({
         },
 
         addPropertyToMessage(message) {
-            if (this.selectedContract.options.moduleContract) return;
+            if (this.selectedContract.options?.moduleContract) return;
 
             if (!message.properties) {
                 message.properties = {};
@@ -886,7 +885,7 @@ createApp({
         },
 
         updatePropertyKey(message, oldKey, newKey) {
-            if (oldKey === newKey || !newKey || this.selectedContract.options.moduleContract) return;
+            if (oldKey === newKey || !newKey || this.selectedContract.options?.moduleContract) return;
 
             if (message.properties[newKey])
                 return;
@@ -905,7 +904,7 @@ createApp({
         },
 
         removePropertyFromMessage(message, key) {
-            if (this.selectedContract.options.moduleContract) return;
+            if (this.selectedContract.options?.moduleContract) return;
 
             const updatedProperties = {};
             Object.keys(message.properties).forEach(propKey => {
@@ -918,7 +917,7 @@ createApp({
         },
 
         addField() {
-            if (!this.selectedContract.options.moduleContract) {
+            if (!this.selectedContract.options?.moduleContract) {
                 const newFieldName = "newfield";
                 let fieldName = newFieldName;
 
@@ -951,7 +950,7 @@ createApp({
         },
 
         removeField(key, fieldKey) {
-            if (!this.selectedContract.options.moduleContract) {
+            if (!this.selectedContract.options?.moduleContract) {
                 this.modalContent = {
                     title: `Do want to remove the field '${key}'?`,
                     content: `By performing this action you will permanently remove the field and this will have repercussions throughout the application.`,
@@ -1067,7 +1066,7 @@ createApp({
         },
 
         addService() {
-            if (this.selectedContract.options.moduleContract) return;
+            if (this.selectedContract.options?.moduleContract) return;
 
             if (!this.selectedContract.services) {
                 this.selectedContract.services = [];
@@ -1089,7 +1088,7 @@ createApp({
         },
 
         removeService(name, serviceKey) {
-            if (this.selectedContract.options.moduleContract) return;
+            if (this.selectedContract.options?.moduleContract) return;
 
             this.modalContent = {
                 title: `Do you want to remove the method '${name}'?`,

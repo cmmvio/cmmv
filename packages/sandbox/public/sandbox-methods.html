@@ -2,7 +2,7 @@
     <div class="flex w-[120px]">
         <button
             class="text-sm p-1 px-3 rounded-md"
-            :class="[selectedContract.options.moduleContract ? 'bg-neutral-800 text-neutral-400 cursor-not-allowed' : 'bg-green-800 hover:bg-green-700 cursor-pointer']"
+            :class="[selectedContract.options?.moduleContract ? 'bg-neutral-800 text-neutral-400 cursor-not-allowed' : 'bg-green-800 hover:bg-green-700 cursor-pointer']"
             @click="addService()"
         >
             New Method
@@ -275,8 +275,8 @@
     <button
         class="text-sm p-2 px-4 rounded-md bg-green-800 hover:bg-green-700 cursor-pointer transition-colors"
         @click="addService()"
-        :disabled="selectedContract.options.moduleContract"
-        :class="{'opacity-50 cursor-not-allowed': selectedContract.options.moduleContract}"
+        :disabled="selectedContract.options?.moduleContract"
+        :class="{'opacity-50 cursor-not-allowed': selectedContract.options?.moduleContract}"
     >
         Create Your First Method
     </button>
@@ -307,7 +307,7 @@
             placeholder="Method Name"
             title="Method Name"
             v-model="service.name"
-            :disabled="selectedContract.options.moduleContract"
+            :disabled="selectedContract.options?.moduleContract"
         />
 
         <input
@@ -316,7 +316,7 @@
             placeholder="Path"
             title="Path"
             v-model="service.path"
-            :disabled="selectedContract.options.moduleContract"
+            :disabled="selectedContract.options?.moduleContract"
         />
 
         <div class="flex p-1 border-l border-neutral-800 ml-auto" title="More">
@@ -343,7 +343,7 @@
         <div class="flex p-2 border-l border-neutral-800" title="More">
             <button
                 class="items-center justify-center flex select-none mt-1 ml-1"
-                :class="[selectedContract.options.moduleContract ? 'text-neutral-600 cursor-not-allowed' : 'text-red-500 cursor-pointer']"
+                :class="[selectedContract.options?.moduleContract ? 'text-neutral-600 cursor-not-allowed' : 'text-red-500 cursor-pointer']"
                 @click="removeService(service.name, serviceKey)"
                 title="Remove Method"
             >
@@ -380,7 +380,7 @@
                 <select
                     class="border pl-4 h-[42px] w-full outline-none bg-neutral-900 border-neutral-800"
                     v-model="service.method"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 >
                     <option value="GET">GET</option>
                     <option value="POST">POST</option>
@@ -398,7 +398,7 @@
                     type="text"
                     placeholder="Function name for the method implementation"
                     v-model="service.functionName"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 />
             </div>
         </div>
@@ -409,7 +409,7 @@
                 <select
                     class="border pl-4 h-[42px] w-full outline-none bg-neutral-900 border-neutral-800"
                     v-model="service.request"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 >
                     <option value="">None</option>
                     <option
@@ -428,7 +428,7 @@
                 <select
                     class="border pl-4 h-[42px] w-full outline-none bg-neutral-900 border-neutral-800"
                     v-model="service.response"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 >
                     <option value="">None</option>
                     <option
@@ -451,7 +451,7 @@
                     class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                     v-model="service.auth"
                     title="Requires Authentication"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 />
             </div>
         </div>
@@ -464,7 +464,7 @@
                     class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                     v-model="service.createBoilerplate"
                     title="Create Boilerplate Code"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 />
                 <span class="text-neutral-500 ml-2"
                     >Generate implementation template for this method</span

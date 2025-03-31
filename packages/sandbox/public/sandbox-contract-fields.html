@@ -5,7 +5,7 @@
     <div class="flex">
         <div
             class="flex justify-center items-center ml-1"
-            v-if="selectedContract.options.moduleContract"
+            v-if="selectedContract.options?.moduleContract"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -27,8 +27,8 @@
         <select
             title="Type"
             class="p-2 pr-4 mr-2 h-[42px] w-56 outline-none bg-neutral-900 border-none"
-            :class="[selectedContract.options.moduleContract ? 'text-neutral-500' : '']"
-            :disabled="selectedContract.options.moduleContract"
+            :class="[selectedContract.options?.moduleContract ? 'text-neutral-500' : '']"
+            :disabled="selectedContract.options?.moduleContract"
             v-model="field.protoType"
         >
             <option
@@ -44,7 +44,7 @@
             <input
                 type="checkbox"
                 class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
-                :disabled="selectedContract.options.moduleContract"
+                :disabled="selectedContract.options?.moduleContract"
                 v-model="field.protoRepeated"
             />
             <svg
@@ -71,7 +71,7 @@
                 placeholder="Name"
                 title="Name"
                 v-model="field.propertyKey"
-                :disabled="selectedContract.options.moduleContract || (field.fromServer && ['id', '_id', 'ID', '_ID'].includes(field.propertyKey))"
+                :disabled="selectedContract.options?.moduleContract || (field.fromServer && ['id', '_id', 'ID', '_ID'].includes(field.propertyKey))"
                 @input="validateFieldName(field)"
             />
             <div
@@ -107,7 +107,7 @@
                     class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                     v-model="field.nullable"
                     title="Nullable"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 />
                 <label>N</label>
             </div>
@@ -118,7 +118,7 @@
                     class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                     v-model="field.readOnly"
                     title="Read Only"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 />
                 <label>RO</label>
             </div>
@@ -129,7 +129,7 @@
                     class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                     v-model="field.required"
                     title="Required"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 />
                 <label>R</label>
             </div>
@@ -140,7 +140,7 @@
                     class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                     v-model="field.index"
                     title="Index"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 />
                 <label>I</label>
             </div>
@@ -151,7 +151,7 @@
                     class="w-3 h-3 mr-2 text-blue-600 bg-neutral-800 dark:bg-gray-700 rounded-sm focus:ring-blue-800 focus:ring-2 rounded-md"
                     v-model="field.unique"
                     title="Unique"
-                    :disabled="selectedContract.options.moduleContract"
+                    :disabled="selectedContract.options?.moduleContract"
                 />
                 <label>U</label>
             </div>
@@ -181,7 +181,7 @@
         <div class="flex p-2 border-l border-neutral-800" title="More">
             <button
                 class="items-center justify-center flex select-none mt-1 ml-1"
-                :class="[selectedContract.options.moduleContract ? 'text-neutral-600 cursor-not-allowed' : 'text-red-500 cursor-pointer']"
+                :class="[selectedContract.options?.moduleContract ? 'text-neutral-600 cursor-not-allowed' : 'text-red-500 cursor-pointer']"
                 @click="removeField(field.propertyKey, fieldKey)"
                 title="Remove Field"
             >
@@ -222,7 +222,7 @@
                         placeholder="Object Type"
                         title="Object Type"
                         v-model="field.objectType"
-                        :disabled="selectedContract.options.moduleContract || (field.link && field.link.length > 0)"
+                        :disabled="selectedContract.options?.moduleContract || (field.link && field.link.length > 0)"
                     />
                 </div>
             </div>
@@ -235,7 +235,7 @@
                         placeholder="Model Name"
                         title="Model Name"
                         v-model="field.modelName"
-                        :disabled="selectedContract.options.moduleContract"
+                        :disabled="selectedContract.options?.moduleContract"
                     />
                 </div>
             </div>
@@ -248,7 +248,7 @@
                         placeholder="Resolver"
                         title="Resolver"
                         v-model="field.resolver"
-                        :disabled="selectedContract.options.moduleContract"
+                        :disabled="selectedContract.options?.moduleContract"
                     />
                 </div>
             </div>
@@ -261,8 +261,8 @@
             <button
                 @click="addValidation(field)"
                 class="ml-2 px-2 py-0.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded"
-                :disabled="selectedContract.options.moduleContract"
-                v-if="!selectedContract.options.moduleContract"
+                :disabled="selectedContract.options?.moduleContract"
+                v-if="!selectedContract.options?.moduleContract"
             >
                 Add
             </button>
@@ -278,8 +278,8 @@
                         <select
                             title="Type"
                             class="p-2 pr-4 h-[42px] w-full outline-none bg-neutral-900 border border-neutral-800 rounded"
-                            :class="[selectedContract.options.moduleContract ? 'text-neutral-500' : '']"
-                            :disabled="selectedContract.options.moduleContract"
+                            :class="[selectedContract.options?.moduleContract ? 'text-neutral-500' : '']"
+                            :disabled="selectedContract.options?.moduleContract"
                             v-model="validation.type"
                         >
                             <option
@@ -300,7 +300,7 @@
                             :placeholder="getPlaceholderForValidation(validation.type)"
                             :title="getPlaceholderForValidation(validation.type)"
                             v-model="validation.value"
-                            :disabled="selectedContract.options.moduleContract"
+                            :disabled="selectedContract.options?.moduleContract"
                         />
 
                         <div
@@ -313,7 +313,7 @@
                                 placeholder="Min"
                                 title="Min Length"
                                 v-model="getOrCreateOptions(validation).min"
-                                :disabled="selectedContract.options.moduleContract"
+                                :disabled="selectedContract.options?.moduleContract"
                             />
                             <input
                                 class="p-2 h-[42px] w-1/2 border border-neutral-800 rounded focus-none outline-none"
@@ -321,7 +321,7 @@
                                 placeholder="Max"
                                 title="Max Length"
                                 v-model="getOrCreateOptions(validation).max"
-                                :disabled="selectedContract.options.moduleContract"
+                                :disabled="selectedContract.options?.moduleContract"
                             />
                         </div>
 
@@ -335,7 +335,7 @@
                                 placeholder="Enum object or values separated by comma"
                                 title="Enum values"
                                 v-model="validation.value"
-                                :disabled="selectedContract.options.moduleContract"
+                                :disabled="selectedContract.options?.moduleContract"
                             />
                         </div>
 
@@ -349,7 +349,7 @@
                                     class="p-2 h-[42px] w-20 border border-neutral-800 rounded focus-none outline-none"
                                     type="number"
                                     v-model="getOrCreateOptions(validation).minLength"
-                                    :disabled="selectedContract.options.moduleContract"
+                                    :disabled="selectedContract.options?.moduleContract"
                                 />
                             </div>
                             <div class="flex items-center">
@@ -404,7 +404,7 @@
                             placeholder="Validation Message"
                             title="Message"
                             v-model="validation.message"
-                            :disabled="selectedContract.options.moduleContract"
+                            :disabled="selectedContract.options?.moduleContract"
                         />
                     </div>
 
@@ -412,8 +412,8 @@
                         <button
                             @click="removeValidation(field, validationIndex)"
                             class="p-1.5 text-red-500 hover:text-red-300 hover:bg-red-900/30 rounded transition-colors"
-                            :disabled="selectedContract.options.moduleContract"
-                            v-if="!selectedContract.options.moduleContract"
+                            :disabled="selectedContract.options?.moduleContract"
+                            v-if="!selectedContract.options?.moduleContract"
                             title="Remove Validation"
                         >
                             <svg
@@ -450,8 +450,8 @@
             <button
                 @click="addRelationship(field)"
                 class="ml-2 px-2 py-0.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded"
-                :disabled="selectedContract.options.moduleContract"
-                v-if="!selectedContract.options.moduleContract"
+                :disabled="selectedContract.options?.moduleContract"
+                v-if="!selectedContract.options?.moduleContract"
             >
                 Add
             </button>
@@ -475,7 +475,7 @@
                             placeholder="_id"
                             title="Field"
                             v-model="relationship.field"
-                            :disabled="selectedContract.options.moduleContract"
+                            :disabled="selectedContract.options?.moduleContract"
                         />
                     </div>
 
@@ -484,7 +484,7 @@
                         <select
                             class="p-2 h-[42px] w-full border border-neutral-800 rounded bg-neutral-900 text-neutral-200 focus:outline-none"
                             v-model="relationship.contract"
-                            :disabled="selectedContract.options.moduleContract"
+                            :disabled="selectedContract.options?.moduleContract"
                             @change="updateEntityName(relationship, field)"
                         >
                             <option value="">Select Contract</option>
@@ -507,7 +507,7 @@
                                     type="checkbox"
                                     class="w-4 h-4 mr-2 text-blue-600 bg-neutral-800 rounded focus:ring-blue-800 focus:ring-2"
                                     v-model="relationship.array"
-                                    :disabled="selectedContract.options.moduleContract"
+                                    :disabled="selectedContract.options?.moduleContract"
                                 />
                                 <label class="text-xs">Array</label>
                             </div>
@@ -520,7 +520,7 @@
                                     type="checkbox"
                                     class="w-4 h-4 mr-2 text-blue-600 bg-neutral-800 rounded focus:ring-blue-800 focus:ring-2"
                                     v-model="relationship.createRelationship"
-                                    :disabled="selectedContract.options.moduleContract"
+                                    :disabled="selectedContract.options?.moduleContract"
                                 />
                                 <label class="text-xs">Create Relationship</label>
                             </div>
@@ -531,8 +531,8 @@
                         <button
                             @click="removeRelationship(field, relationshipIndex)"
                             class="p-2 text-red-500 hover:text-red-300 hover:bg-red-900/30 rounded transition-colors h-[42px]"
-                            :disabled="selectedContract.options.moduleContract"
-                            v-if="!selectedContract.options.moduleContract"
+                            :disabled="selectedContract.options?.moduleContract"
+                            v-if="!selectedContract.options?.moduleContract"
                             title="Remove Relationship"
                         >
                             <svg
