@@ -16,55 +16,56 @@ export class ApplicationTranspile
     }
 
     private generateModel(contract: IContract): void {
-        const hasOpenAPI = Module.hasModule('openapi');
-        const hasGraphQL = Module.hasModule('graphql');
-        const modelName = `${contract.controllerName}`;
-        const modelInterfaceName = `I${modelName}`;
-        const modelFileName = `${modelName.toLowerCase()}.model.ts`;
-        const isModuleContract = contract.options?.moduleContract === true;
-        const outputDir = isModuleContract
-            ? this.getGeneratedPath(contract, 'models')
-            : this.getRootPath(contract, 'models');
+        if (contract.controllerName) {
+            const hasOpenAPI = Module.hasModule('openapi');
+            const hasGraphQL = Module.hasModule('graphql');
+            const modelName = `${contract.controllerName}`;
+            const modelInterfaceName = `I${modelName}`;
+            const modelFileName = `${modelName.toLowerCase()}.model.ts`;
+            const isModuleContract = contract.options?.moduleContract === true;
+            const outputDir = isModuleContract
+                ? this.getGeneratedPath(contract, 'models')
+                : this.getRootPath(contract, 'models');
 
-        const outputFilePath = path.join(outputDir, modelFileName);
-        let includeId = '';
-        const idApiDecorator = hasOpenAPI
-            ? '@ApiResponseProperty({ type: String }) //OpenAPI\n    '
-            : '    ';
-        const idGraphQLDecorator = hasGraphQL
-            ? '@Field(type => ID) //GraphQL\n    '
-            : '    ';
+            const outputFilePath = path.join(outputDir, modelFileName);
+            let includeId = '';
+            const idApiDecorator = hasOpenAPI
+                ? '@ApiResponseProperty({ type: String }) //OpenAPI\n    '
+                : '    ';
+            const idGraphQLDecorator = hasGraphQL
+                ? '@Field(type => ID) //GraphQL\n    '
+                : '    ';
 
-        if (
-            modelInterfaceName !== 'IWsCall' &&
-            modelInterfaceName !== 'IWsError'
-        ) {
-            includeId = `${Config.get('repository.type') === 'mongodb' ? '    _id?: ObjectId' : '    id?: any'};\n`;
-        }
-
-        let afterValidation = '';
-        if (contract.fields.some((field) => field.afterValidation)) {
-            const fns = contract.fields.filter(
-                (field) => field.afterValidation,
-            );
-            if (fns.length > 0) {
-                afterValidation +=
-                    '\n\n    public override afterValidation(item: this){\n';
-
-                fns.map((fn) => {
-                    const cleanedTransform = fn.afterValidation
-                        .toString()
-                        .replace(/_([a-zA-Z]+)/g, ' $1');
-
-                    afterValidation += `        item.${fn.propertyKey} = (${cleanedTransform}).call(this, item.${fn.propertyKey});\n`;
-                });
-
-                afterValidation += '        return item;\n';
-                afterValidation += '    }\n';
+            if (
+                modelInterfaceName !== 'IWsCall' &&
+                modelInterfaceName !== 'IWsError'
+            ) {
+                includeId = `${Config.get('repository.type') === 'mongodb' ? '    _id?: ObjectId' : '    id?: any'};\n`;
             }
-        }
 
-        const modelTemplate = `/**
+            let afterValidation = '';
+            if (contract.fields.some((field) => field.afterValidation)) {
+                const fns = contract.fields.filter(
+                    (field) => field.afterValidation,
+                );
+                if (fns.length > 0) {
+                    afterValidation +=
+                        '\n\n    public override afterValidation(item: this){\n';
+
+                    fns.map((fn) => {
+                        const cleanedTransform = fn.afterValidation
+                            .toString()
+                            .replace(/_([a-zA-Z]+)/g, ' $1');
+
+                        afterValidation += `        item.${fn.propertyKey} = (${cleanedTransform}).call(this, item.${fn.propertyKey});\n`;
+                    });
+
+                    afterValidation += '        return item;\n';
+                    afterValidation += '    }\n';
+                }
+            }
+
+            const modelTemplate = `/**
     **********************************************
     This script was generated automatically by CMMV.
     It is recommended not to modify this file manually,
@@ -76,25 +77,25 @@ ${this.generateClassImports(contract, modelInterfaceName, outputFilePath)}
 
 export interface ${modelInterfaceName} {
 ${includeId}${contract.fields
-            ?.map((field: any) => {
-                let optional = field.nullable ? '?' : '';
+                ?.map((field: any) => {
+                    let optional = field.nullable ? '?' : '';
 
-                if (field.link && field.link.length > 0) {
-                    if (field.propertyKey.includes('Id')) {
-                        return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};`;
-                    } else {
-                        return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};
+                    if (field.link && field.link.length > 0) {
+                        if (field.propertyKey.includes('Id')) {
+                            return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};`;
+                        } else {
+                            return `    ${field.propertyKey}${optional}: object | string | string[]${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' : ''};
     ${field.propertyKey}Id?: string;`;
-                    }
-                } else {
-                    const fieldType = field.objectType
-                        ? field.objectType
-                        : this.mapToTsType(field.protoType);
+                        }
+                    } else {
+                        const fieldType = field.objectType
+                            ? field.objectType
+                            : this.mapToTsType(field.protoType);
 
-                    return `    ${field.propertyKey}${optional}: ${fieldType};`;
-                }
-            })
-            .join('\n')}
+                        return `    ${field.propertyKey}${optional}: ${fieldType};`;
+                    }
+                })
+                .join('\n')}
 }
 
 //Model${hasOpenAPI ? `\n@ApiSchema({ name: "${modelName}" })` : ''}${hasGraphQL ? `\n@ObjectType()` : ''}
@@ -152,11 +153,15 @@ export const ${modelName}FastSchema = fastJson(${modelName}FastSchemaStructure);
 ${this.generateDTOs(contract)}
 `;
 
-        fs.writeFileSync(
-            outputFilePath,
-            this.removeExtraSpaces(modelTemplate),
-            'utf8',
-        );
+            if (outputFilePath !== 'undefined.model.ts') {
+                //Stuped fix
+                fs.writeFileSync(
+                    outputFilePath,
+                    this.removeExtraSpaces(modelTemplate),
+                    'utf8',
+                );
+            }
+        }
     }
 
     private generateClassImports(

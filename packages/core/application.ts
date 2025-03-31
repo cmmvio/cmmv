@@ -588,7 +588,13 @@ export class Application {
                         viewPage,
                     };
 
-                    Scope.addToArray('__contracts', contractStructure);
+                    if (contractStructure.controllerName) {
+                        Scope.addToArray('__contracts', contractStructure);
+                    } else {
+                        this.logger.error(
+                            `Contract ${contractStructure.contractName} has no controller name`,
+                        );
+                    }
                 }
             });
 
