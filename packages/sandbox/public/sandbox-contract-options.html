@@ -1,6 +1,7 @@
 <div
     v-show="tabs[selectedTab].label === 'Options'"
     class="flex-1 p-4 overflow-auto h-[calc(100%-96px)]"
+    v-if="selectedContract.options"
 >
     <div class="flex text-xs justify-center">
         <div class="w-full">
