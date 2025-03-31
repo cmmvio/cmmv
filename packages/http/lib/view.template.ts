@@ -74,7 +74,7 @@ export class Template {
                 );
                 resolvedWorkspacePath = path.resolve(
                     workspacePath,
-                    includePath.replace('@packages', 'packages'),
+                    includePath.replace('@packages/', ''),
                 );
             } else {
                 resolvedPath = path.resolve(cwd(), includePath);

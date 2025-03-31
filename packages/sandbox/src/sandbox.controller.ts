@@ -149,9 +149,24 @@ export class SandboxController {
     @Get('schema', { exclude: true })
     async handlerSchema() {
         const schemaFilename = path.join(cwd(), '.generated', 'schema.json');
-        return fs.existsSync(schemaFilename)
-            ? JSON.parse(await fs.readFileSync(schemaFilename, 'utf-8'))
-            : {};
+        const schemaFilenameWorkspace = path.join(
+            __dirname.replace('src', ''),
+            '../../../',
+            '.generated',
+            'schema.json',
+        );
+        let schemaContent = {};
+
+        if (fs.existsSync(schemaFilename))
+            schemaContent = JSON.parse(
+                await fs.readFileSync(schemaFilename, 'utf-8'),
+            );
+        else if (fs.existsSync(schemaFilenameWorkspace))
+            schemaContent = JSON.parse(
+                await fs.readFileSync(schemaFilenameWorkspace, 'utf-8'),
+            );
+
+        return schemaContent;
     }
 
     @Post('compile', { exclude: true })

@@ -558,11 +558,26 @@ import {
         ];
 
         if (field.defaultValue !== undefined && !field.protoRepeated) {
-            const defaultValue =
-                typeof field.defaultValue === 'object'
-                    ? JSON.stringify(field.defaultValue)
-                    : field.defaultValue;
-            parts.push(`    default: ${defaultValue}`);
+            let defaultValue = null;
+
+            switch (typeof field.defaultValue) {
+                case 'string':
+                    defaultValue = `"${field.defaultValue}"`;
+                    break;
+                case 'number':
+                    defaultValue = field.defaultValue;
+                    break;
+                case 'boolean':
+                    defaultValue = field.defaultValue ? 'true' : 'false';
+                    break;
+                case 'object':
+                    defaultValue = JSON.stringify(field.defaultValue);
+                    break;
+            }
+
+            if (defaultValue) {
+                parts.push(`    default: ${defaultValue}`);
+            }
         }
 
         if (field.description) {

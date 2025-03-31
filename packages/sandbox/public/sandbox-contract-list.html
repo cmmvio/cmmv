@@ -61,7 +61,7 @@
                     viewBox="0 0 24 24"
                     fill="currentColor"
                     class="mr-1"
-                    v-if="contract.options.moduleContract"
+                    v-if="contract.options?.moduleContract"
                     title="ReadOnly"
                 >
                     <path
@@ -81,7 +81,7 @@
                 viewBox="0 0 24 24"
                 fill="currentColor"
                 class="mr-1 text-red-400"
-                v-if="!contract.sync && !contract.options.moduleContract"
+                v-if="!contract.sync && !contract.options?.moduleContract"
                 title="Not Synced"
             >
                 <path
@@ -100,7 +100,7 @@
         class="flex items-center cursor-pointer py-1 px-3 text-sm rounded-md text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800/50 w-full py-2 select-none"
         :class="{'bg-neutral-800' : selectedContract.controllerName === contract.controllerName }"
         @click="selectContract(key)"
-        v-show="(!hiddenModuleContracts || (hiddenModuleContracts && !contract.options.moduleContract)) &&
+        v-show="(!hiddenModuleContracts || (hiddenModuleContracts && !contract.options?.moduleContract)) &&
                 !contract.directMessage &&
                 (contract.expose !== false)"
     >
@@ -112,7 +112,7 @@
                 viewBox="0 0 24 24"
                 fill="currentColor"
                 class="mr-1"
-                v-if="contract.options.moduleContract"
+                v-if="contract.options?.moduleContract"
                 title="ReadOnly"
             >
                 <path
@@ -132,7 +132,7 @@
             viewBox="0 0 24 24"
             fill="currentColor"
             class="mr-1 text-red-400"
-            v-if="!contract.sync && !contract.options.moduleContract"
+            v-if="!contract.sync && !contract.options?.moduleContract"
             title="Not Synced"
         >
             <path
