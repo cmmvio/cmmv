@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/openapi",
-    "version": "0.9.26",
+    "version": "0.9.27",
     "description": "Module for automatic generation of OpenAPI schema for CMMV",
     "keywords": [
         "cmmv",
