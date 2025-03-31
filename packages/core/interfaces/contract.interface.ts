@@ -31,7 +31,7 @@ export class IContract {
     cache?: CacheOptions;
     customProto?: string | Function;
     customTypes?: string | Function;
-    options?: ContractExtraOptions;
+    options: ContractExtraOptions;
     tags?: string | string[];
     viewForm?: new () => any;
     viewPage?: new () => any;

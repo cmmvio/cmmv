@@ -545,7 +545,7 @@ export class Application {
                         CONTROLLER_CACHE,
                         contract.constructor,
                     );
-                    const options = Reflect.getMetadata(
+                    let options = Reflect.getMetadata(
                         CONTROLLER_OPTIONS,
                         contract.constructor,
                     );
@@ -557,6 +557,8 @@ export class Application {
                         CONTROLLER_VIEWPAGE,
                         contract.constructor,
                     );
+
+                    if (!options || typeof options !== 'object') options = {};
 
                     const contractStructure = {
                         namespace,
