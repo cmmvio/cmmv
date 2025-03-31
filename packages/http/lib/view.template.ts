@@ -60,6 +60,8 @@ export class Template {
             const includePath = match[1];
             let resolvedPath = '';
             let resolvedPathSimplifly = '';
+            let resolvedWorkspacePath = '';
+            const workspacePath = path.resolve(__dirname, '../../');
 
             if (includePath.includes('@packages')) {
                 resolvedPath = path.resolve(
@@ -70,6 +72,10 @@ export class Template {
                     cwd(),
                     includePath.replace('@packages', 'node_modules/@cmmv'),
                 );
+                resolvedWorkspacePath = path.resolve(
+                    workspacePath,
+                    includePath.replace('@packages', 'packages'),
+                );
             } else {
                 resolvedPath = path.resolve(cwd(), includePath);
                 resolvedPathSimplifly = path.resolve(
@@ -78,11 +84,18 @@ export class Template {
                     'views',
                     includePath,
                 );
+                resolvedWorkspacePath = path.resolve(
+                    workspacePath,
+                    'public',
+                    'views',
+                    includePath,
+                );
             }
 
             if (
                 (!templateCache[resolvedPath] &&
-                    !templateCache[resolvedPathSimplifly]) ||
+                    !templateCache[resolvedPathSimplifly] &&
+                    !templateCache[resolvedWorkspacePath]) ||
                 process.env.NODE_ENV === 'dev'
             ) {
                 if (fs.existsSync(resolvedPath)) {
@@ -110,12 +123,27 @@ export class Template {
                     );
                     includeContent = await this.loadIncludes(includeContent);
                     templateCache[resolvedPathSimplifly] = includeContent;
+                } else if (fs.existsSync(resolvedWorkspacePath)) {
+                    let includeContent = fs.readFileSync(
+                        resolvedWorkspacePath,
+                        'utf-8',
+                    );
+                    includeContent = await this.loadIncludes(includeContent);
+                    templateCache[resolvedWorkspacePath] = includeContent;
+                } else if (fs.existsSync(`${resolvedWorkspacePath}.html`)) {
+                    let includeContent = fs.readFileSync(
+                        `${resolvedWorkspacePath}.html`,
+                        'utf-8',
+                    );
+                    includeContent = await this.loadIncludes(includeContent);
+                    templateCache[resolvedWorkspacePath] = includeContent;
                 }
             }
 
             const template =
                 templateCache[resolvedPath] ||
-                templateCache[resolvedPathSimplifly];
+                templateCache[resolvedPathSimplifly] ||
+                templateCache[resolvedWorkspacePath];
 
             resultText = resultText.replace(
                 match[0],

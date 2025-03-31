@@ -65,7 +65,7 @@ export class ModulesService {
     private async fetchModules(): Promise<void> {
         try {
             const response = await axios.get<ModulesResponse>(
-                this.modulesApiUrl,
+                this.modulesApiUrl + '?v=' + Date.now(),
             );
 
             if (response.data && response.data.modules) {
