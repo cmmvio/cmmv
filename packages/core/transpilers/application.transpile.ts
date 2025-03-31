@@ -614,7 +614,7 @@ import {
             bool: 'boolean',
             int: 'integer',
             int32: 'integer',
-            int64: 'integer',
+            int64: 'number',
             integer: 'integer',
             number: 'number',
             float: 'number',
@@ -642,7 +642,7 @@ import {
             any: 'object',
         };
 
-        return typeMapping[protoType] || 'any';
+        return typeMapping[protoType] || 'string';
     }
 
     private generateDTOs(contract: IContract) {
