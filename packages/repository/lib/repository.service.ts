@@ -110,6 +110,43 @@ export class Repository extends Singleton {
                     Repository.logEntity = entity.target;
             });
         }
+
+        // Load settings
+        const SettingsEntity = this.getEntity('SettingsEntity');
+        const settings = await this.findAll(
+            SettingsEntity,
+            {
+                limit: 1000,
+            },
+            [],
+            { select: ['key', 'value', 'type', 'flags', 'group'] },
+        );
+
+        if (settings.data && settings.data.length > 0) {
+            settings.data.forEach((setting) => {
+                let value = setting.value;
+
+                switch (setting.type) {
+                    case 'json':
+                        value = JSON.parse(value);
+                        break;
+                    case 'array':
+                        value = value.split(',');
+                        break;
+                    case 'boolean':
+                        value = value === 'true';
+                        break;
+                    case 'number':
+                        value = parseInt(value);
+                        break;
+                    case 'float':
+                        value = parseFloat(value);
+                        break;
+                }
+
+                Config.set(setting.key, value);
+            });
+        }
     }
 
     @Hook(HooksType.Log)
@@ -925,6 +962,77 @@ export class Repository extends Singleton {
             );
             return [];
         }
+    }
+
+    /**
+     * Set a setting in the repository
+     * @param group - The group of the setting
+     * @param key - The key of the setting
+     * @param value - The value of the setting
+     * @param type - The type of the setting
+     * @param flags - The flags of the setting
+     * @returns boolean
+     */
+    public static async setSetting(
+        group: string,
+        key: string,
+        value: any,
+        type: string,
+        flags: string[],
+    ): Promise<boolean> {
+        const SettingsEntity = this.getEntity('SettingsEntity');
+        const settingsRepository = this.getRepository(SettingsEntity);
+        const setting = await settingsRepository.findOne({ where: { key } });
+
+        Hooks.execute(HooksType.onSettingChange, {
+            key,
+            value,
+            type,
+            flags,
+            group,
+        });
+
+        if (setting) {
+            setting.group = group;
+            setting.value = value;
+            setting.type = type;
+            setting.flags = flags;
+            await settingsRepository.save(setting);
+            return true;
+        } else {
+            await settingsRepository.insert({ key, value, type, flags, group });
+            return true;
+        }
+    }
+
+    /**
+     * Get a setting from the repository
+     * @param key - The key of the setting
+     * @returns any
+     */
+    public static async getSetting(key: string): Promise<any> {
+        const SettingsEntity = this.getEntity('SettingsEntity');
+        const settingsRepository = this.getRepository(SettingsEntity);
+        const setting = await settingsRepository.findOne({ where: { key } });
+        return setting || null;
+    }
+
+    /**
+     * Delete a setting from the repository
+     * @param key - The key of the setting
+     * @returns boolean
+     */
+    public static async deleteSetting(key: string): Promise<boolean> {
+        const SettingsEntity = this.getEntity('SettingsEntity');
+        const settingsRepository = this.getRepository(SettingsEntity);
+        const setting = await settingsRepository.findOne({ where: { key } });
+
+        if (setting) {
+            await settingsRepository.delete(setting);
+            return true;
+        }
+
+        return false;
     }
 }
 

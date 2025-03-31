@@ -1,3 +1,5 @@
+import './configEnv';
+
 import { Application } from '@cmmv/core';
 import { DefaultAdapter, DefaultHTTPModule } from '@cmmv/http';
 import { ProtobufModule } from '@cmmv/protobuf';

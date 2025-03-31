@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 
@@ -5,7 +6,10 @@ import { Singleton } from '../abstracts';
 
 import { ConfigSchema, ConfigSubPropsSchemas } from '../interfaces';
 
+import { Module } from './module';
+
 import { Logger } from './logger';
+import { Application } from '..';
 
 export class Config extends Singleton {
     private config: Record<string, any> = {};
@@ -13,10 +17,15 @@ export class Config extends Singleton {
 
     public static loadConfig(): void {
         const rootDir = process.cwd();
-        const configFiles = ['.cmmv.config', '.cmmv.test'];
+        const configFiles = [
+            '.cmmv.config',
+            '.cmmv.test',
+            'config',
+            'config.test',
+        ];
         const extensions = ['.js', '.cjs', '.ts'];
 
-        configFiles.forEach(configName => {
+        configFiles.forEach(async (configName) => {
             for (const ext of extensions) {
                 const filePath = path.join(rootDir, `${configName}${ext}`);
 
@@ -24,12 +33,9 @@ export class Config extends Singleton {
                     let configModule;
 
                     try {
-                        if (ext === '.ts') {
-                            require('ts-node').register();
-                            configModule = require(filePath);
-                        } else {
-                            configModule = require(filePath);
-                        }
+                        if (ext === '.ts')
+                            configModule = await import(filePath);
+                        else configModule = require(filePath);
 
                         if (configName.includes('config')) {
                             const instance = Config.getInstance();
@@ -213,6 +219,15 @@ export class Config extends Singleton {
                 if (moduleConfig !== undefined && moduleConfig !== null)
                     validateSchema(moduleSchema, moduleConfig, moduleKey);
             }
+        }
+    }
+
+    public static envMap(envConfig: Record<string, any>): void {
+        const instance = Config.getInstance();
+
+        for (const key in envConfig) {
+            if (envConfig[key] === undefined)
+                instance.config[envConfig[key]] = process.env[key];
         }
     }
 }

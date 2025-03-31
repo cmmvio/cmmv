@@ -117,6 +117,35 @@ components:
       required:
         - timestamp
         - name
+    Settings:
+      properties:
+        id:
+          readOnly: true
+          type: string
+        group:
+          type: string
+          required: true
+        key:
+          type: string
+          required: true
+        value:
+          type: string
+          readOnly: true
+          required: false
+        type:
+          type: string
+          readOnly: true
+          required: true
+        flags:
+          type: array
+          readOnly: true
+          required: false
+          items:
+            type: string
+      required:
+        - group
+        - key
+        - type
     Groups:
       properties:
         id:

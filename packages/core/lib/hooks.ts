@@ -9,6 +9,7 @@ export enum HooksType {
     'onError',
     'onHTTPServerInit',
     'Log',
+    'onSettingChange',
 }
 
 export class Hooks extends Singleton {
@@ -17,7 +18,9 @@ export class Hooks extends Singleton {
     public static add(event: HooksType, fn: HookFunction): void {
         const instance = Hooks.getInstance();
 
-        if (!instance.events.has(event)) instance.events.set(event, []);
+        if (!instance.events.has(event)) {
+            instance.events.set(event, []);
+        }
 
         instance.events.get(event)?.push(fn);
     }
@@ -29,7 +32,9 @@ export class Hooks extends Singleton {
         const instance = Hooks.getInstance();
         const hooks = instance.events.get(event) || [];
 
-        for (const fn of hooks) await fn(...args);
+        for (const fn of hooks) {
+            await fn(...args);
+        }
     }
 
     public static has(event: HooksType): boolean {

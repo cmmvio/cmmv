@@ -24,11 +24,12 @@
     "dependencies": {
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.1",
-        "fast-glob": "^3.3.2",
-        "fast-json-stringify": "^6.0.0",
+        "dotenv": "^16.4.7",
+        "fast-glob": "^3.3.3",
+        "fast-json-stringify": "^6.0.1",
         "reflect-metadata": "^0.2.2",
-        "rxjs": "^7.8.1",
-        "terser": "^5.31.6",
+        "rxjs": "^7.8.2",
+        "terser": "^5.39.0",
         "uglify-js": "^3.19.3",
         "uuid": "^10.0.0"
     },

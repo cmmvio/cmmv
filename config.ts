@@ -1,10 +1,8 @@
-require('dotenv').config();
-
-module.exports = {
+export default {
     env: process.env.NODE_ENV,
 
     app: {
-        telemetry: false
+        telemetry: false,
     },
 
     server: {
@@ -12,7 +10,7 @@ module.exports = {
         port: process.env.PORT || 3000,
         poweredBy: false,
         removePolicyHeaders: false,
-        publicDirs: ["public", 'public/views'],
+        publicDirs: ['public', 'public/views'],
         compress: {
             enabled: true,
             options: {
@@ -20,7 +18,7 @@ module.exports = {
             },
         },
         cors: true,
-        logging: "all",
+        logging: 'all',
         helmet: {
             enabled: false,
             options: {
@@ -56,12 +54,12 @@ module.exports = {
     view: {
         extractInlineScript: false,
         minifyHTML: true,
-        scriptsTimestamp: false
+        scriptsTimestamp: false,
     },
 
     repository: {
         type: 'sqlite',
-        database: "./database.sqlite",
+        database: './database.sqlite',
         synchronize: true,
         logging: false,
     },
@@ -88,26 +86,26 @@ module.exports = {
         },
         qrCode: {
             image: 'public/assets/favicon/android-chrome-512x512.png',
-            type: "canvas",
-            shape: "square",
+            type: 'canvas',
+            shape: 'square',
             width: 300,
             height: 300,
             margin: 0,
             qrOptions: {
-                "typeNumber": "0",
-                "mode": "Byte",
-                "errorCorrectionLevel": "Q"
-            }
+                typeNumber: '0',
+                mode: 'Byte',
+                errorCorrectionLevel: 'Q',
+            },
         },
         recaptcha: {
             required: false,
-            secret: process.env.RECAPTCHA_SECRET
+            secret: process.env.RECAPTCHA_SECRET,
         },
         oneTimeToken: {
             enabled: true,
             expiresIn: 60 * 10,
             urlLink: 'http://localhost:3000/auth/one-time-token',
-        }
+        },
     },
 
     keyv: {
@@ -137,7 +135,7 @@ module.exports = {
         ],
         link: [
             { rel: 'icon', href: 'assets/favicon/favicon.ico' },
-            { rel: 'stylesheet', href: '/assets/bundle.min.css' }
+            { rel: 'stylesheet', href: '/assets/bundle.min.css' },
         ],
     },
 
@@ -146,47 +144,50 @@ module.exports = {
             type: 'module',
             src: '/assets/bundle.min.js',
             defer: 'defer',
-        }
+        },
     ],
 
     vault: {
         namespace: process.env.VAULT_NAMESPACE,
         publicKey: process.env.VAULT_PUBLIC_KEY,
-        privateKey: process.env.VAULT_PRIVATE_KEY
+        privateKey: process.env.VAULT_PRIVATE_KEY,
     },
 
     openapi: {
-        openapi: "3.0.4",
+        openapi: '3.0.4',
         info: {
-            "title": "Contract-Model-Model-View (CMMV)",
-            "description": "CMMV is a minimalist Node.js framework focused on contract-driven development, combining automatic code generation, RPC communication, and declarative programming to build efficient, scalable applications with simplified backend and frontend integration.",
-            "version": "0.8.31"
+            title: 'Contract-Model-Model-View (CMMV)',
+            description:
+                'CMMV is a minimalist Node.js framework focused on contract-driven development, combining automatic code generation, RPC communication, and declarative programming to build efficient, scalable applications with simplified backend and frontend integration.',
+            version: '0.8.31',
         },
-        servers: [
-            { "url": "http://localhost:3000" }
-        ],
+        servers: [{ url: 'http://localhost:3000' }],
         components: {
             securitySchemes: {
                 BearerAuth: {
-                    type: "http",
-                    scheme: "bearer",
-                    bearerFormat: "JWT"
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
                 },
                 OAuth2: {
-                    name: "CMMV OAuth2",
-                    type: "oauth2",
-                    scheme: "bearer",
-                    bearerFormat: "JWT",
+                    name: 'CMMV OAuth2',
+                    type: 'oauth2',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
                     flows: {
                         password: {
-                            authorizationUrl: "/oauth2/authorize",
-                            tokenUrl: "/oauth2/token",
-                            scopes: { "email": "email", "openid": "openid", "profile": "profile" }
-                        }
-                    }
-                }
-            }
-        }
+                            authorizationUrl: '/oauth2/authorize',
+                            tokenUrl: '/oauth2/token',
+                            scopes: {
+                                email: 'email',
+                                openid: 'openid',
+                                profile: 'profile',
+                            },
+                        },
+                    },
+                },
+            },
+        },
     },
 
     graphql: {
@@ -208,6 +209,6 @@ module.exports = {
             region: process.env.AWS_REGION,
             accessKeyId: process.env.AWS_ACCESS_KEY_ID,
             secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        }
-    }
+        },
+    },
 };

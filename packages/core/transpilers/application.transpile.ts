@@ -92,7 +92,7 @@ ${includeId}${contract.fields
                             ? field.objectType
                             : this.mapToTsType(field.protoType);
 
-                        return `    ${field.propertyKey}${optional}: ${fieldType};`;
+                        return `    ${field.propertyKey}${optional}: ${fieldType}${field.array || field.protoRepeated ? '[]' : ''};`;
                     }
                 })
                 .join('\n')}
@@ -477,9 +477,12 @@ import {
                 );
                 return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${field.entityType.replace('Entity', '')}${field.protoRepeated ? '[]' : ''} | string${field.protoRepeated ? '[]' : ''}${Config.get('repository.type') === 'mongodb' ? ' | ObjectId' + (field.protoRepeated ? '[]' : '') : ''} | null;`;
             } else {
-                const fieldType = field.objectType
+                let fieldType = field.objectType
                     ? field.objectType
                     : this.mapToTsType(field.protoType);
+
+                if (field.array || field.protoRepeated)
+                    fieldType = `${fieldType}[]`;
 
                 return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${fieldType}${defaultValueString}`;
             }
