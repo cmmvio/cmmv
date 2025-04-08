@@ -1,4 +1,4 @@
-export * from './decorators/controller.decorator';
+export * from './decorators';
 export * from './registries/controller.registry';
 
 export * from './adapters/default.adapter';

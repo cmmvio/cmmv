@@ -336,9 +336,13 @@ ${contract.services
      */
     private generateColumnOptions(field: any): string {
         const isMongoDB = Config.get('repository.type') === 'mongodb';
+        const isSQLite = Config.get('repository.type') === 'sqlite';
         const typeField = this.mapToTypeORMType(field.protoType, field);
         const options = [];
-        options.push(`type: "${typeField}"`);
+
+        if (field.protoType === 'datetime')
+            options.push(`type: "${isSQLite ? 'datetime' : 'timestamp'}"`);
+        else options.push(`type: "${typeField}"`);
 
         if (
             field.defaultValue !== undefined &&

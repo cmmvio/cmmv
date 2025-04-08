@@ -500,14 +500,14 @@ export class Repository extends Singleton {
 
             const limit = Math.max(
                 1,
-                Math.min(100, parseInt(queries?.limit) || 10),
+                Math.min(1000, parseInt(queries?.limit) || 10),
             );
             const offset = Math.max(0, parseInt(queries?.offset) || 0);
             const sortBy = this.escape(queries?.sortBy || 'id');
             const sort: 'ASC' | 'DESC' =
                 queries?.sort?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
             const search = this.escape(queries?.search || '');
-            const searchField = escape(queries?.searchField || '');
+            const searchField = this.escape(queries?.searchField || '');
             const filters = queries ? { ...queries } : {};
 
             delete filters.limit;
@@ -545,7 +545,11 @@ export class Repository extends Singleton {
 
             const start = Date.now();
 
-            const total = await repository.count(queryOptions.where as any);
+            const total = await repository.count({
+                where: queryOptions.where,
+                ...options,
+            });
+
             const results = await repository.find(queryOptions);
             const end = Date.now();
 

@@ -251,6 +251,10 @@ export class DefaultAdapter extends AbstractHttpAdapter<
 
                 if (this.instance[method] && fullPath !== '/*') {
                     const handler = async (req: any, res: any, next: any) => {
+                        const rawData = Config.get<boolean>(
+                            'server.rawData',
+                            false,
+                        );
                         const startTime = Date.now();
 
                         try {
@@ -295,6 +299,18 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                             const result = await instance[route.handlerName](
                                 ...args,
                             );
+
+                            const raw = Reflect.getMetadata(
+                                'raw',
+                                instance[route.handlerName],
+                            );
+
+                            if (raw) {
+                                if (typeof result === 'object')
+                                    res.json(result);
+                                else res.send(result);
+                                return;
+                            }
 
                             Telemetry.end('Controller Handler', req.requestId);
 
@@ -347,7 +363,8 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                                     req.ip,
                                 );
 
-                                if (typeof result === 'object') res.json(raw);
+                                if (typeof result === 'object' && !rawData)
+                                    res.json(raw);
                                 else res.send(result);
                             } else if (result) {
                                 if (

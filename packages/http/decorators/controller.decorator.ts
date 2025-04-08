@@ -1,4 +1,5 @@
 import { ControllerRegistry } from '../registries/controller.registry';
+import { createRouteMiddleware } from './route-middleware.util';
 
 export function Controller(prefix: string = ''): ClassDecorator {
     return (target: object) => {
@@ -24,21 +25,6 @@ function createMethodDecorator(
             metadata,
         );
     };
-}
-
-function createRouteMiddleware(middleware: any, descriptor: any) {
-    const existingFields =
-        Reflect.getMetadata('route_metadata', descriptor.value) || {};
-
-    const newField = existingFields?.middleware
-        ? { middleware: [...existingFields?.middleware, middleware] }
-        : { middleware: [middleware] };
-
-    Reflect.defineMetadata(
-        'route_metadata',
-        { ...existingFields, ...newField },
-        descriptor.value,
-    );
 }
 
 export interface RouterMetadata {
@@ -178,33 +164,6 @@ export function Patch(
         undefined,
         metadata,
     );
-}
-
-export function Redirect(
-    url: string,
-    statusCode: 301 | 302 | 307 | 308,
-): MethodDecorator {
-    return (target, propertyKey: string | symbol, descriptor: any) => {
-        const middleware = async (request: any, response: any, next?: any) => {
-            if (response?.res) {
-                response.res.writeHead(statusCode, { Location: url });
-                response.res.end();
-            }
-        };
-
-        createRouteMiddleware(middleware, descriptor);
-    };
-}
-
-export function HttpCode(statusCode: number): MethodDecorator {
-    return (target, propertyKey: string | symbol, descriptor: any) => {
-        const middleware = async (request: any, response: any, next?: any) => {
-            response.code(statusCode);
-            next();
-        };
-
-        createRouteMiddleware(middleware, descriptor);
-    };
 }
 
 function createParamDecorator(paramType: string): ParameterDecorator {
