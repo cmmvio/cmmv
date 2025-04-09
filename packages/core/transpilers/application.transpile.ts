@@ -88,9 +88,20 @@ ${includeId}${contract.fields
     ${field.propertyKey}Id?: string;`;
                         }
                     } else {
-                        const fieldType = field.objectType
+                        let fieldType = field.objectType
                             ? field.objectType
                             : this.mapToTsType(field.protoType);
+
+                        if (fieldType.includes('[') || fieldType.includes(']'))
+                            fieldType = fieldType
+                                .replace('[', '')
+                                .replace(']', '');
+
+                        if (
+                            field.protoType === 'datetime' ||
+                            field.protoType === 'date'
+                        )
+                            fieldType = 'string | Date';
 
                         return `    ${field.propertyKey}${optional}: ${fieldType}${field.array || field.protoRepeated ? '[]' : ''};`;
                     }
@@ -420,7 +431,12 @@ import {
 
                 if (field.type === 'simpleArray')
                     apiType = `[${this.mapToTsTypeUpper(field.arrayType)}]`;
-                else if (apiType === 'Any') apiType = 'object';
+                else if (apiType === 'Any') apiType = 'Object';
+                else if (
+                    field.protoType === 'datetime' ||
+                    field.protoType === 'date'
+                )
+                    apiType = 'Date';
 
                 //OpenAPI
                 if (!field.exclude) {
@@ -481,8 +497,17 @@ import {
                     ? field.objectType
                     : this.mapToTsType(field.protoType);
 
+                if (fieldType.includes('[') || fieldType.includes(']'))
+                    fieldType = fieldType.replace('[', '').replace(']', '');
+
                 if (field.array || field.protoRepeated)
                     fieldType = `${fieldType}[]`;
+
+                if (
+                    field.protoType === 'datetime' ||
+                    field.protoType === 'date'
+                )
+                    fieldType = 'string | Date';
 
                 return `${decorators.length > 0 ? decorators.join('\n') + '\n' : ''}    ${readOnlySting}${field.propertyKey}${optional}: ${fieldType}${defaultValueString}`;
             }
@@ -536,6 +561,8 @@ import {
             case 'int32':
             case 'float':
             case 'number':
+            case 'time':
+            case 'timestamp':
                 return 'Number';
                 break;
             case 'string':
@@ -549,6 +576,10 @@ import {
                 break;
             case 'simpleArray':
                 return 'Array<any>';
+                break;
+            case 'date':
+            case 'datetime':
+                return 'Date';
                 break;
         }
     }

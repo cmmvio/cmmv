@@ -191,7 +191,7 @@ components:
     GroupGetInQueryDTO:
       properties:
         ids:
-          type: array
+          type: string
           required: true
           items:
             type: string
@@ -203,7 +203,7 @@ components:
           type: string
           required: true
         roles:
-          type: array
+          type: string
           required: true
           items:
             type: string
@@ -758,22 +758,22 @@ components:
           type: string
           required: true
         redirectUris:
-          type: array
+          type: string
           required: true
           items:
             type: string
         allowedScopes:
-          type: array
+          type: string
           required: true
           items:
             type: string
         allowedGrantTypes:
-          type: array
+          type: string
           required: true
           items:
             type: string
         authorizedDomains:
-          type: array
+          type: string
           required: true
           items:
             type: string
@@ -804,22 +804,22 @@ components:
           type: string
           required: true
         redirectUris:
-          type: array
+          type: string
           required: true
           items:
             type: string
         allowedScopes:
-          type: array
+          type: string
           required: true
           items:
             type: string
         allowedGrantTypes:
-          type: array
+          type: string
           required: true
           items:
             type: string
         authorizedDomains:
-          type: array
+          type: string
           required: true
           items:
             type: string
@@ -1188,7 +1188,7 @@ components:
           required: true
           default: false
         recivedAt:
-          type: number
+          type: object
           readOnly: true
           required: false
         opened:

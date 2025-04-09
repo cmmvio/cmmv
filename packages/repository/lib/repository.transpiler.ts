@@ -262,6 +262,7 @@ ${contract.services
      * @returns The field
      */
     private generateField(field: any, contract: IContract): string {
+        const isSQLite = Config.get('repository.type') === 'sqlite';
         let tsType = this.mapToTsType(field.protoType, field);
         const columnOptions = this.generateColumnOptions(field);
         let decorators = [
@@ -285,7 +286,7 @@ ${contract.services
                     const entityName = controllerName;
                     const isMongoDB =
                         Config.get('repository.type') === 'mongodb';
-                    const linkType = isMongoDB ? 'string' : 'varchar';
+                    let linkType = isMongoDB ? 'string' : 'varchar';
                     const linkField =
                         link.field === '_id' && !isMongoDB ? 'id' : link.field;
 
@@ -310,6 +311,12 @@ ${contract.services
 
                         tsType = `${entityName}Entity[] | string[] | null`;
                     } else {
+                        if (
+                            field.protoType === 'datetime' ||
+                            field.protoType === 'date'
+                        )
+                            linkType = isSQLite ? 'datetime' : 'timestamp';
+
                         decorators.push(
                             `@Column({ type: "${field.protoRepeated ? 'simple-array' : linkType}", nullable: true })`,
                         );
@@ -414,6 +421,7 @@ ${contract.services
             any: 'any',
             text: 'string',
             timestamp: 'string',
+            datetime: 'Date',
             date: 'Date',
             time: 'Date',
             bytes: 'string',
@@ -453,6 +461,7 @@ ${contract.services
             time: 'time',
             simpleArray: 'simple-array',
             simpleJson: 'simple-json',
+            datetime: 'Date',
             bigint: 'bigint',
             uint32: 'int',
             uint64: 'bigint',

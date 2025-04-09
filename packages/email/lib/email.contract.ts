@@ -53,11 +53,11 @@ export class EmailSendingContract extends AbstractContract {
     recived: boolean;
 
     @ContractField({
-        protoType: 'number',
+        protoType: 'datetime',
         nullable: true,
         readOnly: true,
     })
-    recivedAt: number;
+    recivedAt: Date;
 
     @ContractField({
         protoType: 'bool',

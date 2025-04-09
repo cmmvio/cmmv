@@ -124,7 +124,7 @@ export class UserContract extends AbstractContract {
     @ContractField({
         protoType: 'string',
         defaultValue: '[]',
-        objectType: 'string[]',
+        objectType: 'string',
         entityType: 'simple-array',
         protoRepeated: true,
         nullable: true,

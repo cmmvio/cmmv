@@ -45,7 +45,7 @@ export class OAuthClientsContract extends AbstractContract {
     @ContractField({
         protoType: 'string',
         defaultValue: '[]',
-        objectType: 'string[]',
+        objectType: 'string',
         protoRepeated: true,
         nullable: true,
         readOnly: true,
@@ -55,7 +55,7 @@ export class OAuthClientsContract extends AbstractContract {
     @ContractField({
         protoType: 'string',
         defaultValue: '[]',
-        objectType: 'string[]',
+        objectType: 'string',
         protoRepeated: true,
         nullable: true,
         readOnly: true,
@@ -65,7 +65,7 @@ export class OAuthClientsContract extends AbstractContract {
     @ContractField({
         protoType: 'string',
         defaultValue: '[]',
-        objectType: 'string[]',
+        objectType: 'string',
         protoRepeated: true,
         nullable: true,
         readOnly: true,
@@ -75,7 +75,7 @@ export class OAuthClientsContract extends AbstractContract {
     @ContractField({
         protoType: 'string',
         defaultValue: '[]',
-        objectType: 'string[]',
+        objectType: 'string',
         protoRepeated: true,
         nullable: true,
         readOnly: true,
