@@ -65,7 +65,6 @@ export class UserContract extends AbstractContract {
         validations: [
             {
                 type: 'IsEmail',
-                message: 'The email must be a valid email address',
             },
         ],
     })

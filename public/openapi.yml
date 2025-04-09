@@ -2072,7 +2072,6 @@ paths:
                   uniqueItems: true
                   validations: &ref_3
                     - type: IsEmail
-                      message: The email must be a valid email address
                 password:
                   type: string
                   nullable: false

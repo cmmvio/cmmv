@@ -3069,8 +3069,7 @@
                     "uniqueItems": true,
                     "validations": [
                       {
-                        "type": "IsEmail",
-                        "message": "The email must be a valid email address"
+                        "type": "IsEmail"
                       }
                     ]
                   },
@@ -3296,8 +3295,7 @@
                     "uniqueItems": true,
                     "validations": [
                       {
-                        "type": "IsEmail",
-                        "message": "The email must be a valid email address"
+                        "type": "IsEmail"
                       }
                     ]
                   },
