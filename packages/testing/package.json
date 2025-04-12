@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/testing",
-    "version": "0.11.3",
+    "version": "0.11.4",
     "description": "Module testing module and application for CMMV",
     "keywords": [
         "cmmv",
