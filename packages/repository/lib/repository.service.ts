@@ -459,6 +459,13 @@ export class Repository extends Singleton {
         return await this.findBy(entity, criteria, options);
     }
 
+    /**
+     * Find an entity by criteria
+     * @param entity - The entity type
+     * @param criteria - The criteria to find the entity by
+     * @param options - The options to find the entity by
+     * @returns Entity | null
+     */
     public static async findBy<Entity>(
         entity: new () => Entity,
         criteria: FindOptionsWhere<Entity>,
@@ -585,6 +592,26 @@ export class Repository extends Singleton {
             console.error('Database findAll error:', error);
             return null;
         }
+    }
+
+    /**
+     * Count an entity by criteria
+     * @param entity - The entity type
+     * @param criteria - The criteria to count the entity by
+     * @param options - The options to count the entity by
+     * @returns number
+     */
+    public static async count<Entity>(
+        entity: new () => Entity,
+        criteria: FindOptionsWhere<Entity>,
+        options: FindManyOptions<Entity> = {},
+    ): Promise<number> {
+        const repository = this.getRepository(entity);
+
+        return await repository.count({
+            where: criteria,
+            ...options,
+        });
     }
 
     /**
@@ -717,6 +744,30 @@ export class Repository extends Singleton {
         } catch (e) {
             return false;
         }
+    }
+
+    /**
+     * Upsert an entity into the repository
+     * @param entity - The entity type
+     * @param criteria - The criteria to upsert the entity by
+     * @param data - The data to upsert
+     * @returns boolean
+     */
+    public static async upsert<Entity>(
+        entity: new () => Entity,
+        criteria: FindOptionsWhere<Entity>,
+        data: DeepPartial<Entity>,
+    ) {
+        const repository = this.getRepository(entity);
+        const existingRecord = await this.findOne(entity, criteria);
+
+        if (existingRecord)
+            return await this.update(
+                entity,
+                existingRecord[this.getIdField()],
+                data,
+            );
+        return await this.insert(entity, data);
     }
 
     /**
@@ -1208,6 +1259,25 @@ export class RepositorySchema<Entity, T> {
     }
 
     /**
+     * Count an entity by criteria
+     * @param criteria - The criteria to count the entity by
+     * @param options - The options to count the entity by
+     * @returns number
+     */
+    public async count(criteria: any, options: FindManyOptions<Entity> = {}) {
+        return await Repository.count(this.entity, criteria, options);
+    }
+
+    /**
+     * Check if an entity exists by criteria
+     * @param criteria - The criteria to check if the entity exists by
+     * @returns boolean
+     */
+    public async exists(criteria: any) {
+        return await Repository.exists(this.entity, criteria);
+    }
+
+    /**
      * Insert an entity into the repository
      * @param data - The data to insert
      * @returns any
@@ -1254,6 +1324,36 @@ export class RepositorySchema<Entity, T> {
         }
 
         return { success: result > 0, affected: result };
+    }
+
+    /**
+     * Update an entity in the repository by criteria
+     * @param criteria - The criteria to update the entity by
+     * @param data - The data to update
+     * @returns number
+     */
+    public async updateOne(criteria: any, data: any) {
+        return await Repository.updateOne(this.entity, criteria, data);
+    }
+
+    /**
+     * Update an entity in the repository by ID
+     * @param id - The ID of the entity
+     * @param data - The data to update
+     * @returns number
+     */
+    public async updateById(id: string, data: any) {
+        return await Repository.updateById(this.entity, id, data);
+    }
+
+    /**
+     * Upsert an entity into the repository
+     * @param criteria - The criteria to upsert the entity by
+     * @param data - The data to upsert
+     * @returns boolean
+     */
+    public async upsert(criteria: any, data: any) {
+        return await Repository.upsert(this.entity, criteria, data);
     }
 
     /**
