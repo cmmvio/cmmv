@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/auth",
-    "version": "0.11.4",
+    "version": "0.11.5",
     "description": "Authentication module for CMMV",
     "keywords": [
         "cmmv",
