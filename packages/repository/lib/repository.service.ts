@@ -445,6 +445,171 @@ export class Repository extends Singleton {
     }
 
     /**
+     * Validate the criteria for the repository
+     * @param entity - The entity type
+     * @param criteria - The criteria to validate
+     * @returns boolean
+     */
+    public static validateCriteria<Entity>(
+        entity: new () => Entity,
+        criteria: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
+    ): boolean {
+        if (!criteria || Object.keys(criteria).length === 0) return true;
+
+        const instance = Repository.getInstance();
+
+        try {
+            const metadata = instance.dataSource.getMetadata(entity);
+            const entityColumns = metadata.columns.map(
+                (col) => col.propertyName,
+            );
+            const entityRelations = metadata.relations.map(
+                (rel) => rel.propertyName,
+            );
+            const validFields = [
+                ...entityColumns,
+                ...entityRelations,
+                '_id',
+                'id',
+            ];
+
+            if (Array.isArray(criteria)) {
+                for (const criteriaItem of criteria) {
+                    for (const field in criteriaItem) {
+                        if (field.startsWith('$')) continue;
+
+                        if (!validFields.includes(field))
+                            throw new Error(
+                                `Invalid field in search criteria: '${field}' does not exist in entity ${metadata.name}`,
+                            );
+                    }
+                }
+                return true;
+            }
+
+            for (const field in criteria) {
+                if (field.startsWith('$')) continue;
+
+                if (!validFields.includes(field))
+                    throw new Error(
+                        `Invalid field in search criteria: '${field}' does not exist in entity ${metadata.name}`,
+                    );
+            }
+
+            return true;
+        } catch (error) {
+            if (error.message.includes('Invalid field')) throw error;
+
+            Repository.logger.error(
+                `Error validating criteria: ${error.message}`,
+            );
+            throw new Error('Error validating search criteria');
+        }
+    }
+
+    /**
+     * Validate the query options for the repository
+     * @param entity - The entity type
+     * @param options - The options to validate
+     * @returns boolean
+     */
+    public static validateQueryOptions<Entity>(
+        entity: new () => Entity,
+        options: FindManyOptions<Entity>,
+    ): boolean {
+        if (!options) return true;
+
+        const instance = Repository.getInstance();
+
+        try {
+            const metadata = instance.dataSource.getMetadata(entity);
+            const entityColumns = metadata.columns.map(
+                (col) => col.propertyName,
+            );
+            const entityRelations = metadata.relations.map(
+                (rel) => rel.propertyName,
+            );
+            const validFields = [
+                ...entityColumns,
+                ...entityRelations,
+                '_id',
+                'id',
+            ];
+
+            if (options.take !== undefined) {
+                if (typeof options.take !== 'number' || options.take <= 0)
+                    throw new Error(
+                        'The limit parameter must be a positive number',
+                    );
+
+                if (options.take > 1000)
+                    throw new Error(
+                        'The maximum limit for results per query is 1000',
+                    );
+            }
+
+            if (options.skip !== undefined) {
+                if (typeof options.skip !== 'number' || options.skip < 0)
+                    throw new Error(
+                        'The offset parameter must be a non-negative number',
+                    );
+            }
+
+            if (options.order) {
+                const orderFields = Object.keys(options.order);
+
+                for (const field of orderFields) {
+                    if (!validFields.includes(field))
+                        throw new Error(
+                            `Invalid field for sorting: '${field}' does not exist in entity ${metadata.name}`,
+                        );
+
+                    const hasIndex = metadata.indices.some((index) =>
+                        index.columns.some(
+                            (col) =>
+                                col.databaseName === field ||
+                                (field === 'id' && col.databaseName === '_id'),
+                        ),
+                    );
+
+                    if (!hasIndex && field !== 'id' && field !== '_id')
+                        throw new Error(
+                            `Sorting by non-indexed field is not allowed: '${field}'. Create an index for this field.`,
+                        );
+                }
+            }
+
+            if (options.select) {
+                const selectFields = Object.values(options.select);
+
+                for (const field of selectFields) {
+                    if (!validFields.includes(field))
+                        throw new Error(
+                            `Invalid field in select: '${field}' does not exist in entity ${metadata.name}`,
+                        );
+                }
+            }
+
+            if (options.where)
+                return this.validateCriteria(entity, options.where);
+
+            return true;
+        } catch (error) {
+            if (
+                error.message.includes('Invalid field') ||
+                error.message.includes('maximum limit') ||
+                error.message.includes('Sorting by non-indexed field')
+            ) {
+                throw error;
+            }
+            Repository.logger.error(
+                `Error validating query options: ${error.message}`,
+            );
+            throw new Error('Error validating query options');
+        }
+    }
+
+    /**
      * Find a single entity by criteria
      * @param entity - The entity type
      * @param criteria - The criteria to find the entity by
@@ -456,6 +621,9 @@ export class Repository extends Singleton {
         criteria: FindOptionsWhere<Entity>,
         options: FindOneOptions<Entity> = {},
     ): Promise<Entity | null> {
+        if (!this.validateCriteria(entity, criteria))
+            throw new Error('Invalid criteria');
+
         return await this.findBy(entity, criteria, options);
     }
 
@@ -472,6 +640,9 @@ export class Repository extends Singleton {
         options: FindOneOptions<Entity> = {},
     ): Promise<Entity | null> {
         try {
+            if (!this.validateCriteria(entity, criteria))
+                throw new Error('Invalid criteria');
+
             const repository = this.getRepository(entity);
             const registry = await repository.findOne({
                 where: criteria,
@@ -551,6 +722,9 @@ export class Repository extends Singleton {
             };
 
             const start = Date.now();
+
+            if (!this.validateQueryOptions(entity, queryOptions))
+                throw new Error('Invalid query options');
 
             const total = await repository.count({
                 where: queryOptions.where,
