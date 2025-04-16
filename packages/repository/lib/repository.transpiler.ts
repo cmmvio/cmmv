@@ -248,10 +248,18 @@ ${contract.services
             ];
         }
 
-        if (contract.options?.databaseFakeDelete)
+        if (contract.options?.databaseFakeDelete) {
             indexDecorators.push(
                 `@Index("idx_${entityName.toLowerCase()}_deleted", ["deleted"])`,
             );
+        }
+
+        if (contract.options?.databaseTimestamps) {
+            indexDecorators.push(
+                `@Index("idx_${entityName.toLowerCase()}_createdAt", ["createdAt"])`,
+                `@Index("idx_${entityName.toLowerCase()}_updatedAt", ["updatedAt"])`,
+            );
+        }
 
         return indexDecorators.join('\n');
     }
