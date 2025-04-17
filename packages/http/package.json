@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/http",
-    "version": "0.11.6",
+    "version": "0.12.0",
     "description": "HTTP module implementing controllers, using CMMV standard adapter",
     "keywords": [
         "cmmv",
