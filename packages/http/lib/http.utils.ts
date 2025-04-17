@@ -3,7 +3,12 @@ import { URL } from 'node:url';
 
 export function generateFingerprint(req, usernameHashed) {
     const userAgent = req.headers['user-agent'] || '';
-    const ip = req.ip || req.connection?.remoteAddress || '';
+    const ip =
+        req.headers['cf-connecting-ip'] ||
+        req.headers['X-Real-IP'] ||
+        req.headers['X-Forwarded-For'] ||
+        req.connection.remoteAddress ||
+        req.ip;
     const language = req.headers['accept-language'] || '';
     const referer = req.headers['referer']
         ? new URL(req.headers['referer']).origin

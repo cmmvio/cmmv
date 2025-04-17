@@ -532,11 +532,11 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                     break;
                 case 'ip':
                     args[param.index] =
-                        req.ip ||
                         req.headers['cf-connecting-ip'] ||
                         req.headers['X-Real-IP'] ||
                         req.headers['X-Forwarded-For'] ||
-                        req.connection.remoteAddress;
+                        req.connection.remoteAddress ||
+                        req.ip;
                     break;
                 case 'hosts':
                     args[param.index] = req.hosts;
