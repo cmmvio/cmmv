@@ -48,8 +48,6 @@
             "@cmmv/auth/*": ["packages/auth/*"],
             "@cmmv/testing": ["packages/testing"],
             "@cmmv/testing/*": ["packages/testing/*"],
-            "@cmmv/form": ["packages/form"],
-            "@cmmv/form/*": ["packages/form/*"],
             "@cmmv/graphql": ["packages/graphql"],
             "@cmmv/graphql/*": ["packages/graphql/*"],
             "@cmmv/vault": ["packages/vault"],

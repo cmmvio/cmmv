@@ -13,7 +13,6 @@ export default defineConfig({
             '@cmmv/http': path.resolve(__dirname, 'packages/http'),
             '@cmmv/protobuf': path.resolve(__dirname, 'packages/protobuf'),
             '@cmmv/repository': path.resolve(__dirname, 'packages/repository'),
-            '@cmmv/scheduling': path.resolve(__dirname, 'packages/scheduling'),
             '@cmmv/testing': path.resolve(__dirname, 'packages/testing'),
             '@cmmv/vault': path.resolve(__dirname, 'packages/vault'),
             '@cmmv/ws': path.resolve(__dirname, 'packages/ws'),

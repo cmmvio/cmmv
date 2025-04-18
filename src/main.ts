@@ -6,7 +6,6 @@ import { ProtobufModule } from '@cmmv/protobuf';
 import { WSModule, WSAdapter } from '@cmmv/ws';
 import { RepositoryModule, Repository } from '@cmmv/repository';
 import { AuthModule } from '@cmmv/auth';
-import { FormModule } from '@cmmv/form';
 import { OpenAPIModule } from '@cmmv/openapi';
 import { GraphQLModule } from '@cmmv/graphql';
 import { SandboxModule } from '@cmmv/sandbox';
@@ -23,7 +22,6 @@ Application.create({
         WSModule,
         RepositoryModule,
         AuthModule,
-        FormModule,
         OpenAPIModule,
         GraphQLModule,
         SandboxModule,

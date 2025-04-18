@@ -1,9 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Scope } from '../../lib/scope';
+
+vi.mock('../../lib/module', () => ({
+    Module: vi.fn(),
+}));
 
 describe('Scope', () => {
     beforeEach(() => {
-        // Clear any existing data before each test to ensure isolation
         Scope.clear('testData');
         Scope.clear('testArray');
     });
