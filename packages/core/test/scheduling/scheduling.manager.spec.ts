@@ -1,11 +1,29 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
-import { SchedulingManager } from '../lib/scheduling.manager';
+import { SchedulingManager } from '../../managers/scheduling.manager';
 import { CronJob } from 'cron';
-import { Logger } from '@cmmv/core';
+import { Logger } from '../../lib/logger';
+
+vi.mock('../../lib/logger', () => {
+    interface MockLoggerInstance {
+        context: string;
+        log: ReturnType<typeof vi.fn>;
+    }
+
+    const MockLogger = vi.fn(function (
+        this: MockLoggerInstance,
+        context: string,
+    ) {
+        this.context = context;
+        this.log = vi.fn();
+        return this;
+    });
+
+    return { Logger: MockLogger };
+});
 
 vi.mock('@cmmv/core', () => ({
-    Logger: vi.fn().mockImplementation(() => ({
-        log: vi.fn(),
+    Config: vi.fn().mockImplementation(() => ({
+        get: vi.fn(),
     })),
 }));
 
@@ -15,7 +33,6 @@ describe('SchedulingManager', () => {
     const mockObserver1 = vi.fn();
     const mockObserver2 = vi.fn();
 
-    // Simular ambiente de desenvolvimento
     const originalEnv = process.env.NODE_ENV;
     beforeEach(() => {
         process.env.NODE_ENV = 'dev';

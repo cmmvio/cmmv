@@ -1,4 +1,4 @@
-import { Scope } from '@cmmv/core';
+import { Scope } from '../lib/scope';
 
 export const CRON_METADATA = Symbol('CRON_METADATA');
 

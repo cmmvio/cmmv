@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Cron, CRON_METADATA } from '../lib/scheduling.decorator';
-import { Scope } from '@cmmv/core';
-import 'reflect-metadata'; // Importar reflect-metadata para os decoradores
+import { Cron, CRON_METADATA } from '../../decorators/scheduling.decorator';
+import { Scope } from '../../lib/scope';
+import 'reflect-metadata';
 
-// Mock das dependências
+Scope.addToArray = vi.fn();
+
 vi.mock('@cmmv/core', () => ({
-    Scope: {
-        addToArray: vi.fn(),
-    },
+    Config: vi.fn().mockImplementation(() => ({
+        get: vi.fn(),
+    })),
 }));
 
-// Espionar as funções do Reflect em vez de substituí-las completamente
 const originalDefineMetadata = Reflect.defineMetadata;
 Reflect.defineMetadata = vi.fn().mockImplementation((key, value, target) => {
     return originalDefineMetadata
@@ -20,12 +20,10 @@ Reflect.defineMetadata = vi.fn().mockImplementation((key, value, target) => {
 
 describe('Cron Decorator', () => {
     beforeEach(() => {
-        // Resetar os mocks
         vi.clearAllMocks();
     });
 
     it('should define metadata on the decorated method', () => {
-        // Definir uma classe de teste com um método decorado
         class TestClass {
             @Cron('0 0 * * *')
             public testMethod() {
@@ -33,7 +31,6 @@ describe('Cron Decorator', () => {
             }
         }
 
-        // Verificar se o metadata foi definido corretamente
         expect(Reflect.defineMetadata).toHaveBeenCalledWith(
             CRON_METADATA,
             '0 0 * * *',
@@ -42,7 +39,6 @@ describe('Cron Decorator', () => {
     });
 
     it('should add the cron job to the Scope.__crons array', () => {
-        // Definir uma classe de teste com um método decorado
         class TestClass {
             @Cron('*/5 * * * *')
             public testMethod() {
@@ -50,7 +46,6 @@ describe('Cron Decorator', () => {
             }
         }
 
-        // Verificar se addToArray foi chamado com os parâmetros corretos
         expect(Scope.addToArray).toHaveBeenCalledWith('__crons', {
             target: TestClass.prototype,
             method: expect.any(Function),
@@ -59,7 +54,6 @@ describe('Cron Decorator', () => {
     });
 
     it('should preserve the original method functionality', () => {
-        // Definir uma classe de teste com um método decorado
         class TestClass {
             public value: string = '';
 
@@ -70,17 +64,14 @@ describe('Cron Decorator', () => {
             }
         }
 
-        // Criar uma instância e executar o método
         const instance = new TestClass();
         const result = instance.testMethod('test input');
 
-        // Verificar se o método ainda funciona como esperado
         expect(result).toBe('processed: test input');
         expect(instance.value).toBe('processed: test input');
     });
 
     it('should work with inherited class methods', () => {
-        // Definir uma classe base
         class BaseClass {
             @Cron('0 12 * * *')
             public baseMethod() {
@@ -88,7 +79,6 @@ describe('Cron Decorator', () => {
             }
         }
 
-        // Definir uma classe que herda da classe base
         class ChildClass extends BaseClass {
             @Cron('0 18 * * *')
             public childMethod() {
@@ -96,10 +86,8 @@ describe('Cron Decorator', () => {
             }
         }
 
-        // Verificar se addToArray foi chamado duas vezes
         expect(Scope.addToArray).toHaveBeenCalledTimes(2);
 
-        // Verificar se o método da classe base foi registrado
         expect(Scope.addToArray).toHaveBeenCalledWith(
             '__crons',
             expect.objectContaining({
@@ -108,7 +96,6 @@ describe('Cron Decorator', () => {
             }),
         );
 
-        // Verificar se o método da classe filha foi registrado
         expect(Scope.addToArray).toHaveBeenCalledWith(
             '__crons',
             expect.objectContaining({
@@ -119,7 +106,6 @@ describe('Cron Decorator', () => {
     });
 
     it('should accept different cron time formats', () => {
-        // Testar com diferentes formatos de expressão cron
         class TestCronFormats {
             @Cron('*/30 * * * *')
             public everyThirtyMinutes() {}
@@ -131,10 +117,8 @@ describe('Cron Decorator', () => {
             public everyMonday() {}
         }
 
-        // Verificar se addToArray foi chamado três vezes
         expect(Scope.addToArray).toHaveBeenCalledTimes(3);
 
-        // Verificar se os diferentes formatos foram registrados corretamente
         expect(Scope.addToArray).toHaveBeenCalledWith(
             '__crons',
             expect.objectContaining({ cronTime: '*/30 * * * *' }),
@@ -152,7 +136,6 @@ describe('Cron Decorator', () => {
     });
 
     it('should allow decorating multiple methods in the same class', () => {
-        // Classe com múltiplos métodos decorados
         class MultiMethodClass {
             @Cron('0 0 * * *')
             public dailyMethod() {}
@@ -164,10 +147,8 @@ describe('Cron Decorator', () => {
             public monthlyMethod() {}
         }
 
-        // Verificar se addToArray foi chamado três vezes
         expect(Scope.addToArray).toHaveBeenCalledTimes(3);
 
-        // Verificar se todos os métodos foram registrados com o cronTime correto
         expect(Scope.addToArray).toHaveBeenCalledWith(
             '__crons',
             expect.objectContaining({ cronTime: '0 0 * * *' }),

@@ -711,7 +711,8 @@ import "reflect-metadata";
 
 import {
     Module, ApplicationTranspile,
-    ApplicationConfig, ContractsTranspile
+    ApplicationConfig, ContractsTranspile,
+    SchedulingModule, SchedulingService
 } from "@cmmv/core";
 
 //Controllers
@@ -726,11 +727,15 @@ export let ApplicationModule = new Module("app", {
         ${Application.appModule.controllers.map((controller) => controller.name).join(', \n\t\t')}
     ],
     providers: [
-        ${Application.appModule.providers.map((provider) => provider.name).join(', \n\t\t')}
+        ${Application.appModule.providers.map((provider) => provider.name).join(', \n\t\t')},
+        SchedulingService
     ],
     transpilers: [
         ApplicationTranspile,
         ContractsTranspile
+    ],
+    submodules: [
+        SchedulingModule
     ]
 });`;
 

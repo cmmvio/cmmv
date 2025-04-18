@@ -5,4 +5,5 @@ export * from './is-strong-password.decorator';
 export * from './metadata.decorator';
 export * from './mixed.decorator';
 export * from './resolver.decorator';
+export * from './scheduling.decorator';
 export * from './service.decorator';

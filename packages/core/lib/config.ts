@@ -6,10 +6,7 @@ import { Singleton } from '../abstracts';
 
 import { ConfigSchema, ConfigSubPropsSchemas } from '../interfaces';
 
-import { Module } from './module';
-
 import { Logger } from './logger';
-import { Application } from '..';
 
 export class Config extends Singleton {
     private config: Record<string, any> = {};
@@ -153,7 +150,6 @@ export class Config extends Singleton {
 
                 if (configValue === undefined || configValue === null) continue;
 
-                // Handle type validation
                 if (schemaDefinition.type !== 'any') {
                     const isTypeValid =
                         (schemaDefinition.type === 'array' &&
@@ -167,7 +163,6 @@ export class Config extends Singleton {
                     }
                 }
 
-                // Handle array sub-properties validation
                 if (
                     schemaDefinition.type === 'array' &&
                     schemaDefinition.properties &&
@@ -188,7 +183,6 @@ export class Config extends Singleton {
                     });
                 }
 
-                // Handle object sub-properties validation
                 if (
                     schemaDefinition.type === 'object' &&
                     schemaDefinition.properties

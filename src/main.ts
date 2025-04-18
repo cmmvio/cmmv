@@ -5,7 +5,6 @@ import { DefaultAdapter, DefaultHTTPModule } from '@cmmv/http';
 import { ProtobufModule } from '@cmmv/protobuf';
 import { WSModule, WSAdapter } from '@cmmv/ws';
 import { RepositoryModule, Repository } from '@cmmv/repository';
-import { SchedulingModule, SchedulingService } from '@cmmv/scheduling';
 import { AuthModule } from '@cmmv/auth';
 import { FormModule } from '@cmmv/form';
 import { OpenAPIModule } from '@cmmv/openapi';
@@ -23,7 +22,6 @@ Application.create({
         ProtobufModule,
         WSModule,
         RepositoryModule,
-        SchedulingModule,
         AuthModule,
         FormModule,
         OpenAPIModule,
@@ -33,5 +31,5 @@ Application.create({
         //ThrottlerModule,
         IndexModule,
     ],
-    providers: [Repository, SchedulingService],
+    providers: [Repository],
 });

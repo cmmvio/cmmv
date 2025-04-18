@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Scope, Service } from '@cmmv/core';
-import { SchedulingService } from '../lib/scheduling.service';
-import { Cron } from '../lib/scheduling.decorator';
-import { SchedulingManager } from '../lib/scheduling.manager';
+import { SchedulingService } from '../../services/scheduling.service';
+import { Cron } from '../../decorators/scheduling.decorator';
+import { SchedulingManager } from '../../managers/scheduling.manager';
 
 let mockCronJob = {
     start: () => {},

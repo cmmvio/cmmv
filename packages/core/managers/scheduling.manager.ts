@@ -1,5 +1,5 @@
 import { CronJob, CronTime } from 'cron';
-import { Logger } from '@cmmv/core';
+import { Logger } from '../lib/logger';
 
 type CronObserver = () => void;
 

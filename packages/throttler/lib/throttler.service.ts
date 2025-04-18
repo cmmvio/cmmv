@@ -29,7 +29,13 @@ export class ThrottlerService extends AbstractService {
             handler,
         }: { req: any; res: any; next: any; handler: any },
     ) {
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const ip =
+            req.headers['cf-connecting-ip'] ||
+            req.headers['X-Real-IP'] ||
+            req.headers['X-Forwarded-For'] ||
+            req.connection.remoteAddress ||
+            req.ip;
+
         const requestSignature = `${req.method}::${handler.name}::${ip}`;
         return ThrottlerService.validateRequest(
             requestSignature,

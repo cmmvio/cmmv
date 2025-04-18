@@ -5,10 +5,13 @@ export * from './application.config';
 export * from './abstracts';
 export * from './decorators';
 export * from './interfaces';
+export * from './managers';
 export * from './registries';
+export * from './services';
 export * from './transpilers';
 export * from './utils';
 export * from './lib';
+export * from './modules';
 
 export {
     Transform,

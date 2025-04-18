@@ -1,5 +1,8 @@
-import { Scope, Logger, Singleton, Service } from '@cmmv/core';
-import { SchedulingManager } from './scheduling.manager';
+import { Scope } from '../lib/scope';
+import { Logger } from '../lib/logger';
+import { Singleton } from '../abstracts/singleton.abstract';
+import { Service } from '../decorators/service.decorator';
+import { SchedulingManager } from '../managers/scheduling.manager';
 
 @Service('scheduling')
 export class SchedulingService extends Singleton {
