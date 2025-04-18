@@ -98,7 +98,7 @@ describe('HTTP View Mocks', () => {
             const html = '<div s-data="name">placeholder</div>';
 
             // Configurar o mock para realmente substituir o conteúdo neste teste
-            MockViewDirectives.sData.mockImplementationOnce(
+            (MockViewDirectives.sData as any).mockImplementationOnce(
                 async (html, data, template) => {
                     return html.replace('placeholder', data.name);
                 },
@@ -150,18 +150,18 @@ describe('HTTP View Mocks', () => {
             const template = new MockTemplate();
             const data = {};
 
-            MockViewDirectives.extractSetupScript.mockImplementationOnce(
-                async () => ({
-                    html: html.replace(
-                        /<script[^>]*>[\s\S]*?<\/script>/,
-                        '<!-- setup -->',
-                    ),
-                    setup: {
-                        data: () => ({}),
-                        methods: {},
-                    },
-                }),
-            );
+            (
+                MockViewDirectives.extractSetupScript as any
+            ).mockImplementationOnce(async () => ({
+                html: html.replace(
+                    /<script[^>]*>[\s\S]*?<\/script>/,
+                    '<!-- setup -->',
+                ),
+                setup: {
+                    data: () => ({}),
+                    methods: {},
+                },
+            }));
 
             const result = await extractSetupScript(html, data, template);
 

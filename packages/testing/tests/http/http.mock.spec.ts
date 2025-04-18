@@ -80,11 +80,11 @@ describe('HTTP Mocks', () => {
         it('should initialize with logger and instance properties', () => {
             const adapter = new MockDefaultAdapter();
 
-            expect(adapter.logger).toBeDefined();
-            expect(adapter.logger.log).toBeDefined();
-            expect(adapter.logger.error).toBeDefined();
-            expect(adapter.logger.warning).toBeDefined();
-            expect(adapter.logger.verbose).toBeDefined();
+            expect((adapter as any).logger).toBeDefined();
+            expect((adapter as any).logger.log).toBeDefined();
+            expect((adapter as any).logger.error).toBeDefined();
+            expect((adapter as any).logger.warning).toBeDefined();
+            expect((adapter as any).logger.verbose).toBeDefined();
 
             expect(adapter.instance).toBeDefined();
             expect(adapter.instance.disable).toBeDefined();
@@ -163,12 +163,12 @@ describe('HTTP Mocks', () => {
             const adapter = new MockDefaultAdapter();
 
             // Change some implementations
-            adapter.logger.log.mockImplementation(() => 'log');
+            (adapter as any).logger.log.mockImplementation(() => 'log');
             adapter.instance.use.mockImplementation(() => 'use');
             adapter.listen.mockResolvedValue('listening');
 
             // Verify changes
-            expect(adapter.logger.log()).toBe('log');
+            expect((adapter as any).logger.log()).toBe('log');
             expect(adapter.instance.use()).toBe('use');
             expect(adapter.listen('')).resolves.toBe('listening');
 
@@ -179,7 +179,7 @@ describe('HTTP Mocks', () => {
             const newAdapter = new MockDefaultAdapter();
 
             // Verify reset
-            expect(newAdapter.logger.log()).toBeUndefined();
+            expect((newAdapter as any).logger.log()).toBeUndefined();
             expect(newAdapter.instance.use()).toBe(newAdapter.instance);
             expect(newAdapter.listen('')).resolves.toBeUndefined();
         });
