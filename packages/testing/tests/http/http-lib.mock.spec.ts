@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import {
     mockHttpLib,
     MockHttpLib,
@@ -67,14 +68,12 @@ describe('HTTP Lib Mocks', () => {
         });
 
         it('should reset generateFingerprint mock implementation', () => {
-            // Override implementation
             MockHttpUtils.generateFingerprint.mockReturnValue(
                 'custom-fingerprint',
             );
 
             expect(generateFingerprint({}, 'user')).toBe('custom-fingerprint');
 
-            // Reset
             MockHttpUtils.reset();
 
             const result = generateFingerprint({}, 'user');
@@ -102,14 +101,12 @@ describe('HTTP Lib Mocks', () => {
         });
 
         it('should reset ResponseSchema mock implementation', () => {
-            // Override implementation
             MockHttpSchema.ResponseSchema.mockReturnValue(
                 '{"custom":"response"}',
             );
 
             expect(ResponseSchema({})).toBe('{"custom":"response"}');
 
-            // Reset
             MockHttpSchema.reset();
 
             const data = { test: true };
@@ -126,15 +123,12 @@ describe('HTTP Lib Mocks', () => {
         });
 
         it('should reset all mock implementations', () => {
-            // Setup spies on individual reset methods
             const spyExceptionReset = vi.spyOn(MockHttpException, 'reset');
             const spyUtilsReset = vi.spyOn(MockHttpUtils, 'reset');
             const spySchemaReset = vi.spyOn(MockHttpSchema, 'reset');
 
-            // Call central reset
             MockHttpLib.reset();
 
-            // Verify all reset methods were called
             expect(spyExceptionReset).toHaveBeenCalled();
             expect(spyUtilsReset).toHaveBeenCalled();
             expect(spySchemaReset).toHaveBeenCalled();

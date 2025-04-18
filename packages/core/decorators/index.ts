@@ -1,4 +1,5 @@
 export * from './contract.decorator';
+export * from './events.decorator';
 export * from './hooks.decorator';
 export * from './interceptor.decorator';
 export * from './is-strong-password.decorator';
