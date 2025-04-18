@@ -14,7 +14,6 @@ import {
 } from './transpile.mock';
 import { mockAbstracts, MockAbstracts } from './abstracts.mock';
 import { mockDecorators, MockDecorators } from './decorators.mock';
-import { mockInterfaces, MockInterfaces } from './interface.mock';
 
 export class MockCore {
     public static Config = MockConfig;
@@ -30,7 +29,6 @@ export class MockCore {
     public static AbstractTranspile = MockAbstractTranspile;
     public static Abstracts = MockAbstracts;
     public static Decorators = MockDecorators;
-    public static Interfaces = MockInterfaces;
 
     public static createLogger(context: string = 'Test'): MockLogger {
         return new MockLogger(context);
@@ -56,7 +54,6 @@ export class MockCore {
         MockTelemetry.reset();
         MockDecorators.reset();
         MockAbstracts.resetAll();
-        MockInterfaces.reset();
         const compile = MockCompile.getInstance();
         compile.reset();
     }
@@ -76,7 +73,6 @@ export class MockCore {
             AbstractTranspile: MockAbstractTranspile,
             ...MockAbstracts.getAbstracts(),
             ...MockDecorators.getMockModule(),
-            ...MockInterfaces.getMockModule(),
             Singleton: class Singleton {
                 static _instance: any;
                 public static getInstance(): any {
@@ -141,7 +137,6 @@ export {
     mockTranspile,
     mockAbstracts,
     mockDecorators,
-    mockInterfaces,
 
     // Types
     MockConfig,
@@ -157,5 +152,4 @@ export {
     MockAbstractTranspile,
     MockAbstracts,
     MockDecorators,
-    MockInterfaces,
 };

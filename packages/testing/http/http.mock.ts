@@ -85,18 +85,6 @@ export class MockDefaultAdapter {
     };
     public httpServer: any = null;
 
-    // Propriedade para armazenar manipuladores de rota para testes (por instância)
-    public routeHandlers: Record<
-        string,
-        { handler: Function; instance: any; route: any }
-    > = {};
-
-    // Propriedade estática para armazenar manipuladores de rota para testes (compartilhada)
-    public static routeHandlers: Record<
-        string,
-        { handler: Function; instance: any; route: any }
-    > = {};
-
     constructor(protected instanceToUse?: any) {
         this.instance = instanceToUse || this.instance;
         this.httpServer = this.instance.server;
@@ -115,10 +103,6 @@ export class MockDefaultAdapter {
 
     public registerControllers = vi.fn().mockImplementation(() => {
         const controllers = MockControllerRegistry.getControllers();
-
-        // Copiar handlers estáticos para a instância atual
-        this.routeHandlers = { ...MockDefaultAdapter.routeHandlers };
-
         return controllers;
     });
 
@@ -166,9 +150,6 @@ export class MockDefaultAdapter {
 
     public static reset(): void {
         const instance = new MockDefaultAdapter();
-
-        // Limpar handlers estáticos
-        MockDefaultAdapter.routeHandlers = {};
 
         // Reset logger
         instance.logger.log.mockReset();

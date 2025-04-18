@@ -1,29 +1,11 @@
 import { vi } from 'vitest';
 
-// Interface to define shape of decorator call data
-interface MockDecoratorCall {
-    decoratorArgs: any[];
-    target: any;
-    key?: string | symbol;
-    descriptor?: PropertyDescriptor;
-    paramIndex?: number;
-}
-
 // Helper to create mock decorator functions
 const createMockDecorator = (name: string) => {
     const mockFn = vi.fn().mockImplementation((...args: any[]) => {
         return (...targetArgs: any[]) => {
             const [target, key, descriptor] = targetArgs;
-
-            // Armazenar os dados da chamada diretamente na propriedade calls do mock
-            const calls = mockFn.mock.calls as unknown as MockDecoratorCall[];
-            calls.push({
-                decoratorArgs: args,
-                target,
-                key,
-                descriptor,
-            } as unknown as any);
-
+            mockFn(args, target, key, descriptor);
             return descriptor;
         };
     });
@@ -36,15 +18,7 @@ const createMockParamDecorator = (name: string) => {
     const mockFn = vi.fn().mockImplementation((...args: any[]) => {
         return (...targetArgs: any[]) => {
             const [target, key, paramIndex] = targetArgs;
-
-            // Armazenar os dados da chamada diretamente na propriedade calls do mock
-            const calls = mockFn.mock.calls as unknown as MockDecoratorCall[];
-            calls.push({
-                decoratorArgs: args,
-                target,
-                key,
-                paramIndex,
-            } as unknown as any);
+            mockFn(args, target, key, paramIndex);
         };
     });
 
