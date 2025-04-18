@@ -176,6 +176,7 @@
 		"cron": "^3.5.0",
 		"dotenv": "^16.4.7",
 		"elliptic": "^6.6.1",
+		"eventemitter2": "^6.4.9",
 		"fast-glob": "^3.3.3",
 		"fast-json-stringify": "^6.0.1",
 		"graphql": "^16.10.0",
@@ -204,8 +205,8 @@
 		"yaml": "^2.7.1"
 	},
 	"peerDependencies": {
-        "cli-cursor": "^5.0.0"
-    },
+		"cli-cursor": "^5.0.0"
+	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
 			"@apollo/protobufjs",
