@@ -134,7 +134,7 @@ export class Repository extends Singleton {
                         value = value.split(',');
                         break;
                     case 'boolean':
-                        value = value === 'true';
+                        value = value === 'true' || value === '1';
                         break;
                     case 'number':
                         value = parseInt(value);
