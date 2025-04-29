@@ -232,7 +232,7 @@ export function Auth(
                             }
                         }
 
-                        if (
+                        /*if (
                             decoded.fingerprint !==
                             generateFingerprint(request.req, decoded.username)
                         ) {
@@ -246,7 +246,7 @@ export function Auth(
                             });
 
                             return response.code(403).end('Forbidden');
-                        }
+                        }*/
 
                         request.user = decoded;
                         next();

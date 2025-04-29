@@ -72,9 +72,7 @@ export function generateFingerprint(req, usernameHashed) {
         req.connection?.remoteAddress ||
         req.ip;
     const language = req.headers['accept-language'] || '';
-    const referer = req.headers['referer']
-        ? new URL(req.headers['referer']).origin
-        : '';
-    const rawFingerprint = `${userAgent}|${ip}|${language}|${referer}|${usernameHashed}`;
+
+    const rawFingerprint = `${userAgent}|${ip}|${language}|${usernameHashed}`;
     return crypto.createHash('sha256').update(rawFingerprint).digest('hex');
 }
