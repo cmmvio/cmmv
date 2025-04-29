@@ -160,11 +160,7 @@ export class AuthAutorizationService extends AbstractService {
             );
         }
 
-        if (
-            ((requireEmailValidation && !user.verifyEmail) ||
-                !requireEmailValidation) &&
-            !user.root
-        ) {
+        if (!user.verifyEmail && !user.root) {
             throw new HttpException(
                 'Email not validated',
                 HttpStatus.FORBIDDEN,
