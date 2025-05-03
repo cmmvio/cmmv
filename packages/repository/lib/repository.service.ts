@@ -153,6 +153,9 @@ export class Repository extends Singleton {
     public static async log(message: LogEvent) {
         if (Repository.logEntity !== null) {
             const repository = this.getRepository(Repository.logEntity);
+            const logs = Config.get<boolean>('logs.enabled', false);
+
+            if (!logs) return;
 
             try {
                 switch (message.context) {
