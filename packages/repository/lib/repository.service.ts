@@ -624,6 +624,11 @@ export class Repository extends Singleton {
         if (!this.validateCriteria(entity, criteria))
             throw new Error('Invalid criteria');
 
+        //@ts-ignore
+        if (criteria?.t)
+            //@ts-ignore
+            delete criteria.t; //Fix cdn cache
+
         return await this.findBy(entity, criteria, options);
     }
 
@@ -642,6 +647,11 @@ export class Repository extends Singleton {
         try {
             if (!this.validateCriteria(entity, criteria))
                 throw new Error('Invalid criteria');
+
+            //@ts-ignore
+            if (criteria?.t)
+                //@ts-ignore
+                delete criteria.t; //Fix cdn cache
 
             const repository = this.getRepository(entity);
             const registry = await repository.findOne({
@@ -687,6 +697,8 @@ export class Repository extends Singleton {
             const search = this.escape(queries?.search || '');
             const searchField = this.escape(queries?.searchField || '');
             const filters = queries ? { ...queries } : {};
+
+            if (queries?.t) delete filters.t; //Fix cdn cache
 
             delete filters.limit;
             delete filters.offset;
@@ -781,6 +793,11 @@ export class Repository extends Singleton {
         options: FindManyOptions<Entity> = {},
     ): Promise<number> {
         const repository = this.getRepository(entity);
+
+        //@ts-ignore
+        if (criteria?.t)
+            //@ts-ignore
+            delete criteria.t; //Fix cdn cache
 
         return await repository.count({
             where: criteria,
