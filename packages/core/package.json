@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/core",
-    "version": "0.13.4",
+    "version": "0.13.5",
     "description": "CMMV core module for contract and application management",
     "publishConfig": {
         "access": "public"
