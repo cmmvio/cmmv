@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/protobuf",
-    "version": "0.14.1",
+    "version": "0.14.2",
     "description": "Protobuf management module for RPC communication for CMMV",
     "keywords": [
         "cmmv",
@@ -26,5 +26,5 @@
         "protobufjs": "^7.4.0",
         "uglify-js": "^3.19.3"
     },
-    "gitHead": "7fbeab3208de67c39f6837f96189f002fc26e6d2"
+    "gitHead": "0f23357a0b1ff0db14c0c71c10d90bf26e388512"
 }
