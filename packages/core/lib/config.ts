@@ -12,7 +12,7 @@ export class Config extends Singleton {
     private config: Record<string, any> = {};
     private static readonly logger = new Logger('Config');
 
-    public static loadConfig(): void {
+    public static async loadConfig(): Promise<void> {
         const rootDir = process.cwd();
         const configFiles = [
             '.cmmv.config',
@@ -22,7 +22,7 @@ export class Config extends Singleton {
         ];
         const extensions = ['.js', '.cjs', '.ts'];
 
-        configFiles.forEach(async (configName) => {
+        await configFiles.forEach(async (configName) => {
             for (const ext of extensions) {
                 const filePath = path.join(rootDir, `${configName}${ext}`);
 
@@ -34,10 +34,11 @@ export class Config extends Singleton {
                             configModule = await import(filePath);
                         else configModule = require(filePath);
 
-                        if (configName.includes('config')) {
+                        if (configModule || configName.includes('config')) {
                             const instance = Config.getInstance();
                             instance.config =
                                 configModule.default || configModule;
+                            Config.assign(configModule.default || configModule);
                         } else if (configName.includes('test')) {
                             Config.assign(configModule);
                         }
@@ -151,20 +152,40 @@ export class Config extends Singleton {
                 if (configValue === undefined || configValue === null) continue;
 
                 if (schemaDefinition.type !== 'any') {
-                    const isTypeValid =
-                        (schemaDefinition.type === 'array' &&
-                            Array.isArray(configValue)) ||
-                        schemaDefinition.type === typeof configValue;
+                    let isTypeValid = false;
 
-                    if (!isTypeValid) {
-                        throw new Error(
-                            `Configuration "${currentPath}" expects type "${schemaDefinition.type}" but received "${typeof configValue}".`,
-                        );
+                    if (Array.isArray(schemaDefinition.type)) {
+                        isTypeValid = schemaDefinition.type.some((type) => {
+                            return (
+                                (type === 'array' &&
+                                    Array.isArray(configValue)) ||
+                                type === typeof configValue
+                            );
+                        });
+
+                        if (!isTypeValid) {
+                            throw new Error(
+                                `Configuration "${currentPath}" expects one of types [${schemaDefinition.type.join(', ')}] but received "${typeof configValue}".`,
+                            );
+                        }
+                    } else {
+                        isTypeValid =
+                            (schemaDefinition.type === 'array' &&
+                                Array.isArray(configValue)) ||
+                            schemaDefinition.type === typeof configValue;
+
+                        if (!isTypeValid) {
+                            throw new Error(
+                                `Configuration "${currentPath}" expects type "${schemaDefinition.type}" but received "${typeof configValue}".`,
+                            );
+                        }
                     }
                 }
 
                 if (
-                    schemaDefinition.type === 'array' &&
+                    ((Array.isArray(schemaDefinition.type) &&
+                        schemaDefinition.type.includes('array')) ||
+                        schemaDefinition.type === 'array') &&
                     schemaDefinition.properties &&
                     Array.isArray(configValue)
                 ) {
@@ -184,7 +205,9 @@ export class Config extends Singleton {
                 }
 
                 if (
-                    schemaDefinition.type === 'object' &&
+                    ((Array.isArray(schemaDefinition.type) &&
+                        schemaDefinition.type.includes('object')) ||
+                        schemaDefinition.type === 'object') &&
                     schemaDefinition.properties
                 ) {
                     if (

@@ -102,7 +102,6 @@ export class Application {
 
     constructor(settings: IApplicationSettings, compile: boolean = false) {
         this.logger.log('Initialize application');
-        Config.loadConfig();
 
         this.settings = settings;
         this.compile = compile;
@@ -111,7 +110,9 @@ export class Application {
         Application.instance = this;
     }
 
-    protected preInitialize() {
+    protected async preInitialize() {
+        await Config.loadConfig();
+
         this.httpOptions = (this.settings && this.settings.httpOptions) || {};
         this.httpAdapter =
             this.settings && this.settings.httpAdapter
@@ -122,8 +123,8 @@ export class Application {
             if (this.settings.wsAdapter)
                 this.wsAdapter = new this.settings.wsAdapter(this.httpAdapter);
 
-            this.host = Config.get<string>('server.host') || '0.0.0.0';
-            this.port = Config.get<number>('server.port') || 3000;
+            this.host = Config.get<string>('server.host', '0.0.0.0');
+            this.port = Config.get<number>('server.port', 3000);
 
             Application.contractsCls = this.settings.contracts || [];
             this.transpilers = this.settings.transpilers || [];

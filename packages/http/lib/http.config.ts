@@ -9,7 +9,7 @@ export const HTTPConfig: ConfigSchema = {
         },
         port: {
             required: true,
-            type: 'number',
+            type: ['number', 'string'],
             default: 3000,
         },
         poweredBy: {

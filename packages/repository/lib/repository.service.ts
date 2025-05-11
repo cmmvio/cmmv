@@ -984,6 +984,25 @@ export class Repository extends Singleton {
     }
 
     /**
+     * Delete many entities from the repository
+     * @param entity - The entity type
+     * @param criteria - The criteria to delete the entities by
+     * @returns number
+     */
+    public static async deleteMany<Entity>(
+        entity: new () => Entity,
+        criteria: FindOptionsWhere<Entity>,
+    ): Promise<number> {
+        try {
+            const repository = this.getRepository(entity);
+            const result = await repository.delete(criteria);
+            return result.affected;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    /**
      * Check if an entity exists in the repository
      * @param entity - The entity type
      * @param criteria - The criteria to check if the entity exists by
@@ -1575,6 +1594,15 @@ export class RepositorySchema<Entity, T> {
         }
 
         return { success: result > 0, affected: result };
+    }
+
+    /**
+     * Delete many entities from the repository
+     * @param criteria - The criteria to delete the entities by
+     * @returns number
+     */
+    public async deleteMany(criteria: any) {
+        return await Repository.deleteMany(this.entity, criteria);
     }
 
     /**

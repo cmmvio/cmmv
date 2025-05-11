@@ -12,7 +12,8 @@ export interface ConfigSubPropsSchemas {
             | 'object'
             | 'any'
             | 'function'
-            | 'array';
+            | 'array'
+            | string[];
         default?: any;
         properties?: ConfigSubPropsSchemas;
     };
