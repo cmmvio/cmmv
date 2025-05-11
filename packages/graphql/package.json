@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/graphql",
-    "version": "0.14.2",
+    "version": "0.14.3",
     "description": "GraphQL module for CMMV",
     "keywords": [
         "cmmv",
@@ -23,8 +23,8 @@
     "homepage": "https://cmmv.io",
     "dependencies": {
         "@apollo/server": "^4.11.3",
-        "@cmmv/auth": "0.14.2",
-        "@cmmv/core": "0.14.2",
+        "@cmmv/auth": "0.14.3",
+        "@cmmv/core": "0.14.3",
         "@cmmv/server": "^0.9.1",
         "graphql": "^16.10.0",
         "graphql-scalars": "^1.24.1",
@@ -37,5 +37,5 @@
             "skia-canvas"
         ]
     },
-    "gitHead": "0f23357a0b1ff0db14c0c71c10d90bf26e388512"
+    "gitHead": "1d30dee4b4d4dbcbe57ef52ec2d933fe75c66713"
 }

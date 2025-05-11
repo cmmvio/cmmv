@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/email",
-    "version": "0.14.2",
+    "version": "0.14.3",
     "description": "Module for sending emails with Nodemail for CMMV",
     "keywords": [
         "cmmv",
@@ -23,7 +23,7 @@
     "homepage": "https://cmmv.io",
     "dependencies": {
         "@aws-sdk/client-ses": "^3.775.0",
-        "@cmmv/core": "0.14.2",
+        "@cmmv/core": "0.14.3",
         "nodemailer": "^6.10.0"
     },
     "pnpm": {
@@ -31,5 +31,5 @@
             "aws-sdk"
         ]
     },
-    "gitHead": "0f23357a0b1ff0db14c0c71c10d90bf26e388512"
+    "gitHead": "1d30dee4b4d4dbcbe57ef52ec2d933fe75c66713"
 }

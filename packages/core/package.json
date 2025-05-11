@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/core",
-    "version": "0.14.2",
+    "version": "0.14.3",
     "description": "CMMV core module for contract and application management",
     "publishConfig": {
         "access": "public"
@@ -35,5 +35,5 @@
         "uglify-js": "^3.19.3",
         "uuid": "^10.0.0"
     },
-    "gitHead": "0f23357a0b1ff0db14c0c71c10d90bf26e388512"
+    "gitHead": "1d30dee4b4d4dbcbe57ef52ec2d933fe75c66713"
 }
