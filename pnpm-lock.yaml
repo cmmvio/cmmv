@@ -11,10 +11,10 @@ importers:
                 specifier: ^4.12.0
                 version: 4.12.0(encoding@0.1.13)(graphql@16.11.0)
             '@aws-sdk/client-s3':
-                specifier: ^3.806.0
+                specifier: ^3.782.0
                 version: 3.806.0
             '@aws-sdk/client-ses':
-                specifier: ^3.806.0
+                specifier: ^3.782.0
                 version: 3.806.0
             '@cmmv/body-parser':
                 specifier: ^0.9.5
@@ -53,7 +53,7 @@ importers:
                 specifier: ^1.10.10
                 version: 1.10.10(@swc/core@1.11.24)(@swc/types@0.1.21)(typescript@5.8.3)
             '@swc/core':
-                specifier: ^1.11.24
+                specifier: ^1.11.18
                 version: 1.11.24
             '@xenova/transformers':
                 specifier: ^2.17.2
@@ -65,7 +65,7 @@ importers:
                 specifier: ^0.5.1
                 version: 0.5.1
             class-validator:
-                specifier: ^0.14.2
+                specifier: ^0.14.1
                 version: 0.14.2
             cli-cursor:
                 specifier: ^5.0.0
@@ -74,7 +74,7 @@ importers:
                 specifier: ^3.5.0
                 version: 3.5.0
             dotenv:
-                specifier: ^16.5.0
+                specifier: ^16.4.7
                 version: 16.5.0
             elliptic:
                 specifier: ^6.6.1
@@ -89,7 +89,7 @@ importers:
                 specifier: ^6.0.1
                 version: 6.0.1
             graphql:
-                specifier: ^16.11.0
+                specifier: ^16.10.0
                 version: 16.11.0
             graphql-scalars:
                 specifier: ^1.24.2
@@ -110,16 +110,16 @@ importers:
                 specifier: ^9.0.2
                 version: 9.0.2
             mongodb:
-                specifier: ^6.16.0
+                specifier: ^6.15.0
                 version: 6.16.0(socks@2.8.4)
             pg:
-                specifier: ^8.15.6
+                specifier: ^8.14.1
                 version: 8.15.6
             pnpm:
-                specifier: ^10.10.0
+                specifier: ^10.8.0
                 version: 10.10.0
             protobufjs:
-                specifier: ^7.5.1
+                specifier: ^7.4.0
                 version: 7.5.1
             qrcode:
                 specifier: ^1.5.4
@@ -163,7 +163,7 @@ importers:
         devDependencies:
             '@cmmv/core':
                 specifier: latest
-                version: 0.13.6
+                version: 0.14.3
             '@cmmv/encryptor':
                 specifier: ^0.7.0
                 version: 0.7.0(typescript@5.8.3)
@@ -171,16 +171,16 @@ importers:
                 specifier: ^0.0.50
                 version: 0.0.50(request@2.88.2)(typescript@5.8.3)
             '@commitlint/cli':
-                specifier: ^19.8.1
+                specifier: ^19.8.0
                 version: 19.8.1(@types/node@22.15.17)(typescript@5.8.3)
             '@commitlint/config-angular':
-                specifier: ^19.8.1
+                specifier: ^19.8.0
                 version: 19.8.1
             '@commitlint/config-conventional':
-                specifier: ^19.8.1
+                specifier: ^19.8.0
                 version: 19.8.1
             '@keyv/compress-gzip':
-                specifier: ^2.0.3
+                specifier: ^2.0.2
                 version: 2.0.3(keyv@5.3.3)
             '@keyv/redis':
                 specifier: ^3.0.1
@@ -216,7 +216,7 @@ importers:
                 specifier: ^10.0.10
                 version: 10.0.10
             '@types/node':
-                specifier: ^22.15.17
+                specifier: ^22.14.0
                 version: 22.15.17
             '@types/semver':
                 specifier: ^7.7.0
@@ -237,7 +237,7 @@ importers:
                 specifier: ^0.64.1
                 version: 0.64.1
             '@vitejs/plugin-vue':
-                specifier: ^5.2.4
+                specifier: ^5.2.3
                 version: 5.2.4(vite@5.4.19(@types/node@22.15.17)(sass@1.88.0)(terser@5.39.0))(vue@3.5.13(typescript@5.8.3))
             '@vitejs/plugin-vue-jsx':
                 specifier: ^4.1.2
@@ -249,7 +249,7 @@ importers:
                 specifier: ^2.1692.0
                 version: 2.1692.0
             axios:
-                specifier: ^1.9.0
+                specifier: ^1.8.4
                 version: 1.9.0
             bytes:
                 specifier: ^3.1.2
@@ -285,7 +285,7 @@ importers:
                 specifier: ^0.24.2
                 version: 0.24.2
             eslint:
-                specifier: ^9.26.0
+                specifier: ^9.24.0
                 version: 9.26.0(jiti@2.4.2)
             eslint-config-prettier:
                 specifier: 9.1.0
@@ -309,16 +309,16 @@ importers:
                 specifier: ^9.1.7
                 version: 9.1.7
             keyv:
-                specifier: ^5.3.3
+                specifier: ^5.3.2
                 version: 5.3.3
             lerna:
-                specifier: ^8.2.2
+                specifier: ^8.2.1
                 version: 8.2.2(@swc-node/register@1.10.10(@swc/core@1.11.24)(@swc/types@0.1.21)(typescript@5.8.3))(@swc/core@1.11.24)(encoding@0.1.13)
             lerna-changelog:
                 specifier: ^2.2.0
                 version: 2.2.0
             lint-staged:
-                specifier: ^15.5.2
+                specifier: ^15.5.0
                 version: 15.5.2
             listhen:
                 specifier: ^1.9.0
@@ -327,10 +327,10 @@ importers:
                 specifier: ^3.0.4
                 version: 3.0.4
             nodemailer:
-                specifier: ^6.10.1
+                specifier: ^6.10.0
                 version: 6.10.1
             nodemon:
-                specifier: ^3.1.10
+                specifier: ^3.1.9
                 version: 3.1.10
             npm-run-all:
                 specifier: ^4.1.5
@@ -348,7 +348,7 @@ importers:
                 specifier: ^5.14.0
                 version: 5.14.0(rollup@4.40.2)
             sass:
-                specifier: ^1.88.0
+                specifier: ^1.86.3
                 version: 1.88.0
             sinon:
                 specifier: ^19.0.5
@@ -357,7 +357,7 @@ importers:
                 specifier: ^5.39.0
                 version: 5.39.0
             typeorm:
-                specifier: ^0.3.23
+                specifier: ^0.3.22
                 version: 0.3.23(better-sqlite3@11.9.0)(ioredis@5.6.1)(mongodb@6.16.0(socks@2.8.4))(pg@8.15.6)(redis@4.7.1)(reflect-metadata@0.2.2)(sqlite3@5.1.7)
             typescript:
                 specifier: ^5.8.3
@@ -375,7 +375,7 @@ importers:
                 specifier: ^0.27.5
                 version: 0.27.5(@babel/parser@7.27.2)(rollup@4.40.2)(vue@3.5.13(typescript@5.8.3))
             vite:
-                specifier: ^5.4.19
+                specifier: ^5.4.17
                 version: 5.4.19(@types/node@22.15.17)(sass@1.88.0)(terser@5.39.0)
             vite-plugin-compression:
                 specifier: ^0.5.1
@@ -390,7 +390,7 @@ importers:
                 specifier: ^9.4.3
                 version: 9.4.3(eslint@9.26.0(jiti@2.4.2))
             ws:
-                specifier: ^8.18.2
+                specifier: ^8.18.1
                 version: 8.18.2
 
 packages:
@@ -1037,10 +1037,10 @@ packages:
                 integrity: sha512-aZBEAwUo8lrxUv6X6nPxsSaP7EnXeMUSTuQn/Pug3nICtj6cYbMLWPgYLZWw1vSxHB1ci4rTwU+YZ15Sd1avyA==,
             }
 
-    '@cmmv/core@0.13.6':
+    '@cmmv/core@0.14.3':
         resolution:
             {
-                integrity: sha512-fHNmiU/0WeTe+hZVAn37tW8aZ+snITGGIoqDryrwW1DUnS00m10oIWxfPijCfWMDC0DetNNFhsrwfWbsSepEAw==,
+                integrity: sha512-UpZ42RF9AhrwBjbcB/4ngNYm+ItoszCSeiYcxT8y7+VFy0goIlAqal8R6o59Lz2bT7eCO6w9tBu68kuOaEK7Qg==,
             }
 
     '@cmmv/cors@0.9.5':
@@ -15624,7 +15624,7 @@ snapshots:
             on-headers: 1.0.2
             vary: 1.1.2
 
-    '@cmmv/core@0.13.6':
+    '@cmmv/core@0.14.3':
         dependencies:
             class-transformer: 0.5.1
             class-validator: 0.14.2
@@ -19921,9 +19921,9 @@ snapshots:
     execa@5.0.0:
         dependencies:
             cross-spawn: 7.0.6
-            get-stream: 6.0.0
+            get-stream: 6.0.1
             human-signals: 2.1.0
-            is-stream: 2.0.0
+            is-stream: 2.0.1
             merge-stream: 2.0.0
             npm-run-path: 4.0.1
             onetime: 5.1.2
@@ -21123,13 +21123,13 @@ snapshots:
     jake@10.9.2:
         dependencies:
             async: 3.2.6
-            chalk: 4.1.0
+            chalk: 4.1.2
             filelist: 1.0.4
             minimatch: 3.1.2
 
     jest-diff@29.7.0:
         dependencies:
-            chalk: 4.1.0
+            chalk: 4.1.2
             diff-sequences: 29.6.3
             jest-get-type: 29.6.3
             pretty-format: 29.7.0
@@ -21918,7 +21918,7 @@ snapshots:
             array-differ: 3.0.0
             array-union: 2.1.0
             arrify: 2.0.1
-            minimatch: 3.0.5
+            minimatch: 3.1.2
 
     mute-stdout@2.0.0: {}
 
@@ -22159,7 +22159,7 @@ snapshots:
             '@yarnpkg/parsers': 3.0.2
             '@zkochan/js-yaml': 0.0.7
             axios: 1.9.0
-            chalk: 4.1.0
+            chalk: 4.1.2
             cli-cursor: 3.1.0
             cli-spinners: 2.6.1
             cliui: 8.0.1
@@ -22320,9 +22320,9 @@ snapshots:
     ora@5.3.0:
         dependencies:
             bl: 4.1.0
-            chalk: 4.1.0
+            chalk: 4.1.2
             cli-cursor: 3.1.0
-            cli-spinners: 2.6.1
+            cli-spinners: 2.9.2
             is-interactive: 1.0.0
             log-symbols: 4.1.0
             strip-ansi: 6.0.1
