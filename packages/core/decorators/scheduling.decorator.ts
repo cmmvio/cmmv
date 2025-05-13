@@ -10,6 +10,14 @@ export function Cron(cronTime: string): MethodDecorator {
     ) => {
         const method = descriptor.value;
         Reflect.defineMetadata(CRON_METADATA, cronTime, method);
-        Scope.addToArray('__crons', { target, method, cronTime });
+
+        const crons = Scope.getArray('__crons') || [];
+
+        const existingCronIndex = crons.findIndex(
+            (cron) => cron.target === target && cron.method === method,
+        );
+
+        if (existingCronIndex < 0)
+            Scope.addToArray('__crons', { target, method, cronTime });
     };
 }
