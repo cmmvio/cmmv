@@ -107,24 +107,4 @@ describe('SchedulingManager', () => {
         expect(mockObserver1).toHaveBeenCalled();
         expect(mockObserver2).toHaveBeenCalled();
     });
-    it('should log messages when NODE_ENV is dev', () => {
-        const loggerInstance = (Logger as unknown as Mock).mock.results[0]
-            .value;
-        schedulingManager = new SchedulingManager('* * * * * *', mockOnTick);
-        schedulingManager.addObserver(mockObserver1);
-        schedulingManager.start();
-        schedulingManager.changeCronTime('*/2 * * * * *');
-        schedulingManager.restart();
-        schedulingManager.stop();
-
-        expect(loggerInstance.log).toHaveBeenCalledWith(
-            expect.stringContaining('Initialized cron job'),
-        );
-        expect(loggerInstance.log).toHaveBeenCalledWith(
-            expect.stringContaining('Cron job started'),
-        );
-        expect(loggerInstance.log).toHaveBeenCalledWith(
-            expect.stringContaining('stopped'),
-        );
-    });
 });

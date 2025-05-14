@@ -19,12 +19,6 @@ export class SchedulingService extends Singleton {
 
             manager.start();
             instance.managers.push(manager);
-
-            if (process.env.NODE_ENV === 'dev') {
-                instance.logger.log(
-                    `Cron job started for ${method.name} with schedule: ${cronTime}`,
-                );
-            }
         });
     }
 

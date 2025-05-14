@@ -11,7 +11,6 @@ export * from './services';
 export * from './transpilers';
 export * from './utils';
 export * from './lib';
-export * from './modules';
 
 export {
     Transform,

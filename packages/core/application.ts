@@ -713,8 +713,7 @@ import "reflect-metadata";
 import {
     Module, ApplicationTranspile,
     ApplicationConfig, ContractsTranspile,
-    SchedulingModule, SchedulingService,
-    EventsService
+    SchedulingService, EventsService
 } from "@cmmv/core";
 
 //Controllers
@@ -736,9 +735,6 @@ export let ApplicationModule = new Module("app", {
     transpilers: [
         ApplicationTranspile,
         ContractsTranspile
-    ],
-    submodules: [
-        SchedulingModule
     ]
 });`;
 
