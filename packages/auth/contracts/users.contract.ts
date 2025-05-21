@@ -239,6 +239,14 @@ export class UserContract extends AbstractContract {
     })
     unsubscribeNewsletter: boolean;
 
+    @ContractField({
+        protoType: 'bool',
+        nullable: true,
+        readOnly: true,
+        defaultValue: false,
+    })
+    temporaryPassword: boolean;
+
     // Login
     @ContractMessage({
         name: 'LoginRequest',
