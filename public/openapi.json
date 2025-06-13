@@ -396,6 +396,12 @@
             "readOnly": true,
             "default": false,
             "required": false
+          },
+          "temporaryPassword": {
+            "type": "boolean",
+            "readOnly": true,
+            "default": false,
+            "required": false
           }
         },
         "required": [
