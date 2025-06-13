@@ -21,7 +21,15 @@ export default {
                 level: 6,
             },
         },
-        cors: true,
+        cors: {
+            enabled: true,
+            options: {
+                origin: '*',
+                methods: ['GET', 'POST', 'PUT', 'DELETE'],
+                allowedHeaders: ['Content-Type', 'Authorization'],
+                credentials: true,
+            },
+        },
         logging: 'all',
         helmet: {
             enabled: false,

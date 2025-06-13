@@ -33,8 +33,20 @@ export const HTTPConfig: ConfigSchema = {
         },
         cors: {
             required: false,
-            type: 'boolean',
-            default: true,
+            type: 'object',
+            default: {},
+            properties: {
+                enabled: {
+                    required: false,
+                    type: 'boolean',
+                    default: true,
+                },
+                options: {
+                    required: false,
+                    type: 'object',
+                    default: {},
+                },
+            },
         },
         logging: {
             required: false,

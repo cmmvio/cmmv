@@ -80,13 +80,29 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         this.instance.use(json({ limit: '50mb' }));
         this.instance.use(urlencoded({ limit: '50mb', extended: true }));
 
-        if (Config.get<boolean>('server.cors', true)) {
-            this.instance.use(
-                cors({
-                    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-                    allowedHeaders: ['Content-Type', 'Authorization'],
-                }),
-            );
+        if (Config.get<boolean>('server.cors.enabled', true)) {
+            const corsOptions = Config.get('server.cors.options', {
+                methods: ['GET', 'POST', 'PUT', 'DELETE'],
+                allowedHeaders: ['Content-Type', 'Authorization'],
+                origin: Config.get('server.cors.origin', '*'),
+                credentials: Config.get('server.cors.credentials', false),
+                maxAge: Config.get('server.cors.maxAge', 0),
+                preflightContinue: Config.get(
+                    'server.cors.preflightContinue',
+                    false,
+                ),
+                optionsSuccessStatus: Config.get(
+                    'server.cors.optionsSuccessStatus',
+                    204,
+                ),
+                headers: Config.get('server.cors.headers', [
+                    'Content-Type',
+                    'Authorization',
+                ]),
+                exposedHeaders: Config.get('server.cors.exposedHeaders', []),
+            });
+
+            this.instance.use(cors(corsOptions));
         }
 
         if (Config.get<boolean>('server.helmet.enabled', true)) {
