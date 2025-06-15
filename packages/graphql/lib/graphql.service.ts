@@ -20,6 +20,9 @@ import GraphQLJSON from 'graphql-type-json';
 
 @Service('graphql')
 export class GraphQLService extends AbstractService {
+    /**
+     * Start the Apollo server
+     */
     @Hook(HooksType.onInitialize)
     async startApolloServer() {
         const sourceDir = Config.get<string>('app.sourceDir', 'src');

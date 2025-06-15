@@ -16,6 +16,10 @@ export class CacheService extends Singleton {
     public logger: Logger = new Logger('CacheService');
     public manager: cacheManager.Cache<any> | cacheManager.MemoryCache;
 
+    /**
+     * Load the config
+     * @param application - The application
+     */
     public static async loadConfig(application: Application): Promise<void> {
         const instance = CacheService.getInstance();
         const config = Config.get('cache');
@@ -125,6 +129,13 @@ export class CacheService extends Singleton {
         }
     }
 
+    /**
+     * Set a value
+     * @param key - The key
+     * @param value - The value
+     * @param ttl - The TTL
+     * @returns The result
+     */
     public static async set(
         key: string,
         value: string,
@@ -139,6 +150,11 @@ export class CacheService extends Singleton {
         }
     }
 
+    /**
+     * Get a value
+     * @param key - The key
+     * @returns The value
+     */
     public static async get(key: string): Promise<any> {
         try {
             const instance = CacheService.getInstance();
@@ -149,6 +165,11 @@ export class CacheService extends Singleton {
         }
     }
 
+    /**
+     * Delete a value
+     * @param key - The key
+     * @returns The result
+     */
     public static async del(key: string): Promise<boolean> {
         try {
             const instance = CacheService.getInstance();

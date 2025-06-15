@@ -28,7 +28,6 @@ export class OAuth2Service extends AbstractService {
         super();
     }
 
-    //Login
     /**
      * @description Authenticate the user
      * @param req
@@ -367,6 +366,7 @@ export class OAuth2Service extends AbstractService {
     }
 
     //Clients
+
     /**
      * @description Create a new client
      * @param newClient

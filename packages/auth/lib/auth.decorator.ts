@@ -2,13 +2,17 @@ import * as jwt from 'jsonwebtoken';
 import * as crypto from 'crypto';
 
 import { Config, Hooks, HooksType, Logger } from '@cmmv/core';
-
 import { generateFingerprint } from '@cmmv/http';
 
 import { IAuthSettings, IJWTDecoded } from './auth.interface';
 import { AuthSessionsService } from '../services/sessions.service';
 import { decryptJWTData } from './auth.utils';
 
+/**
+ * Create an auth decorator
+ * @param rolesOrSettings - The roles or settings
+ * @returns The auth decorator
+ */
 export function Auth(
     rolesOrSettings?: string[] | string | IAuthSettings,
 ): MethodDecorator {

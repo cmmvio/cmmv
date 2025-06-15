@@ -434,7 +434,12 @@ export class AuthUsersService extends AbstractService {
         };
     }
 
-    // GraphQL Handlers
+    /**
+     * Handler for block user
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerBlockUser(payload: { userId: string }, req: any) {
         const result = await this.blockUser(payload.userId);
         return {
@@ -443,6 +448,12 @@ export class AuthUsersService extends AbstractService {
         };
     }
 
+    /**
+     * Handler for unblock user
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerUnblockUser(payload: { userId: string }, req: any) {
         const result = await this.unblockUser(payload.userId);
         return {
@@ -451,6 +462,12 @@ export class AuthUsersService extends AbstractService {
         };
     }
 
+    /**
+     * Handler for assign groups to user
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerAssignGroupsToUser(
         payload: { userId: string; groups: string | string[] },
         req: any,
@@ -465,6 +482,12 @@ export class AuthUsersService extends AbstractService {
         };
     }
 
+    /**
+     * Handler for remove groups from user
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerRemoveGroups(
         payload: { userId: string; groups: string | string[] },
         req: any,

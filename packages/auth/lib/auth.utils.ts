@@ -7,6 +7,11 @@ import { Config } from '@cmmv/core';
 
 import { IJWTDecoded } from './auth.interface';
 
+/**
+ * Verify a JWT token
+ * @param token - The token
+ * @returns The decoded token
+ */
 export async function jwtVerify(token: string): Promise<IJWTDecoded> {
     const jwtSecret = Config.get<string>('auth.jwtSecret');
 
@@ -23,6 +28,12 @@ export async function jwtVerify(token: string): Promise<IJWTDecoded> {
     }
 }
 
+/**
+ * Encrypt a JWT data
+ * @param text - The text
+ * @param secret - The secret
+ * @returns The encrypted data
+ */
 export function encryptJWTData(text: string, secret: string): string {
     try {
         const iv = crypto.randomBytes(12);
@@ -40,6 +51,12 @@ export function encryptJWTData(text: string, secret: string): string {
     }
 }
 
+/**
+ * Decrypt a JWT data
+ * @param encryptedText - The encrypted text
+ * @param secret - The secret
+ * @returns The decrypted data
+ */
 export function decryptJWTData(encryptedText: string, secret: string) {
     try {
         const [iv, encrypted, authTag] = encryptedText
@@ -63,6 +80,12 @@ export function decryptJWTData(encryptedText: string, secret: string) {
     }
 }
 
+/**
+ * Generate a fingerprint
+ * @param req - The request
+ * @param usernameHashed - The username hashed
+ * @returns The fingerprint
+ */
 export function generateFingerprint(req, usernameHashed) {
     const userAgent = req.headers['user-agent'] || '';
     const ip =

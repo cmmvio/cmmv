@@ -110,6 +110,9 @@ export class Application {
         Application.instance = this;
     }
 
+    /**
+     * Pre initialize
+     */
     protected async preInitialize() {
         await Config.loadConfig();
 
@@ -151,6 +154,11 @@ export class Application {
         }
     }
 
+    /**
+     * Initialize the application
+     * @param settings - The settings
+     * @param compile - The compile
+     */
     protected async initialize(
         settings: IApplicationSettings,
         compile: boolean = false,
@@ -275,6 +283,10 @@ export class Application {
         if (compile) this.logger.log(`Compilation process complete!`);
     }
 
+    /**
+     * Restart the application
+     * @returns The result
+     */
     public async restart() {
         if (this.httpAdapter) this.httpAdapter.close();
 
@@ -284,6 +296,11 @@ export class Application {
         return true;
     }
 
+    /**
+     * Execute the process
+     * @param settings - The settings
+     * @returns The result
+     */
     protected async execProcess(settings: IApplicationSettings) {
         try {
             Application.contractsCls = settings.contracts || [];

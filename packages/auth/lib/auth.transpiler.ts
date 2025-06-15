@@ -20,14 +20,17 @@ export class AuthTranspile implements ITranspile {
         //if (hasWs) this.generateWebSocketIntegration();
     }
 
+    /**
+     * Generate the web socket integration
+     */
     async generateWebSocketIntegration() {
         const outputDir = path.resolve(process.cwd(), './src/gateways/auth');
         const wsFileName = `auth.gateway.ts`;
 
-        const wsTemplate = `/**                                                                               
+        const wsTemplate = `/**
     **********************************************
     This script was generated automatically by CMMV.
-    It is recommended not to modify this file manually, 
+    It is recommended not to modify this file manually,
     as it may be overwritten by the application.
     **********************************************
 **/
@@ -35,9 +38,9 @@ export class AuthTranspile implements ITranspile {
 import { Rpc, Message, Data, Socket, RpcUtils } from "@cmmv/ws";
 import { AuthService } from "@services/auth/auth.service";
 
-import { 
+import {
     LoginRequest,
-    RegisterRequest  
+    RegisterRequest
 } from "@models/auth/user.model";
 
 @Rpc("auth")
@@ -51,7 +54,7 @@ export class AuthGateway {
             const response = await RpcUtils.pack("auth", "LoginResponse", result);
 
             if(response)
-                socket.send(response);            
+                socket.send(response);
         }
         catch(e){
             return null;
@@ -65,7 +68,7 @@ export class AuthGateway {
             const response = await RpcUtils.pack("auth", "RegisterResponse", result);
 
             if(response)
-                socket.send(response);            
+                socket.send(response);
         }
         catch(e){
             return null;
@@ -85,5 +88,8 @@ export class AuthGateway {
         });
     }
 
+    /**
+     * Mapper roles
+     */
     async mapperRoles() {}
 }

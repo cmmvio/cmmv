@@ -217,7 +217,12 @@ export class AuthGroupsService extends AbstractService {
         return { message: 'Roles removed from group successfully' };
     }
 
-    // GraphQL Handlers
+    /**
+     * Handler for group get all
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerGroupGetAll(payload: any, req: any) {
         const result = await this.getAllGroups();
         return {
@@ -226,6 +231,12 @@ export class AuthGroupsService extends AbstractService {
         };
     }
 
+    /**
+     * Handler for group get in
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerGroupGetIn(
         payload: { ids: string[] | string },
         req: any,
@@ -237,6 +248,12 @@ export class AuthGroupsService extends AbstractService {
         };
     }
 
+    /**
+     * Handler for group create
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerCreateGroup(payload: GroupPayload, req: any) {
         const result = await this.createGroup(payload);
         return {
@@ -244,6 +261,13 @@ export class AuthGroupsService extends AbstractService {
             message: result.message,
         };
     }
+
+    /**
+     * Handler for group update
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerUpdateGroup(
         payload: { groupId: string; name: string },
         req: any,
@@ -257,6 +281,12 @@ export class AuthGroupsService extends AbstractService {
         };
     }
 
+    /**
+     * Handler for group delete
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerDeleteGroup(payload: { groupId: string }, req: any) {
         const result = await this.deleteGroup(payload.groupId);
         return {
@@ -265,6 +295,12 @@ export class AuthGroupsService extends AbstractService {
         };
     }
 
+    /**
+     * Handler for group assign roles
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerAssignRolesToGroup(
         payload: { groupId: string; roles: string[] },
         req: any,
@@ -279,6 +315,12 @@ export class AuthGroupsService extends AbstractService {
         };
     }
 
+    /**
+     * Handler for group remove roles
+     * @param payload - The payload
+     * @param req - The request
+     * @returns The result
+     */
     public async handlerRemoveRolesFromGroup(
         payload: { groupId: string; roles: string[] },
         req: any,
