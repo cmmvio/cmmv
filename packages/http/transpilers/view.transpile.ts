@@ -8,6 +8,9 @@ import { Config, ITranspile, Logger } from '@cmmv/core';
 export class ViewTranspile implements ITranspile {
     private logger: Logger = new Logger('ViewTranspile');
 
+    /**
+     * Run the transpile
+     */
     run(): void {
         const useRPCMiddleware = Config.get<boolean>(
             'rpc.injectMiddleware',

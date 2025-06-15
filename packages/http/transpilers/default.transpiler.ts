@@ -38,6 +38,10 @@ export class DefaultHTTPTranspiler
         this.generateModule(controllers, providers);
     }
 
+    /**
+     * Generate a service
+     * @param contract - The contract
+     */
     private generateService(contract: IContract): void {
         const generateBoilerplates = contract.generateBoilerplates === true;
         const serviceName = `${contract.controllerName}Service`;
@@ -231,6 +235,16 @@ ${contract.services
         }
     }
 
+    /**
+     * Get the controller decorators
+     * @param authRouter - The auth router
+     * @param rootOnlyRouter - The root only router
+     * @param hasCache - The has cache
+     * @param contract - The contract
+     * @param medatada - The medatada
+     * @param authRole - The auth role
+     * @returns The controller decorators
+     */
     private getControllerDecorators(
         { authRouter, rootOnlyRouter = false, hasCache, contract },
         medatada?: any,
@@ -249,6 +263,10 @@ ${contract.services
         return decoracotrs;
     }
 
+    /**
+     * Generate a controller
+     * @param contract - The contract
+     */
     private generateController(contract: IContract): void {
         const telemetry = Config.get<boolean>('app.telemetry');
         const generateBoilerplates = contract.generateBoilerplates === true;
@@ -478,6 +496,11 @@ export class ${controllerName} extends ${controllerName}Generated {}`),
         }
     }
 
+    /**
+     * Generate a module
+     * @param controllers - The controllers
+     * @param providers - The providers
+     */
     private generateModule(
         controllers: Array<{ name: string; subPath: string }>,
         providers: Array<{ name: string; subPath: string }>,
@@ -503,6 +526,11 @@ export class ${controllerName} extends ${controllerName}Generated {}`),
         ];
     }
 
+    /**
+     * Get the method formated
+     * @param raw - The raw method
+     * @returns The method formated
+     */
     private getMethodFormated(raw: string): string {
         switch (raw.toLocaleLowerCase()) {
             case 'get':
@@ -518,6 +546,12 @@ export class ${controllerName} extends ${controllerName}Generated {}`),
         }
     }
 
+    /**
+     * Import services
+     * @param importsFromModel - The imports from model
+     * @param contract - The contract
+     * @returns The import services
+     */
     private importServices(importsFromModel, contract: IContract): string {
         return importsFromModel.length
             ? `\n\nimport {

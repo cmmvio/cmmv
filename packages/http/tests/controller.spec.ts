@@ -19,7 +19,6 @@ import {
 } from '../decorators';
 
 import { ControllerRegistry } from '../registries/controller.registry';
-import { ProxyMiddleware } from '@cmmv/proxy';
 
 describe('Controller Decorators', () => {
     beforeEach(() => {

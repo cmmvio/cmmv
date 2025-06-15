@@ -6,6 +6,13 @@ import { getValueFromKey } from './view.utils';
 import { Directive, Template } from './view.template';
 import { evaluate, evaluateAsync } from './view.eval';
 
+/**
+ * Load data for SSR
+ * @param templateText - The template text
+ * @param data - The data
+ * @param template - The template
+ * @returns The template text
+ */
 export const ssrLoadData: Directive = async (
     templateText: string,
     data: Record<string, any>,
@@ -31,6 +38,13 @@ export const ssrLoadData: Directive = async (
     return templateText;
 };
 
+/**
+ * Load data for SSR
+ * @param templateText - The template text
+ * @param data - The data
+ * @param template - The template
+ * @returns The template text
+ */
 export const sData: Directive = async (
     templateText: string,
     data: Record<string, any>,
@@ -48,6 +62,13 @@ export const sData: Directive = async (
     );
 };
 
+/**
+ * Load data for SSR
+ * @param templateText - The template text
+ * @param data - The data
+ * @param template - The template
+ * @returns The template text
+ */
 export const sAttr: Directive = (
     templateText: string,
     data: Record<string, any>,
@@ -65,6 +86,13 @@ export const sAttr: Directive = (
     );
 };
 
+/**
+ * Load data for SSR
+ * @param templateText - The template text
+ * @param data - The data
+ * @param template - The template
+ * @returns The template text
+ */
 export const sServerData: Directive = (
     templateText: string,
     data: Record<string, any>,
@@ -94,6 +122,13 @@ function loadLocaleFile(locale: string): Record<string, string> {
     return {};
 }
 
+/**
+ * Load i18n data
+ * @param templateText - The template text
+ * @param data - The data
+ * @param template - The template
+ * @returns The template text
+ */
 export const i18n: Directive = (
     templateText: string,
     data: Record<string, any>,
@@ -115,6 +150,12 @@ export const i18n: Directive = (
 };
 
 //Layout
+
+/**
+ * Resolve an import
+ * @param filename - The filename
+ * @returns The resolved filename
+ */
 async function resolveImport(filename): Promise<string> {
     try {
         const resolvedFilename = path.resolve(
@@ -218,6 +259,11 @@ async function resolveImport(filename): Promise<string> {
     }
 }
 
+/**
+ * Extract the setup script
+ * @param templateText - The template text
+ * @returns The setup script
+ */
 export const extractSetupScript = async (
     templateText: string,
 ): Promise<object | string> => {
@@ -288,6 +334,13 @@ export const extractSetupScript = async (
 };
 
 //SSR
+
+/**
+ * Process the for directive
+ * @param templateText - The template text
+ * @param template - The template
+ * @returns The template text
+ */
 async function forSSR(templateText: string, template: Template) {
     const forDirectiveRegex =
         /<(\w[-\w]*)([^>]*)\s+(c-for)\s*=\s*[""](.*?)[""]([^>]*)>(.*?)<\/\1>/gs;
@@ -390,6 +443,12 @@ async function forSSR(templateText: string, template: Template) {
     return templateText;
 }
 
+/**
+ * Process the if directive
+ * @param templateText - The template text
+ * @param data - The data
+ * @returns The template text
+ */
 async function ifSSR(templateText: string, data: Record<string, any>) {
     const sIfRegex = /<s-if\s+exp=[""]([^""]+)[""]>(.*?)<\/s-if>/gs;
     const sElseRegex = /<s-else>(.*?)<\/s-else>/gs;
@@ -407,6 +466,13 @@ async function ifSSR(templateText: string, data: Record<string, any>) {
     });
 }
 
+/**
+ * Process the directives
+ * @param templateText - The template text
+ * @param data - The data
+ * @param template - The template
+ * @returns The template text
+ */
 export const ssrDirectives: Directive = async (
     templateText: string,
     data: Record<string, any>,

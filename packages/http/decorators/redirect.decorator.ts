@@ -1,5 +1,11 @@
 import { createRouteMiddleware } from './route-middleware.util';
 
+/**
+ * Redirect the request
+ * @param url - The URL to redirect to
+ * @param statusCode - The status code
+ * @returns The redirect decorator
+ */
 export function Redirect(
     url: string,
     statusCode: 301 | 302 | 307 | 308,

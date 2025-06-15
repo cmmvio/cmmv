@@ -35,20 +35,38 @@ export class Template {
         this.nonce = opts.nonce || '';
     }
 
+    /**
+     * Use directives
+     * @param directives - The directives
+     */
     use(directives: Directive | Directive[]) {
         if (Array.isArray(directives)) {
             for (const key in directives) this.directives.push(directives[key]);
         } else this.directives.push(directives);
     }
 
+    /**
+     * Set the context
+     * @param value - The value
+     * @param data - The data
+     */
     setContext(value: string, data: any) {
         this.context[value] = data;
     }
 
+    /**
+     * Get the context
+     * @returns The context
+     */
     getContext() {
         return this.context;
     }
 
+    /**
+     * Load includes
+     * @param templateText - The template text
+     * @returns The template text
+     */
     private async loadIncludes(templateText: string): Promise<string> {
         Telemetry.start('Load Includes', this.context.requestId);
         const includeRegex =
@@ -155,6 +173,11 @@ export class Template {
         return resultText;
     }
 
+    /**
+     * Extract inline scripts
+     * @param html - The HTML
+     * @returns The HTML
+     */
     private async extractInlineScripts(html: string): Promise<string> {
         const extractScript = Config.get<boolean>('view.extractInlineScript');
 
@@ -193,6 +216,11 @@ export class Template {
         return resultHtml;
     }
 
+    /**
+     * Cleanup expired files
+     * @param directory - The directory
+     * @param maxAge - The maximum age
+     */
     private async cleanupExpiredFiles(directory: string, maxAge: number) {
         Telemetry.start('Cleanup Expired Files', this.context.requestId);
         const files = await fg(`${directory}/*.cached.js`);
@@ -217,6 +245,11 @@ export class Template {
         Telemetry.end('Cleanup Expired Files', this.context.requestId);
     }
 
+    /**
+     * Minify the HTML
+     * @param html - The HTML
+     * @returns The HTML
+     */
     private async minifyHtml(html: string): Promise<string> {
         const minifyHtml = Config.get<boolean>('view.minifyHTML') || true;
         if (!minifyHtml) return html;
@@ -231,6 +264,11 @@ export class Template {
         })*/;
     }
 
+    /**
+     * Process the setup
+     * @param result - The result
+     * @returns The page contents
+     */
     async processSetup(result) {
         Telemetry.start('Process Setup', this.context.requestId);
         let pageContents = result.html;
@@ -421,6 +459,13 @@ export class Template {
         return pageContents;
     }
 
+    /**
+     * Parse the layout
+     * @param template - The template
+     * @param pageContents - The page contents
+     * @param setup - The setup
+     * @returns The page contents
+     */
     parseLayout(template: string, pageContents: string, setup: any) {
         pageContents = template.replace(/<slot\s*\/?>/i, pageContents);
 
@@ -445,6 +490,11 @@ export class Template {
         return pageContents;
     }
 
+    /**
+     * Parse the head
+     * @param setup - The setup
+     * @returns The head content
+     */
     parseHead(setup: any) {
         let headConfig = Config.get('head');
         headConfig = this.deepMerge({}, headConfig, setup.head);
@@ -479,6 +529,10 @@ export class Template {
         return headContent;
     }
 
+    /**
+     * Parse the scripts
+     * @returns The scripts content
+     */
     parseScripts() {
         const scripts = Config.get('scripts');
         const scriptsTimestamp = Config.get<boolean>(
@@ -522,6 +576,12 @@ export class Template {
         return scriptsContent;
     }
 
+    /**
+     * Deep merge
+     * @param target - The target
+     * @param sources - The sources
+     * @returns The merged object
+     */
     deepMerge(target: any, ...sources: any[]): any {
         sources.forEach((source) => {
             if (source instanceof Object && !Array.isArray(source)) {
@@ -561,10 +621,20 @@ export class Template {
         return target;
     }
 
+    /**
+     * Check if two objects are equal
+     * @param obj1 - The first object
+     * @param obj2 - The second object
+     * @returns True if the objects are equal, false otherwise
+     */
     isEqualObject(obj1: any, obj2: any): boolean {
         return JSON.stringify(obj1) === JSON.stringify(obj2);
     }
 
+    /**
+     * Compile the template
+     * @returns The compiled template
+     */
     compile() {
         const self = this;
 

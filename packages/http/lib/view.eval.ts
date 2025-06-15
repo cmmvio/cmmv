@@ -1,8 +1,22 @@
 const evalCache: Record<string, Function> = Object.create(null);
 
+/**
+ * Evaluate an expression
+ * @param scope - The scope
+ * @param exp - The expression
+ * @param el - The element
+ * @returns The result
+ */
 export const evaluate = (scope: any, exp: string, el?: Node) =>
     execute(scope, `return(${exp})`, el);
 
+/**
+ * Evaluate an expression asynchronously
+ * @param scope - The scope
+ * @param exp - The expression
+ * @param el - The element
+ * @returns The result
+ */
 export const evaluateAsync = async (
     scope: any,
     exp: string,
@@ -19,6 +33,13 @@ export const evaluateAsync = async (
     });
 };
 
+/**
+ * Execute an expression
+ * @param scope - The scope
+ * @param exp - The expression
+ * @param el - The element
+ * @returns The result
+ */
 export const execute = (scope: any, exp: string, el?: Node) => {
     const fn = evalCache[exp] || (evalCache[exp] = toFunction(exp));
 

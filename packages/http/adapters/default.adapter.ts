@@ -11,6 +11,7 @@ import cors from '@cmmv/cors';
 import cookieParser from '@cmmv/cookie-parser';
 import etag from '@cmmv/etag';
 import helmet from '@cmmv/helmet';
+import multer from '@cmmv/multer';
 
 import {
     Logger,
@@ -34,6 +35,11 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         super(instance || cmmv());
     }
 
+    /**
+     * Initialize the HTTP adapter
+     * @param application - The application instance
+     * @param settings - The HTTP settings
+     */
     public async init(application: Application, settings?: IHTTPSettings) {
         let publicDirs = Config.get<string[]>('server.publicDirs', [
             'public/views',
@@ -79,6 +85,7 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         this.instance.use(etag({ algorithm: 'fnv1a' }));
         this.instance.use(json({ limit: '50mb' }));
         this.instance.use(urlencoded({ limit: '50mb', extended: true }));
+        this.instance.use(multer());
 
         if (Config.get<boolean>('server.cors.enabled', true)) {
             const corsOptions = Config.get('server.cors.options', {
@@ -120,6 +127,11 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         this.initHttpServer(settings);
     }
 
+    /**
+     * Set the static server
+     * @param publicDir - The public directory
+     * @returns The static server
+     */
     private setStaticServer(publicDir: string) {
         return serverStatic(publicDir, {
             setHeaders: (res, path) => {
@@ -141,6 +153,10 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         });
     }
 
+    /**
+     * Initialize the HTTP server
+     * @param options - The HTTP server options
+     */
     public initHttpServer(options: any) {
         this.httpServer = this.instance.server;
 
@@ -149,6 +165,9 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         this.trackOpenConnections();
     }
 
+    /**
+     * Track the open connections
+     */
     private trackOpenConnections() {
         this.httpServer.on('connection', (socket: Duplex) => {
             this.openConnections.add(socket);
@@ -156,6 +175,9 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         });
     }
 
+    /**
+     * Close the open connections
+     */
     private closeOpenConnections() {
         for (const socket of this.openConnections) {
             socket.destroy();
@@ -163,6 +185,9 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         }
     }
 
+    /**
+     * Set the middleware
+     */
     private setMiddleware() {
         this.instance.addHook('onRequest', async (req, res, payload, done) => {
             req.requestId = uuidv4();
@@ -246,6 +271,9 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         });
     }
 
+    /**
+     * Register the controllers
+     */
     private registerControllers() {
         const controllers = ControllerRegistry.getControllers();
 
@@ -507,6 +535,14 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         });
     }
 
+    /**
+     * Build the route arguments
+     * @param req - The request object
+     * @param res - The response object
+     * @param next - The next function
+     * @param params - The route parameters
+     * @returns The route arguments
+     */
     private buildRouteArgs(req: any, res: any, next: any, params: any[]) {
         const args: any[] = [];
 
@@ -574,6 +610,11 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         return args;
     }
 
+    /**
+     * Listen for incoming requests
+     * @param bind - The host and port to bind to
+     * @returns A promise that resolves when the server is listening
+     */
     public listen(bind: string): Promise<void> {
         return new Promise((resolve, reject) => {
             const [host, port] = bind.split(':');
@@ -585,10 +626,18 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         });
     }
 
+    /**
+     * Check if the server is connected
+     * @returns True if the server is connected, false otherwise
+     */
     public connected() {
         return this.instance.enabled;
     }
 
+    /**
+     * Close the server
+     * @returns A promise that resolves when the server is closed
+     */
     public close() {
         this.closeOpenConnections();
 
@@ -610,6 +659,15 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         });
     }
 
+    /**
+     * Print the log
+     * @param type - The log type
+     * @param method - The method
+     * @param path - The path
+     * @param timer - The timer
+     * @param status - The status
+     * @param ip - The IP address
+     */
     public printLog(
         type: string,
         method: string,
@@ -649,6 +707,10 @@ export class DefaultAdapter extends AbstractHttpAdapter<
         }
     }
 
+    /**
+     * Set the public directory
+     * @param dirs - The public directory or directories
+     */
     public setPublicDir(dirs: string | string[]) {
         const dirArr = typeof dirs === 'string' ? [dirs] : dirs;
         const currentViews = this.instance.get('views');

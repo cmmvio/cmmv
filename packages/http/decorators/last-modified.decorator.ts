@@ -1,5 +1,10 @@
 import { createRouteMiddleware } from './route-middleware.util';
 
+/**
+ * Set the last modified header
+ * @param date - The date
+ * @returns The last modified decorator
+ */
 export function LastModified(date: Date | number): MethodDecorator {
     return (target, propertyKey: string | symbol, descriptor: any) => {
         const timestamp = typeof date === 'number' ? new Date(date) : date;

@@ -14,6 +14,11 @@ type CacheControlOptions = {
     staleIfError?: number;
 };
 
+/**
+ * Set the cache control directives
+ * @param options - The cache control options
+ * @returns The cache control decorator
+ */
 export function CacheControl(options: CacheControlOptions): MethodDecorator {
     return (target, propertyKey: string | symbol, descriptor: any) => {
         const directives: string[] = [];

@@ -30,6 +30,13 @@ export class WSAdapter extends AbstractWSAdapter {
         { instance: any; handlerName: string; params: any[] }
     > = new Map();
 
+    /**
+     * Create a WebSocket server
+     * @param server - The HTTP server
+     * @param application - The application
+     * @param options - The options
+     * @returns The WebSocket server
+     */
     create(
         server: AbstractHttpAdapter,
         application: Application,
@@ -71,14 +78,29 @@ export class WSAdapter extends AbstractWSAdapter {
         return wsServer;
     }
 
+    /**
+     * Bind a client connect
+     * @param server - The server
+     * @param callback - The callback
+     */
     bindClientConnect(server, callback: Function) {
         server.on('connection', callback);
     }
 
+    /**
+     * Bind a custom message handler
+     * @param server - The server
+     * @param callback - The callback
+     */
     bindCustomMessageHandler(server, callback: Function) {
         server.on('message', callback);
     }
 
+    /**
+     * Interceptor
+     * @param socket - The socket
+     * @param data - The data
+     */
     interceptor(socket, data) {
         const message = plainToClass(
             WSCall,
@@ -119,6 +141,9 @@ export class WSAdapter extends AbstractWSAdapter {
         }
     }
 
+    /**
+     * Register gateways
+     */
     private registerGateways() {
         const controllers = RPCRegistry.getControllers();
 
@@ -141,6 +166,9 @@ export class WSAdapter extends AbstractWSAdapter {
         });
     }
 
+    /**
+     * Close the WebSocket server
+     */
     public close() {
         this.wsServer.close();
     }

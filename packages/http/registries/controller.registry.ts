@@ -8,6 +8,12 @@ export class ControllerRegistry {
 
     private static middlewares = new Map<string, Function[]>();
 
+    /**
+     * Register a controller
+     * @param target - The target
+     * @param prefix - The prefix
+     * @param context - The context
+     */
     public static registerController(
         target: any,
         prefix: string,
@@ -29,6 +35,16 @@ export class ControllerRegistry {
         }
     }
 
+    /**
+     * Register a route
+     * @param target - The target
+     * @param method - The method
+     * @param path - The path
+     * @param handlerName - The handler name
+     * @param context - The context
+     * @param cb - The callback
+     * @param metadata - The metadata
+     */
     public static registerRoute(
         target: any,
         method: string,
@@ -94,6 +110,14 @@ export class ControllerRegistry {
         }
     }
 
+    /**
+     * Register a parameter
+     * @param target - The target
+     * @param handlerName - The handler name
+     * @param paramType - The parameter type
+     * @param index - The index
+     * @param paramName - The parameter name
+     */
     public static registerParam(
         target: any,
         handlerName: string,
@@ -134,6 +158,14 @@ export class ControllerRegistry {
         }
     }
 
+    /**
+     * Set a middleware
+     * @param target - The target
+     * @param method - The method
+     * @param path - The path
+     * @param handlerName - The handler name
+     * @param middleware - The middleware
+     */
     public static setMiddleware(
         target: any,
         method: string,
@@ -146,6 +178,13 @@ export class ControllerRegistry {
         this.middlewares.get(key)!.push(middleware);
     }
 
+    /**
+     * Get the middlewares
+     * @param target - The target
+     * @param method - The method
+     * @param path - The path
+     * @returns The middlewares
+     */
     public static getMiddlewares(
         target: any,
         method: string,
@@ -155,15 +194,30 @@ export class ControllerRegistry {
         return this.middlewares.get(key) || [];
     }
 
+    /**
+     * Get the controllers
+     * @returns The controllers
+     */
     public static getControllers() {
         return Array.from(this.controllers.entries());
     }
 
+    /**
+     * Get the routes
+     * @param target - The target
+     * @returns The routes
+     */
     public static getRoutes(target: any): any[] {
         const controller = this.controllers.get(target);
         return controller ? controller.routes : [];
     }
 
+    /**
+     * Get the parameters
+     * @param target - The target
+     * @param handlerName - The handler name
+     * @returns The parameters
+     */
     public static getParams(target: any, handlerName: string): any[] {
         const controller = this.controllers.get(target.constructor);
 
@@ -175,6 +229,9 @@ export class ControllerRegistry {
         return route ? route.params : [];
     }
 
+    /**
+     * Clear the controller registry
+     */
     public static clear() {
         ControllerRegistry.controllers = new Map<
             any,

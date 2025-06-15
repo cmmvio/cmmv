@@ -12,6 +12,9 @@ import {
 } from '@cmmv/core';
 
 export class WSTranspile extends AbstractTranspile implements ITranspile {
+    /**
+     * Run the transpile
+     */
     run(): void {
         const contracts = Scope.getArray<any>('__contracts');
         const generateGateways = Config.get<boolean>(
@@ -26,6 +29,10 @@ export class WSTranspile extends AbstractTranspile implements ITranspile {
         });
     }
 
+    /**
+     * Generate a gateway
+     * @param contract - The contract
+     */
     private generateGateway(contract: IContract) {
         const generateBoilerplates = contract.generateBoilerplates === true;
         const hasCacheModule = Module.hasModule('cache');

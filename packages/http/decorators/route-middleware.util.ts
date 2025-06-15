@@ -1,3 +1,8 @@
+/**
+ * Create a route middleware
+ * @param middleware - The middleware
+ * @param descriptor - The descriptor
+ */
 export function createRouteMiddleware(middleware: any, descriptor: any) {
     const existingFields =
         Reflect.getMetadata('route_metadata', descriptor.value) || {};

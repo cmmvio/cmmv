@@ -20,6 +20,10 @@ export class CMMVRenderer {
         this.cache = new Map();
     }
 
+    /**
+     * Create a null prototype object
+     * @returns The null prototype object
+     */
     private createNullProtoObjWherePossible() {
         if (typeof Object.create === 'function') {
             return function () {
@@ -38,6 +42,13 @@ export class CMMVRenderer {
         };
     }
 
+    /**
+     * Shallow copy from list
+     * @param to - The target object
+     * @param from - The source object
+     * @param list - The list of properties to copy
+     * @returns The target object
+     */
     private shallowCopyFromList(to: any, from: any, list: string[]) {
         list = list || [];
         from = from || {};
@@ -53,6 +64,12 @@ export class CMMVRenderer {
         return to;
     }
 
+    /**
+     * Handle the cache
+     * @param options - The options
+     * @param template - The template
+     * @returns The function
+     */
     private handleCache(options: any, template?: string) {
         let func: Function;
         const filename = options.filename;
@@ -80,6 +97,12 @@ export class CMMVRenderer {
         return func;
     }
 
+    /**
+     * Compile the template
+     * @param template - The template
+     * @param opts - The options
+     * @returns The compiled template
+     */
     public compile(template: string, opts: any) {
         const templ = new Template(template, opts);
 
@@ -109,6 +132,13 @@ export class CMMVRenderer {
         }
     }
 
+    /**
+     * Render the template
+     * @param template - The template
+     * @param d - The data
+     * @param o - The options
+     * @returns The rendered template
+     */
     public async render(template: string, d: any, o?: any) {
         const data = d || this.createNullProtoObjWherePossible();
         const opts = o || this.createNullProtoObjWherePossible();
@@ -138,6 +168,13 @@ export class CMMVRenderer {
         }
     }
 
+    /**
+     * Render the file
+     * @param filename - The filename
+     * @param data - The data
+     * @param opts - The options
+     * @param cb - The callback function
+     */
     public renderFile(filename: string, data: any, opts: any, cb: Function) {
         opts = opts || {};
         opts.filename = filename;
@@ -158,6 +195,9 @@ export class CMMVRenderer {
         });
     }
 
+    /**
+     * Clear the cache
+     */
     public clearCache() {
         this.cache.clear();
     }

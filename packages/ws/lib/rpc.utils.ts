@@ -1,6 +1,13 @@
 import { ProtoRegistry } from '@cmmv/protobuf';
 
 export class RpcUtils {
+    /**
+     * Generate a buffer
+     * @param protoFile - The proto file
+     * @param namespace - The namespace
+     * @param data - The data
+     * @returns The buffer
+     */
     public static async generateBuffer(
         protoFile: string,
         namespace: string,
@@ -22,6 +29,13 @@ export class RpcUtils {
         }
     }
 
+    /**
+     * Pack a message
+     * @param contractName - The contract name
+     * @param messageName - The message name
+     * @param data - The data
+     * @returns The packed message
+     */
     public static async pack(
         contractName: string,
         messageName: string,
@@ -61,6 +75,13 @@ export class RpcUtils {
         });
     }
 
+    /**
+     * Pack an error message
+     * @param message - The message
+     * @param code - The code
+     * @param context - The context
+     * @returns The packed error message
+     */
     public static async error(
         message: string,
         code?: number,

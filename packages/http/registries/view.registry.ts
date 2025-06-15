@@ -7,6 +7,9 @@ import { Singleton } from '@cmmv/core';
 export class ViewRegistry extends Singleton {
     public styles: Map<string, any> = new Map<string, any>();
 
+    /**
+     * Load the styles
+     */
     static async load() {
         const directoryPackages = path.resolve(
             process.env.NODE_ENV === 'prod'
@@ -36,16 +39,30 @@ export class ViewRegistry extends Singleton {
         }
     }
 
+    /**
+     * Register a style
+     * @param name - The name
+     * @param style - The style
+     */
     static register(name: string, style: any): void {
         const globalView = ViewRegistry.getInstance();
         globalView.styles.set(name, style);
     }
 
+    /**
+     * Retrieve a style
+     * @param key - The key
+     * @returns The style
+     */
     static retrieve(key: string): any | null {
         const globalView = ViewRegistry.getInstance();
         return globalView.styles.has(key) ? globalView.styles.get(key) : null;
     }
 
+    /**
+     * Retrieve all styles
+     * @returns The styles
+     */
     static retrieveAll(): object {
         const globalView = ViewRegistry.getInstance();
         const stylesArr = Array.from(globalView.styles);

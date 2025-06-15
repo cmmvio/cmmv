@@ -1,5 +1,11 @@
 import * as crypto from 'node:crypto';
 
+/**
+ * Generate a fingerprint
+ * @param req - The request
+ * @param usernameHashed - The username hashed
+ * @returns The fingerprint
+ */
 export function generateFingerprint(req, usernameHashed) {
     const userAgent = req.headers['user-agent'] || '';
     const ip =

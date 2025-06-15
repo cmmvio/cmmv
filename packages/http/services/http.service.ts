@@ -4,6 +4,14 @@ import { AbstractService, Service } from '@cmmv/core';
 export class HttpService extends AbstractService {
     public name = 'http';
 
+    /**
+     * Request a resource
+     * @param url - The URL
+     * @param method - The method
+     * @param body - The body
+     * @param config - The config
+     * @returns The response
+     */
     private async request<T = any>(
         url: string,
         method: string,
@@ -25,6 +33,11 @@ export class HttpService extends AbstractService {
         return response;
     }
 
+    /**
+     * Handle the response
+     * @param response - The response
+     * @returns The response
+     */
     private async handleResponse<T = any>(response: Response): Promise<T> {
         const contentType = response.headers.get('content-type');
         let data: any;
@@ -44,11 +57,23 @@ export class HttpService extends AbstractService {
         } as any;
     }
 
+    /**
+     * Get a resource
+     * @param url - The URL
+     * @param config - The config
+     * @returns The response
+     */
     async get<T = any>(url: string, config?: RequestInit): Promise<T> {
         const response = await this.request<T>(url, 'GET', undefined, config);
         return this.handleResponse<T>(response);
     }
 
+    /**
+     * Delete a resource
+     * @param url - The URL
+     * @param config - The config
+     * @returns The response
+     */
     async delete<T = any>(url: string, config?: RequestInit): Promise<T> {
         const response = await this.request<T>(
             url,
@@ -59,11 +84,24 @@ export class HttpService extends AbstractService {
         return this.handleResponse<T>(response);
     }
 
+    /**
+     * Head a resource
+     * @param url - The URL
+     * @param config - The config
+     * @returns The response
+     */
     async head<T = any>(url: string, config?: RequestInit): Promise<T> {
         const response = await this.request<T>(url, 'HEAD', undefined, config);
         return this.handleResponse<T>(response);
     }
 
+    /**
+     * Post a resource
+     * @param url - The URL
+     * @param data - The data
+     * @param config - The config
+     * @returns The response
+     */
     async post<T = any>(
         url: string,
         data?: any,
@@ -73,6 +111,13 @@ export class HttpService extends AbstractService {
         return this.handleResponse<T>(response);
     }
 
+    /**
+     * Put a resource
+     * @param url - The URL
+     * @param data - The data
+     * @param config - The config
+     * @returns The response
+     */
     async put<T = any>(
         url: string,
         data?: any,
@@ -82,6 +127,13 @@ export class HttpService extends AbstractService {
         return this.handleResponse<T>(response);
     }
 
+    /**
+     * Patch a resource
+     * @param url - The URL
+     * @param data - The data
+     * @param config - The config
+     * @returns The response
+     */
     async patch<T = any>(
         url: string,
         data?: any,
