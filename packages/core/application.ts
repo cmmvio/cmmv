@@ -93,6 +93,7 @@ export class Application {
     protected models: Array<any> = [];
     protected resolvers: Array<any> = [];
     public providersMap = new Map<string, any>();
+    protected loadedProviders = new Set<any>();
 
     public static contractsCls: Array<new () => {}> = [];
     public static models = new Map<string, new () => any>();
@@ -213,8 +214,8 @@ export class Application {
             const providersLoad = [];
 
             const processProvider = async (provider) => {
-                if (provider && typeof provider.loadConfig === 'function')
-                    providersLoad.push(provider?.loadConfig(this));
+                const result = this.tryLoadProviderConfig(provider);
+                if (result) providersLoad.push(result);
 
                 if (Scope.has(`_await_service_${provider.name}`)) {
                     providersLoad.push(
@@ -332,13 +333,13 @@ export class Application {
             const providersLoad = [];
 
             settings.services?.forEach(async (service) => {
-                if (service && typeof service.loadConfig === 'function')
-                    providersLoad.push(service?.loadConfig(this));
+                const result = this.tryLoadProviderConfig(service);
+                if (result) providersLoad.push(result);
             });
 
             settings.providers?.forEach(async (provider) => {
-                if (provider && typeof provider.loadConfig === 'function')
-                    providersLoad.push(provider?.loadConfig(this));
+                const result = this.tryLoadProviderConfig(provider);
+                if (result) providersLoad.push(result);
             });
 
             await Promise.all(providersLoad);
@@ -425,6 +426,17 @@ export class Application {
         }
     }
 
+    protected tryLoadProviderConfig(provider: any): Promise<any> | void {
+        if (
+            provider &&
+            typeof provider.loadConfig === 'function' &&
+            !this.loadedProviders.has(provider)
+        ) {
+            this.loadedProviders.add(provider);
+            return provider.loadConfig(this);
+        }
+    }
+
     protected loadModules(modules: Array<Module>): void {
         if (modules && modules.length > 0) {
             modules.forEach((module) => {
@@ -460,11 +472,7 @@ export class Application {
                                         new paramType(),
                                 );
 
-                                if (
-                                    provider &&
-                                    typeof provider.loadConfig === 'function'
-                                )
-                                    provider?.loadConfig(this);
+                                this.tryLoadProviderConfig(provider);
 
                                 const providerInstance = new provider(
                                     ...instances,
