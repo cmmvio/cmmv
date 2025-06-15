@@ -243,3 +243,11 @@ export function Ip(): ParameterDecorator {
 export function HostParam(): ParameterDecorator {
     return createParamDecorator(`hosts`);
 }
+
+export function UploadedFile(fieldName?: string): ParameterDecorator {
+    return createParamDecorator(fieldName ? `file:${fieldName}` : 'file');
+}
+
+export function UploadedFiles(): ParameterDecorator {
+    return createParamDecorator('files');
+}

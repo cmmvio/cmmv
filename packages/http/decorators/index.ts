@@ -8,3 +8,4 @@ export * from './last-modified.decorator';
 export * from './raw.decorator';
 export * from './redirect.decorator';
 export * from './route-middleware.util';
+export * from './proxy.decorator';

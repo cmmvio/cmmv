@@ -557,6 +557,14 @@ export class DefaultAdapter extends AbstractHttpAdapter<
                 case 'hosts':
                     args[param.index] = req.hosts;
                     break;
+                case 'file':
+                    args[param.index] = paramName
+                        ? req.files?.[paramName]
+                        : req.files;
+                    break;
+                case 'files':
+                    args[param.index] = req.files;
+                    break;
                 default:
                     args[param.index] = undefined;
                     break;
