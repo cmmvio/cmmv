@@ -13,9 +13,13 @@ import {
     Header,
     Request,
     Response,
-} from '../decorators/controller.decorator';
+    Proxy,
+    UploadedFile,
+    UploadedFiles,
+} from '../decorators';
 
 import { ControllerRegistry } from '../registries/controller.registry';
+import { ProxyMiddleware } from '@cmmv/proxy';
 
 describe('Controller Decorators', () => {
     beforeEach(() => {
@@ -190,5 +194,43 @@ describe('Controller Decorators', () => {
         );
         expect(params.length).toBe(1);
         expect(params[0].paramType).toBe('response');
+    });
+
+    it('should register proxy middleware for a route', () => {
+        @Controller()
+        class TestController {
+            @Get('/proxy')
+            @Proxy({ target: 'http://example.com' })
+            test() {}
+        }
+
+        const routes = ControllerRegistry.getRoutes(TestController);
+        expect(routes[0].middlewares?.[0]).toBeInstanceOf(Function);
+    });
+
+    it('should register UploadedFile parameter', () => {
+        @Controller()
+        class TestController {
+            test(@UploadedFile('avatar') file: any) {}
+        }
+
+        const params = ControllerRegistry.getParams(
+            TestController.prototype,
+            'test',
+        );
+        expect(params[0].paramType).toBe('file:avatar');
+    });
+
+    it('should register UploadedFiles parameter', () => {
+        @Controller()
+        class TestController {
+            test(@UploadedFiles() files: any) {}
+        }
+
+        const params = ControllerRegistry.getParams(
+            TestController.prototype,
+            'test',
+        );
+        expect(params[0].paramType).toBe('files');
     });
 });
