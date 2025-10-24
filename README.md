@@ -154,3 +154,12 @@ From version 0.8.33, the following changes apply:
 * `@cmmv/view` → Merged into `@cmmv/http` (no separate installation needed)
 * `@cmmv/swagger` → Replaced by `@cmmv/openapi`
 * Express is no longer required, replaced by @cmmv/server (4x faster)
+
+---
+
+## 📚 Documentation
+
+- **[Complete Documentation](docs/)** - All project documentation
+- **[OpenSpec Proposals](openspec/changes/)** - Improvement proposals
+- **[Test Coverage Analysis](docs/TEST_COVERAGE_ANALYSIS.md)** - Coverage report
+- **[Next Steps](docs/NEXT_STEPS.md)** - Immediate actions and priorities
