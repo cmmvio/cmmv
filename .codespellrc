@@ -1,0 +1,4 @@
+[codespell]
+skip = *.lock,*.json,*.map,*.yaml,*.yml,target,node_modules,.git,dist,*.sqlite,pnpm-lock.yaml,.generated,http
+ignore-words-list = crate,ser,deser,nd,openapi,que,ba,inferr,afterall,comandos,fase,essencial,cliente,utiliza,leve,leves,inicial,controle,beforeall,beforeeach,aftereach
+
