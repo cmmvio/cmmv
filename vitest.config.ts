@@ -25,5 +25,27 @@ export default defineConfig({
         env: {
             NODE_ENV: 'test',
         },
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'json', 'html', 'lcov'],
+            exclude: [
+                'node_modules/',
+                'dist/',
+                '.generated/',
+                '**/*.spec.ts',
+                '**/*.test.ts',
+                '**/*.mock.ts',
+                '**/test/**',
+                '**/tests/**',
+                '**/*.config.ts',
+                '**/*.config.js',
+                '**/tsconfig.*.json',
+            ],
+            all: true,
+            lines: 80,
+            functions: 80,
+            branches: 70,
+            statements: 80,
+        },
     },
 });
