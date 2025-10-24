@@ -78,6 +78,8 @@
 		]
 	},
 	"devDependencies": {
+		"@vitest/coverage-v8": "^2.1.9",
+		"@vitest/ui": "^2.1.9",
 		"@cmmv/core": "latest",
 		"@cmmv/encryptor": "^0.7.0",
 		"@codechecks/client": "^0.0.50",
