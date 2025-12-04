@@ -193,17 +193,15 @@ export class Application {
                     this.createCSSBundle();
                 }
             } else {
-                const tsconfig: any = new Function(
-                    `return(${fs.readFileSync(path.resolve('./tsconfig.json'), 'utf-8')})`,
-                )();
-
-                const outputPath = path.resolve(
-                    tsconfig.compilerOptions.outDir,
-                    `app.module.js`,
+                // Production mode: use @swc-node/register to load TypeScript files directly
+                // This allows path aliases to be resolved at runtime
+                const appModulePath = path.resolve(
+                    '.generated',
+                    'app.module.ts',
                 );
 
-                if (fs.existsSync(outputPath)) {
-                    const { ApplicationModule } = await import(outputPath);
+                if (fs.existsSync(appModulePath)) {
+                    const { ApplicationModule } = await import(appModulePath);
                     this.loadModules([...this.modules, ApplicationModule]);
                 } else {
                     this.loadModules([...this.modules]);
