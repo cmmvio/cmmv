@@ -14,11 +14,11 @@ export class SchedulingManager {
     }
 
     public start(): void {
-        if (!this.cronJob.running) this.cronJob.start();
+        if (!this.cronJob.isActive) this.cronJob.start();
     }
 
     public stop(): void {
-        if (this.cronJob.running) this.cronJob.stop();
+        if (this.cronJob.isActive) this.cronJob.stop();
     }
 
     public restart(): void {
