@@ -1,7 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as fg from 'fast-glob';
-import chokidar from 'chokidar';
 
 const { WebSocketServer, WebSocket } = require('ws');
 
@@ -60,7 +59,9 @@ export class SandboxService {
             path.resolve(__dirname, '../public/*.html'),
         ]);
 
-        SandboxService.chokidar = chokidar
+        // Dynamic import for chokidar (ESM module)
+        const chokidar = await import('chokidar');
+        SandboxService.chokidar = chokidar.default
             .watch(files, {
                 persistent: true,
                 ignoreInitial: true,
