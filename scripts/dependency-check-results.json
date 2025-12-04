@@ -1,0 +1,820 @@
+{
+  "timestamp": "2025-12-04T19:39:26.096Z",
+  "summary": {
+    "total": 135,
+    "outdated": 88,
+    "upToDate": 47,
+    "errors": 0
+  },
+  "outdated": [
+    {
+      "name": "@apollo/server",
+      "type": "dependencies",
+      "current": "^4.12.2",
+      "packages": [
+        "cmmv",
+        "graphql"
+      ],
+      "latest": "5.2.0"
+    },
+    {
+      "name": "@aws-sdk/client-s3",
+      "type": "dependencies",
+      "current": "^3.828.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "3.943.0"
+    },
+    {
+      "name": "@aws-sdk/client-ses",
+      "type": "dependencies",
+      "current": "^3.828.0",
+      "packages": [
+        "cmmv",
+        "email"
+      ],
+      "latest": "3.943.0"
+    },
+    {
+      "name": "@codechecks/client",
+      "type": "devDependencies",
+      "current": "^0.0.50",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "0.1.12"
+    },
+    {
+      "name": "@commitlint/cli",
+      "type": "devDependencies",
+      "current": "^19.8.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "20.1.0"
+    },
+    {
+      "name": "@commitlint/config-angular",
+      "type": "devDependencies",
+      "current": "^19.8.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "20.0.0"
+    },
+    {
+      "name": "@commitlint/config-conventional",
+      "type": "devDependencies",
+      "current": "^19.8.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "20.0.0"
+    },
+    {
+      "name": "@keyv/compress-gzip",
+      "type": "dependencies",
+      "current": "^2.0.2",
+      "packages": [
+        "keyv"
+      ],
+      "latest": "2.0.3"
+    },
+    {
+      "name": "@keyv/redis",
+      "type": "devDependencies",
+      "current": "^3.0.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "5.1.4"
+    },
+    {
+      "name": "@keyv/redis",
+      "type": "dependencies",
+      "current": "^3.0.1",
+      "packages": [
+        "keyv"
+      ],
+      "latest": "5.1.4"
+    },
+    {
+      "name": "@rollup/plugin-alias",
+      "type": "devDependencies",
+      "current": "^5.1.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "6.0.0"
+    },
+    {
+      "name": "@rollup/plugin-replace",
+      "type": "devDependencies",
+      "current": "^6.0.2",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "6.0.3"
+    },
+    {
+      "name": "@swc-node/core",
+      "type": "dependencies",
+      "current": "^1.13.3",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "1.14.1"
+    },
+    {
+      "name": "@swc-node/register",
+      "type": "dependencies",
+      "current": "^1.10.10",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "1.11.1"
+    },
+    {
+      "name": "@swc/core",
+      "type": "dependencies",
+      "current": "^1.12.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "1.15.3"
+    },
+    {
+      "name": "@types/archiver",
+      "type": "devDependencies",
+      "current": "^6.0.3",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "7.0.0"
+    },
+    {
+      "name": "@types/cache-manager",
+      "type": "devDependencies",
+      "current": "^4.0.6",
+      "packages": [
+        "cmmv",
+        "cache"
+      ],
+      "latest": "5.0.0"
+    },
+    {
+      "name": "@types/chai",
+      "type": "devDependencies",
+      "current": "^4.3.20",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "5.2.3"
+    },
+    {
+      "name": "@types/jest",
+      "type": "devDependencies",
+      "current": "^29.5.14",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "30.0.0"
+    },
+    {
+      "name": "@types/node",
+      "type": "devDependencies",
+      "current": "^22.15.31",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "24.10.1"
+    },
+    {
+      "name": "@types/semver",
+      "type": "devDependencies",
+      "current": "^7.7.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "7.7.1"
+    },
+    {
+      "name": "@types/sinon",
+      "type": "devDependencies",
+      "current": "^17.0.4",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "21.0.0"
+    },
+    {
+      "name": "@types/ws",
+      "type": "devDependencies",
+      "current": "^8.5.12",
+      "packages": [
+        "ws"
+      ],
+      "latest": "8.18.1"
+    },
+    {
+      "name": "@typescript-eslint/eslint-plugin",
+      "type": "devDependencies",
+      "current": "7.18.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "8.48.1"
+    },
+    {
+      "name": "@typescript-eslint/parser",
+      "type": "devDependencies",
+      "current": "7.18.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "8.48.1"
+    },
+    {
+      "name": "@unocss/preset-mini",
+      "type": "devDependencies",
+      "current": "^0.64.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "66.5.10"
+    },
+    {
+      "name": "@vitejs/plugin-vue",
+      "type": "devDependencies",
+      "current": "^5.2.4",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "6.0.2"
+    },
+    {
+      "name": "@vitejs/plugin-vue-jsx",
+      "type": "devDependencies",
+      "current": "^4.2.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "5.1.2"
+    },
+    {
+      "name": "@vitest/coverage-v8",
+      "type": "devDependencies",
+      "current": "^2.1.9",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "4.0.15"
+    },
+    {
+      "name": "@vitest/ui",
+      "type": "devDependencies",
+      "current": "^2.1.9",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "4.0.15"
+    },
+    {
+      "name": "autoprefixer",
+      "type": "devDependencies",
+      "current": "^10.4.21",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "10.4.22"
+    },
+    {
+      "name": "axios",
+      "type": "devDependencies",
+      "current": "^1.10.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "1.13.2"
+    },
+    {
+      "name": "axios",
+      "type": "dependencies",
+      "current": "^1.8.4",
+      "packages": [
+        "sandbox"
+      ],
+      "latest": "1.13.2"
+    },
+    {
+      "name": "cache-manager",
+      "type": "devDependencies",
+      "current": "^5.7.6",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "7.2.5"
+    },
+    {
+      "name": "cache-manager",
+      "type": "dependencies",
+      "current": "^5.7.6",
+      "packages": [
+        "cache"
+      ],
+      "latest": "7.2.5"
+    },
+    {
+      "name": "chai",
+      "type": "devDependencies",
+      "current": "^5.2.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "6.2.1"
+    },
+    {
+      "name": "chai-as-promised",
+      "type": "devDependencies",
+      "current": "^8.0.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "8.0.2"
+    },
+    {
+      "name": "chokidar",
+      "type": "devDependencies",
+      "current": "^4.0.3",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "5.0.0"
+    },
+    {
+      "name": "chokidar",
+      "type": "dependencies",
+      "current": "^4.0.3",
+      "packages": [
+        "sandbox"
+      ],
+      "latest": "5.0.0"
+    },
+    {
+      "name": "class-validator",
+      "type": "dependencies",
+      "current": "^0.14.2",
+      "packages": [
+        "cmmv",
+        "core"
+      ],
+      "latest": "0.14.3"
+    },
+    {
+      "name": "concurrently",
+      "type": "devDependencies",
+      "current": "^9.1.2",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "9.2.1"
+    },
+    {
+      "name": "cron",
+      "type": "dependencies",
+      "current": "^3.5.0",
+      "packages": [
+        "cmmv",
+        "core"
+      ],
+      "latest": "4.3.5"
+    },
+    {
+      "name": "dotenv",
+      "type": "dependencies",
+      "current": "^16.5.0",
+      "packages": [
+        "cmmv",
+        "core"
+      ],
+      "latest": "17.2.3"
+    },
+    {
+      "name": "esbuild",
+      "type": "devDependencies",
+      "current": "^0.24.2",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "0.27.1"
+    },
+    {
+      "name": "eslint",
+      "type": "devDependencies",
+      "current": "^9.29.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "9.39.1"
+    },
+    {
+      "name": "eslint-config-prettier",
+      "type": "devDependencies",
+      "current": "9.1.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "10.1.8"
+    },
+    {
+      "name": "eslint-plugin-import",
+      "type": "devDependencies",
+      "current": "^2.31.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "2.32.0"
+    },
+    {
+      "name": "fast-json-stringify",
+      "type": "dependencies",
+      "current": "^6.0.1",
+      "packages": [
+        "cmmv",
+        "core",
+        "http"
+      ],
+      "latest": "6.1.1"
+    },
+    {
+      "name": "graphql",
+      "type": "dependencies",
+      "current": "^16.11.0",
+      "packages": [
+        "cmmv",
+        "graphql"
+      ],
+      "latest": "16.12.0"
+    },
+    {
+      "name": "graphql-scalars",
+      "type": "dependencies",
+      "current": "^1.24.2",
+      "packages": [
+        "cmmv",
+        "graphql"
+      ],
+      "latest": "1.25.0"
+    },
+    {
+      "name": "js-yaml",
+      "type": "dependencies",
+      "current": "^4.1.0",
+      "packages": [
+        "cmmv",
+        "openapi"
+      ],
+      "latest": "4.1.1"
+    },
+    {
+      "name": "jsonwebtoken",
+      "type": "dependencies",
+      "current": "^9.0.2",
+      "packages": [
+        "cmmv",
+        "auth"
+      ],
+      "latest": "9.0.3"
+    },
+    {
+      "name": "keyv",
+      "type": "devDependencies",
+      "current": "^5.3.4",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "5.5.5"
+    },
+    {
+      "name": "keyv",
+      "type": "dependencies",
+      "current": "^5.1.0",
+      "packages": [
+        "keyv"
+      ],
+      "latest": "5.5.5"
+    },
+    {
+      "name": "lerna",
+      "type": "devDependencies",
+      "current": "^8.2.2",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "9.0.3"
+    },
+    {
+      "name": "lint-staged",
+      "type": "devDependencies",
+      "current": "^15.5.2",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "16.2.7"
+    },
+    {
+      "name": "mongodb",
+      "type": "dependencies",
+      "current": "^6.17.0",
+      "packages": [
+        "cmmv",
+        "repository"
+      ],
+      "latest": "7.0.0"
+    },
+    {
+      "name": "nodemailer",
+      "type": "devDependencies",
+      "current": "^6.10.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "7.0.11"
+    },
+    {
+      "name": "nodemailer",
+      "type": "dependencies",
+      "current": "^6.10.0",
+      "packages": [
+        "email"
+      ],
+      "latest": "7.0.11"
+    },
+    {
+      "name": "nodemon",
+      "type": "devDependencies",
+      "current": "^3.1.10",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "3.1.11"
+    },
+    {
+      "name": "pg",
+      "type": "dependencies",
+      "current": "^8.16.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "8.16.3"
+    },
+    {
+      "name": "pnpm",
+      "type": "dependencies",
+      "current": "^10.12.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "10.24.0"
+    },
+    {
+      "name": "postcss",
+      "type": "devDependencies",
+      "current": "^8.5.5",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "8.5.6"
+    },
+    {
+      "name": "prettier",
+      "type": "devDependencies",
+      "current": "^3.5.3",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "3.7.4"
+    },
+    {
+      "name": "protobufjs",
+      "type": "dependencies",
+      "current": "^7.5.3",
+      "packages": [
+        "cmmv",
+        "protobuf"
+      ],
+      "latest": "7.5.4"
+    },
+    {
+      "name": "rimraf",
+      "type": "devDependencies",
+      "current": "^6.0.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "6.1.2"
+    },
+    {
+      "name": "rollup-plugin-visualizer",
+      "type": "devDependencies",
+      "current": "^5.14.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "6.0.5"
+    },
+    {
+      "name": "sass",
+      "type": "devDependencies",
+      "current": "^1.89.2",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "1.94.2"
+    },
+    {
+      "name": "sax",
+      "type": "dependencies",
+      "current": "^1.4.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "1.4.3"
+    },
+    {
+      "name": "semver",
+      "type": "dependencies",
+      "current": "^7.7.1",
+      "packages": [
+        "sandbox"
+      ],
+      "latest": "7.7.3"
+    },
+    {
+      "name": "sharp",
+      "type": "dependencies",
+      "current": "^0.33.5",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "0.34.5"
+    },
+    {
+      "name": "sinon",
+      "type": "devDependencies",
+      "current": "^19.0.5",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "21.0.0"
+    },
+    {
+      "name": "terser",
+      "type": "devDependencies",
+      "current": "^5.42.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "5.44.1"
+    },
+    {
+      "name": "terser",
+      "type": "dependencies",
+      "current": "^5.39.0",
+      "packages": [
+        "core"
+      ],
+      "latest": "5.44.1"
+    },
+    {
+      "name": "typeorm",
+      "type": "devDependencies",
+      "current": "^0.3.24",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "0.3.28"
+    },
+    {
+      "name": "typeorm",
+      "type": "dependencies",
+      "current": "^0.3.20",
+      "packages": [
+        "repository"
+      ],
+      "latest": "0.3.28"
+    },
+    {
+      "name": "typescript",
+      "type": "devDependencies",
+      "current": "^5.8.3",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "5.9.3"
+    },
+    {
+      "name": "unocss",
+      "type": "devDependencies",
+      "current": "^0.64.1",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "66.5.10"
+    },
+    {
+      "name": "unplugin-auto-import",
+      "type": "devDependencies",
+      "current": "^0.18.6",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "20.3.0"
+    },
+    {
+      "name": "unplugin-vue-components",
+      "type": "devDependencies",
+      "current": "^0.27.5",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "30.0.0"
+    },
+    {
+      "name": "uuid",
+      "type": "dependencies",
+      "current": "^10.0.0",
+      "packages": [
+        "cmmv",
+        "core"
+      ],
+      "latest": "13.0.0"
+    },
+    {
+      "name": "vite",
+      "type": "devDependencies",
+      "current": "^5.4.19",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "7.2.6"
+    },
+    {
+      "name": "vitest",
+      "type": "devDependencies",
+      "current": "^2.1.9",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "4.0.15"
+    },
+    {
+      "name": "vue",
+      "type": "dependencies",
+      "current": "^3.5.16",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "3.5.25"
+    },
+    {
+      "name": "vue-eslint-parser",
+      "type": "devDependencies",
+      "current": "^9.4.3",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "10.2.0"
+    },
+    {
+      "name": "ws",
+      "type": "devDependencies",
+      "current": "^8.18.2",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "8.18.3"
+    },
+    {
+      "name": "ws",
+      "type": "dependencies",
+      "current": "^8.18.1",
+      "packages": [
+        "sandbox",
+        "ws"
+      ],
+      "latest": "8.18.3"
+    },
+    {
+      "name": "yaml",
+      "type": "dependencies",
+      "current": "^2.8.0",
+      "packages": [
+        "cmmv"
+      ],
+      "latest": "2.8.2"
+    }
+  ],
+  "errors": []
+}

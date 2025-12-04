@@ -61,3 +61,26 @@ newrelic.js
 /src/services/*
 /src/migrations/*
 
+
+# Patterns added by @hivellm/rulebook
+# Added at: 2025-12-04T19:21:29.290Z
+
+*.swo
+*.swp
+*.tsbuildinfo
+*.tsbuildinfo.*
+*~
+.cache/
+.env.*.local
+.env.local
+.idea/
+.tsc/
+.vscode/
+Thumbs.db
+build/
+dist/
+logs/
+node_modules/
+out/
+temp/
+tmp/
