@@ -95,7 +95,11 @@ describe('SchedulingService', () => {
             const mockMethod = vi.fn();
             const mockTarget = {};
             const mockCrons = [
-                { target: mockTarget, method: mockMethod, cronTime: '* * * * *' },
+                {
+                    target: mockTarget,
+                    method: mockMethod,
+                    cronTime: '* * * * *',
+                },
             ];
 
             vi.mocked(Scope.getArray).mockReturnValue(mockCrons);
@@ -121,7 +125,11 @@ describe('SchedulingService', () => {
             const mockMethod = vi.fn();
             const mockTarget = { name: 'test' };
             const mockCrons = [
-                { target: mockTarget, method: mockMethod, cronTime: '*/5 * * * *' },
+                {
+                    target: mockTarget,
+                    method: mockMethod,
+                    cronTime: '*/5 * * * *',
+                },
             ];
 
             vi.mocked(Scope.getArray).mockReturnValue(mockCrons);
@@ -215,7 +223,7 @@ describe('SchedulingService', () => {
 
         it('should change cron time for existing job', () => {
             expect(() =>
-                SchedulingService.changeCronTimeForJob(0, '*/10 * * * *')
+                SchedulingService.changeCronTimeForJob(0, '*/10 * * * *'),
             ).not.toThrow();
         });
 
@@ -250,7 +258,7 @@ describe('SchedulingService', () => {
         it('should add observer to existing job', () => {
             const observer = vi.fn();
             expect(() =>
-                SchedulingService.addObserverToJob(0, observer)
+                SchedulingService.addObserverToJob(0, observer),
             ).not.toThrow();
         });
 

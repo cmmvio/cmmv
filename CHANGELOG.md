@@ -9,6 +9,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### @cmmv/core - Application Scopes for Multi-Agent Support
+
+Added application scope infrastructure enabling multiple isolated Application instances for MCP servers, A2A communication, and worker-based architectures.
+
+**New Scope Types:**
+- `singleton` - Default, backward-compatible single instance
+- `agent` - Isolated per agent/worker (requires explicit `scopeId`)
+- `request` - New instance per HTTP request (auto-generated `scopeId`)
+
+**New Classes & Interfaces:**
+- `ApplicationFactory` - Factory for creating scoped applications
+  - `create(settings)` - Create a new scoped application
+  - `get(scopeId)` - Retrieve an application by scope ID
+  - `current()` - Get the current application based on context
+  - `dispose(scopeId)` - Dispose a specific scope
+  - `runInScope(scopeId, callback)` - Execute code within a scope
+- `AppRegistry` - Registry for managing multiple Application instances
+  - Thread-safe storage indexed by `scopeId`
+  - Automatic lifecycle management
+- `ScopeContext` - AsyncLocalStorage-based context isolation
+  - `run(scopeId, fn)` / `runAsync(scopeId, fn)` - Execute within scope
+  - `getCurrentScopeId()` - Get current scope identifier
+  - `getCurrentApplication()` - Get current Application instance
+  - `getMetadata(key)` / `setMetadata(key, value)` - Scope metadata
+- `IApplicationScopeConfig` - Configuration interface for scopes
+- `IScopedApplicationInfo` - Scope metadata interface
+
+**Utility Functions:**
+- `runWithApplicationScope(scopeId, callback)` - Run async code in a registered scope
+- `runWithApplicationScopeSync(scopeId, callback)` - Sync version
+- `@WithScope(scopeId)` - Method decorator for scope execution
+
+**Application Class Enhancements:**
+- New `scopeId` and `scope` properties
+- `Application.current()` static method for context-aware access
+- `dispose()` method for cleanup with `onDispose` hook
+- Backward compatible - existing code works unchanged
+
+**Telemetry Integration:**
+- Logger now includes optional `scopeId` for scope-tagged logging
+- `LogEvent` interface extended with `scopeId` field
+
+**Test Coverage:**
+- 59 new tests for scope functionality
+- AppRegistry: 19 tests
+- ScopeContext: 22 tests
+- ApplicationFactory: 18 tests
+
 #### @cmmv/testing - Complete Refactor
 
 Comprehensive testing utilities for the CMMV framework with mocks for all packages.

@@ -55,9 +55,12 @@ export interface MockEncryptionResult {
 /**
  * Create mock encryption result
  */
-export function createMockEncryptionResult(overrides: Partial<MockEncryptionResult> = {}): MockEncryptionResult {
+export function createMockEncryptionResult(
+    overrides: Partial<MockEncryptionResult> = {},
+): MockEncryptionResult {
     return {
-        ciphertext: 'mock-ciphertext-' + Math.random().toString(36).substr(2, 16),
+        ciphertext:
+            'mock-ciphertext-' + Math.random().toString(36).substr(2, 16),
         iv: 'mock-iv-' + Math.random().toString(36).substr(2, 16),
         tag: 'mock-tag-' + Math.random().toString(36).substr(2, 16),
         ...overrides,
@@ -77,8 +80,10 @@ export interface MockKeyPair {
  */
 export function createMockKeyPair(): MockKeyPair {
     return {
-        publicKey: '-----BEGIN PUBLIC KEY-----\nMOCK_PUBLIC_KEY\n-----END PUBLIC KEY-----',
-        privateKey: '-----BEGIN PRIVATE KEY-----\nMOCK_PRIVATE_KEY\n-----END PRIVATE KEY-----',
+        publicKey:
+            '-----BEGIN PUBLIC KEY-----\nMOCK_PUBLIC_KEY\n-----END PUBLIC KEY-----',
+        privateKey:
+            '-----BEGIN PRIVATE KEY-----\nMOCK_PRIVATE_KEY\n-----END PRIVATE KEY-----',
     };
 }
 

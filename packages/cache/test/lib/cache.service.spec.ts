@@ -308,7 +308,11 @@ describe('CacheService', () => {
 
             await CacheService.set('12345', 'value');
 
-            expect(mockManager.set).toHaveBeenCalledWith('12345', 'value', 5000);
+            expect(mockManager.set).toHaveBeenCalledWith(
+                '12345',
+                'value',
+                5000,
+            );
         });
 
         it('should handle empty cache key', async () => {
@@ -327,7 +331,11 @@ describe('CacheService', () => {
             const longKey = 'k'.repeat(1000);
             await CacheService.set(longKey, 'value');
 
-            expect(mockManager.set).toHaveBeenCalledWith(longKey, 'value', 5000);
+            expect(mockManager.set).toHaveBeenCalledWith(
+                longKey,
+                'value',
+                5000,
+            );
         });
 
         it('should handle unicode in cache key', async () => {

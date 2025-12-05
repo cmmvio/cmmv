@@ -86,7 +86,7 @@ vi.mock('@cmmv/core', () => ({
     Config: {
         get: vi.fn((key: string, defaultValue?: any) => {
             const configs: Record<string, any> = {
-                'env': 'test',
+                env: 'test',
                 'auth.jwtSecret': 'test-secret',
                 'auth.jwtSecretRefresh': 'test-refresh-secret',
                 'auth.expiresIn': 86400,
@@ -122,7 +122,9 @@ vi.mock('@cmmv/repository', () => ({
         findBy: vi.fn().mockResolvedValue(null),
         findOne: vi.fn().mockResolvedValue(null),
         findAll: vi.fn().mockResolvedValue({ data: [] }),
-        insert: vi.fn().mockResolvedValue({ success: true, data: { id: 'new-user-id' } }),
+        insert: vi
+            .fn()
+            .mockResolvedValue({ success: true, data: { id: 'new-user-id' } }),
         update: vi.fn().mockResolvedValue(1),
         exists: vi.fn().mockResolvedValue(false),
         queryBuilder: vi.fn((query) => query),
@@ -133,7 +135,10 @@ vi.mock('@cmmv/repository', () => ({
 vi.mock('@cmmv/http', () => ({
     CMMVRenderer: class {},
     HttpException: class MockHttpException extends Error {
-        constructor(message: string, public status: number) {
+        constructor(
+            message: string,
+            public status: number,
+        ) {
             super(message);
             this.name = 'HttpException';
         }
@@ -160,7 +165,8 @@ const mockValidateRefreshToken = vi.fn().mockResolvedValue(true);
 
 vi.mock('./sessions.service', () => ({
     AuthSessionsService: {
-        validateRefreshToken: (...args: any[]) => mockValidateRefreshToken(...args),
+        validateRefreshToken: (...args: any[]) =>
+            mockValidateRefreshToken(...args),
     },
 }));
 
@@ -196,7 +202,7 @@ describe('AuthAutorizationService', () => {
         path: '/auth/login',
         headers: {
             'user-agent': 'Mozilla/5.0',
-            'authorization': 'Bearer mock-token',
+            authorization: 'Bearer mock-token',
         },
         get: vi.fn((header: string) => {
             const headers: Record<string, string> = {
@@ -233,7 +239,7 @@ describe('AuthAutorizationService', () => {
         service = new AuthAutorizationService(
             mockSessionsService,
             mockRecaptchaService,
-            mockEmailService
+            mockEmailService,
         );
     });
 
@@ -267,7 +273,10 @@ describe('AuthAutorizationService', () => {
         });
 
         it('should check connection.remoteAddress if ip is not available', () => {
-            const req = { ip: null, connection: { remoteAddress: '127.0.0.1' } };
+            const req = {
+                ip: null,
+                connection: { remoteAddress: '127.0.0.1' },
+            };
             const result = (service as any).isLocalhost(req);
             expect(result).toBe(true);
         });
@@ -276,15 +285,18 @@ describe('AuthAutorizationService', () => {
     describe('login', () => {
         it('should throw error for invalid credentials', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'env') return 'production';
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'env') return 'production';
+                    return defaultValue;
+                },
+            );
 
             const payload = { username: 'user', password: 'pass' };
 
-            await expect(service.login(payload, mockReq, mockRes, mockSession))
-                .rejects.toThrow('Invalid credentials');
+            await expect(
+                service.login(payload, mockReq, mockRes, mockSession),
+            ).rejects.toThrow('Invalid credentials');
         });
 
         it('should throw error for blocked user', async () => {
@@ -296,8 +308,9 @@ describe('AuthAutorizationService', () => {
 
             const payload = { username: 'user', password: 'pass' };
 
-            await expect(service.login(payload, mockReq, mockRes, mockSession))
-                .rejects.toThrow('User Blocked');
+            await expect(
+                service.login(payload, mockReq, mockRes, mockSession),
+            ).rejects.toThrow('User Blocked');
         });
 
         it('should throw error for unverified email', async () => {
@@ -311,8 +324,9 @@ describe('AuthAutorizationService', () => {
 
             const payload = { username: 'user', password: 'pass' };
 
-            await expect(service.login(payload, mockReq, mockRes, mockSession))
-                .rejects.toThrow('Email not validated');
+            await expect(
+                service.login(payload, mockReq, mockRes, mockSession),
+            ).rejects.toThrow('Email not validated');
         });
 
         it('should login successfully with valid credentials', async () => {
@@ -328,7 +342,12 @@ describe('AuthAutorizationService', () => {
             });
 
             const payload = { username: 'user', password: 'pass' };
-            const result = await service.login(payload, mockReq, mockRes, mockSession);
+            const result = await service.login(
+                payload,
+                mockReq,
+                mockRes,
+                mockSession,
+            );
 
             expect(result).toHaveProperty('result');
             expect(result.result).toHaveProperty('token');
@@ -336,17 +355,24 @@ describe('AuthAutorizationService', () => {
         });
 
         it('should validate recaptcha when required', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'auth.recaptcha.required') return true;
-                if (key === 'auth.recaptcha.secret') return 'secret';
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'auth.recaptcha.required') return true;
+                    if (key === 'auth.recaptcha.secret') return 'secret';
+                    return defaultValue;
+                },
+            );
             mockRecaptchaService.validateRecaptcha.mockResolvedValue(false);
 
-            const payload = { username: 'user', password: 'pass', token: 'recaptcha-token' };
+            const payload = {
+                username: 'user',
+                password: 'pass',
+                token: 'recaptcha-token',
+            };
 
-            await expect(service.login(payload, mockReq, mockRes, mockSession))
-                .rejects.toThrow('Invalid reCAPTCHA');
+            await expect(
+                service.login(payload, mockReq, mockRes, mockSession),
+            ).rejects.toThrow('Invalid reCAPTCHA');
         });
     });
 
@@ -354,8 +380,9 @@ describe('AuthAutorizationService', () => {
         it('should throw error for non-existent user', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.loginWithOneTimeToken('user-123', mockReq, mockRes))
-                .rejects.toThrow('User not found');
+            await expect(
+                service.loginWithOneTimeToken('user-123', mockReq, mockRes),
+            ).rejects.toThrow('User not found');
         });
 
         it('should login user with one-time token', async () => {
@@ -367,7 +394,11 @@ describe('AuthAutorizationService', () => {
                 roles: [],
             });
 
-            const result = await service.loginWithOneTimeToken('user-123', mockReq, mockRes);
+            const result = await service.loginWithOneTimeToken(
+                'user-123',
+                mockReq,
+                mockRes,
+            );
 
             expect(result).toHaveProperty('token');
             expect(result).toHaveProperty('refreshToken');
@@ -376,12 +407,19 @@ describe('AuthAutorizationService', () => {
 
     describe('register', () => {
         it('should throw error for existing email', async () => {
-            vi.mocked(Repository.findOne).mockResolvedValueOnce({ id: 'existing-user' });
+            vi.mocked(Repository.findOne).mockResolvedValueOnce({
+                id: 'existing-user',
+            });
 
-            const payload = { username: 'newuser', password: 'pass', email: 'existing@email.com' };
+            const payload = {
+                username: 'newuser',
+                password: 'pass',
+                email: 'existing@email.com',
+            };
 
-            await expect(service.register(payload))
-                .rejects.toThrow('Email already in use');
+            await expect(service.register(payload)).rejects.toThrow(
+                'Email already in use',
+            );
         });
 
         it('should throw error for existing username', async () => {
@@ -389,23 +427,34 @@ describe('AuthAutorizationService', () => {
                 .mockResolvedValueOnce(null)
                 .mockResolvedValueOnce({ id: 'existing-user' });
 
-            const payload = { username: 'existinguser', password: 'pass', email: 'new@email.com' };
+            const payload = {
+                username: 'existinguser',
+                password: 'pass',
+                email: 'new@email.com',
+            };
 
-            await expect(service.register(payload))
-                .rejects.toThrow('Username already in use');
+            await expect(service.register(payload)).rejects.toThrow(
+                'Username already in use',
+            );
         });
 
         it('should register new user successfully', async () => {
             vi.mocked(Repository.findOne).mockResolvedValue(null);
             vi.mocked(Repository.insert).mockResolvedValue({
                 success: true,
-                data: { id: 'new-user-id' }
+                data: { id: 'new-user-id' },
             });
 
-            const payload = { username: 'newuser', password: 'pass', email: 'new@email.com' };
+            const payload = {
+                username: 'newuser',
+                password: 'pass',
+                email: 'new@email.com',
+            };
             const result = await service.register(payload);
 
-            expect(result).toEqual({ message: 'User registered successfully!' });
+            expect(result).toEqual({
+                message: 'User registered successfully!',
+            });
             expect(Repository.insert).toHaveBeenCalled();
         });
 
@@ -413,10 +462,15 @@ describe('AuthAutorizationService', () => {
             vi.mocked(Repository.findOne).mockResolvedValue(null);
             vi.mocked(Repository.insert).mockResolvedValue({ success: false });
 
-            const payload = { username: 'newuser', password: 'pass', email: 'new@email.com' };
+            const payload = {
+                username: 'newuser',
+                password: 'pass',
+                email: 'new@email.com',
+            };
 
-            await expect(service.register(payload))
-                .rejects.toThrow('Error trying to register new user');
+            await expect(service.register(payload)).rejects.toThrow(
+                'Error trying to register new user',
+            );
         });
     });
 
@@ -448,8 +502,9 @@ describe('AuthAutorizationService', () => {
         it('should throw error for missing authorization header', async () => {
             const req = { headers: {} };
 
-            await expect(service.refreshToken(req))
-                .rejects.toThrow('Authorization header missing');
+            await expect(service.refreshToken(req)).rejects.toThrow(
+                'Authorization header missing',
+            );
         });
 
         it('should throw error for missing refresh token', async () => {
@@ -458,8 +513,9 @@ describe('AuthAutorizationService', () => {
                 cookies: {},
             };
 
-            await expect(service.refreshToken(req))
-                .rejects.toThrow('Invalid credentials');
+            await expect(service.refreshToken(req)).rejects.toThrow(
+                'Invalid credentials',
+            );
         });
 
         it('should throw error for invalid refresh token', async () => {
@@ -473,8 +529,9 @@ describe('AuthAutorizationService', () => {
                 cookies: {},
             };
 
-            await expect(service.refreshToken(req))
-                .rejects.toThrow('Invalid refresh token');
+            await expect(service.refreshToken(req)).rejects.toThrow(
+                'Invalid refresh token',
+            );
         });
     });
 
@@ -591,15 +648,17 @@ describe('AuthAutorizationService', () => {
                 },
             ]);
 
-            await expect(service.assignRoles('user-123', ['user:get']))
-                .rejects.toThrow('User not found');
+            await expect(
+                service.assignRoles('user-123', ['user:get']),
+            ).rejects.toThrow('User not found');
         });
 
         it('should throw error for invalid roles', async () => {
             vi.mocked(Scope.getArray).mockReturnValue([]);
 
-            await expect(service.assignRoles('user-123', ['invalid-role']))
-                .rejects.toThrow('Invalid roles');
+            await expect(
+                service.assignRoles('user-123', ['invalid-role']),
+            ).rejects.toThrow('Invalid roles');
         });
 
         it('should throw error for root-only roles', async () => {
@@ -612,8 +671,9 @@ describe('AuthAutorizationService', () => {
                 },
             ]);
 
-            await expect(service.assignRoles('user-123', ['admin:get']))
-                .rejects.toThrow('Cannot assign root-only roles');
+            await expect(
+                service.assignRoles('user-123', ['admin:get']),
+            ).rejects.toThrow('Cannot assign root-only roles');
         });
 
         it('should assign valid roles successfully', async () => {
@@ -646,15 +706,17 @@ describe('AuthAutorizationService', () => {
                 },
             ]);
 
-            await expect(service.removeRoles('user-123', ['user:get']))
-                .rejects.toThrow('User not found');
+            await expect(
+                service.removeRoles('user-123', ['user:get']),
+            ).rejects.toThrow('User not found');
         });
 
         it('should throw error for invalid roles', async () => {
             vi.mocked(Scope.getArray).mockReturnValue([]);
 
-            await expect(service.removeRoles('user-123', ['invalid-role']))
-                .rejects.toThrow('Invalid roles');
+            await expect(
+                service.removeRoles('user-123', ['invalid-role']),
+            ).rejects.toThrow('Invalid roles');
         });
 
         it('should remove roles successfully', async () => {
@@ -674,7 +736,10 @@ describe('AuthAutorizationService', () => {
 
             const result = await service.removeRoles('user-123', ['user:get']);
 
-            expect(result).toEqual({ success: true, message: 'Roles removed successfully' });
+            expect(result).toEqual({
+                success: true,
+                message: 'Roles removed successfully',
+            });
         });
     });
 
@@ -687,7 +752,11 @@ describe('AuthAutorizationService', () => {
             const username = 'testuser';
 
             const result = (service as any).createAuthToken(
-                user, jwtSecret, fingerprint, roles, username
+                user,
+                jwtSecret,
+                fingerprint,
+                roles,
+                username,
             );
 
             expect(jwt.sign).toHaveBeenCalled();
@@ -703,7 +772,10 @@ describe('AuthAutorizationService', () => {
             const expiresIn = 86400;
 
             const result = (service as any).createRefreshToken(
-                user, fingerprint, jwtSecretRefresh, expiresIn
+                user,
+                fingerprint,
+                jwtSecretRefresh,
+                expiresIn,
             );
 
             expect(jwt.sign).toHaveBeenCalled();
@@ -715,16 +787,18 @@ describe('AuthAutorizationService', () => {
         it('should throw error for unauthenticated user', async () => {
             const req = { user: null };
 
-            await expect(service.user({}, req))
-                .rejects.toThrow('User not authenticated');
+            await expect(service.user({}, req)).rejects.toThrow(
+                'User not authenticated',
+            );
         });
 
         it('should throw error for non-existent user', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
             const req = { user: { id: 'user-123', username: 'testuser' } };
 
-            await expect(service.user({}, req))
-                .rejects.toThrow('User not found');
+            await expect(service.user({}, req)).rejects.toThrow(
+                'User not found',
+            );
         });
 
         it('should return user info', async () => {
@@ -765,10 +839,12 @@ describe('AuthAutorizationService', () => {
 
         it('should return error response on invalid login', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'env') return 'production';
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'env') return 'production';
+                    return defaultValue;
+                },
+            );
 
             const payload = { username: 'invalid', password: 'invalid' };
             const result = await service.loginGraphQL(payload, mockReq);
@@ -781,9 +857,15 @@ describe('AuthAutorizationService', () => {
     describe('registerGraphQL', () => {
         it('should return error response on failed registration', async () => {
             // First findOne returns existing email user
-            vi.mocked(Repository.findOne).mockResolvedValueOnce({ id: 'existing' });
+            vi.mocked(Repository.findOne).mockResolvedValueOnce({
+                id: 'existing',
+            });
 
-            const payload = { username: 'existing', password: 'pass', email: 'existing@email.com' };
+            const payload = {
+                username: 'existing',
+                password: 'pass',
+                email: 'existing@email.com',
+            };
             const result = await service.registerGraphQL(payload, mockReq);
 
             expect(result.success).toBe(false);
@@ -793,7 +875,7 @@ describe('AuthAutorizationService', () => {
             // Test that registerGraphQL catches errors
             const result = await service.registerGraphQL(
                 { username: '', password: '', email: '' },
-                mockReq
+                mockReq,
             );
 
             // Should still return a result with success: false

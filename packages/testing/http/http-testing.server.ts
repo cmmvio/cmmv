@@ -49,7 +49,9 @@ export class HttpTestingServer {
     /**
      * Initialize and start the testing server
      */
-    async init(options: { port?: number; host?: string } = {}): Promise<HttpTestingServer> {
+    async init(
+        options: { port?: number; host?: string } = {},
+    ): Promise<HttpTestingServer> {
         this.port = options.port || this.findAvailablePort();
         this.host = options.host || '127.0.0.1';
         this.baseUrl = `http://${this.host}:${this.port}`;
@@ -120,35 +122,53 @@ export class HttpTestingServer {
     /**
      * Make a GET request
      */
-    async get(path: string, options: Omit<IHttpTestRequest, 'method' | 'path'> = {}): Promise<IHttpTestResponse> {
+    async get(
+        path: string,
+        options: Omit<IHttpTestRequest, 'method' | 'path'> = {},
+    ): Promise<IHttpTestResponse> {
         return this.request({ ...options, method: 'GET', path });
     }
 
     /**
      * Make a POST request
      */
-    async post(path: string, body?: any, options: Omit<IHttpTestRequest, 'method' | 'path' | 'body'> = {}): Promise<IHttpTestResponse> {
+    async post(
+        path: string,
+        body?: any,
+        options: Omit<IHttpTestRequest, 'method' | 'path' | 'body'> = {},
+    ): Promise<IHttpTestResponse> {
         return this.request({ ...options, method: 'POST', path, body });
     }
 
     /**
      * Make a PUT request
      */
-    async put(path: string, body?: any, options: Omit<IHttpTestRequest, 'method' | 'path' | 'body'> = {}): Promise<IHttpTestResponse> {
+    async put(
+        path: string,
+        body?: any,
+        options: Omit<IHttpTestRequest, 'method' | 'path' | 'body'> = {},
+    ): Promise<IHttpTestResponse> {
         return this.request({ ...options, method: 'PUT', path, body });
     }
 
     /**
      * Make a DELETE request
      */
-    async delete(path: string, options: Omit<IHttpTestRequest, 'method' | 'path'> = {}): Promise<IHttpTestResponse> {
+    async delete(
+        path: string,
+        options: Omit<IHttpTestRequest, 'method' | 'path'> = {},
+    ): Promise<IHttpTestResponse> {
         return this.request({ ...options, method: 'DELETE', path });
     }
 
     /**
      * Make a PATCH request
      */
-    async patch(path: string, body?: any, options: Omit<IHttpTestRequest, 'method' | 'path' | 'body'> = {}): Promise<IHttpTestResponse> {
+    async patch(
+        path: string,
+        body?: any,
+        options: Omit<IHttpTestRequest, 'method' | 'path' | 'body'> = {},
+    ): Promise<IHttpTestResponse> {
         return this.request({ ...options, method: 'PATCH', path, body });
     }
 
@@ -223,9 +243,10 @@ export class HttpTestingServer {
 
             // Write body if present
             if (options.body) {
-                const bodyStr = typeof options.body === 'string'
-                    ? options.body
-                    : JSON.stringify(options.body);
+                const bodyStr =
+                    typeof options.body === 'string'
+                        ? options.body
+                        : JSON.stringify(options.body);
                 req.write(bodyStr);
             }
 
@@ -266,7 +287,9 @@ export class HttpTestingServer {
 /**
  * Helper function to create an HttpTestingServer from a TestingModule
  */
-export async function createHttpTestingServer(module: ITestingModule): Promise<HttpTestingServer> {
+export async function createHttpTestingServer(
+    module: ITestingModule,
+): Promise<HttpTestingServer> {
     const server = new HttpTestingServer(module);
     await server.init();
     return server;
@@ -319,7 +342,10 @@ export class HttpRequestBuilder {
         return this;
     }
 
-    auth(token: string, type: 'Bearer' | 'Basic' = 'Bearer'): HttpRequestBuilder {
+    auth(
+        token: string,
+        type: 'Bearer' | 'Basic' = 'Bearer',
+    ): HttpRequestBuilder {
         this._headers['Authorization'] = `${type} ${token}`;
         return this;
     }
@@ -356,7 +382,9 @@ export class HttpResponseAssert {
      */
     status(expected: number): HttpResponseAssert {
         if (this.response.status !== expected) {
-            throw new Error(`Expected status ${expected} but got ${this.response.status}`);
+            throw new Error(
+                `Expected status ${expected} but got ${this.response.status}`,
+            );
         }
         return this;
     }
@@ -366,7 +394,9 @@ export class HttpResponseAssert {
      */
     isOk(): HttpResponseAssert {
         if (this.response.status < 200 || this.response.status >= 300) {
-            throw new Error(`Expected 2xx status but got ${this.response.status}`);
+            throw new Error(
+                `Expected 2xx status but got ${this.response.status}`,
+            );
         }
         return this;
     }
@@ -376,7 +406,9 @@ export class HttpResponseAssert {
      */
     isClientError(): HttpResponseAssert {
         if (this.response.status < 400 || this.response.status >= 500) {
-            throw new Error(`Expected 4xx status but got ${this.response.status}`);
+            throw new Error(
+                `Expected 4xx status but got ${this.response.status}`,
+            );
         }
         return this;
     }
@@ -386,7 +418,9 @@ export class HttpResponseAssert {
      */
     isServerError(): HttpResponseAssert {
         if (this.response.status < 500 || this.response.status >= 600) {
-            throw new Error(`Expected 5xx status but got ${this.response.status}`);
+            throw new Error(
+                `Expected 5xx status but got ${this.response.status}`,
+            );
         }
         return this;
     }
@@ -400,9 +434,13 @@ export class HttpResponseAssert {
             throw new Error(`Expected header '${name}' to exist`);
         }
         if (value !== undefined) {
-            const actualValue = Array.isArray(headerValue) ? headerValue[0] : headerValue;
+            const actualValue = Array.isArray(headerValue)
+                ? headerValue[0]
+                : headerValue;
             if (actualValue !== value) {
-                throw new Error(`Expected header '${name}' to be '${value}' but got '${actualValue}'`);
+                throw new Error(
+                    `Expected header '${name}' to be '${value}' but got '${actualValue}'`,
+                );
             }
         }
         return this;
@@ -436,7 +474,9 @@ export class HttpResponseAssert {
     bodyProperty(property: string, expected: any): HttpResponseAssert {
         const actual = this.response.body[property];
         if (actual !== expected) {
-            throw new Error(`Expected body.${property} to be ${expected} but got ${actual}`);
+            throw new Error(
+                `Expected body.${property} to be ${expected} but got ${actual}`,
+            );
         }
         return this;
     }
@@ -446,7 +486,9 @@ export class HttpResponseAssert {
      */
     responseTimeBelow(ms: number): HttpResponseAssert {
         if (this.response.responseTime > ms) {
-            throw new Error(`Expected response time below ${ms}ms but got ${this.response.responseTime}ms`);
+            throw new Error(
+                `Expected response time below ${ms}ms but got ${this.response.responseTime}ms`,
+            );
         }
         return this;
     }
@@ -462,6 +504,8 @@ export class HttpResponseAssert {
 /**
  * Create assertion helper from response
  */
-export function assertResponse(response: IHttpTestResponse): HttpResponseAssert {
+export function assertResponse(
+    response: IHttpTestResponse,
+): HttpResponseAssert {
     return new HttpResponseAssert(response);
 }

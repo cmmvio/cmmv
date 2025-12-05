@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-
 // Mock node:fs
 vi.mock('node:fs', () => ({
     existsSync: vi.fn().mockReturnValue(true),
@@ -44,8 +43,12 @@ vi.mock('@cmmv/core', () => ({
         getResolvers: vi.fn().mockReturnValue([]),
     },
     AbstractTranspile: class MockAbstractTranspile {
-        getImportPath = vi.fn((contract, type, name, defaultPath) => `${defaultPath}/${name}`);
-        getGeneratedPath = vi.fn((contract, type) => `/mock/cwd/.generated/${type}`);
+        getImportPath = vi.fn(
+            (contract, type, name, defaultPath) => `${defaultPath}/${name}`,
+        );
+        getGeneratedPath = vi.fn(
+            (contract, type) => `/mock/cwd/.generated/${type}`,
+        );
     },
     Config: {
         get: vi.fn((key: string, defaultValue?: any) => {
@@ -304,13 +307,19 @@ describe('GraphQLTranspile', () => {
                     { name: 'User', properties: {} },
                     { name: 'Product', properties: {} },
                 ];
-                const result = transpiler['findMessageByName'](messages, 'User');
+                const result = transpiler['findMessageByName'](
+                    messages,
+                    'User',
+                );
                 expect(result).toEqual({ name: 'User', properties: {} });
             });
 
             it('should return null if message not found', () => {
                 const messages = [{ name: 'User', properties: {} }];
-                const result = transpiler['findMessageByName'](messages, 'NotFound');
+                const result = transpiler['findMessageByName'](
+                    messages,
+                    'NotFound',
+                );
                 expect(result).toBeUndefined();
             });
 
@@ -336,7 +345,11 @@ describe('GraphQLTranspile', () => {
                 const service = { response: 'Array<User>' };
                 const messages = [{ name: 'User', properties: {} }];
 
-                const result = transpiler['determineReturnType'](service, 'Product', messages);
+                const result = transpiler['determineReturnType'](
+                    service,
+                    'Product',
+                    messages,
+                );
 
                 expect(result.isArray).toBe(true);
                 expect(result.type).toBe('[UserGraphQLDTO]');
@@ -346,7 +359,11 @@ describe('GraphQLTranspile', () => {
                 const service = { response: 'User[]' };
                 const messages = [{ name: 'User', properties: {} }];
 
-                const result = transpiler['determineReturnType'](service, 'Product', messages);
+                const result = transpiler['determineReturnType'](
+                    service,
+                    'Product',
+                    messages,
+                );
 
                 expect(result.isArray).toBe(true);
             });
@@ -355,7 +372,11 @@ describe('GraphQLTranspile', () => {
                 const service = { response: 'Product' };
                 const messages: any[] = [];
 
-                const result = transpiler['determineReturnType'](service, 'Product', messages);
+                const result = transpiler['determineReturnType'](
+                    service,
+                    'Product',
+                    messages,
+                );
 
                 expect(result.type).toBe('Product');
             });
@@ -364,7 +385,11 @@ describe('GraphQLTranspile', () => {
                 const service = { response: 'string' };
                 const messages: any[] = [];
 
-                const result = transpiler['determineReturnType'](service, 'Product', messages);
+                const result = transpiler['determineReturnType'](
+                    service,
+                    'Product',
+                    messages,
+                );
 
                 expect(result.type).toBe('String');
             });
@@ -373,7 +398,11 @@ describe('GraphQLTranspile', () => {
                 const service = { response: 'UserResponse' };
                 const messages = [{ name: 'UserResponse', properties: {} }];
 
-                const result = transpiler['determineReturnType'](service, 'Product', messages);
+                const result = transpiler['determineReturnType'](
+                    service,
+                    'Product',
+                    messages,
+                );
 
                 expect(result.type).toBe('UserResponseGraphQLDTO');
             });
@@ -383,7 +412,11 @@ describe('GraphQLTranspile', () => {
     describe('getControllerDecorators', () => {
         it('should return empty string when authRouter is false', () => {
             const result = transpiler['getControllerDecorators'](
-                { authRouter: false, rootOnlyRouter: false, contract: { controllerName: 'User' } },
+                {
+                    authRouter: false,
+                    rootOnlyRouter: false,
+                    contract: { controllerName: 'User' },
+                },
                 'get',
             );
             expect(result).toBe('');
@@ -391,7 +424,11 @@ describe('GraphQLTranspile', () => {
 
         it('should return Authorized decorator with role when authRouter is true', () => {
             const result = transpiler['getControllerDecorators'](
-                { authRouter: true, rootOnlyRouter: false, contract: { controllerName: 'User' } },
+                {
+                    authRouter: true,
+                    rootOnlyRouter: false,
+                    contract: { controllerName: 'User' },
+                },
                 'get',
             );
             expect(result).toContain('@Authorized');
@@ -400,7 +437,11 @@ describe('GraphQLTranspile', () => {
 
         it('should return rootOnly Authorized decorator when rootOnlyRouter is true', () => {
             const result = transpiler['getControllerDecorators'](
-                { authRouter: true, rootOnlyRouter: true, contract: { controllerName: 'User' } },
+                {
+                    authRouter: true,
+                    rootOnlyRouter: true,
+                    contract: { controllerName: 'User' },
+                },
                 'get',
             );
             expect(result).toContain('@Authorized');
@@ -501,7 +542,9 @@ describe('GraphQLTranspile', () => {
             const result = transpiler['prepareCustomServices'](contract as any);
 
             expect(result.initializations).toContain('this.authService');
-            expect(result.initializations).toContain('Application.resolveProvider');
+            expect(result.initializations).toContain(
+                'Application.resolveProvider',
+            );
         });
 
         it('should map service methods correctly', () => {

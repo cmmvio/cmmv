@@ -102,7 +102,10 @@ export class TestingModule implements ITestingModule {
             for (const provider of this.config.providers) {
                 // Check if there's an override
                 if (this.providerOverrides.has(provider)) {
-                    this.providers.set(provider, this.providerOverrides.get(provider));
+                    this.providers.set(
+                        provider,
+                        this.providerOverrides.get(provider),
+                    );
                 } else {
                     // Create instance of the provider
                     try {

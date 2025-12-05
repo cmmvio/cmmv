@@ -17,7 +17,9 @@ export interface MockJWTPayload {
 /**
  * Create a mock JWT payload
  */
-export function createMockJWTPayload(overrides: Partial<MockJWTPayload> = {}): MockJWTPayload {
+export function createMockJWTPayload(
+    overrides: Partial<MockJWTPayload> = {},
+): MockJWTPayload {
     return {
         id: 'user-' + Math.random().toString(36).substr(2, 9),
         username: 'testuser',
@@ -35,7 +37,9 @@ export function createMockJWTPayload(overrides: Partial<MockJWTPayload> = {}): M
  * Mock Authorization Service
  */
 export const MockAuthorizationService = {
-    register: vi.fn().mockResolvedValue({ success: true, user: { id: 'new-user-id' } }),
+    register: vi
+        .fn()
+        .mockResolvedValue({ success: true, user: { id: 'new-user-id' } }),
     login: vi.fn().mockResolvedValue({
         success: true,
         token: 'mock-jwt-token',
@@ -90,10 +94,18 @@ export const MockSessionsService = {
  * Mock Users Service
  */
 export const MockUsersService = {
-    findById: vi.fn().mockResolvedValue({ id: 'user-id', username: 'testuser' }),
-    findByUsername: vi.fn().mockResolvedValue({ id: 'user-id', username: 'testuser' }),
-    findByEmail: vi.fn().mockResolvedValue({ id: 'user-id', email: 'test@example.com' }),
-    create: vi.fn().mockResolvedValue({ id: 'new-user-id', username: 'newuser' }),
+    findById: vi
+        .fn()
+        .mockResolvedValue({ id: 'user-id', username: 'testuser' }),
+    findByUsername: vi
+        .fn()
+        .mockResolvedValue({ id: 'user-id', username: 'testuser' }),
+    findByEmail: vi
+        .fn()
+        .mockResolvedValue({ id: 'user-id', email: 'test@example.com' }),
+    create: vi
+        .fn()
+        .mockResolvedValue({ id: 'new-user-id', username: 'newuser' }),
     update: vi.fn().mockResolvedValue({ success: true }),
     delete: vi.fn().mockResolvedValue({ success: true }),
     validatePassword: vi.fn().mockResolvedValue(true),
@@ -115,7 +127,9 @@ export const MockUsersService = {
 export const MockGroupsService = {
     findAll: vi.fn().mockResolvedValue([]),
     findById: vi.fn().mockResolvedValue({ id: 'group-id', name: 'Test Group' }),
-    create: vi.fn().mockResolvedValue({ id: 'new-group-id', name: 'New Group' }),
+    create: vi
+        .fn()
+        .mockResolvedValue({ id: 'new-group-id', name: 'New Group' }),
     update: vi.fn().mockResolvedValue({ success: true }),
     delete: vi.fn().mockResolvedValue({ success: true }),
     addUserToGroup: vi.fn().mockResolvedValue({ success: true }),
@@ -135,13 +149,17 @@ export const MockGroupsService = {
  * Mock OAuth2 Service
  */
 export const MockOAuth2Service = {
-    getAuthorizationUrl: vi.fn().mockReturnValue('https://oauth.example.com/auth'),
+    getAuthorizationUrl: vi
+        .fn()
+        .mockReturnValue('https://oauth.example.com/auth'),
     handleCallback: vi.fn().mockResolvedValue({
         success: true,
         token: 'oauth-token',
         user: createMockJWTPayload(),
     }),
-    refreshOAuthToken: vi.fn().mockResolvedValue({ access_token: 'new-oauth-token' }),
+    refreshOAuthToken: vi
+        .fn()
+        .mockResolvedValue({ access_token: 'new-oauth-token' }),
     revokeToken: vi.fn().mockResolvedValue({ success: true }),
 
     reset: () => {
@@ -157,7 +175,12 @@ export const MockOAuth2Service = {
  * Mock OTP Service
  */
 export const MockOTPService = {
-    generateSecret: vi.fn().mockReturnValue({ secret: 'MOCK-OTP-SECRET', qrCode: 'data:image/png...' }),
+    generateSecret: vi
+        .fn()
+        .mockReturnValue({
+            secret: 'MOCK-OTP-SECRET',
+            qrCode: 'data:image/png...',
+        }),
     verifyToken: vi.fn().mockReturnValue(true),
     activateOTP: vi.fn().mockResolvedValue({ success: true }),
     deactivateOTP: vi.fn().mockResolvedValue({ success: true }),
@@ -175,7 +198,11 @@ export const MockOTPService = {
  * Mock Auth Decorator behavior
  */
 export function mockAuthDecorator(user?: MockJWTPayload) {
-    return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    return (
+        target: any,
+        propertyKey: string,
+        descriptor: PropertyDescriptor,
+    ) => {
         const originalMethod = descriptor.value;
         descriptor.value = async function (...args: any[]) {
             // Inject user into request
@@ -199,7 +226,9 @@ export function createMockAuthenticatedRequest(user?: Partial<MockJWTPayload>) {
             refreshToken: 'mock-refresh-token',
         },
         session: {
-            get: vi.fn().mockResolvedValue({ user: { token: 'mock-jwt-token' } }),
+            get: vi
+                .fn()
+                .mockResolvedValue({ user: { token: 'mock-jwt-token' } }),
             set: vi.fn().mockResolvedValue(undefined),
             destroy: vi.fn().mockResolvedValue(undefined),
         },

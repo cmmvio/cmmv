@@ -81,8 +81,16 @@ describe('DatabaseTestingModule', () => {
 
         it('should seed multiple entities', async () => {
             const results = await db.seedMany([
-                { entity: UserEntity, data: [{ name: 'User 1', email: 'user1@example.com' }] },
-                { entity: PostEntity, data: [{ title: 'Post 1', content: 'Content', userId: '1' }] },
+                {
+                    entity: UserEntity,
+                    data: [{ name: 'User 1', email: 'user1@example.com' }],
+                },
+                {
+                    entity: PostEntity,
+                    data: [
+                        { title: 'Post 1', content: 'Content', userId: '1' },
+                    ],
+                },
             ]);
 
             expect(results.get('UserEntity')).toHaveLength(1);
@@ -100,7 +108,9 @@ describe('DatabaseTestingModule', () => {
         });
 
         it('should clear seeded data', async () => {
-            await db.seed(UserEntity, [{ name: 'To Clear', email: 'clear@example.com' }]);
+            await db.seed(UserEntity, [
+                { name: 'To Clear', email: 'clear@example.com' },
+            ]);
 
             await db.clearSeededData();
 
@@ -108,8 +118,12 @@ describe('DatabaseTestingModule', () => {
         });
 
         it('should clear specific entity', async () => {
-            await db.seed(UserEntity, [{ name: 'User', email: 'user@example.com' }]);
-            await db.seed(PostEntity, [{ title: 'Post', content: 'Content', userId: '1' }]);
+            await db.seed(UserEntity, [
+                { name: 'User', email: 'user@example.com' },
+            ]);
+            await db.seed(PostEntity, [
+                { title: 'Post', content: 'Content', userId: '1' },
+            ]);
 
             await db.clearEntity(UserEntity);
 
@@ -196,7 +210,9 @@ describe('DatabaseTestingModule', () => {
 
     describe('reset', () => {
         it('should reset database state', async () => {
-            await db.seed(UserEntity, [{ name: 'User', email: 'user@example.com' }]);
+            await db.seed(UserEntity, [
+                { name: 'User', email: 'user@example.com' },
+            ]);
 
             await db.reset();
 
@@ -302,7 +318,10 @@ describe('MockTestRepository', () => {
 
     describe('save', () => {
         it('should save new entity', async () => {
-            const user = await repo.save({ name: 'New User', email: 'new@example.com' });
+            const user = await repo.save({
+                name: 'New User',
+                email: 'new@example.com',
+            });
 
             expect(user.id).toBeDefined();
             expect(user.name).toBe('New User');
@@ -336,9 +355,7 @@ describe('MockTestRepository', () => {
 
     describe('count', () => {
         it('should count entities', async () => {
-            store.set('UserEntity', [
-                { id: '1' }, { id: '2' }, { id: '3' },
-            ]);
+            store.set('UserEntity', [{ id: '1' }, { id: '2' }, { id: '3' }]);
 
             const count = await repo.count();
             expect(count).toBe(3);
@@ -347,7 +364,10 @@ describe('MockTestRepository', () => {
 
     describe('create', () => {
         it('should create entity instance', () => {
-            const user = repo.create({ name: 'Created', email: 'created@example.com' });
+            const user = repo.create({
+                name: 'Created',
+                email: 'created@example.com',
+            });
 
             expect(user.id).toBeDefined();
             expect(user.name).toBe('Created');
@@ -378,9 +398,27 @@ describe('MockQueryBuilder', () => {
 
     beforeEach(() => {
         data = [
-            { id: '1', name: 'User 1', email: 'user1@example.com', createdAt: new Date(), updatedAt: new Date() },
-            { id: '2', name: 'User 2', email: 'user2@example.com', createdAt: new Date(), updatedAt: new Date() },
-            { id: '3', name: 'User 3', email: 'user3@example.com', createdAt: new Date(), updatedAt: new Date() },
+            {
+                id: '1',
+                name: 'User 1',
+                email: 'user1@example.com',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            },
+            {
+                id: '2',
+                name: 'User 2',
+                email: 'user2@example.com',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            },
+            {
+                id: '3',
+                name: 'User 3',
+                email: 'user3@example.com',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            },
         ];
         qb = new MockQueryBuilder(data);
     });

@@ -23,7 +23,10 @@ vi.mock('@cmmv/core', () => {
     return {
         Application: MockApplication,
         Module: class MockModule {
-            constructor(public name: string, public options: any) {}
+            constructor(
+                public name: string,
+                public options: any,
+            ) {}
         },
         Config: {
             set: vi.fn(),
@@ -115,7 +118,9 @@ describe('TestingModuleBuilder', () => {
             const builder = Test.createTestingModule();
             class TestService {}
             const mockValue = { test: 'mock' };
-            const result = builder.overrideProvider(TestService).useValue(mockValue);
+            const result = builder
+                .overrideProvider(TestService)
+                .useValue(mockValue);
             expect(result).toBe(builder);
         });
 
@@ -123,7 +128,9 @@ describe('TestingModuleBuilder', () => {
             const builder = Test.createTestingModule();
             class TestService {}
             class MockTestService {}
-            const result = builder.overrideProvider(TestService).useClass(MockTestService);
+            const result = builder
+                .overrideProvider(TestService)
+                .useClass(MockTestService);
             expect(result).toBe(builder);
         });
 
@@ -131,7 +138,9 @@ describe('TestingModuleBuilder', () => {
             const builder = Test.createTestingModule();
             class TestService {}
             const factory = () => ({ test: 'factory' });
-            const result = builder.overrideProvider(TestService).useFactory(factory);
+            const result = builder
+                .overrideProvider(TestService)
+                .useFactory(factory);
             expect(result).toBe(builder);
         });
     });
@@ -159,7 +168,8 @@ describe('TestingModuleBuilder', () => {
         it('should return an interceptor override builder', () => {
             const builder = Test.createTestingModule();
             class TestInterceptor {}
-            const overrideBuilder = builder.overrideInterceptor(TestInterceptor);
+            const overrideBuilder =
+                builder.overrideInterceptor(TestInterceptor);
             expect(overrideBuilder).toBeDefined();
             expect(typeof overrideBuilder.useValue).toBe('function');
             expect(typeof overrideBuilder.useClass).toBe('function');
@@ -169,7 +179,9 @@ describe('TestingModuleBuilder', () => {
             const builder = Test.createTestingModule();
             class TestInterceptor {}
             const mockInterceptor = { intercept: vi.fn() };
-            const result = builder.overrideInterceptor(TestInterceptor).useValue(mockInterceptor);
+            const result = builder
+                .overrideInterceptor(TestInterceptor)
+                .useValue(mockInterceptor);
             expect(result).toBe(builder);
         });
     });

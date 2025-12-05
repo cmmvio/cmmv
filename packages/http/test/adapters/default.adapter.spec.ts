@@ -68,7 +68,9 @@ vi.mock('@cmmv/core', () => ({
         protected httpServer: any;
         protected application: any;
         isJson(obj: any) {
-            return obj !== null && typeof obj === 'object' && !Array.isArray(obj);
+            return (
+                obj !== null && typeof obj === 'object' && !Array.isArray(obj)
+            );
         }
     },
     IHTTPSettings: {},
@@ -182,15 +184,17 @@ describe('DefaultAdapter', () => {
         });
 
         it('should disable x-powered-by when configured', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.poweredBy') return false;
-                if (key === 'server.publicDirs') return ['public/views'];
-                if (key === 'server.render') return 'cmmv';
-                if (key === 'server.compress.enabled') return true;
-                if (key === 'server.cors.enabled') return true;
-                if (key === 'server.helmet.enabled') return true;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.poweredBy') return false;
+                    if (key === 'server.publicDirs') return ['public/views'];
+                    if (key === 'server.render') return 'cmmv';
+                    if (key === 'server.compress.enabled') return true;
+                    if (key === 'server.cors.enabled') return true;
+                    if (key === 'server.helmet.enabled') return true;
+                    return defaultValue;
+                },
+            );
 
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
@@ -200,14 +204,16 @@ describe('DefaultAdapter', () => {
         });
 
         it('should enable compression when configured', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.compress.enabled') return true;
-                if (key === 'server.publicDirs') return [];
-                if (key === 'server.render') return null;
-                if (key === 'server.cors.enabled') return false;
-                if (key === 'server.helmet.enabled') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.compress.enabled') return true;
+                    if (key === 'server.publicDirs') return [];
+                    if (key === 'server.render') return null;
+                    if (key === 'server.cors.enabled') return false;
+                    if (key === 'server.helmet.enabled') return false;
+                    return defaultValue;
+                },
+            );
 
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
@@ -216,15 +222,17 @@ describe('DefaultAdapter', () => {
         });
 
         it('should configure CORS when enabled', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.cors.enabled') return true;
-                if (key === 'server.cors.origin') return 'http://localhost';
-                if (key === 'server.publicDirs') return [];
-                if (key === 'server.render') return null;
-                if (key === 'server.helmet.enabled') return false;
-                if (key === 'server.compress.enabled') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.cors.enabled') return true;
+                    if (key === 'server.cors.origin') return 'http://localhost';
+                    if (key === 'server.publicDirs') return [];
+                    if (key === 'server.render') return null;
+                    if (key === 'server.helmet.enabled') return false;
+                    if (key === 'server.compress.enabled') return false;
+                    return defaultValue;
+                },
+            );
 
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
@@ -233,15 +241,18 @@ describe('DefaultAdapter', () => {
         });
 
         it('should configure Helmet when enabled', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.helmet.enabled') return true;
-                if (key === 'server.helmet.options') return { contentSecurityPolicy: false };
-                if (key === 'server.publicDirs') return [];
-                if (key === 'server.render') return null;
-                if (key === 'server.cors.enabled') return false;
-                if (key === 'server.compress.enabled') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.helmet.enabled') return true;
+                    if (key === 'server.helmet.options')
+                        return { contentSecurityPolicy: false };
+                    if (key === 'server.publicDirs') return [];
+                    if (key === 'server.render') return null;
+                    if (key === 'server.cors.enabled') return false;
+                    if (key === 'server.compress.enabled') return false;
+                    return defaultValue;
+                },
+            );
 
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
@@ -262,7 +273,9 @@ describe('DefaultAdapter', () => {
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
 
-            await expect(adapter.listen('0.0.0.0:3000')).resolves.toBeUndefined();
+            await expect(
+                adapter.listen('0.0.0.0:3000'),
+            ).resolves.toBeUndefined();
         });
 
         it('should parse bind string correctly', async () => {
@@ -307,18 +320,20 @@ describe('DefaultAdapter', () => {
 
     describe('printLog', () => {
         const setupMockConfig = () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                const config: Record<string, any> = {
-                    'server.publicDirs': ['public/views'],
-                    'server.render': null,
-                    'server.poweredBy': false,
-                    'server.compress.enabled': false,
-                    'server.cors.enabled': false,
-                    'server.helmet.enabled': false,
-                    'server.logging': 'all',
-                };
-                return config[key] ?? defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    const config: Record<string, any> = {
+                        'server.publicDirs': ['public/views'],
+                        'server.render': null,
+                        'server.poweredBy': false,
+                        'server.compress.enabled': false,
+                        'server.cors.enabled': false,
+                        'server.helmet.enabled': false,
+                        'server.logging': 'all',
+                    };
+                    return config[key] ?? defaultValue;
+                },
+            );
         };
 
         it('should log error messages', async () => {
@@ -326,7 +341,14 @@ describe('DefaultAdapter', () => {
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
 
-            adapter.printLog('error', 'GET', '/api/test', 100, 500, '127.0.0.1');
+            adapter.printLog(
+                'error',
+                'GET',
+                '/api/test',
+                100,
+                500,
+                '127.0.0.1',
+            );
 
             expect(adapter).toBeDefined();
         });
@@ -336,25 +358,41 @@ describe('DefaultAdapter', () => {
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
 
-            adapter.printLog('warning', 'POST', '/api/data', 50, 400, '127.0.0.1');
+            adapter.printLog(
+                'warning',
+                'POST',
+                '/api/data',
+                50,
+                400,
+                '127.0.0.1',
+            );
 
             expect(adapter).toBeDefined();
         });
 
         it('should log verbose messages', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.logging') return 'verbose';
-                if (key === 'server.publicDirs') return ['public/views'];
-                if (key === 'server.render') return null;
-                if (key === 'server.compress.enabled') return false;
-                if (key === 'server.cors.enabled') return false;
-                if (key === 'server.helmet.enabled') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.logging') return 'verbose';
+                    if (key === 'server.publicDirs') return ['public/views'];
+                    if (key === 'server.render') return null;
+                    if (key === 'server.compress.enabled') return false;
+                    if (key === 'server.cors.enabled') return false;
+                    if (key === 'server.helmet.enabled') return false;
+                    return defaultValue;
+                },
+            );
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
 
-            adapter.printLog('verbose', 'PUT', '/api/update', 30, 200, '127.0.0.1');
+            adapter.printLog(
+                'verbose',
+                'PUT',
+                '/api/update',
+                30,
+                200,
+                '127.0.0.1',
+            );
 
             expect(adapter).toBeDefined();
         });
@@ -364,21 +402,30 @@ describe('DefaultAdapter', () => {
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
 
-            adapter.printLog('log', 'DELETE', '/api/remove', 20, 204, '127.0.0.1');
+            adapter.printLog(
+                'log',
+                'DELETE',
+                '/api/remove',
+                20,
+                204,
+                '127.0.0.1',
+            );
 
             expect(adapter).toBeDefined();
         });
 
         it('should respect logging configuration', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.logging') return 'error';
-                if (key === 'server.publicDirs') return ['public/views'];
-                if (key === 'server.render') return null;
-                if (key === 'server.compress.enabled') return false;
-                if (key === 'server.cors.enabled') return false;
-                if (key === 'server.helmet.enabled') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.logging') return 'error';
+                    if (key === 'server.publicDirs') return ['public/views'];
+                    if (key === 'server.render') return null;
+                    if (key === 'server.compress.enabled') return false;
+                    if (key === 'server.cors.enabled') return false;
+                    if (key === 'server.helmet.enabled') return false;
+                    return defaultValue;
+                },
+            );
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
 
@@ -391,14 +438,16 @@ describe('DefaultAdapter', () => {
 
     describe('setPublicDir', () => {
         const setupMockConfig = () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.publicDirs') return ['public/views'];
-                if (key === 'server.render') return null;
-                if (key === 'server.compress.enabled') return false;
-                if (key === 'server.cors.enabled') return false;
-                if (key === 'server.helmet.enabled') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.publicDirs') return ['public/views'];
+                    if (key === 'server.render') return null;
+                    if (key === 'server.compress.enabled') return false;
+                    if (key === 'server.cors.enabled') return false;
+                    if (key === 'server.helmet.enabled') return false;
+                    return defaultValue;
+                },
+            );
         };
 
         it('should set single public directory', async () => {
@@ -434,14 +483,16 @@ describe('DefaultAdapter', () => {
 
     describe('render engine configuration', () => {
         it('should configure cmmv render engine', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.render') return 'cmmv';
-                if (key === 'server.publicDirs') return ['public/views'];
-                if (key === 'server.cors.enabled') return false;
-                if (key === 'server.helmet.enabled') return false;
-                if (key === 'server.compress.enabled') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.render') return 'cmmv';
+                    if (key === 'server.publicDirs') return ['public/views'];
+                    if (key === 'server.cors.enabled') return false;
+                    if (key === 'server.helmet.enabled') return false;
+                    if (key === 'server.compress.enabled') return false;
+                    return defaultValue;
+                },
+            );
 
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
@@ -450,14 +501,16 @@ describe('DefaultAdapter', () => {
         });
 
         it('should configure @cmmv/view render engine', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.render') return '@cmmv/view';
-                if (key === 'server.publicDirs') return ['public/views'];
-                if (key === 'server.cors.enabled') return false;
-                if (key === 'server.helmet.enabled') return false;
-                if (key === 'server.compress.enabled') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.render') return '@cmmv/view';
+                    if (key === 'server.publicDirs') return ['public/views'];
+                    if (key === 'server.cors.enabled') return false;
+                    if (key === 'server.helmet.enabled') return false;
+                    if (key === 'server.compress.enabled') return false;
+                    return defaultValue;
+                },
+            );
 
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
@@ -466,14 +519,16 @@ describe('DefaultAdapter', () => {
         });
 
         it('should configure custom render engine', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.render') return 'ejs';
-                if (key === 'server.publicDirs') return ['public/views'];
-                if (key === 'server.cors.enabled') return false;
-                if (key === 'server.helmet.enabled') return false;
-                if (key === 'server.compress.enabled') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.render') return 'ejs';
+                    if (key === 'server.publicDirs') return ['public/views'];
+                    if (key === 'server.cors.enabled') return false;
+                    if (key === 'server.helmet.enabled') return false;
+                    if (key === 'server.compress.enabled') return false;
+                    return defaultValue;
+                },
+            );
 
             const mockApplication = { providersMap: new Map() };
             await adapter.init(mockApplication as any, {});
@@ -484,33 +539,41 @@ describe('DefaultAdapter', () => {
 
     describe('edge cases', () => {
         it('should handle missing public directories', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.publicDirs') return [];
-                if (key === 'server.render') return null;
-                if (key === 'server.cors.enabled') return false;
-                if (key === 'server.helmet.enabled') return false;
-                if (key === 'server.compress.enabled') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.publicDirs') return [];
+                    if (key === 'server.render') return null;
+                    if (key === 'server.cors.enabled') return false;
+                    if (key === 'server.helmet.enabled') return false;
+                    if (key === 'server.compress.enabled') return false;
+                    return defaultValue;
+                },
+            );
 
             const mockApplication = { providersMap: new Map() };
 
-            await expect(adapter.init(mockApplication as any, {})).resolves.not.toThrow();
+            await expect(
+                adapter.init(mockApplication as any, {}),
+            ).resolves.not.toThrow();
         });
 
         it('should handle disabled features', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'server.compress.enabled') return false;
-                if (key === 'server.cors.enabled') return false;
-                if (key === 'server.helmet.enabled') return false;
-                if (key === 'server.publicDirs') return [];
-                if (key === 'server.render') return null;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'server.compress.enabled') return false;
+                    if (key === 'server.cors.enabled') return false;
+                    if (key === 'server.helmet.enabled') return false;
+                    if (key === 'server.publicDirs') return [];
+                    if (key === 'server.render') return null;
+                    return defaultValue;
+                },
+            );
 
             const mockApplication = { providersMap: new Map() };
 
-            await expect(adapter.init(mockApplication as any, {})).resolves.not.toThrow();
+            await expect(
+                adapter.init(mockApplication as any, {}),
+            ).resolves.not.toThrow();
         });
     });
 });

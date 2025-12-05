@@ -73,11 +73,13 @@ describe('ContractsTranspile', () => {
         transpile = new ContractsTranspile();
 
         // Reset default mocks
-        vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-            if (key === 'app.generateSchema') return true;
-            if (key === 'app.generatedDir') return '.generated';
-            return defaultValue;
-        });
+        vi.mocked(Config.get).mockImplementation(
+            (key: string, defaultValue?: any) => {
+                if (key === 'app.generateSchema') return true;
+                if (key === 'app.generatedDir') return '.generated';
+                return defaultValue;
+            },
+        );
 
         vi.mocked(fs.existsSync).mockReturnValue(true);
     });
@@ -129,11 +131,13 @@ describe('ContractsTranspile', () => {
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             expect(fs.writeFileSync).toHaveBeenCalled();
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
             expect(jsonCall).toBeDefined();
         });
 
@@ -146,95 +150,118 @@ describe('ContractsTranspile', () => {
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             expect(fs.writeFileSync).toHaveBeenCalled();
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const ymlCall = calls.find(call => String(call[0]).includes('schema.yml'));
+            const ymlCall = calls.find((call) =>
+                String(call[0]).includes('schema.yml'),
+            );
             expect(ymlCall).toBeDefined();
         });
 
         it('should create generated directory if it does not exist', async () => {
             vi.mocked(fs.existsSync).mockReturnValue(false);
 
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
-            vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
-
-            transpile.run();
-
-            // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
-
-            expect(fs.mkdirSync).toHaveBeenCalledWith('.generated', { recursive: true });
-        });
-
-        it('should not create directory if it already exists', async () => {
-            vi.mocked(fs.existsSync).mockReturnValue(true);
-
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
-            vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
-
-            transpile.run();
-
-            // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
-
-            expect(fs.mkdirSync).not.toHaveBeenCalled();
-        });
-
-        it('should not generate schema when disabled', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'app.generateSchema') return false;
-                if (key === 'app.generatedDir') return '.generated';
-                return defaultValue;
-            });
-
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
-            vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
-
-            transpile.run();
-
-            // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
-
-            expect(fs.writeFileSync).not.toHaveBeenCalled();
-        });
-
-        it('should use custom generated directory', async () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'app.generateSchema') return true;
-                if (key === 'app.generatedDir') return 'custom-generated';
-                return defaultValue;
-            });
-
-            vi.mocked(fs.existsSync).mockReturnValue(false);
-
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
-            vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
-
-            transpile.run();
-
-            // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
-
-            expect(fs.mkdirSync).toHaveBeenCalledWith('custom-generated', { recursive: true });
-        });
-
-        it('should include all contracts in schema', async () => {
             const mockContracts = [
-                { contractName: 'UserContract', fields: [{ name: 'id' }] },
-                { contractName: 'PostContract', fields: [{ name: 'title' }] },
-                { contractName: 'CommentContract', fields: [{ name: 'content' }] },
+                { contractName: 'TestContract', fields: [] },
             ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
+
+            expect(fs.mkdirSync).toHaveBeenCalledWith('.generated', {
+                recursive: true,
+            });
+        });
+
+        it('should not create directory if it already exists', async () => {
+            vi.mocked(fs.existsSync).mockReturnValue(true);
+
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
+            vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
+
+            transpile.run();
+
+            // Allow async operations to complete
+            await new Promise((resolve) => setTimeout(resolve, 10));
+
+            expect(fs.mkdirSync).not.toHaveBeenCalled();
+        });
+
+        it('should not generate schema when disabled', async () => {
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'app.generateSchema') return false;
+                    if (key === 'app.generatedDir') return '.generated';
+                    return defaultValue;
+                },
+            );
+
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
+            vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
+
+            transpile.run();
+
+            // Allow async operations to complete
+            await new Promise((resolve) => setTimeout(resolve, 10));
+
+            expect(fs.writeFileSync).not.toHaveBeenCalled();
+        });
+
+        it('should use custom generated directory', async () => {
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'app.generateSchema') return true;
+                    if (key === 'app.generatedDir') return 'custom-generated';
+                    return defaultValue;
+                },
+            );
+
+            vi.mocked(fs.existsSync).mockReturnValue(false);
+
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
+            vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
+
+            transpile.run();
+
+            // Allow async operations to complete
+            await new Promise((resolve) => setTimeout(resolve, 10));
+
+            expect(fs.mkdirSync).toHaveBeenCalledWith('custom-generated', {
+                recursive: true,
+            });
+        });
+
+        it('should include all contracts in schema', async () => {
+            const mockContracts = [
+                { contractName: 'UserContract', fields: [{ name: 'id' }] },
+                { contractName: 'PostContract', fields: [{ name: 'title' }] },
+                {
+                    contractName: 'CommentContract',
+                    fields: [{ name: 'content' }],
+                },
+            ];
+            vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
+
+            transpile.run();
+
+            // Allow async operations to complete
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -251,16 +278,20 @@ describe('ContractsTranspile', () => {
                 return name === 'auth';
             });
 
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -274,16 +305,20 @@ describe('ContractsTranspile', () => {
                 return name === 'graphql';
             });
 
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -296,16 +331,20 @@ describe('ContractsTranspile', () => {
                 return name === 'protobuf' || name === 'ws';
             });
 
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -318,16 +357,20 @@ describe('ContractsTranspile', () => {
                 return name === 'protobuf';
             });
 
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -340,16 +383,20 @@ describe('ContractsTranspile', () => {
                 return name === 'openapi';
             });
 
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -362,16 +409,20 @@ describe('ContractsTranspile', () => {
                 return name === 'cache';
             });
 
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -384,16 +435,20 @@ describe('ContractsTranspile', () => {
                 return name === 'repository';
             });
 
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -406,16 +461,20 @@ describe('ContractsTranspile', () => {
                 return name === 'vault';
             });
 
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -426,16 +485,20 @@ describe('ContractsTranspile', () => {
         it('should detect all modules when present', async () => {
             vi.mocked(Module.hasModule).mockReturnValue(true);
 
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -452,45 +515,53 @@ describe('ContractsTranspile', () => {
 
     describe('YAML output', () => {
         it('should use yaml.dump for YAML output', async () => {
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             expect(yaml.dump).toHaveBeenCalled();
         });
 
         it('should pass correct options to yaml.dump', async () => {
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             expect(yaml.dump).toHaveBeenCalledWith(
                 expect.any(Object),
-                expect.objectContaining({ indent: 2 })
+                expect.objectContaining({ indent: 2 }),
             );
         });
     });
 
     describe('JSON output', () => {
         it('should output formatted JSON with 4 spaces', async () => {
-            const mockContracts = [{ contractName: 'TestContract', fields: [] }];
+            const mockContracts = [
+                { contractName: 'TestContract', fields: [] },
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = jsonCall[1] as string;
@@ -502,38 +573,44 @@ describe('ContractsTranspile', () => {
 
     describe('edge cases', () => {
         it('should handle contracts with complex fields', async () => {
-            const mockContracts = [{
-                contractName: 'ComplexContract',
-                fields: [
-                    {
-                        propertyKey: 'nested',
-                        protoType: 'json',
-                        nullable: true,
-                        validations: [{ type: 'IsObject' }],
-                    },
-                ],
-                options: { moduleContract: true },
-                messages: {
-                    CreateRequest: {
-                        name: 'CreateRequest',
-                        properties: { name: { type: 'string' } },
+            const mockContracts = [
+                {
+                    contractName: 'ComplexContract',
+                    fields: [
+                        {
+                            propertyKey: 'nested',
+                            protoType: 'json',
+                            nullable: true,
+                            validations: [{ type: 'IsObject' }],
+                        },
+                    ],
+                    options: { moduleContract: true },
+                    messages: {
+                        CreateRequest: {
+                            name: 'CreateRequest',
+                            properties: { name: { type: 'string' } },
+                        },
                     },
                 },
-            }];
+            ];
             vi.mocked(Scope.getArray).mockReturnValue(mockContracts);
 
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
                 expect(content.contracts.ComplexContract).toBeDefined();
-                expect(content.contracts.ComplexContract.fields).toHaveLength(1);
+                expect(content.contracts.ComplexContract.fields).toHaveLength(
+                    1,
+                );
             }
         });
 
@@ -543,10 +620,12 @@ describe('ContractsTranspile', () => {
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);
@@ -559,8 +638,16 @@ describe('ContractsTranspile', () => {
                 contractName: 'UserContract',
                 controllerName: 'User',
                 fields: [
-                    { propertyKey: 'name', protoType: 'string', nullable: false },
-                    { propertyKey: 'email', protoType: 'string', nullable: false },
+                    {
+                        propertyKey: 'name',
+                        protoType: 'string',
+                        nullable: false,
+                    },
+                    {
+                        propertyKey: 'email',
+                        protoType: 'string',
+                        nullable: false,
+                    },
                 ],
                 options: { databaseSchemaName: 'users' },
                 indexs: [{ name: 'idx_email', fields: ['email'] }],
@@ -571,10 +658,12 @@ describe('ContractsTranspile', () => {
             transpile.run();
 
             // Allow async operations to complete
-            await new Promise(resolve => setTimeout(resolve, 10));
+            await new Promise((resolve) => setTimeout(resolve, 10));
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const jsonCall = calls.find(call => String(call[0]).includes('schema.json'));
+            const jsonCall = calls.find((call) =>
+                String(call[0]).includes('schema.json'),
+            );
 
             if (jsonCall) {
                 const content = JSON.parse(jsonCall[1] as string);

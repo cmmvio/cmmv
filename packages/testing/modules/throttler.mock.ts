@@ -6,7 +6,13 @@ import { vi } from 'vitest';
 export const MockThrottlerService = {
     // Rate limiting
     isRateLimited: vi.fn().mockReturnValue(false),
-    checkLimit: vi.fn().mockResolvedValue({ allowed: true, remaining: 100, resetTime: Date.now() + 60000 }),
+    checkLimit: vi
+        .fn()
+        .mockResolvedValue({
+            allowed: true,
+            remaining: 100,
+            resetTime: Date.now() + 60000,
+        }),
     incrementCounter: vi.fn().mockResolvedValue(1),
     resetCounter: vi.fn().mockResolvedValue(undefined),
 
@@ -62,7 +68,9 @@ export interface MockRateLimitResponse {
 /**
  * Create mock rate limit response
  */
-export function createMockRateLimitResponse(overrides: Partial<MockRateLimitResponse> = {}): MockRateLimitResponse {
+export function createMockRateLimitResponse(
+    overrides: Partial<MockRateLimitResponse> = {},
+): MockRateLimitResponse {
     return {
         allowed: true,
         remaining: 99,

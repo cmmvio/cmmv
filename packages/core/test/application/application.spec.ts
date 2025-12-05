@@ -110,16 +110,36 @@ vi.mock('../../lib/module', () => ({
     Module: class MockModule {
         static hasModule = vi.fn(() => false);
         devMode = false;
-        getContractsCls() { return []; }
-        getTranspilers() { return []; }
-        getControllers() { return []; }
-        getSubmodules() { return []; }
-        getContracts() { return []; }
-        getEntities() { return []; }
-        getModels() { return []; }
-        getConfigsSchemas() { return []; }
-        getResolvers() { return []; }
-        getProviders() { return []; }
+        getContractsCls() {
+            return [];
+        }
+        getTranspilers() {
+            return [];
+        }
+        getControllers() {
+            return [];
+        }
+        getSubmodules() {
+            return [];
+        }
+        getContracts() {
+            return [];
+        }
+        getEntities() {
+            return [];
+        }
+        getModels() {
+            return [];
+        }
+        getConfigsSchemas() {
+            return [];
+        }
+        getResolvers() {
+            return [];
+        }
+        getProviders() {
+            return [];
+        }
     },
 }));
 
@@ -261,7 +281,7 @@ describe('Application', () => {
 
             expect(Scope.addToArray).toHaveBeenCalledWith(
                 '_await_module_testModule',
-                { cb: callback, context }
+                { cb: callback, context },
             );
         });
     });
@@ -275,7 +295,7 @@ describe('Application', () => {
 
             expect(Scope.addToArray).toHaveBeenCalledWith(
                 '_await_service_testService',
-                { cb: callback, context }
+                { cb: callback, context },
             );
         });
     });
@@ -292,7 +312,7 @@ describe('Application', () => {
 
         it('should throw error if model does not exist', () => {
             expect(() => Application.getModel('NonExistentModel')).toThrow(
-                "Could not load model 'NonExistentModel'"
+                "Could not load model 'NonExistentModel'",
             );
         });
     });
@@ -313,7 +333,9 @@ describe('Application', () => {
 
             Application.setHTTPInterceptor(interceptor);
 
-            expect(Application.appModule.httpInterceptors).toContain(interceptor);
+            expect(Application.appModule.httpInterceptors).toContain(
+                interceptor,
+            );
         });
     });
 
@@ -350,7 +372,10 @@ describe('Application', () => {
         it('should return unique resolvers', () => {
             const settings: IApplicationSettings = {};
             const app = new Application(settings);
-            (app as any).resolvers = [{ name: 'resolver1' }, { name: 'resolver2' }];
+            (app as any).resolvers = [
+                { name: 'resolver1' },
+                { name: 'resolver2' },
+            ];
             Application.instance = app;
 
             const result = Application.getResolvers();

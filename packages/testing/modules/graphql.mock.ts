@@ -12,7 +12,9 @@ export interface MockGraphQLContext {
 /**
  * Create a mock GraphQL context
  */
-export function createMockGraphQLContext(overrides: Partial<MockGraphQLContext> = {}): MockGraphQLContext {
+export function createMockGraphQLContext(
+    overrides: Partial<MockGraphQLContext> = {},
+): MockGraphQLContext {
     return {
         req: {
             headers: { authorization: 'Bearer mock-token' },
@@ -80,7 +82,11 @@ export const MockAuthChecker = vi.fn().mockResolvedValue(true);
 export function createMockResolver<T>(data: T) {
     return {
         Query: {
-            find: vi.fn().mockResolvedValue({ data: Array.isArray(data) ? data : [data] }),
+            find: vi
+                .fn()
+                .mockResolvedValue({
+                    data: Array.isArray(data) ? data : [data],
+                }),
             findById: vi.fn().mockResolvedValue({ data }),
         },
         Mutation: {
@@ -104,7 +110,9 @@ export interface MockPaginationArgs {
 /**
  * Create mock pagination args
  */
-export function createMockPaginationArgs(overrides: Partial<MockPaginationArgs> = {}): MockPaginationArgs {
+export function createMockPaginationArgs(
+    overrides: Partial<MockPaginationArgs> = {},
+): MockPaginationArgs {
     return {
         page: 1,
         limit: 10,
@@ -137,7 +145,9 @@ export const MockGraphQLResponse = {
     }),
     unauthorized: () => ({
         data: null,
-        errors: [{ message: 'Unauthorized', extensions: { code: 'UNAUTHORIZED' } }],
+        errors: [
+            { message: 'Unauthorized', extensions: { code: 'UNAUTHORIZED' } },
+        ],
     }),
     forbidden: () => ({
         data: null,
@@ -145,7 +155,12 @@ export const MockGraphQLResponse = {
     }),
     notFound: (entity: string) => ({
         data: null,
-        errors: [{ message: `${entity} not found`, extensions: { code: 'NOT_FOUND' } }],
+        errors: [
+            {
+                message: `${entity} not found`,
+                extensions: { code: 'NOT_FOUND' },
+            },
+        ],
     }),
 };
 

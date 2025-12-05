@@ -6,7 +6,12 @@ import { vi } from 'vitest';
  */
 export const MockRepository = {
     // CRUD operations
-    getAll: vi.fn().mockResolvedValue({ data: [], pagination: { total: 0, page: 1, limit: 10 } }),
+    getAll: vi
+        .fn()
+        .mockResolvedValue({
+            data: [],
+            pagination: { total: 0, page: 1, limit: 10 },
+        }),
     getById: vi.fn().mockResolvedValue({ data: null }),
     insert: vi.fn().mockResolvedValue({ success: true, data: {} }),
     update: vi.fn().mockResolvedValue({ success: true }),
@@ -154,6 +159,9 @@ export function createMockEntity<T>(partial: Partial<T> = {}): T {
 /**
  * Create multiple mock entities
  */
-export function createMockEntities<T>(count: number, partial: Partial<T> = {}): T[] {
+export function createMockEntities<T>(
+    count: number,
+    partial: Partial<T> = {},
+): T[] {
     return Array.from({ length: count }, () => createMockEntity<T>(partial));
 }

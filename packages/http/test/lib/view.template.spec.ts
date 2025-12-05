@@ -107,7 +107,9 @@ describe('Template', () => {
         });
 
         it('should accept options parameter', () => {
-            const template = new Template('<div>Hello</div>', { nonce: 'abc123' });
+            const template = new Template('<div>Hello</div>', {
+                nonce: 'abc123',
+            });
 
             expect(template).toBeDefined();
         });
@@ -310,9 +312,7 @@ describe('Template', () => {
                 if (key === 'head')
                     return {
                         meta: [],
-                        link: [
-                            { rel: 'stylesheet', href: '/styles.css' },
-                        ],
+                        link: [{ rel: 'stylesheet', href: '/styles.css' }],
                     };
                 return undefined;
             });
@@ -359,12 +359,14 @@ describe('Template', () => {
 
     describe('parseScripts', () => {
         it('should parse script tags from config', () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'scripts')
-                    return [{ src: '/app.js', type: 'module' }];
-                if (key === 'view.scriptsTimestamp') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'scripts')
+                        return [{ src: '/app.js', type: 'module' }];
+                    if (key === 'view.scriptsTimestamp') return false;
+                    return defaultValue;
+                },
+            );
 
             const template = new Template();
             const scriptsContent = template.parseScripts();
@@ -375,11 +377,13 @@ describe('Template', () => {
         });
 
         it('should handle @ prefixed scripts', () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'scripts') return [{ src: '@vue/dist/vue.js' }];
-                if (key === 'view.scriptsTimestamp') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'scripts') return [{ src: '@vue/dist/vue.js' }];
+                    if (key === 'view.scriptsTimestamp') return false;
+                    return defaultValue;
+                },
+            );
 
             const template = new Template();
             const scriptsContent = template.parseScripts();
@@ -388,23 +392,29 @@ describe('Template', () => {
         });
 
         it('should add nonce to scripts', () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'scripts') return [{ src: '/app.js' }];
-                if (key === 'view.scriptsTimestamp') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'scripts') return [{ src: '/app.js' }];
+                    if (key === 'view.scriptsTimestamp') return false;
+                    return defaultValue;
+                },
+            );
 
-            const template = new Template('<div></div>', { nonce: 'test-nonce' });
+            const template = new Template('<div></div>', {
+                nonce: 'test-nonce',
+            });
             const scriptsContent = template.parseScripts();
 
             expect(scriptsContent).toContain('nonce="test-nonce"');
         });
 
         it('should return empty string when no scripts configured', () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'scripts') return null;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'scripts') return null;
+                    return defaultValue;
+                },
+            );
 
             const template = new Template();
             const scriptsContent = template.parseScripts();
@@ -416,30 +426,41 @@ describe('Template', () => {
     describe('parseLayout', () => {
         it('should replace slot with page contents', () => {
             const template = new Template('<div>Test</div>', { nonce: 'abc' });
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'head') return { title: 'Test', meta: [], link: [] };
-                if (key === 'scripts') return [];
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'head')
+                        return { title: 'Test', meta: [], link: [] };
+                    if (key === 'scripts') return [];
+                    return defaultValue;
+                },
+            );
 
             const layoutTemplate = '<html><body><slot></slot></body></html>';
             const pageContents = '<div>Page Content</div>';
 
-            const result = template.parseLayout(layoutTemplate, pageContents, {});
+            const result = template.parseLayout(
+                layoutTemplate,
+                pageContents,
+                {},
+            );
 
             expect(result).toContain('Page Content');
         });
 
         it('should replace headers placeholder', () => {
             const template = new Template('<div>Test</div>', { nonce: 'abc' });
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'head') return { title: 'My Title', meta: [], link: [] };
-                if (key === 'scripts') return [];
-                if (key === 'view.vue3') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'head')
+                        return { title: 'My Title', meta: [], link: [] };
+                    if (key === 'scripts') return [];
+                    if (key === 'view.vue3') return false;
+                    return defaultValue;
+                },
+            );
 
-            const layoutTemplate = '<html><head><headers></headers></head><body><slot/></body></html>';
+            const layoutTemplate =
+                '<html><head><headers></headers></head><body><slot/></body></html>';
 
             const result = template.parseLayout(layoutTemplate, 'content', {
                 title: 'Custom Title',
@@ -450,14 +471,18 @@ describe('Template', () => {
 
         it('should replace scripts placeholder', () => {
             const template = new Template('<div>Test</div>', { nonce: 'test' });
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'head') return { title: 'Test', meta: [], link: [] };
-                if (key === 'scripts') return [{ src: '/app.js' }];
-                if (key === 'view.scriptsTimestamp') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'head')
+                        return { title: 'Test', meta: [], link: [] };
+                    if (key === 'scripts') return [{ src: '/app.js' }];
+                    if (key === 'view.scriptsTimestamp') return false;
+                    return defaultValue;
+                },
+            );
 
-            const layoutTemplate = '<html><body><slot/><scripts></scripts></body></html>';
+            const layoutTemplate =
+                '<html><body><slot/><scripts></scripts></body></html>';
 
             const result = template.parseLayout(layoutTemplate, 'content', {});
 
@@ -543,17 +568,15 @@ describe('Template', () => {
         it('should return true for equal objects', () => {
             const template = new Template();
 
-            expect(
-                template.isEqualObject({ a: 1, b: 2 }, { a: 1, b: 2 }),
-            ).toBe(true);
+            expect(template.isEqualObject({ a: 1, b: 2 }, { a: 1, b: 2 })).toBe(
+                true,
+            );
         });
 
         it('should return false for different objects', () => {
             const template = new Template();
 
-            expect(
-                template.isEqualObject({ a: 1 }, { a: 2 }),
-            ).toBe(false);
+            expect(template.isEqualObject({ a: 1 }, { a: 2 })).toBe(false);
         });
 
         it('should return true for equal nested objects', () => {
@@ -570,9 +593,7 @@ describe('Template', () => {
         it('should return false for objects with different keys', () => {
             const template = new Template();
 
-            expect(
-                template.isEqualObject({ a: 1 }, { b: 1 }),
-            ).toBe(false);
+            expect(template.isEqualObject({ a: 1 }, { b: 1 })).toBe(false);
         });
 
         it('should return true for equal arrays', () => {
@@ -614,7 +635,10 @@ describe('Template', () => {
 
             await template.processSetup(result);
 
-            expect(Telemetry.start).toHaveBeenCalledWith('Process Setup', '123');
+            expect(Telemetry.start).toHaveBeenCalledWith(
+                'Process Setup',
+                '123',
+            );
             expect(Telemetry.end).toHaveBeenCalledWith('Process Setup', '123');
         });
 
@@ -648,7 +672,10 @@ describe('Template', () => {
             };
 
             const result = directive('<div>test</div>', {}, new Template());
-            expect(result).toEqual({ html: '<div>test</div>', setup: { data: {} } });
+            expect(result).toEqual({
+                html: '<div>test</div>',
+                setup: { data: {} },
+            });
         });
 
         it('should receive all parameters', () => {
@@ -703,7 +730,8 @@ describe('Template', () => {
         });
 
         it('should handle large template', async () => {
-            const largeContent = '<div>'.repeat(100) + 'Content' + '</div>'.repeat(100);
+            const largeContent =
+                '<div>'.repeat(100) + 'Content' + '</div>'.repeat(100);
             const template = new Template(largeContent);
             const compiled = template.compile();
 

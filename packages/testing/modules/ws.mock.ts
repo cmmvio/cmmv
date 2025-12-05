@@ -58,7 +58,8 @@ export class MockWebSocketClient {
 
     // Simulate receiving a message
     simulateMessage(data: any) {
-        const messageData = typeof data === 'string' ? data : JSON.stringify(data);
+        const messageData =
+            typeof data === 'string' ? data : JSON.stringify(data);
         if (this.onmessage) {
             this.onmessage({ data: messageData });
         }
@@ -215,7 +216,9 @@ export interface MockWSMessage {
     id?: string;
 }
 
-export function createMockWSMessage(overrides: Partial<MockWSMessage> = {}): MockWSMessage {
+export function createMockWSMessage(
+    overrides: Partial<MockWSMessage> = {},
+): MockWSMessage {
     return {
         event: 'message',
         data: {},

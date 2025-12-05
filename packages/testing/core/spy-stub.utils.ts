@@ -49,7 +49,9 @@ export interface ICallInfo {
 /**
  * Enhanced spy wrapper that provides additional utilities
  */
-export class SpyWrapper<T extends (...args: any[]) => any = (...args: any[]) => any> {
+export class SpyWrapper<
+    T extends (...args: any[]) => any = (...args: any[]) => any,
+> {
     private _calls: ICallInfo[] = [];
     private _callOrder: number = 0;
 
@@ -342,7 +344,10 @@ export function createStub<T = any>(options: IStubOptions<T> = {}): SpyWrapper {
         // Return values sequentially
         let callIndex = 0;
         spy.mockImplementation(() => {
-            const value = options.values![Math.min(callIndex, options.values!.length - 1)];
+            const value =
+                options.values![
+                    Math.min(callIndex, options.values!.length - 1)
+                ];
             callIndex++;
             return value;
         });
@@ -356,9 +361,9 @@ export function createStub<T = any>(options: IStubOptions<T> = {}): SpyWrapper {
 /**
  * Create a stub object with multiple methods
  */
-export function createStubObject<T extends Record<string, any>>(
-    methods: { [K in keyof T]?: IStubOptions<ReturnType<T[K]>> },
-): { [K in keyof T]: SpyWrapper } {
+export function createStubObject<T extends Record<string, any>>(methods: {
+    [K in keyof T]?: IStubOptions<ReturnType<T[K]>>;
+}): { [K in keyof T]: SpyWrapper } {
     const stub: any = {};
 
     for (const [method, options] of Object.entries(methods)) {
@@ -429,7 +434,9 @@ class SpyVerifier implements ISpyVerifier {
 
     wasCalled(): ISpyVerifier {
         if (!this.spy.called) {
-            throw new Error('Expected spy to be called but it was never called');
+            throw new Error(
+                'Expected spy to be called but it was never called',
+            );
         }
         return this;
     }
@@ -482,7 +489,9 @@ class SpyVerifier implements ISpyVerifier {
     nthCallWas(n: number, ...args: any[]): ISpyVerifier {
         const call = this.spy.getCall(n);
         if (!call) {
-            throw new Error(`Expected call ${n} to exist but spy was only called ${this.spy.callCount} times`);
+            throw new Error(
+                `Expected call ${n} to exist but spy was only called ${this.spy.callCount} times`,
+            );
         }
         const matches = args.every((arg, i) => {
             const actual = call[i];

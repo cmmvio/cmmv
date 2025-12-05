@@ -71,7 +71,10 @@ describe('authChecker', () => {
             const result = await authChecker({ context } as any, []);
 
             expect(result).toBe(true);
-            expect(jwt.verify).toHaveBeenCalledWith('valid-token', 'test-jwt-secret');
+            expect(jwt.verify).toHaveBeenCalledWith(
+                'valid-token',
+                'test-jwt-secret',
+            );
         });
     });
 
@@ -86,7 +89,9 @@ describe('authChecker', () => {
             } as any);
 
             const context = { token: 'valid-token' };
-            const result = await authChecker({ context } as any, ['admin:read']);
+            const result = await authChecker({ context } as any, [
+                'admin:read',
+            ]);
 
             expect(result).toBe(true);
         });
@@ -102,7 +107,9 @@ describe('authChecker', () => {
             } as any);
 
             const context = { token: 'valid-token' };
-            const result = await authChecker({ context } as any, [{ rootOnly: true }]);
+            const result = await authChecker({ context } as any, [
+                { rootOnly: true },
+            ]);
 
             expect(result).toBe(false);
         });
@@ -136,7 +143,9 @@ describe('authChecker', () => {
             } as any);
 
             const context = { token: 'valid-token' };
-            const result = await authChecker({ context } as any, ['admin:read']);
+            const result = await authChecker({ context } as any, [
+                'admin:read',
+            ]);
 
             expect(result).toBe(true);
         });
@@ -152,7 +161,10 @@ describe('authChecker', () => {
             } as any);
 
             const context = { token: 'valid-token' };
-            const result = await authChecker({ context } as any, ['admin:read', 'user:write']);
+            const result = await authChecker({ context } as any, [
+                'admin:read',
+                'user:write',
+            ]);
 
             expect(result).toBe(true);
         });
@@ -168,7 +180,9 @@ describe('authChecker', () => {
             } as any);
 
             const context = { token: 'valid-token' };
-            const result = await authChecker({ context } as any, ['admin:write']);
+            const result = await authChecker({ context } as any, [
+                'admin:write',
+            ]);
 
             expect(result).toBe(false);
         });
@@ -184,7 +198,9 @@ describe('authChecker', () => {
             } as any);
 
             const context = { token: 'valid-token' };
-            const result = await authChecker({ context } as any, ['admin:read']);
+            const result = await authChecker({ context } as any, [
+                'admin:read',
+            ]);
 
             expect(result).toBe(false);
         });
@@ -243,7 +259,10 @@ describe('authChecker', () => {
             } as any);
 
             const context = { token: 'valid-token' };
-            const result = await authChecker({ context } as any, [{ rootOnly: true }, 'admin:read']);
+            const result = await authChecker({ context } as any, [
+                { rootOnly: true },
+                'admin:read',
+            ]);
 
             expect(result).toBe(true);
         });
@@ -259,7 +278,9 @@ describe('authChecker', () => {
             } as any);
 
             const context = { token: 'valid-token' };
-            const result = await authChecker({ context } as any, [{ rootOnly: true }]);
+            const result = await authChecker({ context } as any, [
+                { rootOnly: true },
+            ]);
 
             expect(result).toBe(false);
         });

@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { evaluate, evaluateAsync, execute, toFunction } from '../../lib/view.eval';
+import {
+    evaluate,
+    evaluateAsync,
+    execute,
+    toFunction,
+} from '../../lib/view.eval';
 
 describe('view.eval', () => {
     beforeEach(() => {
@@ -32,7 +37,9 @@ describe('view.eval', () => {
         });
 
         it('should handle invalid expressions gracefully', () => {
-            const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const consoleSpy = vi
+                .spyOn(console, 'error')
+                .mockImplementation(() => {});
 
             const fn = toFunction('return(invalid syntax @@@@)');
 

@@ -1,4 +1,13 @@
-import { describe, it, expect, vi, beforeEach, afterEach, afterAll, beforeAll } from 'vitest';
+import {
+    describe,
+    it,
+    expect,
+    vi,
+    beforeEach,
+    afterEach,
+    afterAll,
+    beforeAll,
+} from 'vitest';
 import * as http from 'node:http';
 
 import {
@@ -30,36 +39,55 @@ describe('HttpTestingServer', () => {
         testPort = 49200 + Math.floor(Math.random() * 100);
         testServer = http.createServer((req, res) => {
             let body = '';
-            req.on('data', chunk => {
+            req.on('data', (chunk) => {
                 body += chunk;
             });
             req.on('end', () => {
-                const url = new URL(req.url || '/', `http://localhost:${testPort}`);
+                const url = new URL(
+                    req.url || '/',
+                    `http://localhost:${testPort}`,
+                );
 
                 if (url.pathname === '/api/health') {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ status: 'ok' }));
-                } else if (url.pathname === '/api/users' && req.method === 'GET') {
+                } else if (
+                    url.pathname === '/api/users' &&
+                    req.method === 'GET'
+                ) {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ users: [{ id: 1, name: 'Test' }] }));
-                } else if (url.pathname === '/api/users' && req.method === 'POST') {
+                    res.end(
+                        JSON.stringify({ users: [{ id: 1, name: 'Test' }] }),
+                    );
+                } else if (
+                    url.pathname === '/api/users' &&
+                    req.method === 'POST'
+                ) {
                     const data = body ? JSON.parse(body) : {};
                     res.writeHead(201, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ id: 1, ...data }));
-                } else if (url.pathname === '/api/users/1' && req.method === 'PUT') {
+                } else if (
+                    url.pathname === '/api/users/1' &&
+                    req.method === 'PUT'
+                ) {
                     const data = body ? JSON.parse(body) : {};
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ id: 1, ...data }));
-                } else if (url.pathname === '/api/users/1' && req.method === 'DELETE') {
+                } else if (
+                    url.pathname === '/api/users/1' &&
+                    req.method === 'DELETE'
+                ) {
                     res.writeHead(204);
                     res.end();
                 } else if (url.pathname === '/api/echo') {
                     res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({
-                        method: req.method,
-                        query: Object.fromEntries(url.searchParams),
-                        headers: req.headers,
-                    }));
+                    res.end(
+                        JSON.stringify({
+                            method: req.method,
+                            query: Object.fromEntries(url.searchParams),
+                            headers: req.headers,
+                        }),
+                    );
                 } else if (url.pathname === '/api/error') {
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: 'Internal Server Error' }));
@@ -149,7 +177,9 @@ describe('HttpTestingServer', () => {
         it('should make POST requests', async () => {
             (httpServer as any).baseUrl = `http://127.0.0.1:${testPort}`;
 
-            const response = await httpServer.post('/api/users', { name: 'John' });
+            const response = await httpServer.post('/api/users', {
+                name: 'John',
+            });
 
             expect(response.status).toBe(201);
             expect(response.body).toEqual({ id: 1, name: 'John' });
@@ -158,7 +188,9 @@ describe('HttpTestingServer', () => {
         it('should make PUT requests', async () => {
             (httpServer as any).baseUrl = `http://127.0.0.1:${testPort}`;
 
-            const response = await httpServer.put('/api/users/1', { name: 'Updated' });
+            const response = await httpServer.put('/api/users/1', {
+                name: 'Updated',
+            });
 
             expect(response.status).toBe(200);
             expect(response.body).toEqual({ id: 1, name: 'Updated' });
@@ -175,7 +207,9 @@ describe('HttpTestingServer', () => {
         it('should make PATCH requests', async () => {
             (httpServer as any).baseUrl = `http://127.0.0.1:${testPort}`;
 
-            const response = await httpServer.patch('/api/users/1', { name: 'Patched' });
+            const response = await httpServer.patch('/api/users/1', {
+                name: 'Patched',
+            });
 
             // Our test server doesn't implement PATCH, so it returns 404
             expect(response.status).toBe(404);
@@ -241,17 +275,24 @@ describe('HttpRequestBuilder', () => {
         testPort = 49300 + Math.floor(Math.random() * 100);
         testServer = http.createServer((req, res) => {
             let body = '';
-            req.on('data', chunk => { body += chunk; });
+            req.on('data', (chunk) => {
+                body += chunk;
+            });
             req.on('end', () => {
-                const url = new URL(req.url || '/', `http://localhost:${testPort}`);
+                const url = new URL(
+                    req.url || '/',
+                    `http://localhost:${testPort}`,
+                );
                 res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({
-                    method: req.method,
-                    path: url.pathname,
-                    query: Object.fromEntries(url.searchParams),
-                    headers: req.headers,
-                    body: body ? JSON.parse(body) : null,
-                }));
+                res.end(
+                    JSON.stringify({
+                        method: req.method,
+                        path: url.pathname,
+                        query: Object.fromEntries(url.searchParams),
+                        headers: req.headers,
+                        body: body ? JSON.parse(body) : null,
+                    }),
+                );
             });
         });
 
@@ -321,7 +362,9 @@ describe('HttpRequestBuilder', () => {
             .auth('credentials', 'Basic')
             .send();
 
-        expect(response.body.headers['authorization']).toBe('Basic credentials');
+        expect(response.body.headers['authorization']).toBe(
+            'Basic credentials',
+        );
     });
 
     it('should set content type', async () => {
@@ -375,7 +418,9 @@ describe('HttpRequestBuilder', () => {
 });
 
 describe('HttpResponseAssert', () => {
-    const createResponse = (overrides: Partial<IHttpTestResponse> = {}): IHttpTestResponse => ({
+    const createResponse = (
+        overrides: Partial<IHttpTestResponse> = {},
+    ): IHttpTestResponse => ({
         status: 200,
         headers: { 'content-type': 'application/json' },
         body: { message: 'success', data: { id: 1 } },
@@ -396,7 +441,9 @@ describe('HttpResponseAssert', () => {
             const response = createResponse({ status: 404 });
             const assert = assertResponse(response);
 
-            expect(() => assert.status(200)).toThrow('Expected status 200 but got 404');
+            expect(() => assert.status(200)).toThrow(
+                'Expected status 200 but got 404',
+            );
         });
 
         it('should assert isOk for 2xx', () => {
@@ -406,96 +453,141 @@ describe('HttpResponseAssert', () => {
 
         it('should throw isOk for non-2xx', () => {
             const response = createResponse({ status: 400 });
-            expect(() => assertResponse(response).isOk()).toThrow('Expected 2xx status but got 400');
+            expect(() => assertResponse(response).isOk()).toThrow(
+                'Expected 2xx status but got 400',
+            );
         });
 
         it('should assert isClientError for 4xx', () => {
             const response = createResponse({ status: 404 });
-            expect(() => assertResponse(response).isClientError()).not.toThrow();
+            expect(() =>
+                assertResponse(response).isClientError(),
+            ).not.toThrow();
         });
 
         it('should throw isClientError for non-4xx', () => {
             const response = createResponse({ status: 200 });
-            expect(() => assertResponse(response).isClientError()).toThrow('Expected 4xx status but got 200');
+            expect(() => assertResponse(response).isClientError()).toThrow(
+                'Expected 4xx status but got 200',
+            );
         });
 
         it('should assert isServerError for 5xx', () => {
             const response = createResponse({ status: 500 });
-            expect(() => assertResponse(response).isServerError()).not.toThrow();
+            expect(() =>
+                assertResponse(response).isServerError(),
+            ).not.toThrow();
         });
 
         it('should throw isServerError for non-5xx', () => {
             const response = createResponse({ status: 200 });
-            expect(() => assertResponse(response).isServerError()).toThrow('Expected 5xx status but got 200');
+            expect(() => assertResponse(response).isServerError()).toThrow(
+                'Expected 5xx status but got 200',
+            );
         });
     });
 
     describe('header assertions', () => {
         it('should assert header exists', () => {
-            const response = createResponse({ headers: { 'content-type': 'application/json' } });
-            expect(() => assertResponse(response).header('content-type')).not.toThrow();
+            const response = createResponse({
+                headers: { 'content-type': 'application/json' },
+            });
+            expect(() =>
+                assertResponse(response).header('content-type'),
+            ).not.toThrow();
         });
 
         it('should throw when header missing', () => {
             const response = createResponse({ headers: {} });
-            expect(() => assertResponse(response).header('x-missing')).toThrow("Expected header 'x-missing' to exist");
+            expect(() => assertResponse(response).header('x-missing')).toThrow(
+                "Expected header 'x-missing' to exist",
+            );
         });
 
         it('should assert header value', () => {
-            const response = createResponse({ headers: { 'content-type': 'application/json' } });
-            expect(() => assertResponse(response).header('content-type', 'application/json')).not.toThrow();
+            const response = createResponse({
+                headers: { 'content-type': 'application/json' },
+            });
+            expect(() =>
+                assertResponse(response).header(
+                    'content-type',
+                    'application/json',
+                ),
+            ).not.toThrow();
         });
 
         it('should throw for wrong header value', () => {
-            const response = createResponse({ headers: { 'content-type': 'text/html' } });
-            expect(() => assertResponse(response).header('content-type', 'application/json'))
-                .toThrow("Expected header 'content-type' to be 'application/json' but got 'text/html'");
+            const response = createResponse({
+                headers: { 'content-type': 'text/html' },
+            });
+            expect(() =>
+                assertResponse(response).header(
+                    'content-type',
+                    'application/json',
+                ),
+            ).toThrow(
+                "Expected header 'content-type' to be 'application/json' but got 'text/html'",
+            );
         });
     });
 
     describe('body assertions', () => {
         it('should assert body equals', () => {
             const response = createResponse({ body: { id: 1 } });
-            expect(() => assertResponse(response).bodyEquals({ id: 1 })).not.toThrow();
+            expect(() =>
+                assertResponse(response).bodyEquals({ id: 1 }),
+            ).not.toThrow();
         });
 
         it('should throw for body mismatch', () => {
             const response = createResponse({ body: { id: 1 } });
-            expect(() => assertResponse(response).bodyEquals({ id: 2 })).toThrow();
+            expect(() =>
+                assertResponse(response).bodyEquals({ id: 2 }),
+            ).toThrow();
         });
 
         it('should assert body has property', () => {
             const response = createResponse({ body: { message: 'test' } });
-            expect(() => assertResponse(response).bodyHas('message')).not.toThrow();
+            expect(() =>
+                assertResponse(response).bodyHas('message'),
+            ).not.toThrow();
         });
 
         it('should throw when body missing property', () => {
             const response = createResponse({ body: {} });
-            expect(() => assertResponse(response).bodyHas('missing')).toThrow("Expected body to have property 'missing'");
+            expect(() => assertResponse(response).bodyHas('missing')).toThrow(
+                "Expected body to have property 'missing'",
+            );
         });
 
         it('should assert body property value', () => {
             const response = createResponse({ body: { count: 5 } });
-            expect(() => assertResponse(response).bodyProperty('count', 5)).not.toThrow();
+            expect(() =>
+                assertResponse(response).bodyProperty('count', 5),
+            ).not.toThrow();
         });
 
         it('should throw for wrong body property value', () => {
             const response = createResponse({ body: { count: 5 } });
-            expect(() => assertResponse(response).bodyProperty('count', 10))
-                .toThrow('Expected body.count to be 10 but got 5');
+            expect(() =>
+                assertResponse(response).bodyProperty('count', 10),
+            ).toThrow('Expected body.count to be 10 but got 5');
         });
     });
 
     describe('response time assertions', () => {
         it('should assert response time below threshold', () => {
             const response = createResponse({ responseTime: 50 });
-            expect(() => assertResponse(response).responseTimeBelow(100)).not.toThrow();
+            expect(() =>
+                assertResponse(response).responseTimeBelow(100),
+            ).not.toThrow();
         });
 
         it('should throw when response time exceeds threshold', () => {
             const response = createResponse({ responseTime: 150 });
-            expect(() => assertResponse(response).responseTimeBelow(100))
-                .toThrow('Expected response time below 100ms but got 150ms');
+            expect(() =>
+                assertResponse(response).responseTimeBelow(100),
+            ).toThrow('Expected response time below 100ms but got 150ms');
         });
     });
 
@@ -515,7 +607,7 @@ describe('HttpResponseAssert', () => {
                     .header('content-type', 'application/json')
                     .bodyHas('status')
                     .bodyProperty('count', 10)
-                    .responseTimeBelow(100)
+                    .responseTimeBelow(100),
             ).not.toThrow();
         });
 

@@ -157,7 +157,10 @@ export class TestingModuleBuilder implements ITestingModuleBuilder {
      * Add providers
      */
     addProviders(providers: any[]): ITestingModuleBuilder {
-        this.config.providers = [...(this.config.providers || []), ...providers];
+        this.config.providers = [
+            ...(this.config.providers || []),
+            ...providers,
+        ];
         return this;
     }
 

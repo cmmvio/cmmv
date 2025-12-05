@@ -177,7 +177,10 @@ describe('AbstractModel', () => {
         });
 
         it('should return array of undefined when using default fromEntity', () => {
-            const results = AbstractModel.fromEntities([{ id: '1' }, { id: '2' }]);
+            const results = AbstractModel.fromEntities([
+                { id: '1' },
+                { id: '2' },
+            ]);
 
             expect(results).toHaveLength(2);
             expect(results[0]).toBeUndefined();

@@ -60,8 +60,9 @@ describe('WsTestingClient', () => {
             const slowClient = new WsTestingClient();
             // We can't easily test timeout without mocking internals
             // but we can verify the option is accepted
-            await expect(slowClient.connect('ws://localhost:3000', { timeout: 1000 }))
-                .resolves.not.toThrow();
+            await expect(
+                slowClient.connect('ws://localhost:3000', { timeout: 1000 }),
+            ).resolves.not.toThrow();
         });
     });
 
@@ -125,10 +126,12 @@ describe('WsTestingClient', () => {
 
             client.simulateMessage('test:event', { value: 42 });
 
-            expect(handler).toHaveBeenCalledWith(expect.objectContaining({
-                event: 'test:event',
-                data: { value: 42 },
-            }));
+            expect(handler).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    event: 'test:event',
+                    data: { value: 42 },
+                }),
+            );
         });
 
         it('should unsubscribe from events', () => {
@@ -185,7 +188,10 @@ describe('WsTestingClient', () => {
             });
 
             setTimeout(() => {
-                client.simulateMessage('response', { type: 'success', extra: 'data' });
+                client.simulateMessage('response', {
+                    type: 'success',
+                    extra: 'data',
+                });
             }, 10);
 
             const result = await promise;
@@ -194,14 +200,16 @@ describe('WsTestingClient', () => {
 
         it('should timeout when message not received', async () => {
             await expect(
-                client.waitForMessage({ event: 'never:arrives', timeout: 50 })
+                client.waitForMessage({ event: 'never:arrives', timeout: 50 }),
             ).rejects.toThrow("Timeout waiting for message 'never:arrives'");
         });
 
         it('should resolve immediately if message already received', async () => {
             client.simulateMessage('already:received', { data: 'exists' });
 
-            const result = await client.waitForMessage({ event: 'already:received' });
+            const result = await client.waitForMessage({
+                event: 'already:received',
+            });
             expect(result).toEqual({ data: 'exists' });
         });
     });
@@ -330,15 +338,18 @@ describe('RpcTestingClient', () => {
             const sent = client.getSentMessages();
             const callId = sent[0].data.id;
 
-            client.simulateRpcError(callId, { code: 404, message: 'User not found' });
+            client.simulateRpcError(callId, {
+                code: 404,
+                message: 'User not found',
+            });
 
             await expect(callPromise).rejects.toThrow('User not found');
         });
 
         it('should timeout on no response', async () => {
-            await expect(
-                client.call('slow.method', {}, 50)
-            ).rejects.toThrow("RPC call 'slow.method' timed out");
+            await expect(client.call('slow.method', {}, 50)).rejects.toThrow(
+                "RPC call 'slow.method' timed out",
+            );
         });
 
         it('should track pending calls', async () => {
@@ -382,7 +393,9 @@ describe('WsMessageAssert', () => {
             client.send('e2', {});
 
             expect(() => assertSentMessages(client).count(2)).not.toThrow();
-            expect(() => assertSentMessages(client).count(3)).toThrow('Expected 3 messages but got 2');
+            expect(() => assertSentMessages(client).count(3)).toThrow(
+                'Expected 3 messages but got 2',
+            );
         });
 
         it('should assert at least n messages', () => {
@@ -391,7 +404,9 @@ describe('WsMessageAssert', () => {
 
             expect(() => assertSentMessages(client).atLeast(1)).not.toThrow();
             expect(() => assertSentMessages(client).atLeast(2)).not.toThrow();
-            expect(() => assertSentMessages(client).atLeast(3)).toThrow('Expected at least 3 messages');
+            expect(() => assertSentMessages(client).atLeast(3)).toThrow(
+                'Expected at least 3 messages',
+            );
         });
     });
 
@@ -399,8 +414,12 @@ describe('WsMessageAssert', () => {
         it('should assert event exists', () => {
             client.send('target:event', {});
 
-            expect(() => assertSentMessages(client).hasEvent('target:event')).not.toThrow();
-            expect(() => assertSentMessages(client).hasEvent('missing')).toThrow("Expected message with event 'missing'");
+            expect(() =>
+                assertSentMessages(client).hasEvent('target:event'),
+            ).not.toThrow();
+            expect(() =>
+                assertSentMessages(client).hasEvent('missing'),
+            ).toThrow("Expected message with event 'missing'");
         });
     });
 
@@ -408,14 +427,20 @@ describe('WsMessageAssert', () => {
         it('should assert data equals', () => {
             client.send('event', { foo: 'bar' });
 
-            expect(() => assertSentMessages(client).hasData({ foo: 'bar' })).not.toThrow();
-            expect(() => assertSentMessages(client).hasData({ foo: 'baz' })).toThrow('Expected message with data');
+            expect(() =>
+                assertSentMessages(client).hasData({ foo: 'bar' }),
+            ).not.toThrow();
+            expect(() =>
+                assertSentMessages(client).hasData({ foo: 'baz' }),
+            ).toThrow('Expected message with data');
         });
 
         it('should assert partial data match', () => {
             client.send('event', { foo: 'bar', extra: 'data' });
 
-            expect(() => assertSentMessages(client).hasDataMatching({ foo: 'bar' })).not.toThrow();
+            expect(() =>
+                assertSentMessages(client).hasDataMatching({ foo: 'bar' }),
+            ).not.toThrow();
         });
     });
 
@@ -424,14 +449,18 @@ describe('WsMessageAssert', () => {
             client.send('first', { n: 1 });
             client.send('second', { n: 2 });
 
-            expect(() => assertSentMessages(client).first().event('first')).not.toThrow();
+            expect(() =>
+                assertSentMessages(client).first().event('first'),
+            ).not.toThrow();
         });
 
         it('should assert last message', () => {
             client.send('first', { n: 1 });
             client.send('second', { n: 2 });
 
-            expect(() => assertSentMessages(client).last().event('second')).not.toThrow();
+            expect(() =>
+                assertSentMessages(client).last().event('second'),
+            ).not.toThrow();
         });
 
         it('should assert nth message', () => {
@@ -439,7 +468,9 @@ describe('WsMessageAssert', () => {
             client.send('e1', {});
             client.send('e2', {});
 
-            expect(() => assertSentMessages(client).nth(1).event('e1')).not.toThrow();
+            expect(() =>
+                assertSentMessages(client).nth(1).event('e1'),
+            ).not.toThrow();
         });
     });
 });
@@ -459,28 +490,42 @@ describe('WsSingleMessageAssert', () => {
     it('should assert event', () => {
         client.send('test:event', {});
 
-        expect(() => assertSentMessages(client).first().event('test:event')).not.toThrow();
-        expect(() => assertSentMessages(client).first().event('wrong')).toThrow("Expected event 'wrong'");
+        expect(() =>
+            assertSentMessages(client).first().event('test:event'),
+        ).not.toThrow();
+        expect(() => assertSentMessages(client).first().event('wrong')).toThrow(
+            "Expected event 'wrong'",
+        );
     });
 
     it('should assert data equals', () => {
         client.send('event', { value: 42 });
 
-        expect(() => assertSentMessages(client).first().dataEquals({ value: 42 })).not.toThrow();
+        expect(() =>
+            assertSentMessages(client).first().dataEquals({ value: 42 }),
+        ).not.toThrow();
     });
 
     it('should assert data has property', () => {
         client.send('event', { name: 'test', value: 42 });
 
-        expect(() => assertSentMessages(client).first().dataHas('name')).not.toThrow();
-        expect(() => assertSentMessages(client).first().dataHas('missing')).toThrow("Expected data to have property 'missing'");
+        expect(() =>
+            assertSentMessages(client).first().dataHas('name'),
+        ).not.toThrow();
+        expect(() =>
+            assertSentMessages(client).first().dataHas('missing'),
+        ).toThrow("Expected data to have property 'missing'");
     });
 
     it('should assert data property value', () => {
         client.send('event', { count: 5 });
 
-        expect(() => assertSentMessages(client).first().dataProperty('count', 5)).not.toThrow();
-        expect(() => assertSentMessages(client).first().dataProperty('count', 10)).toThrow('Expected data.count to be 10');
+        expect(() =>
+            assertSentMessages(client).first().dataProperty('count', 5),
+        ).not.toThrow();
+        expect(() =>
+            assertSentMessages(client).first().dataProperty('count', 10),
+        ).toThrow('Expected data.count to be 10');
     });
 
     it('should return the message', () => {
@@ -507,6 +552,8 @@ describe('assertReceivedMessages', () => {
         client.simulateMessage('server:response', { data: 'test' });
 
         expect(() => assertReceivedMessages(client).count(1)).not.toThrow();
-        expect(() => assertReceivedMessages(client).first().event('server:response')).not.toThrow();
+        expect(() =>
+            assertReceivedMessages(client).first().event('server:response'),
+        ).not.toThrow();
     });
 });

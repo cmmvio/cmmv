@@ -37,7 +37,12 @@ vi.mock('@cmmv/core', () => ({
         getRootPath(contract: any, type: string, create = true) {
             return `src/${type}`;
         }
-        getImportPath(contract: any, type: string, file: string, alias: string) {
+        getImportPath(
+            contract: any,
+            type: string,
+            file: string,
+            alias: string,
+        ) {
             return `${alias}/${file}`;
         }
         removeExtraSpaces(text: string) {
@@ -124,7 +129,9 @@ describe('DefaultHTTPTranspiler', () => {
         });
 
         it('should skip contracts without generateController flag', () => {
-            const mockContract = createMockContract({ generateController: false });
+            const mockContract = createMockContract({
+                generateController: false,
+            });
             vi.mocked(Scope.getArray).mockReturnValue([mockContract]);
 
             transpiler.run();
@@ -163,8 +170,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const serviceCall = calls.find(call =>
-                String(call[0]).includes('service.ts')
+            const serviceCall = calls.find((call) =>
+                String(call[0]).includes('service.ts'),
             );
             expect(serviceCall).toBeDefined();
         });
@@ -176,8 +183,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const serviceCall = calls.find(call =>
-                String(call[0]).includes('service.ts')
+            const serviceCall = calls.find((call) =>
+                String(call[0]).includes('service.ts'),
             );
 
             if (serviceCall) {
@@ -191,7 +198,9 @@ describe('DefaultHTTPTranspiler', () => {
         });
 
         it('should generate boilerplate service when flag is true', () => {
-            const mockContract = createMockContract({ generateBoilerplates: true });
+            const mockContract = createMockContract({
+                generateBoilerplates: true,
+            });
             vi.mocked(Scope.getArray).mockReturnValue([mockContract]);
 
             transpiler.run();
@@ -201,7 +210,9 @@ describe('DefaultHTTPTranspiler', () => {
         });
 
         it('should append to generated service when boilerplates is false', () => {
-            const mockContract = createMockContract({ generateBoilerplates: false });
+            const mockContract = createMockContract({
+                generateBoilerplates: false,
+            });
             vi.mocked(Scope.getArray).mockReturnValue([mockContract]);
 
             transpiler.run();
@@ -228,8 +239,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const serviceCall = calls.find(call =>
-                String(call[0]).includes('service.ts')
+            const serviceCall = calls.find((call) =>
+                String(call[0]).includes('service.ts'),
             );
 
             if (serviceCall) {
@@ -247,8 +258,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const controllerCall = calls.find(call =>
-                String(call[0]).includes('controller.ts')
+            const controllerCall = calls.find((call) =>
+                String(call[0]).includes('controller.ts'),
             );
             expect(controllerCall).toBeDefined();
         });
@@ -260,9 +271,10 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const controllerCall = calls.find(call =>
-                String(call[0]).includes('controller.ts') &&
-                String(call[1]).includes('@Get')
+            const controllerCall = calls.find(
+                (call) =>
+                    String(call[0]).includes('controller.ts') &&
+                    String(call[1]).includes('@Get'),
             );
 
             if (controllerCall) {
@@ -283,8 +295,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const controllerCall = calls.find(call =>
-                String(call[0]).includes('controller.ts')
+            const controllerCall = calls.find((call) =>
+                String(call[0]).includes('controller.ts'),
             );
 
             if (controllerCall) {
@@ -300,8 +312,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const controllerCall = calls.find(call =>
-                String(call[0]).includes('controller.ts')
+            const controllerCall = calls.find((call) =>
+                String(call[0]).includes('controller.ts'),
             );
 
             if (controllerCall) {
@@ -311,14 +323,17 @@ describe('DefaultHTTPTranspiler', () => {
         });
 
         it('should include rootOnly auth when specified', () => {
-            const mockContract = createMockContract({ auth: true, rootOnly: true });
+            const mockContract = createMockContract({
+                auth: true,
+                rootOnly: true,
+            });
             vi.mocked(Scope.getArray).mockReturnValue([mockContract]);
 
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const controllerCall = calls.find(call =>
-                String(call[0]).includes('controller.ts')
+            const controllerCall = calls.find((call) =>
+                String(call[0]).includes('controller.ts'),
             );
 
             if (controllerCall) {
@@ -359,8 +374,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const controllerCall = calls.find(call =>
-                String(call[0]).includes('controller.ts')
+            const controllerCall = calls.find((call) =>
+                String(call[0]).includes('controller.ts'),
             );
 
             if (controllerCall) {
@@ -379,8 +394,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const controllerCall = calls.find(call =>
-                String(call[0]).includes('controller.ts')
+            const controllerCall = calls.find((call) =>
+                String(call[0]).includes('controller.ts'),
             );
 
             if (controllerCall) {
@@ -406,8 +421,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const controllerCall = calls.find(call =>
-                String(call[0]).includes('controller.ts')
+            const controllerCall = calls.find((call) =>
+                String(call[0]).includes('controller.ts'),
             );
 
             if (controllerCall) {
@@ -425,8 +440,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const controllerCall = calls.find(call =>
-                String(call[0]).includes('controller.ts')
+            const controllerCall = calls.find((call) =>
+                String(call[0]).includes('controller.ts'),
             );
 
             if (controllerCall) {
@@ -444,7 +459,7 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             expect(Application.appModule.controllers).toContainEqual(
-                expect.objectContaining({ name: 'UserController' })
+                expect.objectContaining({ name: 'UserController' }),
             );
         });
 
@@ -455,7 +470,7 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             expect(Application.appModule.providers).toContainEqual(
-                expect.objectContaining({ name: 'UserService' })
+                expect.objectContaining({ name: 'UserService' }),
             );
         });
 
@@ -469,7 +484,7 @@ describe('DefaultHTTPTranspiler', () => {
                 expect.objectContaining({
                     name: 'UserController',
                     path: expect.stringContaining('/admin'),
-                })
+                }),
             );
         });
     });
@@ -521,9 +536,10 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const controllerCall = calls.find(call =>
-                String(call[0]).includes('controller.ts') &&
-                String(call[1]).includes('@Get')
+            const controllerCall = calls.find(
+                (call) =>
+                    String(call[0]).includes('controller.ts') &&
+                    String(call[1]).includes('@Get'),
             );
 
             if (controllerCall) {
@@ -556,7 +572,9 @@ describe('DefaultHTTPTranspiler', () => {
         it('should not overwrite existing boilerplate files', () => {
             vi.mocked(fs.existsSync).mockReturnValue(true);
 
-            const mockContract = createMockContract({ generateBoilerplates: true });
+            const mockContract = createMockContract({
+                generateBoilerplates: true,
+            });
             vi.mocked(Scope.getArray).mockReturnValue([mockContract]);
 
             transpiler.run();
@@ -568,7 +586,9 @@ describe('DefaultHTTPTranspiler', () => {
         it('should create boilerplate files when they do not exist', () => {
             vi.mocked(fs.existsSync).mockReturnValue(false);
 
-            const mockContract = createMockContract({ generateBoilerplates: true });
+            const mockContract = createMockContract({
+                generateBoilerplates: true,
+            });
             vi.mocked(Scope.getArray).mockReturnValue([mockContract]);
 
             transpiler.run();
@@ -579,7 +599,9 @@ describe('DefaultHTTPTranspiler', () => {
         it('should delete existing files when generateBoilerplates is false', () => {
             vi.mocked(fs.existsSync).mockReturnValue(true);
 
-            const mockContract = createMockContract({ generateBoilerplates: false });
+            const mockContract = createMockContract({
+                generateBoilerplates: false,
+            });
             vi.mocked(Scope.getArray).mockReturnValue([mockContract]);
 
             transpiler.run();
@@ -608,8 +630,8 @@ describe('DefaultHTTPTranspiler', () => {
             transpiler.run();
 
             const calls = vi.mocked(fs.writeFileSync).mock.calls;
-            const serviceCall = calls.find(call =>
-                String(call[0]).includes('service.ts')
+            const serviceCall = calls.find((call) =>
+                String(call[0]).includes('service.ts'),
             );
 
             if (serviceCall) {

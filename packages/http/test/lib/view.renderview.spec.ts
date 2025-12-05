@@ -29,7 +29,9 @@ vi.mock('../../lib/view.template', () => ({
     Template: vi.fn().mockImplementation((text, opts) => ({
         templateText: text,
         use: vi.fn(),
-        compile: vi.fn(() => vi.fn((data) => Promise.resolve(`Rendered: ${text}`))),
+        compile: vi.fn(() =>
+            vi.fn((data) => Promise.resolve(`Rendered: ${text}`)),
+        ),
         setContext: vi.fn(),
         getContext: vi.fn(() => ({})),
     })),
@@ -92,10 +94,12 @@ describe('CMMVRenderer', () => {
         });
 
         it('should apply directives for non-vue3 mode', () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'view.vue3') return false;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'view.vue3') return false;
+                    return defaultValue;
+                },
+            );
 
             const mockUse = vi.fn();
             vi.mocked(Template).mockImplementationOnce((text, opts) => ({
@@ -115,10 +119,12 @@ describe('CMMVRenderer', () => {
         });
 
         it('should apply different directives for vue3 mode', () => {
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'view.vue3') return true;
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'view.vue3') return true;
+                    return defaultValue;
+                },
+            );
 
             const mockUse = vi.fn();
             vi.mocked(Template).mockImplementationOnce((text, opts) => ({
@@ -276,16 +282,21 @@ describe('CMMVRenderer', () => {
             );
 
             await new Promise<void>((resolve, reject) => {
-                renderer.renderFile('nonexistent.html', {}, {}, (err, result) => {
-                    try {
-                        expect(err).toBeDefined();
-                        expect(err.message).toBe('File not found');
-                        expect(result).toBeUndefined();
-                        resolve();
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
+                renderer.renderFile(
+                    'nonexistent.html',
+                    {},
+                    {},
+                    (err, result) => {
+                        try {
+                            expect(err).toBeDefined();
+                            expect(err.message).toBe('File not found');
+                            expect(result).toBeUndefined();
+                            resolve();
+                        } catch (e) {
+                            reject(e);
+                        }
+                    },
+                );
             });
         });
 
@@ -407,13 +418,21 @@ describe('CMMVRenderer', () => {
             const opts = { cache: true, filename: 'cached.html' };
 
             // First call
-            await renderer.render('<div>Test</div>', { requestId: '123' }, opts);
+            await renderer.render(
+                '<div>Test</div>',
+                { requestId: '123' },
+                opts,
+            );
 
             // Clear template mock calls
             vi.mocked(Template).mockClear();
 
             // Second call should use cache
-            await renderer.render('<div>Test</div>', { requestId: '123' }, opts);
+            await renderer.render(
+                '<div>Test</div>',
+                { requestId: '123' },
+                opts,
+            );
 
             // Template should not be called again for cached content
             // (This depends on implementation details)
@@ -422,8 +441,16 @@ describe('CMMVRenderer', () => {
         it('should not cache when cache option is false', async () => {
             const opts = { cache: false, filename: 'nocache.html' };
 
-            await renderer.render('<div>Test</div>', { requestId: '123' }, opts);
-            await renderer.render('<div>Test</div>', { requestId: '123' }, opts);
+            await renderer.render(
+                '<div>Test</div>',
+                { requestId: '123' },
+                opts,
+            );
+            await renderer.render(
+                '<div>Test</div>',
+                { requestId: '123' },
+                opts,
+            );
 
             // Both calls should create new templates
             expect(Template).toHaveBeenCalledTimes(2);
@@ -432,8 +459,16 @@ describe('CMMVRenderer', () => {
         it('should not cache when no filename provided', async () => {
             const opts = { cache: true };
 
-            await renderer.render('<div>Test</div>', { requestId: '123' }, opts);
-            await renderer.render('<div>Test</div>', { requestId: '123' }, opts);
+            await renderer.render(
+                '<div>Test</div>',
+                { requestId: '123' },
+                opts,
+            );
+            await renderer.render(
+                '<div>Test</div>',
+                { requestId: '123' },
+                opts,
+            );
 
             // Both calls should create new templates
             expect(Template).toHaveBeenCalledTimes(2);
@@ -448,16 +483,17 @@ describe('CMMVRenderer', () => {
         });
 
         it('should handle template with only whitespace', async () => {
-            const result = await renderer.render('   \n\t   ', { requestId: '123' });
+            const result = await renderer.render('   \n\t   ', {
+                requestId: '123',
+            });
 
             expect(result).toBeDefined();
         });
 
         it('should handle unicode content', async () => {
-            const result = await renderer.render(
-                '<div>你好世界 🌍</div>',
-                { requestId: '123' },
-            );
+            const result = await renderer.render('<div>你好世界 🌍</div>', {
+                requestId: '123',
+            });
 
             expect(result).toBeDefined();
         });
@@ -531,7 +567,9 @@ describe('CMMVRenderer', () => {
             ];
 
             for (const template of templates) {
-                const result = await renderer.render(template, { requestId: '123' });
+                const result = await renderer.render(template, {
+                    requestId: '123',
+                });
                 expect(result).toBeDefined();
             }
         });

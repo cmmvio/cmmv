@@ -111,11 +111,9 @@ describe('Hooks', () => {
             const mockFn = vi.fn();
 
             Hooks.add(HooksType.onError, mockFn);
-            await Hooks.execute(
-                HooksType.onError,
-                'error message',
-                { code: 500 },
-            );
+            await Hooks.execute(HooksType.onError, 'error message', {
+                code: 500,
+            });
 
             expect(mockFn).toHaveBeenCalledWith('error message', { code: 500 });
         });

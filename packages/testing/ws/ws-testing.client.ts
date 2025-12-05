@@ -55,7 +55,8 @@ interface IReceivedMessage extends IWsMessage {
 export class WsTestingClient {
     private url: string = '';
     private isConnected: boolean = false;
-    private messageHandlers: Map<string, ((msg: IWsMessage) => void)[]> = new Map();
+    private messageHandlers: Map<string, ((msg: IWsMessage) => void)[]> =
+        new Map();
     private receivedMessages: IReceivedMessage[] = [];
     private sentMessages: IWsMessage[] = [];
     private connectionPromise: Promise<void> | null = null;
@@ -72,7 +73,10 @@ export class WsTestingClient {
     /**
      * Connect to a WebSocket server
      */
-    async connect(url: string, options: IWsConnectionOptions = {}): Promise<void> {
+    async connect(
+        url: string,
+        options: IWsConnectionOptions = {},
+    ): Promise<void> {
         const timeout = options.timeout || 5000;
 
         this.url = url;
@@ -97,7 +101,10 @@ export class WsTestingClient {
     /**
      * Disconnect from the WebSocket server
      */
-    async disconnect(code: number = 1000, reason: string = 'Normal closure'): Promise<void> {
+    async disconnect(
+        code: number = 1000,
+        reason: string = 'Normal closure',
+    ): Promise<void> {
         if (!this.isConnected) {
             return;
         }
@@ -152,7 +159,11 @@ export class WsTestingClient {
     /**
      * Emit an RPC call and wait for response
      */
-    async emit<T = any>(event: string, data: any, timeout: number = 5000): Promise<T> {
+    async emit<T = any>(
+        event: string,
+        data: any,
+        timeout: number = 5000,
+    ): Promise<T> {
         this.send(event, data);
 
         return this.waitForMessage<T>({
@@ -231,12 +242,18 @@ export class WsTestingClient {
     /**
      * Wait for a specific message
      */
-    async waitForMessage<T = any>(expectation: IMessageExpectation): Promise<T> {
+    async waitForMessage<T = any>(
+        expectation: IMessageExpectation,
+    ): Promise<T> {
         const timeout = expectation.timeout || 5000;
 
         return new Promise<T>((resolve, reject) => {
             const timer = setTimeout(() => {
-                reject(new Error(`Timeout waiting for message${expectation.event ? ` '${expectation.event}'` : ''}`));
+                reject(
+                    new Error(
+                        `Timeout waiting for message${expectation.event ? ` '${expectation.event}'` : ''}`,
+                    ),
+                );
             }, timeout);
 
             const checkMessage = (msg: IWsMessage): boolean => {
@@ -274,13 +291,20 @@ export class WsTestingClient {
     /**
      * Wait for multiple messages
      */
-    async waitForMessages(count: number, options: { timeout?: number; event?: string } = {}): Promise<IWsMessage[]> {
+    async waitForMessages(
+        count: number,
+        options: { timeout?: number; event?: string } = {},
+    ): Promise<IWsMessage[]> {
         const timeout = options.timeout || 5000;
         const messages: IWsMessage[] = [];
 
         return new Promise<IWsMessage[]>((resolve, reject) => {
             const timer = setTimeout(() => {
-                reject(new Error(`Timeout waiting for ${count} messages, received ${messages.length}`));
+                reject(
+                    new Error(
+                        `Timeout waiting for ${count} messages, received ${messages.length}`,
+                    ),
+                );
             }, timeout);
 
             const handler = (msg: IWsMessage) => {
@@ -388,7 +412,10 @@ export class WsTestingClient {
  * RPC Testing Client - Specialized for RPC-style communication
  */
 export class RpcTestingClient extends WsTestingClient {
-    private pendingCalls: Map<string, { resolve: Function; reject: Function; timeout: NodeJS.Timeout }> = new Map();
+    private pendingCalls: Map<
+        string,
+        { resolve: Function; reject: Function; timeout: NodeJS.Timeout }
+    > = new Map();
     private rpcTimeout: number = 5000;
 
     constructor(module?: ITestingModule) {
@@ -405,7 +432,11 @@ export class RpcTestingClient extends WsTestingClient {
     /**
      * Make an RPC call
      */
-    async call<T = any>(method: string, params: any = {}, timeout?: number): Promise<T> {
+    async call<T = any>(
+        method: string,
+        params: any = {},
+        timeout?: number,
+    ): Promise<T> {
         const callId = this.generateCallId();
         const effectiveTimeout = timeout || this.rpcTimeout;
 
@@ -418,7 +449,11 @@ export class RpcTestingClient extends WsTestingClient {
         return new Promise<T>((resolve, reject) => {
             const timer = setTimeout(() => {
                 this.pendingCalls.delete(callId);
-                reject(new Error(`RPC call '${method}' timed out after ${effectiveTimeout}ms`));
+                reject(
+                    new Error(
+                        `RPC call '${method}' timed out after ${effectiveTimeout}ms`,
+                    ),
+                );
             }, effectiveTimeout);
 
             this.pendingCalls.set(callId, { resolve, reject, timeout: timer });
@@ -431,7 +466,9 @@ export class RpcTestingClient extends WsTestingClient {
                     unsubscribe();
 
                     if (msg.data.error) {
-                        reject(new Error(msg.data.error.message || 'RPC Error'));
+                        reject(
+                            new Error(msg.data.error.message || 'RPC Error'),
+                        );
                     } else {
                         resolve(msg.data.result as T);
                     }
@@ -453,7 +490,10 @@ export class RpcTestingClient extends WsTestingClient {
     /**
      * Simulate an RPC error
      */
-    simulateRpcError(callId: string, error: { code?: number; message: string }): void {
+    simulateRpcError(
+        callId: string,
+        error: { code?: number; message: string },
+    ): void {
         this.simulateMessage('rpc:response', {
             id: callId,
             error,
@@ -468,21 +508,27 @@ export class RpcTestingClient extends WsTestingClient {
     }
 
     private generateCallId(): string {
-        return 'rpc-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
+        return (
+            'rpc-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now()
+        );
     }
 }
 
 /**
  * Create a WebSocket testing client
  */
-export function createWsTestingClient(module?: ITestingModule): WsTestingClient {
+export function createWsTestingClient(
+    module?: ITestingModule,
+): WsTestingClient {
     return new WsTestingClient(module);
 }
 
 /**
  * Create an RPC testing client
  */
-export function createRpcTestingClient(module?: ITestingModule): RpcTestingClient {
+export function createRpcTestingClient(
+    module?: ITestingModule,
+): RpcTestingClient {
     return new RpcTestingClient(module);
 }
 
@@ -497,7 +543,9 @@ export class WsMessageAssert {
      */
     count(expected: number): WsMessageAssert {
         if (this.messages.length !== expected) {
-            throw new Error(`Expected ${expected} messages but got ${this.messages.length}`);
+            throw new Error(
+                `Expected ${expected} messages but got ${this.messages.length}`,
+            );
         }
         return this;
     }
@@ -507,7 +555,9 @@ export class WsMessageAssert {
      */
     atLeast(n: number): WsMessageAssert {
         if (this.messages.length < n) {
-            throw new Error(`Expected at least ${n} messages but got ${this.messages.length}`);
+            throw new Error(
+                `Expected at least ${n} messages but got ${this.messages.length}`,
+            );
         }
         return this;
     }
@@ -517,7 +567,9 @@ export class WsMessageAssert {
      */
     hasEvent(event: string): WsMessageAssert {
         if (!this.messages.some((m) => m.event === event)) {
-            throw new Error(`Expected message with event '${event}' but none found`);
+            throw new Error(
+                `Expected message with event '${event}' but none found`,
+            );
         }
         return this;
     }
@@ -530,7 +582,9 @@ export class WsMessageAssert {
             return JSON.stringify(m.data) === JSON.stringify(data);
         });
         if (!hasMatch) {
-            throw new Error(`Expected message with data ${JSON.stringify(data)} but none found`);
+            throw new Error(
+                `Expected message with data ${JSON.stringify(data)} but none found`,
+            );
         }
         return this;
     }
@@ -543,7 +597,9 @@ export class WsMessageAssert {
             return this.partialMatch(m.data, partial);
         });
         if (!hasMatch) {
-            throw new Error(`Expected message matching ${JSON.stringify(partial)} but none found`);
+            throw new Error(
+                `Expected message matching ${JSON.stringify(partial)} but none found`,
+            );
         }
         return this;
     }
@@ -565,7 +621,9 @@ export class WsMessageAssert {
         if (this.messages.length === 0) {
             throw new Error('No messages to assert');
         }
-        return new WsSingleMessageAssert(this.messages[this.messages.length - 1]);
+        return new WsSingleMessageAssert(
+            this.messages[this.messages.length - 1],
+        );
     }
 
     /**
@@ -573,7 +631,9 @@ export class WsMessageAssert {
      */
     nth(n: number): WsSingleMessageAssert {
         if (n >= this.messages.length) {
-            throw new Error(`Message at index ${n} does not exist, only ${this.messages.length} messages`);
+            throw new Error(
+                `Message at index ${n} does not exist, only ${this.messages.length} messages`,
+            );
         }
         return new WsSingleMessageAssert(this.messages[n]);
     }
@@ -602,7 +662,9 @@ export class WsSingleMessageAssert {
      */
     event(expected: string): WsSingleMessageAssert {
         if (this.message.event !== expected) {
-            throw new Error(`Expected event '${expected}' but got '${this.message.event}'`);
+            throw new Error(
+                `Expected event '${expected}' but got '${this.message.event}'`,
+            );
         }
         return this;
     }
@@ -612,7 +674,9 @@ export class WsSingleMessageAssert {
      */
     dataEquals(expected: any): WsSingleMessageAssert {
         if (JSON.stringify(this.message.data) !== JSON.stringify(expected)) {
-            throw new Error(`Expected data ${JSON.stringify(expected)} but got ${JSON.stringify(this.message.data)}`);
+            throw new Error(
+                `Expected data ${JSON.stringify(expected)} but got ${JSON.stringify(this.message.data)}`,
+            );
         }
         return this;
     }
@@ -632,7 +696,9 @@ export class WsSingleMessageAssert {
      */
     dataProperty(property: string, expected: any): WsSingleMessageAssert {
         if (this.message.data[property] !== expected) {
-            throw new Error(`Expected data.${property} to be ${expected} but got ${this.message.data[property]}`);
+            throw new Error(
+                `Expected data.${property} to be ${expected} but got ${this.message.data[property]}`,
+            );
         }
         return this;
     }
@@ -655,6 +721,8 @@ export function assertSentMessages(client: WsTestingClient): WsMessageAssert {
 /**
  * Create assertion helper for received messages
  */
-export function assertReceivedMessages(client: WsTestingClient): WsMessageAssert {
+export function assertReceivedMessages(
+    client: WsTestingClient,
+): WsMessageAssert {
     return new WsMessageAssert(client.getReceivedMessages());
 }

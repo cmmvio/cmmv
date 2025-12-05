@@ -115,7 +115,9 @@ export class MockKeyvStore {
 /**
  * Create a pre-populated mock keyv store
  */
-export function createMockKeyvStoreWithData(data: Record<string, any>): MockKeyvStore {
+export function createMockKeyvStoreWithData(
+    data: Record<string, any>,
+): MockKeyvStore {
     const store = new MockKeyvStore();
     Object.entries(data).forEach(([key, value]) => {
         store.set(key, value);

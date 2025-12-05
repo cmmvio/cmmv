@@ -213,8 +213,16 @@ describe('EventsRegistry', () => {
         });
 
         it('should add handler to existing event', () => {
-            EventsRegistry.registerHandler('existing.event', 'handler1', () => {});
-            EventsRegistry.registerHandler('existing.event', 'handler2', () => {});
+            EventsRegistry.registerHandler(
+                'existing.event',
+                'handler1',
+                () => {},
+            );
+            EventsRegistry.registerHandler(
+                'existing.event',
+                'handler2',
+                () => {},
+            );
 
             const consumes = EventsRegistry.getConsumes('existing.event');
             expect(consumes.length).toBe(2);
@@ -224,8 +232,16 @@ describe('EventsRegistry', () => {
             const callback1 = () => 'first';
             const callback2 = () => 'second';
 
-            EventsRegistry.registerHandler('update.event', 'sameHandler', callback1);
-            EventsRegistry.registerHandler('update.event', 'sameHandler', callback2);
+            EventsRegistry.registerHandler(
+                'update.event',
+                'sameHandler',
+                callback1,
+            );
+            EventsRegistry.registerHandler(
+                'update.event',
+                'sameHandler',
+                callback2,
+            );
 
             const consumes = EventsRegistry.getConsumes('update.event');
             expect(consumes.length).toBe(1);

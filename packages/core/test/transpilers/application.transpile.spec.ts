@@ -104,7 +104,11 @@ describe('ApplicationTranspile', () => {
             const mockContract = {
                 controllerName: 'User',
                 fields: [
-                    { propertyKey: 'name', protoType: 'string', nullable: false },
+                    {
+                        propertyKey: 'name',
+                        protoType: 'string',
+                        nullable: false,
+                    },
                 ],
                 options: { moduleContract: false },
                 messages: {},
@@ -183,7 +187,9 @@ describe('ApplicationTranspile', () => {
             const fileContent = callArgs[1] as string;
 
             expect(fileContent).toContain('export interface IUser');
-            expect(fileContent).toContain('export class User extends AbstractModel');
+            expect(fileContent).toContain(
+                'export class User extends AbstractModel',
+            );
             expect(fileContent).toContain('name: string');
             expect(fileContent).toContain('email?: string');
         });
@@ -215,8 +221,16 @@ describe('ApplicationTranspile', () => {
         it('should generate interface with optional fields', () => {
             const mockContract = createMockContract({
                 fields: [
-                    { propertyKey: 'required', protoType: 'string', nullable: false },
-                    { propertyKey: 'optional', protoType: 'string', nullable: true },
+                    {
+                        propertyKey: 'required',
+                        protoType: 'string',
+                        nullable: false,
+                    },
+                    {
+                        propertyKey: 'optional',
+                        protoType: 'string',
+                        nullable: true,
+                    },
                 ],
             });
             vi.mocked(Scope.getArray).mockReturnValue([mockContract]);
@@ -233,7 +247,11 @@ describe('ApplicationTranspile', () => {
         it('should handle date fields', () => {
             const mockContract = createMockContract({
                 fields: [
-                    { propertyKey: 'createdAt', protoType: 'date', nullable: false },
+                    {
+                        propertyKey: 'createdAt',
+                        protoType: 'date',
+                        nullable: false,
+                    },
                 ],
             });
             vi.mocked(Scope.getArray).mockReturnValue([mockContract]);
@@ -599,7 +617,11 @@ describe('ApplicationTranspile', () => {
             const mockContract = {
                 controllerName: 'User',
                 fields: [
-                    { propertyKey: 'name', protoType: 'string', nullable: false },
+                    {
+                        propertyKey: 'name',
+                        protoType: 'string',
+                        nullable: false,
+                    },
                 ],
                 options: { moduleContract: false },
                 messages: {
@@ -628,7 +650,11 @@ describe('ApplicationTranspile', () => {
             const mockContract = {
                 controllerName: 'User',
                 fields: [
-                    { propertyKey: 'name', protoType: 'string', nullable: false },
+                    {
+                        propertyKey: 'name',
+                        protoType: 'string',
+                        nullable: false,
+                    },
                 ],
                 options: { moduleContract: false },
                 messages: {
@@ -656,10 +682,26 @@ describe('ApplicationTranspile', () => {
             const mockContract = {
                 controllerName: 'Types',
                 fields: [
-                    { propertyKey: 'text', protoType: 'string', nullable: false },
-                    { propertyKey: 'flag', protoType: 'boolean', nullable: false },
-                    { propertyKey: 'count', protoType: 'int32', nullable: false },
-                    { propertyKey: 'price', protoType: 'float', nullable: false },
+                    {
+                        propertyKey: 'text',
+                        protoType: 'string',
+                        nullable: false,
+                    },
+                    {
+                        propertyKey: 'flag',
+                        protoType: 'boolean',
+                        nullable: false,
+                    },
+                    {
+                        propertyKey: 'count',
+                        protoType: 'int32',
+                        nullable: false,
+                    },
+                    {
+                        propertyKey: 'price',
+                        protoType: 'float',
+                        nullable: false,
+                    },
                     { propertyKey: 'data', protoType: 'json', nullable: false },
                 ],
                 options: { moduleContract: false },
@@ -683,8 +725,16 @@ describe('ApplicationTranspile', () => {
             const mockContract = {
                 controllerName: 'Types',
                 fields: [
-                    { propertyKey: 'text', protoType: 'string', nullable: false },
-                    { propertyKey: 'count', protoType: 'int32', nullable: false },
+                    {
+                        propertyKey: 'text',
+                        protoType: 'string',
+                        nullable: false,
+                    },
+                    {
+                        propertyKey: 'count',
+                        protoType: 'int32',
+                        nullable: false,
+                    },
                 ],
                 options: { moduleContract: false },
                 messages: {},
@@ -822,7 +872,11 @@ describe('ApplicationTranspile', () => {
             const mockContract = {
                 controllerName: 'User',
                 fields: [
-                    { propertyKey: 'name', protoType: 'string', nullable: false },
+                    {
+                        propertyKey: 'name',
+                        protoType: 'string',
+                        nullable: false,
+                    },
                 ],
                 options: { moduleContract: false },
                 messages: {},
@@ -887,13 +941,25 @@ describe('ApplicationTranspile', () => {
             const contracts = [
                 {
                     controllerName: 'User',
-                    fields: [{ propertyKey: 'name', protoType: 'string', nullable: false }],
+                    fields: [
+                        {
+                            propertyKey: 'name',
+                            protoType: 'string',
+                            nullable: false,
+                        },
+                    ],
                     options: { moduleContract: false },
                     messages: {},
                 },
                 {
                     controllerName: 'Post',
-                    fields: [{ propertyKey: 'title', protoType: 'string', nullable: false }],
+                    fields: [
+                        {
+                            propertyKey: 'title',
+                            protoType: 'string',
+                            nullable: false,
+                        },
+                    ],
                     options: { moduleContract: false },
                     messages: {},
                 },

@@ -88,7 +88,8 @@ describe('view.directives', () => {
     describe('sData', () => {
         // NOTE: sData regex requires attributes BEFORE s-data: <tag attrs s-data="key" attrs>content</tag>
         it('should replace s-data with value from data object', async () => {
-            const templateText = '<div class="test" s-data="name" id="1">placeholder</div>';
+            const templateText =
+                '<div class="test" s-data="name" id="1">placeholder</div>';
             const data = { name: 'John' };
 
             const result = await sData(templateText, data, mockTemplate);
@@ -99,7 +100,8 @@ describe('view.directives', () => {
 
         it('should handle nested data keys', async () => {
             // Note: regex requires at least one attribute before s-data
-            const templateText = '<span class="item" s-data="user.profile.name">placeholder</span>';
+            const templateText =
+                '<span class="item" s-data="user.profile.name">placeholder</span>';
             const data = { user: { profile: { name: 'Alice' } } };
 
             const result = await sData(templateText, data, mockTemplate);
@@ -109,7 +111,8 @@ describe('view.directives', () => {
 
         it('should add comment when key not found', async () => {
             // Note: regex requires at least one attribute before s-data
-            const templateText = '<div class="item" s-data="missing">placeholder</div>';
+            const templateText =
+                '<div class="item" s-data="missing">placeholder</div>';
             const data = {};
 
             const result = await sData(templateText, data, mockTemplate);
@@ -118,7 +121,8 @@ describe('view.directives', () => {
         });
 
         it('should preserve tag attributes', async () => {
-            const templateText = '<p class="text" s-data="content" id="main">placeholder</p>';
+            const templateText =
+                '<p class="text" s-data="content" id="main">placeholder</p>';
             const data = { content: 'Hello World' };
 
             const result = await sData(templateText, data, mockTemplate);
@@ -200,7 +204,8 @@ describe('view.directives', () => {
         });
 
         it('should preserve existing attributes', () => {
-            const templateText = '<input type="text" s-attr="placeholder" class="input" />';
+            const templateText =
+                '<input type="text" s-attr="placeholder" class="input" />';
             const data = { placeholder: 'Enter text' };
 
             const result = sAttr(templateText, data, mockTemplate);
@@ -332,7 +337,8 @@ describe('view.directives', () => {
         });
 
         it('should add comment when key not found', () => {
-            const templateText = '<span s-i18n="missing.key">placeholder</span>';
+            const templateText =
+                '<span s-i18n="missing.key">placeholder</span>';
             const data = {};
 
             const result = i18n(templateText, data, mockTemplate);
@@ -423,7 +429,8 @@ describe('view.directives', () => {
                 new Error('Eval error'),
             );
 
-            const templateText = '<div s:value="invalid.expression">content</div>';
+            const templateText =
+                '<div s:value="invalid.expression">content</div>';
             const data = {};
 
             // Should not throw
@@ -460,7 +467,11 @@ describe('view.directives', () => {
             const templateText = '<div>Simple content</div>';
             const data = {};
 
-            const result = await ssrDirectives(templateText, data, mockTemplate);
+            const result = await ssrDirectives(
+                templateText,
+                data,
+                mockTemplate,
+            );
 
             expect(typeof result).toBe('string');
         });
@@ -470,7 +481,11 @@ describe('view.directives', () => {
             const data = { show: true };
             mockTemplate.getContext = vi.fn(() => data);
 
-            const result = await ssrDirectives(templateText, data, mockTemplate);
+            const result = await ssrDirectives(
+                templateText,
+                data,
+                mockTemplate,
+            );
 
             expect(result).toContain('Visible');
         });
@@ -480,7 +495,11 @@ describe('view.directives', () => {
             const data = { show: false };
             mockTemplate.getContext = vi.fn(() => data);
 
-            const result = await ssrDirectives(templateText, data, mockTemplate);
+            const result = await ssrDirectives(
+                templateText,
+                data,
+                mockTemplate,
+            );
 
             expect(result).not.toContain('Hidden');
         });
@@ -491,7 +510,11 @@ describe('view.directives', () => {
             const data = { show: false };
             mockTemplate.getContext = vi.fn(() => data);
 
-            const result = await ssrDirectives(templateText, data, mockTemplate);
+            const result = await ssrDirectives(
+                templateText,
+                data,
+                mockTemplate,
+            );
 
             expect(result).toContain('Else Content');
         });
@@ -584,7 +607,9 @@ describe('view.directives', () => {
                 </script>
             `;
 
-            await expect(extractSetupScript(templateText)).resolves.toBeDefined();
+            await expect(
+                extractSetupScript(templateText),
+            ).resolves.toBeDefined();
         });
 
         it('should handle complex object in setup', async () => {
@@ -613,7 +638,9 @@ describe('view.directives', () => {
             `;
 
             // Should not throw
-            await expect(extractSetupScript(templateText)).resolves.toBeDefined();
+            await expect(
+                extractSetupScript(templateText),
+            ).resolves.toBeDefined();
 
             consoleSpy.mockRestore();
         });
@@ -640,7 +667,8 @@ describe('view.directives', () => {
 
         it('should handle special characters in values', async () => {
             // Note: sData requires attributes before s-data
-            const templateText = '<div class="c" s-data="content">placeholder</div>';
+            const templateText =
+                '<div class="c" s-data="content">placeholder</div>';
             const data = { content: '<script>alert("xss")</script>' };
 
             const result = await sData(templateText, data, mockTemplate);
@@ -651,7 +679,8 @@ describe('view.directives', () => {
 
         it('should handle unicode in template', async () => {
             // Note: sData requires attributes before s-data
-            const templateText = '<div class="c" s-data="message">placeholder</div>';
+            const templateText =
+                '<div class="c" s-data="message">placeholder</div>';
             const data = { message: '你好世界 🌍' };
 
             const result = await sData(templateText, data, mockTemplate);
@@ -674,7 +703,7 @@ describe('view.directives', () => {
 
             const result = sAttr(templateText, data, mockTemplate);
 
-            expect(result).toContain("placeholder=\"Enter 'name'\"");
+            expect(result).toContain('placeholder="Enter \'name\'"');
         });
     });
 
@@ -701,7 +730,8 @@ describe('view.directives', () => {
 
         it('should handle array values in sData', async () => {
             // Note: sData requires attributes before s-data
-            const templateText = '<div class="c" s-data="items">placeholder</div>';
+            const templateText =
+                '<div class="c" s-data="items">placeholder</div>';
             const data = { items: [1, 2, 3] };
 
             const result = await sData(templateText, data, mockTemplate);
@@ -711,7 +741,8 @@ describe('view.directives', () => {
 
         it('should handle Date values', async () => {
             // Note: sData requires attributes before s-data
-            const templateText = '<span class="c" s-data="date">placeholder</span>';
+            const templateText =
+                '<span class="c" s-data="date">placeholder</span>';
             const date = new Date('2024-06-15T12:00:00Z'); // Use mid-year UTC date to avoid timezone issues
             const data = { date };
 

@@ -45,13 +45,18 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.get('https://api.example.com/data');
+            const result = await httpService.get(
+                'https://api.example.com/data',
+            );
 
-            expect(mockFetch).toHaveBeenCalledWith('https://api.example.com/data', {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                body: undefined,
-            });
+            expect(mockFetch).toHaveBeenCalledWith(
+                'https://api.example.com/data',
+                {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: undefined,
+                },
+            );
             expect(result.status).toBe(200);
             expect(result.data).toEqual({ data: 'test' });
         });
@@ -88,7 +93,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.get('https://api.example.com/text');
+            const result = await httpService.get(
+                'https://api.example.com/text',
+            );
 
             expect(result.data).toBe('Plain text response');
         });
@@ -102,7 +109,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.get('https://api.example.com/missing');
+            const result = await httpService.get(
+                'https://api.example.com/missing',
+            );
 
             expect(result.status).toBe(404);
             expect(result.statusText).toBe('Not Found');
@@ -174,7 +183,10 @@ describe('HttpService', () => {
                 items: [1, 2, 3],
             };
 
-            await httpService.post('https://api.example.com/complex', complexData);
+            await httpService.post(
+                'https://api.example.com/complex',
+                complexData,
+            );
 
             expect(mockFetch).toHaveBeenCalledWith(
                 'https://api.example.com/complex',
@@ -196,7 +208,10 @@ describe('HttpService', () => {
             mockFetch.mockResolvedValue(mockResponse);
 
             const updateData = { id: 1, name: 'Updated' };
-            await httpService.put('https://api.example.com/update/1', updateData);
+            await httpService.put(
+                'https://api.example.com/update/1',
+                updateData,
+            );
 
             expect(mockFetch).toHaveBeenCalledWith(
                 'https://api.example.com/update/1',
@@ -239,7 +254,10 @@ describe('HttpService', () => {
             mockFetch.mockResolvedValue(mockResponse);
 
             const patchData = { name: 'Patched Name' };
-            await httpService.patch('https://api.example.com/patch/1', patchData);
+            await httpService.patch(
+                'https://api.example.com/patch/1',
+                patchData,
+            );
 
             expect(mockFetch).toHaveBeenCalledWith(
                 'https://api.example.com/patch/1',
@@ -331,7 +349,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.head('https://api.example.com/resource');
+            const result = await httpService.head(
+                'https://api.example.com/resource',
+            );
 
             expect(mockFetch).toHaveBeenCalledWith(
                 'https://api.example.com/resource',
@@ -356,7 +376,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.head('https://api.example.com/resource');
+            const result = await httpService.head(
+                'https://api.example.com/resource',
+            );
 
             expect(result.headers).toBeDefined();
         });
@@ -372,7 +394,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.get('https://api.example.com/json');
+            const result = await httpService.get(
+                'https://api.example.com/json',
+            );
 
             expect(mockResponse.json).toHaveBeenCalled();
             expect(result.data).toEqual({ key: 'value' });
@@ -389,7 +413,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.get('https://api.example.com/json');
+            const result = await httpService.get(
+                'https://api.example.com/json',
+            );
 
             expect(mockResponse.json).toHaveBeenCalled();
         });
@@ -403,7 +429,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.get('https://api.example.com/html');
+            const result = await httpService.get(
+                'https://api.example.com/html',
+            );
 
             expect(mockResponse.text).toHaveBeenCalled();
             expect(result.data).toBe('<html></html>');
@@ -432,7 +460,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.get('https://api.example.com/data');
+            const result = await httpService.get(
+                'https://api.example.com/data',
+            );
 
             expect(result.config).toBeDefined();
         });
@@ -470,7 +500,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.get('https://api.example.com/server-error');
+            const result = await httpService.get(
+                'https://api.example.com/server-error',
+            );
 
             expect(result.status).toBe(500);
             expect(result.statusText).toBe('Internal Server Error');
@@ -518,9 +550,13 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            await httpService.post('https://api.example.com/data', { key: 'value' }, {
-                headers: { 'Content-Type': 'text/plain' },
-            });
+            await httpService.post(
+                'https://api.example.com/data',
+                { key: 'value' },
+                {
+                    headers: { 'Content-Type': 'text/plain' },
+                },
+            );
 
             expect(mockFetch).toHaveBeenCalledWith(
                 'https://api.example.com/data',
@@ -583,7 +619,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.delete('https://api.example.com/item/1');
+            const result = await httpService.delete(
+                'https://api.example.com/item/1',
+            );
 
             expect(result.data).toBeNull();
         });
@@ -597,7 +635,9 @@ describe('HttpService', () => {
             };
             mockFetch.mockResolvedValue(mockResponse);
 
-            const result = await httpService.get('https://api.example.com/items');
+            const result = await httpService.get(
+                'https://api.example.com/items',
+            );
 
             expect(result.data).toEqual([1, 2, 3]);
         });

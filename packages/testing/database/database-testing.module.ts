@@ -165,7 +165,9 @@ export class DatabaseTestingModule {
     /**
      * Run a test within a transaction that will be rolled back
      */
-    async runInTransaction<T>(callback: (ctx: ITransactionContext) => Promise<T>): Promise<T> {
+    async runInTransaction<T>(
+        callback: (ctx: ITransactionContext) => Promise<T>,
+    ): Promise<T> {
         const ctx = await this.startTransaction();
         try {
             const result = await callback(ctx);
@@ -264,7 +266,10 @@ export class DatabaseTestingModule {
     /**
      * Create a fixture factory
      */
-    createFixtureFactory<T>(entity: new () => T, defaults: Partial<T> = {}): FixtureFactory<T> {
+    createFixtureFactory<T>(
+        entity: new () => T,
+        defaults: Partial<T> = {},
+    ): FixtureFactory<T> {
         return new FixtureFactory<T>(entity, defaults);
     }
 
@@ -398,11 +403,16 @@ export class MockTestRepository<T> {
         let results = [...this.data];
 
         if (options?.where) {
-            results = results.filter((item) => this.matchWhere(item, options.where));
+            results = results.filter((item) =>
+                this.matchWhere(item, options.where),
+            );
         }
 
         if (options?.order) {
-            const [field, direction] = Object.entries(options.order)[0] as [string, string];
+            const [field, direction] = Object.entries(options.order)[0] as [
+                string,
+                string,
+            ];
             results.sort((a: any, b: any) => {
                 if (direction === 'DESC') return b[field] > a[field] ? 1 : -1;
                 return a[field] > b[field] ? 1 : -1;
@@ -430,7 +440,9 @@ export class MockTestRepository<T> {
     });
 
     save = vi.fn(async (entity: Partial<T>): Promise<T> => {
-        const existing = this.data.find((item: any) => item.id === (entity as any).id);
+        const existing = this.data.find(
+            (item: any) => item.id === (entity as any).id,
+        );
 
         if (existing) {
             Object.assign(existing, entity, { updatedAt: new Date() });
@@ -448,23 +460,30 @@ export class MockTestRepository<T> {
         return newEntity;
     });
 
-    update = vi.fn(async (criteria: any, data: Partial<T>): Promise<{ affected: number }> => {
-        let affected = 0;
+    update = vi.fn(
+        async (
+            criteria: any,
+            data: Partial<T>,
+        ): Promise<{ affected: number }> => {
+            let affected = 0;
 
-        this.data = this.data.map((item: any) => {
-            if (this.matchWhere(item, criteria)) {
-                Object.assign(item, data, { updatedAt: new Date() });
-                affected++;
-            }
-            return item;
-        });
+            this.data = this.data.map((item: any) => {
+                if (this.matchWhere(item, criteria)) {
+                    Object.assign(item, data, { updatedAt: new Date() });
+                    affected++;
+                }
+                return item;
+            });
 
-        return { affected };
-    });
+            return { affected };
+        },
+    );
 
     delete = vi.fn(async (criteria: any): Promise<{ affected: number }> => {
         const originalLength = this.data.length;
-        this.data = this.data.filter((item) => !this.matchWhere(item, criteria));
+        this.data = this.data.filter(
+            (item) => !this.matchWhere(item, criteria),
+        );
         return { affected: originalLength - this.data.length };
     });
 
@@ -538,11 +557,16 @@ export class MockQueryBuilder<T> {
         return this;
     });
 
-    orderBy = vi.fn((field: string, direction: 'ASC' | 'DESC' = 'ASC'): MockQueryBuilder<T> => {
-        this.orderByField = field;
-        this.orderDirection = direction;
-        return this;
-    });
+    orderBy = vi.fn(
+        (
+            field: string,
+            direction: 'ASC' | 'DESC' = 'ASC',
+        ): MockQueryBuilder<T> => {
+            this.orderByField = field;
+            this.orderDirection = direction;
+            return this;
+        },
+    );
 
     limit = vi.fn((limit: number): MockQueryBuilder<T> => {
         this.limitValue = limit;
@@ -637,9 +661,13 @@ export class FixtureFactory<T> {
     /**
      * Create multiple fixtures
      */
-    createMany(count: number, overrides: Partial<T> | ((index: number) => Partial<T>) = {}): T[] {
+    createMany(
+        count: number,
+        overrides: Partial<T> | ((index: number) => Partial<T>) = {},
+    ): T[] {
         return Array.from({ length: count }, (_, index) => {
-            const entityOverrides = typeof overrides === 'function' ? overrides(index) : overrides;
+            const entityOverrides =
+                typeof overrides === 'function' ? overrides(index) : overrides;
             return this.create(entityOverrides);
         });
     }
@@ -661,9 +689,13 @@ export class FixtureFactory<T> {
     /**
      * Build multiple fixtures without saving
      */
-    buildMany(count: number, overrides: Partial<T> | ((index: number) => Partial<T>) = {}): Partial<T>[] {
+    buildMany(
+        count: number,
+        overrides: Partial<T> | ((index: number) => Partial<T>) = {},
+    ): Partial<T>[] {
         return Array.from({ length: count }, (_, index) => {
-            const entityOverrides = typeof overrides === 'function' ? overrides(index) : overrides;
+            const entityOverrides =
+                typeof overrides === 'function' ? overrides(index) : overrides;
             return this.build(entityOverrides);
         });
     }
@@ -679,14 +711,19 @@ export class FixtureFactory<T> {
 /**
  * Create a database testing module
  */
-export function createDatabaseTestingModule(config?: IDatabaseTestConfig): DatabaseTestingModule {
+export function createDatabaseTestingModule(
+    config?: IDatabaseTestConfig,
+): DatabaseTestingModule {
     return new DatabaseTestingModule(config);
 }
 
 /**
  * Create a fixture factory
  */
-export function createFixtureFactory<T>(entity: new () => T, defaults?: Partial<T>): FixtureFactory<T> {
+export function createFixtureFactory<T>(
+    entity: new () => T,
+    defaults?: Partial<T>,
+): FixtureFactory<T> {
     return new FixtureFactory<T>(entity, defaults);
 }
 

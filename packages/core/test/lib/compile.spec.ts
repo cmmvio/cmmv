@@ -341,7 +341,9 @@ describe('Compile', () => {
 
             const writtenCode = vi.mocked(fs.writeFileSync).mock
                 .calls[0][1] as string;
-            expect(writtenCode).toContain('import { something } from somewhere');
+            expect(writtenCode).toContain(
+                'import { something } from somewhere',
+            );
         });
     });
 

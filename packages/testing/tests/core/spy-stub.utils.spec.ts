@@ -46,7 +46,10 @@ describe('SpyWrapper', () => {
             spy.spy('a', 1);
             spy.spy('b', 2);
 
-            expect(spy.calls).toEqual([['a', 1], ['b', 2]]);
+            expect(spy.calls).toEqual([
+                ['a', 1],
+                ['b', 2],
+            ]);
         });
 
         it('should provide firstCall and lastCall', () => {

@@ -60,7 +60,10 @@ vi.mock('@cmmv/core', () => ({
 // Mock @cmmv/http
 vi.mock('@cmmv/http', () => ({
     HttpException: class MockHttpException extends Error {
-        constructor(message: string, public status: number) {
+        constructor(
+            message: string,
+            public status: number,
+        ) {
             super(message);
             this.name = 'HttpException';
         }
@@ -90,7 +93,9 @@ vi.mock('@cmmv/repository', () => ({
 // Mock one-time-token service
 vi.mock('./one-time-token.service', () => ({
     AuthOneTimeTokenService: class MockOneTimeTokenService {
-        createOneTimeToken = vi.fn().mockResolvedValue('http://localhost/reset?token=abc123');
+        createOneTimeToken = vi
+            .fn()
+            .mockResolvedValue('http://localhost/reset?token=abc123');
     },
 }));
 
@@ -136,7 +141,9 @@ describe('AuthUsersService', () => {
         vi.clearAllMocks();
 
         mockOneTimeTokenService = {
-            createOneTimeToken: vi.fn().mockResolvedValue('http://localhost/reset?token=abc123'),
+            createOneTimeToken: vi
+                .fn()
+                .mockResolvedValue('http://localhost/reset?token=abc123'),
         };
 
         mockLocationService = {
@@ -150,7 +157,7 @@ describe('AuthUsersService', () => {
         service = new AuthUsersService(
             mockOneTimeTokenService,
             mockLocationService,
-            mockEmailService
+            mockEmailService,
         );
     });
 
@@ -160,7 +167,11 @@ describe('AuthUsersService', () => {
 
     describe('getUserById', () => {
         it('should return user when found', async () => {
-            const mockUser = { id: 'user-123', username: 'testuser', blocked: false };
+            const mockUser = {
+                id: 'user-123',
+                username: 'testuser',
+                blocked: false,
+            };
             vi.mocked(Repository.findBy).mockResolvedValue(mockUser);
 
             const result = await service.getUserById('user-123');
@@ -187,17 +198,21 @@ describe('AuthUsersService', () => {
             expect(Repository.updateById).toHaveBeenCalledWith(
                 'MockEntity',
                 'user-123',
-                { verifyEmail: true }
+                { verifyEmail: true },
             );
-            expect(mockRes.res.writeHead).toHaveBeenCalledWith(200, expect.any(Object));
+            expect(mockRes.res.writeHead).toHaveBeenCalledWith(
+                200,
+                expect.any(Object),
+            );
             expect(result).toBe(false);
         });
 
         it('should throw error when template not found', async () => {
             vi.mocked(fs.existsSync).mockReturnValue(false);
 
-            await expect(service.validateEmail('user-123', mockRes))
-                .rejects.toThrow('Template not found');
+            await expect(
+                service.validateEmail('user-123', mockRes),
+            ).rejects.toThrow('Template not found');
         });
     });
 
@@ -205,8 +220,9 @@ describe('AuthUsersService', () => {
         it('should throw error when user not found', async () => {
             vi.mocked(Repository.findOne).mockResolvedValue(null);
 
-            await expect(service.forgotPassword('unknown@email.com'))
-                .rejects.toThrow('User not found');
+            await expect(
+                service.forgotPassword('unknown@email.com'),
+            ).rejects.toThrow('User not found');
         });
 
         it('should throw error when reset requested too recently', async () => {
@@ -217,8 +233,11 @@ describe('AuthUsersService', () => {
                 forgotSendAt: Date.now() - 1000, // Just sent
             });
 
-            await expect(service.forgotPassword('test@email.com'))
-                .rejects.toThrow('You can only request a password reset once every 1 hours');
+            await expect(
+                service.forgotPassword('test@email.com'),
+            ).rejects.toThrow(
+                'You can only request a password reset once every 1 hours',
+            );
         });
 
         it('should send forgot password email successfully', async () => {
@@ -232,7 +251,9 @@ describe('AuthUsersService', () => {
 
             const result = await service.forgotPassword('test@email.com');
 
-            expect(result).toEqual({ message: 'Reset password email sent successfully' });
+            expect(result).toEqual({
+                message: 'Reset password email sent successfully',
+            });
             expect(mockEmailService.sendEmail).toHaveBeenCalled();
         });
 
@@ -241,13 +262,15 @@ describe('AuthUsersService', () => {
                 id: 'user-123',
                 email: 'test@email.com',
                 forgotPasswordToken: 'old-token',
-                forgotSendAt: Date.now() - (2 * 60 * 60 * 1000), // 2 hours ago
+                forgotSendAt: Date.now() - 2 * 60 * 60 * 1000, // 2 hours ago
             });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
             const result = await service.forgotPassword('test@email.com');
 
-            expect(result).toEqual({ message: 'Reset password email sent successfully' });
+            expect(result).toEqual({
+                message: 'Reset password email sent successfully',
+            });
         });
     });
 
@@ -259,7 +282,7 @@ describe('AuthUsersService', () => {
                 'user-123',
                 'test@email.com',
                 'newpassword123',
-                mockReq
+                mockReq,
             );
 
             expect(result).toBe(true);
@@ -269,7 +292,7 @@ describe('AuthUsersService', () => {
                 expect.objectContaining({
                     password: 'mock-password-hash',
                     forgotPasswordToken: null,
-                })
+                }),
             );
             expect(mockEmailService.sendEmail).toHaveBeenCalled();
         });
@@ -279,8 +302,9 @@ describe('AuthUsersService', () => {
         it('should throw error when user not found', async () => {
             vi.mocked(Repository.findOne).mockResolvedValue(null);
 
-            await expect(service.unsubscribeNewsletter('unknown@email.com'))
-                .rejects.toThrow('User not found');
+            await expect(
+                service.unsubscribeNewsletter('unknown@email.com'),
+            ).rejects.toThrow('User not found');
         });
 
         it('should unsubscribe user successfully', async () => {
@@ -290,13 +314,16 @@ describe('AuthUsersService', () => {
             });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-            const result = await service.unsubscribeNewsletter('test@email.com');
+            const result =
+                await service.unsubscribeNewsletter('test@email.com');
 
-            expect(result).toEqual({ message: 'Newsletter unsubscribed successfully' });
+            expect(result).toEqual({
+                message: 'Newsletter unsubscribed successfully',
+            });
             expect(Repository.updateById).toHaveBeenCalledWith(
                 'MockEntity',
                 'user-123',
-                { unsubscribe: true }
+                { unsubscribe: true },
             );
         });
     });
@@ -305,8 +332,9 @@ describe('AuthUsersService', () => {
         it('should throw error when user not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.blockUser('user-123'))
-                .rejects.toThrow('User not found');
+            await expect(service.blockUser('user-123')).rejects.toThrow(
+                'User not found',
+            );
         });
 
         it('should throw error when user already blocked', async () => {
@@ -315,8 +343,9 @@ describe('AuthUsersService', () => {
                 blocked: true,
             });
 
-            await expect(service.blockUser('user-123'))
-                .rejects.toThrow('User is already blocked');
+            await expect(service.blockUser('user-123')).rejects.toThrow(
+                'User is already blocked',
+            );
         });
 
         it('should block user successfully', async () => {
@@ -338,8 +367,9 @@ describe('AuthUsersService', () => {
             });
             vi.mocked(Repository.update).mockResolvedValue(0);
 
-            await expect(service.blockUser('user-123'))
-                .rejects.toThrow('Failed to block user');
+            await expect(service.blockUser('user-123')).rejects.toThrow(
+                'Failed to block user',
+            );
         });
     });
 
@@ -347,8 +377,9 @@ describe('AuthUsersService', () => {
         it('should throw error when user not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.unblockUser('user-123'))
-                .rejects.toThrow('User not found');
+            await expect(service.unblockUser('user-123')).rejects.toThrow(
+                'User not found',
+            );
         });
 
         it('should throw error when user already unblocked', async () => {
@@ -357,8 +388,9 @@ describe('AuthUsersService', () => {
                 blocked: false,
             });
 
-            await expect(service.unblockUser('user-123'))
-                .rejects.toThrow('User is already unblocked');
+            await expect(service.unblockUser('user-123')).rejects.toThrow(
+                'User is already unblocked',
+            );
         });
 
         it('should unblock user successfully', async () => {
@@ -380,8 +412,9 @@ describe('AuthUsersService', () => {
             });
             vi.mocked(Repository.update).mockResolvedValue(0);
 
-            await expect(service.unblockUser('user-123'))
-                .rejects.toThrow('Failed to unblock user');
+            await expect(service.unblockUser('user-123')).rejects.toThrow(
+                'Failed to unblock user',
+            );
         });
     });
 
@@ -389,54 +422,81 @@ describe('AuthUsersService', () => {
         it('should throw error when user not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.assignGroupsToUser('user-123', ['group-1']))
-                .rejects.toThrow('User not found');
+            await expect(
+                service.assignGroupsToUser('user-123', ['group-1']),
+            ).rejects.toThrow('User not found');
         });
 
         it('should throw error for invalid groups', async () => {
-            vi.mocked(Repository.findBy).mockResolvedValue({ id: 'user-123', groups: [] });
-            vi.mocked(Repository.findAll).mockResolvedValue({ data: [], count: 0 });
+            vi.mocked(Repository.findBy).mockResolvedValue({
+                id: 'user-123',
+                groups: [],
+            });
+            vi.mocked(Repository.findAll).mockResolvedValue({
+                data: [],
+                count: 0,
+            });
 
-            await expect(service.assignGroupsToUser('user-123', ['invalid-group']))
-                .rejects.toThrow('Invalid groups');
+            await expect(
+                service.assignGroupsToUser('user-123', ['invalid-group']),
+            ).rejects.toThrow('Invalid groups');
         });
 
         it('should assign groups successfully', async () => {
-            vi.mocked(Repository.findBy).mockResolvedValue({ id: 'user-123', groups: [] });
+            vi.mocked(Repository.findBy).mockResolvedValue({
+                id: 'user-123',
+                groups: [],
+            });
             vi.mocked(Repository.findAll).mockResolvedValue({
                 data: [{ id: 'group-1' }],
                 count: 1,
             });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-            const result = await service.assignGroupsToUser('user-123', ['group-1']);
+            const result = await service.assignGroupsToUser('user-123', [
+                'group-1',
+            ]);
 
-            expect(result).toEqual({ message: 'Groups assigned to user successfully' });
+            expect(result).toEqual({
+                message: 'Groups assigned to user successfully',
+            });
         });
 
         it('should handle single group string', async () => {
-            vi.mocked(Repository.findBy).mockResolvedValue({ id: 'user-123', groups: [] });
+            vi.mocked(Repository.findBy).mockResolvedValue({
+                id: 'user-123',
+                groups: [],
+            });
             vi.mocked(Repository.findAll).mockResolvedValue({
                 data: [{ id: 'group-1' }],
                 count: 1,
             });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-            const result = await service.assignGroupsToUser('user-123', 'group-1');
+            const result = await service.assignGroupsToUser(
+                'user-123',
+                'group-1',
+            );
 
-            expect(result).toEqual({ message: 'Groups assigned to user successfully' });
+            expect(result).toEqual({
+                message: 'Groups assigned to user successfully',
+            });
         });
 
         it('should throw error on failed update', async () => {
-            vi.mocked(Repository.findBy).mockResolvedValue({ id: 'user-123', groups: [] });
+            vi.mocked(Repository.findBy).mockResolvedValue({
+                id: 'user-123',
+                groups: [],
+            });
             vi.mocked(Repository.findAll).mockResolvedValue({
                 data: [{ id: 'group-1' }],
                 count: 1,
             });
             vi.mocked(Repository.updateById).mockResolvedValue(false);
 
-            await expect(service.assignGroupsToUser('user-123', ['group-1']))
-                .rejects.toThrow('Failed to assign groups to user');
+            await expect(
+                service.assignGroupsToUser('user-123', ['group-1']),
+            ).rejects.toThrow('Failed to assign groups to user');
         });
     });
 
@@ -444,8 +504,9 @@ describe('AuthUsersService', () => {
         it('should throw error when user not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.removeGroupsFromUser('user-123', ['group-1']))
-                .rejects.toThrow('User not found');
+            await expect(
+                service.removeGroupsFromUser('user-123', ['group-1']),
+            ).rejects.toThrow('User not found');
         });
 
         it('should throw error for invalid groups', async () => {
@@ -453,10 +514,14 @@ describe('AuthUsersService', () => {
                 id: 'user-123',
                 groups: ['group-1'],
             });
-            vi.mocked(Repository.findAll).mockResolvedValue({ data: [], count: 0 });
+            vi.mocked(Repository.findAll).mockResolvedValue({
+                data: [],
+                count: 0,
+            });
 
-            await expect(service.removeGroupsFromUser('user-123', ['invalid-group']))
-                .rejects.toThrow('Invalid groups');
+            await expect(
+                service.removeGroupsFromUser('user-123', ['invalid-group']),
+            ).rejects.toThrow('Invalid groups');
         });
 
         it('should remove groups successfully', async () => {
@@ -470,7 +535,9 @@ describe('AuthUsersService', () => {
             });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-            const result = await service.removeGroupsFromUser('user-123', ['group-1']);
+            const result = await service.removeGroupsFromUser('user-123', [
+                'group-1',
+            ]);
 
             expect(result).toEqual({
                 success: true,
@@ -489,8 +556,9 @@ describe('AuthUsersService', () => {
             });
             vi.mocked(Repository.updateById).mockResolvedValue(false);
 
-            await expect(service.removeGroupsFromUser('user-123', ['group-1']))
-                .rejects.toThrow('Failed to remove groups from user');
+            await expect(
+                service.removeGroupsFromUser('user-123', ['group-1']),
+            ).rejects.toThrow('Failed to remove groups from user');
         });
     });
 
@@ -503,7 +571,10 @@ describe('AuthUsersService', () => {
                 });
                 vi.mocked(Repository.update).mockResolvedValue(1);
 
-                const result = await service.handlerBlockUser({ userId: 'user-123' }, {});
+                const result = await service.handlerBlockUser(
+                    { userId: 'user-123' },
+                    {},
+                );
 
                 expect(result.success).toBe(true);
                 expect(result.message).toBe('User blocked successfully');
@@ -518,7 +589,10 @@ describe('AuthUsersService', () => {
                 });
                 vi.mocked(Repository.update).mockResolvedValue(1);
 
-                const result = await service.handlerUnblockUser({ userId: 'user-123' }, {});
+                const result = await service.handlerUnblockUser(
+                    { userId: 'user-123' },
+                    {},
+                );
 
                 expect(result.success).toBe(true);
                 expect(result.message).toBe('User unblocked successfully');
@@ -527,7 +601,10 @@ describe('AuthUsersService', () => {
 
         describe('handlerAssignGroupsToUser', () => {
             it('should assign groups and return success', async () => {
-                vi.mocked(Repository.findBy).mockResolvedValue({ id: 'user-123', groups: [] });
+                vi.mocked(Repository.findBy).mockResolvedValue({
+                    id: 'user-123',
+                    groups: [],
+                });
                 vi.mocked(Repository.findAll).mockResolvedValue({
                     data: [{ id: 'group-1' }],
                     count: 1,
@@ -536,11 +613,13 @@ describe('AuthUsersService', () => {
 
                 const result = await service.handlerAssignGroupsToUser(
                     { userId: 'user-123', groups: ['group-1'] },
-                    {}
+                    {},
                 );
 
                 expect(result.success).toBe(true);
-                expect(result.message).toBe('Groups assigned to user successfully');
+                expect(result.message).toBe(
+                    'Groups assigned to user successfully',
+                );
             });
         });
 
@@ -558,11 +637,13 @@ describe('AuthUsersService', () => {
 
                 const result = await service.handlerRemoveGroups(
                     { userId: 'user-123', groups: ['group-1'] },
-                    {}
+                    {},
                 );
 
                 expect(result.success).toBe(true);
-                expect(result.message).toBe('Groups removed from user successfully');
+                expect(result.message).toBe(
+                    'Groups removed from user successfully',
+                );
             });
         });
     });

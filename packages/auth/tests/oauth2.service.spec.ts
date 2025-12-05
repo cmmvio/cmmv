@@ -45,7 +45,10 @@ vi.mock('@cmmv/core', () => ({
 // Mock @cmmv/http
 vi.mock('@cmmv/http', () => ({
     HttpException: class MockHttpException extends Error {
-        constructor(message: string, public status: number) {
+        constructor(
+            message: string,
+            public status: number,
+        ) {
             super(message);
             this.name = 'HttpException';
         }
@@ -141,7 +144,10 @@ describe('OAuth2Service', () => {
             getLocation: vi.fn().mockResolvedValue('New York, US'),
         };
 
-        service = new OAuth2Service(mockAuthorizationService, mockLocationService);
+        service = new OAuth2Service(
+            mockAuthorizationService,
+            mockLocationService,
+        );
     });
 
     afterEach(() => {
@@ -150,31 +156,51 @@ describe('OAuth2Service', () => {
 
     describe('auth', () => {
         it('should throw error when client_id is missing', async () => {
-            const queries = { redirect_uri: 'http://localhost', response_type: 'code', state: 'abc' };
+            const queries = {
+                redirect_uri: 'http://localhost',
+                response_type: 'code',
+                state: 'abc',
+            };
 
-            await expect(service.auth(mockReq, mockRes, queries as any))
-                .rejects.toThrow('Client ID is required');
+            await expect(
+                service.auth(mockReq, mockRes, queries as any),
+            ).rejects.toThrow('Client ID is required');
         });
 
         it('should throw error when redirect_uri is missing', async () => {
-            const queries = { client_id: 'client-123', response_type: 'code', state: 'abc' };
+            const queries = {
+                client_id: 'client-123',
+                response_type: 'code',
+                state: 'abc',
+            };
 
-            await expect(service.auth(mockReq, mockRes, queries as any))
-                .rejects.toThrow('Redirect URI is required');
+            await expect(
+                service.auth(mockReq, mockRes, queries as any),
+            ).rejects.toThrow('Redirect URI is required');
         });
 
         it('should throw error when response_type is missing', async () => {
-            const queries = { client_id: 'client-123', redirect_uri: 'http://localhost', state: 'abc' };
+            const queries = {
+                client_id: 'client-123',
+                redirect_uri: 'http://localhost',
+                state: 'abc',
+            };
 
-            await expect(service.auth(mockReq, mockRes, queries as any))
-                .rejects.toThrow('Response Type is required');
+            await expect(
+                service.auth(mockReq, mockRes, queries as any),
+            ).rejects.toThrow('Response Type is required');
         });
 
         it('should throw error when state is missing', async () => {
-            const queries = { client_id: 'client-123', redirect_uri: 'http://localhost', response_type: 'code' };
+            const queries = {
+                client_id: 'client-123',
+                redirect_uri: 'http://localhost',
+                response_type: 'code',
+            };
 
-            await expect(service.auth(mockReq, mockRes, queries as any))
-                .rejects.toThrow('State is required');
+            await expect(
+                service.auth(mockReq, mockRes, queries as any),
+            ).rejects.toThrow('State is required');
         });
 
         it('should throw error when client not found', async () => {
@@ -186,12 +212,15 @@ describe('OAuth2Service', () => {
                 state: 'abc',
             };
 
-            await expect(service.auth(mockReq, mockRes, queries))
-                .rejects.toThrow('Client not found');
+            await expect(
+                service.auth(mockReq, mockRes, queries),
+            ).rejects.toThrow('Client not found');
         });
 
         it('should throw error when template not found', async () => {
-            vi.mocked(Repository.findBy).mockResolvedValue({ clientId: 'client-123' });
+            vi.mocked(Repository.findBy).mockResolvedValue({
+                clientId: 'client-123',
+            });
             vi.mocked(fs.existsSync).mockReturnValue(false);
 
             const queries = {
@@ -201,8 +230,9 @@ describe('OAuth2Service', () => {
                 state: 'abc',
             };
 
-            await expect(service.auth(mockReq, mockRes, queries))
-                .rejects.toThrow('Template not found');
+            await expect(
+                service.auth(mockReq, mockRes, queries),
+            ).rejects.toThrow('Template not found');
         });
     });
 
@@ -230,8 +260,15 @@ describe('OAuth2Service', () => {
         it('should throw error when client not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.authorize('client-123', mockBody, mockUser, mockReq, mockRes))
-                .rejects.toThrow('Client not found');
+            await expect(
+                service.authorize(
+                    'client-123',
+                    mockBody,
+                    mockUser,
+                    mockReq,
+                    mockRes,
+                ),
+            ).rejects.toThrow('Client not found');
         });
 
         it('should throw error for invalid domain', async () => {
@@ -241,32 +278,63 @@ describe('OAuth2Service', () => {
             };
             vi.mocked(Repository.findBy).mockResolvedValue(clientWithDomains);
 
-            await expect(service.authorize('client-123', mockBody, mockUser, mockReq, mockRes))
-                .rejects.toThrow('Invalid domain');
+            await expect(
+                service.authorize(
+                    'client-123',
+                    mockBody,
+                    mockUser,
+                    mockReq,
+                    mockRes,
+                ),
+            ).rejects.toThrow('Invalid domain');
         });
 
         it('should throw error for invalid redirect URI', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(mockClient);
-            const invalidBody = { ...mockBody, redirect_uri: 'http://invalid.com/callback' };
+            const invalidBody = {
+                ...mockBody,
+                redirect_uri: 'http://invalid.com/callback',
+            };
 
-            await expect(service.authorize('client-123', invalidBody, mockUser, mockReq, mockRes))
-                .rejects.toThrow('Invalid redirect URI');
+            await expect(
+                service.authorize(
+                    'client-123',
+                    invalidBody,
+                    mockUser,
+                    mockReq,
+                    mockRes,
+                ),
+            ).rejects.toThrow('Invalid redirect URI');
         });
 
         it('should throw error for invalid scope', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(mockClient);
             const invalidBody = { ...mockBody, scope: 'invalid' };
 
-            await expect(service.authorize('client-123', invalidBody, mockUser, mockReq, mockRes))
-                .rejects.toThrow('Invalid scope');
+            await expect(
+                service.authorize(
+                    'client-123',
+                    invalidBody,
+                    mockUser,
+                    mockReq,
+                    mockRes,
+                ),
+            ).rejects.toThrow('Invalid scope');
         });
 
         it('should throw error for missing state', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(mockClient);
             const invalidBody = { ...mockBody, state: '' };
 
-            await expect(service.authorize('client-123', invalidBody, mockUser, mockReq, mockRes))
-                .rejects.toThrow('Invalid state');
+            await expect(
+                service.authorize(
+                    'client-123',
+                    invalidBody,
+                    mockUser,
+                    mockReq,
+                    mockRes,
+                ),
+            ).rejects.toThrow('Invalid state');
         });
 
         it('should throw error for invalid grant type', async () => {
@@ -276,15 +344,28 @@ describe('OAuth2Service', () => {
             };
             vi.mocked(Repository.findBy).mockResolvedValue(clientWithoutGrant);
 
-            await expect(service.authorize('client-123', mockBody, mockUser, mockReq, mockRes))
-                .rejects.toThrow('Invalid grant type');
+            await expect(
+                service.authorize(
+                    'client-123',
+                    mockBody,
+                    mockUser,
+                    mockReq,
+                    mockRes,
+                ),
+            ).rejects.toThrow('Invalid grant type');
         });
 
         it('should generate authorization code successfully', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(mockClient);
             vi.mocked(Repository.insert).mockResolvedValue({ success: true });
 
-            const result = await service.authorize('client-123', mockBody, mockUser, mockReq, mockRes);
+            const result = await service.authorize(
+                'client-123',
+                mockBody,
+                mockUser,
+                mockReq,
+                mockRes,
+            );
 
             expect(result).toHaveProperty('code');
             expect(result).toHaveProperty('state', 'abc123');
@@ -293,10 +374,19 @@ describe('OAuth2Service', () => {
 
         it('should throw error on failed code generation', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(mockClient);
-            vi.mocked(Repository.insert).mockResolvedValueOnce({ success: false });
+            vi.mocked(Repository.insert).mockResolvedValueOnce({
+                success: false,
+            });
 
-            await expect(service.authorize('client-123', mockBody, mockUser, mockReq, mockRes))
-                .rejects.toThrow('Failed to generate the code');
+            await expect(
+                service.authorize(
+                    'client-123',
+                    mockBody,
+                    mockUser,
+                    mockReq,
+                    mockRes,
+                ),
+            ).rejects.toThrow('Failed to generate the code');
         });
 
         it('should handle implicit flow', async () => {
@@ -307,7 +397,13 @@ describe('OAuth2Service', () => {
             vi.mocked(Repository.findBy).mockResolvedValue(implicitClient);
 
             const implicitBody = { ...mockBody, response_type: 'token' };
-            const result = await service.authorize('client-123', implicitBody, mockUser, mockReq, mockRes);
+            const result = await service.authorize(
+                'client-123',
+                implicitBody,
+                mockUser,
+                mockReq,
+                mockRes,
+            );
 
             expect(result).toHaveProperty('token');
             expect(result).toHaveProperty('refreshToken');
@@ -317,8 +413,15 @@ describe('OAuth2Service', () => {
             vi.mocked(Repository.findBy).mockResolvedValue(mockClient);
             const invalidBody = { ...mockBody, response_type: 'invalid' };
 
-            await expect(service.authorize('client-123', invalidBody, mockUser, mockReq, mockRes))
-                .rejects.toThrow('Invalid response type');
+            await expect(
+                service.authorize(
+                    'client-123',
+                    invalidBody,
+                    mockUser,
+                    mockReq,
+                    mockRes,
+                ),
+            ).rejects.toThrow('Invalid response type');
         });
     });
 
@@ -332,29 +435,33 @@ describe('OAuth2Service', () => {
         it('should throw error when code is missing', async () => {
             const payload = { ...mockPayload, code: '' };
 
-            await expect(service.handler(payload as any, mockReq, mockRes))
-                .rejects.toThrow('Code is required');
+            await expect(
+                service.handler(payload as any, mockReq, mockRes),
+            ).rejects.toThrow('Code is required');
         });
 
         it('should throw error when state is missing', async () => {
             const payload = { ...mockPayload, state: '' };
 
-            await expect(service.handler(payload as any, mockReq, mockRes))
-                .rejects.toThrow('State is required');
+            await expect(
+                service.handler(payload as any, mockReq, mockRes),
+            ).rejects.toThrow('State is required');
         });
 
         it('should throw error when client_secret is missing', async () => {
             const payload = { ...mockPayload, client_secret: '' };
 
-            await expect(service.handler(payload as any, mockReq, mockRes))
-                .rejects.toThrow('Client secret is required');
+            await expect(
+                service.handler(payload as any, mockReq, mockRes),
+            ).rejects.toThrow('Client secret is required');
         });
 
         it('should throw error when code not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.handler(mockPayload as any, mockReq, mockRes))
-                .rejects.toThrow('Invalid code');
+            await expect(
+                service.handler(mockPayload as any, mockReq, mockRes),
+            ).rejects.toThrow('Invalid code');
         });
 
         it('should throw error when code expired', async () => {
@@ -363,8 +470,9 @@ describe('OAuth2Service', () => {
                 expiresAt: Date.now() - 1000, // Expired
             });
 
-            await expect(service.handler(mockPayload as any, mockReq, mockRes))
-                .rejects.toThrow('Code expired');
+            await expect(
+                service.handler(mockPayload as any, mockReq, mockRes),
+            ).rejects.toThrow('Code expired');
         });
     });
 
@@ -394,8 +502,9 @@ describe('OAuth2Service', () => {
         it('should throw error when client not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.getClient('non-existent'))
-                .rejects.toThrow('Client not found');
+            await expect(service.getClient('non-existent')).rejects.toThrow(
+                'Client not found',
+            );
         });
 
         it('should return client when found', async () => {
@@ -416,8 +525,9 @@ describe('OAuth2Service', () => {
         it('should throw error when client not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.getClientAdmin('non-existent'))
-                .rejects.toThrow('Client not found');
+            await expect(
+                service.getClientAdmin('non-existent'),
+            ).rejects.toThrow('Client not found');
         });
 
         it('should return full client data for admin', async () => {
@@ -455,12 +565,15 @@ describe('OAuth2Service', () => {
         it('should throw error when client not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.updateClient('non-existent', {} as any))
-                .rejects.toThrow('Client not found');
+            await expect(
+                service.updateClient('non-existent', {} as any),
+            ).rejects.toThrow('Client not found');
         });
 
         it('should update client successfully', async () => {
-            vi.mocked(Repository.findBy).mockResolvedValue({ clientId: 'client-123' });
+            vi.mocked(Repository.findBy).mockResolvedValue({
+                clientId: 'client-123',
+            });
             vi.mocked(Repository.updateOne).mockResolvedValue(true);
 
             const updateData = {

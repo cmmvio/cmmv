@@ -21,7 +21,7 @@ let jwtVerifyImpl = (token: string, secret: string, callback?: Function) => {
         fingerprint: 'fp-123',
         username: 'testuser',
         f: 'fp-123',
-        u: 'user-123'
+        u: 'user-123',
     };
     if (callback) {
         callback(null, decoded);
@@ -37,7 +37,7 @@ vi.mock('jsonwebtoken', () => ({
             fingerprint: 'fp-123',
             username: 'testuser',
             f: 'fp-123',
-            u: 'user-123'
+            u: 'user-123',
         };
         if (callback) {
             callback(null, decoded);
@@ -52,7 +52,7 @@ vi.mock('jsonwebtoken', () => ({
                 fingerprint: 'fp-123',
                 username: 'testuser',
                 f: 'fp-123',
-                u: 'user-123'
+                u: 'user-123',
             };
             if (callback) {
                 callback(null, decoded);
@@ -118,19 +118,21 @@ describe('AuthSessionsService', () => {
         service = new AuthSessionsService();
 
         // Reset jwt.verify mock to default behavior
-        vi.mocked(jwt.verify).mockImplementation((token: any, secret: any, callback?: any) => {
-            const decoded = {
-                id: 'user-123',
-                fingerprint: 'fp-123',
-                username: 'testuser',
-                f: 'fp-123',
-                u: 'user-123'
-            };
-            if (callback) {
-                callback(null, decoded);
-            }
-            return decoded as any;
-        });
+        vi.mocked(jwt.verify).mockImplementation(
+            (token: any, secret: any, callback?: any) => {
+                const decoded = {
+                    id: 'user-123',
+                    fingerprint: 'fp-123',
+                    username: 'testuser',
+                    f: 'fp-123',
+                    u: 'user-123',
+                };
+                if (callback) {
+                    callback(null, decoded);
+                }
+                return decoded as any;
+            },
+        );
     });
 
     afterEach(() => {
@@ -142,7 +144,9 @@ describe('AuthSessionsService', () => {
             vi.mocked(Repository.exists).mockResolvedValue(true);
 
             const user = { id: 'user-123', fingerprint: 'fp-123' };
-            const result = await AuthSessionsService.validateSession(user as any);
+            const result = await AuthSessionsService.validateSession(
+                user as any,
+            );
 
             expect(result).toBe(true);
             expect(Repository.exists).toHaveBeenCalled();
@@ -151,21 +155,25 @@ describe('AuthSessionsService', () => {
         it('should validate session with token string', async () => {
             vi.mocked(Repository.exists).mockResolvedValue(true);
 
-            const result = await AuthSessionsService.validateSession('valid-token');
+            const result =
+                await AuthSessionsService.validateSession('valid-token');
 
             expect(result).toBe(true);
         });
 
         it('should return false for invalid token', async () => {
-            vi.mocked(jwt.verify).mockImplementation((token: any, secret: any, callback?: any) => {
-                if (callback) {
-                    callback(new Error('Invalid token'), null);
-                    return undefined as any;
-                }
-                throw new Error('Invalid token');
-            });
+            vi.mocked(jwt.verify).mockImplementation(
+                (token: any, secret: any, callback?: any) => {
+                    if (callback) {
+                        callback(new Error('Invalid token'), null);
+                        return undefined as any;
+                    }
+                    throw new Error('Invalid token');
+                },
+            );
 
-            const result = await AuthSessionsService.validateSession('invalid-token');
+            const result =
+                await AuthSessionsService.validateSession('invalid-token');
 
             expect(result).toBe(false);
         });
@@ -174,7 +182,9 @@ describe('AuthSessionsService', () => {
             vi.mocked(Repository.exists).mockResolvedValue(false);
 
             const user = { id: 'user-123', fingerprint: 'fp-123' };
-            const result = await AuthSessionsService.validateSession(user as any);
+            const result = await AuthSessionsService.validateSession(
+                user as any,
+            );
 
             expect(result).toBe(false);
         });
@@ -188,8 +198,13 @@ describe('AuthSessionsService', () => {
             vi.mocked(Repository.exists).mockResolvedValue(true);
 
             // Use a valid 24-character hex string for MongoDB ObjectId
-            const user = { id: '507f1f77bcf86cd799439011', fingerprint: 'fp-123' };
-            const result = await AuthSessionsService.validateSession(user as any);
+            const user = {
+                id: '507f1f77bcf86cd799439011',
+                fingerprint: 'fp-123',
+            };
+            const result = await AuthSessionsService.validateSession(
+                user as any,
+            );
 
             expect(result).toBe(true);
         });
@@ -198,30 +213,37 @@ describe('AuthSessionsService', () => {
     describe('validateRefreshToken', () => {
         it('should validate a valid refresh token', async () => {
             vi.mocked(Repository.exists).mockResolvedValue(true);
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                const configs: Record<string, any> = {
-                    'auth.jwtSecret': 'test-secret',
-                    'auth.jwtSecretRefresh': 'test-refresh-secret',
-                    'repository.type': 'postgres',
-                };
-                return configs[key] ?? defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    const configs: Record<string, any> = {
+                        'auth.jwtSecret': 'test-secret',
+                        'auth.jwtSecretRefresh': 'test-refresh-secret',
+                        'repository.type': 'postgres',
+                    };
+                    return configs[key] ?? defaultValue;
+                },
+            );
 
-            const result = await AuthSessionsService.validateRefreshToken('valid-refresh-token');
+            const result = await AuthSessionsService.validateRefreshToken(
+                'valid-refresh-token',
+            );
 
             expect(result).toBe(true);
         });
 
         it('should return false for invalid refresh token', async () => {
-            vi.mocked(jwt.verify).mockImplementation((token: any, secret: any, callback?: any) => {
-                if (callback) {
-                    callback(new Error('Invalid token'), null);
-                    return undefined as any;
-                }
-                throw new Error('Invalid token');
-            });
+            vi.mocked(jwt.verify).mockImplementation(
+                (token: any, secret: any, callback?: any) => {
+                    if (callback) {
+                        callback(new Error('Invalid token'), null);
+                        return undefined as any;
+                    }
+                    throw new Error('Invalid token');
+                },
+            );
 
-            const result = await AuthSessionsService.validateRefreshToken('invalid-token');
+            const result =
+                await AuthSessionsService.validateRefreshToken('invalid-token');
 
             expect(result).toBe(false);
         });
@@ -229,7 +251,8 @@ describe('AuthSessionsService', () => {
         it('should return false when session does not exist', async () => {
             vi.mocked(Repository.exists).mockResolvedValue(false);
 
-            const result = await AuthSessionsService.validateRefreshToken('valid-token');
+            const result =
+                await AuthSessionsService.validateRefreshToken('valid-token');
 
             expect(result).toBe(false);
         });
@@ -240,21 +263,29 @@ describe('AuthSessionsService', () => {
             const mockSession = { id: 'session-1', user: 'user-123' };
             vi.mocked(Repository.findBy).mockResolvedValue(mockSession);
 
-            const result = await AuthSessionsService.getSessionFromRefreshToken('valid-token');
+            const result =
+                await AuthSessionsService.getSessionFromRefreshToken(
+                    'valid-token',
+                );
 
             expect(result).toEqual(mockSession);
         });
 
         it('should return null for invalid token', async () => {
-            vi.mocked(jwt.verify).mockImplementation((token: any, secret: any, callback?: any) => {
-                if (callback) {
-                    callback(new Error('Invalid token'), null);
-                    return undefined as any;
-                }
-                throw new Error('Invalid token');
-            });
+            vi.mocked(jwt.verify).mockImplementation(
+                (token: any, secret: any, callback?: any) => {
+                    if (callback) {
+                        callback(new Error('Invalid token'), null);
+                        return undefined as any;
+                    }
+                    throw new Error('Invalid token');
+                },
+            );
 
-            const result = await AuthSessionsService.getSessionFromRefreshToken('invalid-token');
+            const result =
+                await AuthSessionsService.getSessionFromRefreshToken(
+                    'invalid-token',
+                );
 
             expect(result).toBeNull();
         });
@@ -265,9 +296,10 @@ describe('AuthSessionsService', () => {
             ip: '127.0.0.1',
             get: vi.fn((header: string) => {
                 const headers: Record<string, string> = {
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0',
-                    'referer': 'http://localhost',
-                    'origin': 'http://localhost',
+                    'user-agent':
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0',
+                    referer: 'http://localhost',
+                    origin: 'http://localhost',
                 };
                 return headers[header];
             }),
@@ -283,7 +315,7 @@ describe('AuthSessionsService', () => {
                 mockReq,
                 'fp-123',
                 'user-123',
-                'refresh-token'
+                'refresh-token',
             );
 
             expect(result).toBe(true);
@@ -299,7 +331,7 @@ describe('AuthSessionsService', () => {
                 mockReq,
                 'fp-123',
                 'user-123',
-                'refresh-token'
+                'refresh-token',
             );
 
             expect(result).toBe(true);
@@ -311,7 +343,13 @@ describe('AuthSessionsService', () => {
             vi.mocked(Repository.update).mockResolvedValue(false);
 
             await expect(
-                service.registrySession('session-123', mockReq, 'fp-123', 'user-123', 'refresh-token')
+                service.registrySession(
+                    'session-123',
+                    mockReq,
+                    'fp-123',
+                    'user-123',
+                    'refresh-token',
+                ),
             ).rejects.toThrow('Failed to update session');
         });
 
@@ -320,7 +358,13 @@ describe('AuthSessionsService', () => {
             vi.mocked(Repository.insert).mockResolvedValue({ success: false });
 
             await expect(
-                service.registrySession('session-123', mockReq, 'fp-123', 'user-123', 'refresh-token')
+                service.registrySession(
+                    'session-123',
+                    mockReq,
+                    'fp-123',
+                    'user-123',
+                    'refresh-token',
+                ),
             ).rejects.toThrow('Failed to create session');
         });
     });
@@ -332,10 +376,12 @@ describe('AuthSessionsService', () => {
                 count: 2,
             };
             vi.mocked(Repository.findAll).mockResolvedValue(mockSessions);
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'repository.type') return 'postgres';
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'repository.type') return 'postgres';
+                    return defaultValue;
+                },
+            );
 
             const user = { id: 'user-123', fingerprint: 'fp-123' };
             const result = await service.getSessions({}, user as any);
@@ -345,15 +391,17 @@ describe('AuthSessionsService', () => {
 
         it('should throw error when no sessions found', async () => {
             vi.mocked(Repository.findAll).mockResolvedValue(null);
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'repository.type') return 'postgres';
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'repository.type') return 'postgres';
+                    return defaultValue;
+                },
+            );
 
             const user = { id: 'user-123', fingerprint: 'fp-123' };
 
             await expect(service.getSessions({}, user as any)).rejects.toThrow(
-                'Unable to load sessions for this user.'
+                'Unable to load sessions for this user.',
             );
         });
     });
@@ -361,13 +409,18 @@ describe('AuthSessionsService', () => {
     describe('revokeSession', () => {
         it('should revoke a session', async () => {
             vi.mocked(Repository.update).mockResolvedValue(true);
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'repository.type') return 'postgres';
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'repository.type') return 'postgres';
+                    return defaultValue;
+                },
+            );
 
             const user = { id: 'user-123', fingerprint: 'fp-123' };
-            const result = await service.revokeSession('session-123', user as any);
+            const result = await service.revokeSession(
+                'session-123',
+                user as any,
+            );
 
             expect(result).toBe(true);
             expect(Repository.update).toHaveBeenCalled();
@@ -375,59 +428,77 @@ describe('AuthSessionsService', () => {
 
         it('should throw error on failed revocation', async () => {
             vi.mocked(Repository.update).mockResolvedValue(false);
-            vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-                if (key === 'repository.type') return 'postgres';
-                return defaultValue;
-            });
+            vi.mocked(Config.get).mockImplementation(
+                (key: string, defaultValue?: any) => {
+                    if (key === 'repository.type') return 'postgres';
+                    return defaultValue;
+                },
+            );
 
             const user = { id: 'user-123', fingerprint: 'fp-123' };
 
-            await expect(service.revokeSession('session-123', user as any)).rejects.toThrow(
-                'Failed to revoke session'
-            );
+            await expect(
+                service.revokeSession('session-123', user as any),
+            ).rejects.toThrow('Failed to revoke session');
         });
     });
 
     describe('extractDevice', () => {
         it('should detect mobile device', () => {
-            const result = (service as any).extractDevice('Mozilla/5.0 Mobile Safari');
+            const result = (service as any).extractDevice(
+                'Mozilla/5.0 Mobile Safari',
+            );
             expect(result).toBe('Mobile');
         });
 
         it('should detect tablet device', () => {
-            const result = (service as any).extractDevice('Mozilla/5.0 iPad Tablet');
+            const result = (service as any).extractDevice(
+                'Mozilla/5.0 iPad Tablet',
+            );
             expect(result).toBe('Tablet');
         });
 
         it('should default to Desktop', () => {
-            const result = (service as any).extractDevice('Mozilla/5.0 Windows NT');
+            const result = (service as any).extractDevice(
+                'Mozilla/5.0 Windows NT',
+            );
             expect(result).toBe('Desktop');
         });
     });
 
     describe('extractBrowser', () => {
         it('should detect Chrome', () => {
-            const result = (service as any).extractBrowser('Mozilla/5.0 Chrome/91.0');
+            const result = (service as any).extractBrowser(
+                'Mozilla/5.0 Chrome/91.0',
+            );
             expect(result).toBe('Chrome');
         });
 
         it('should detect Firefox', () => {
-            const result = (service as any).extractBrowser('Mozilla/5.0 Firefox/89.0');
+            const result = (service as any).extractBrowser(
+                'Mozilla/5.0 Firefox/89.0',
+            );
             expect(result).toBe('Firefox');
         });
 
         it('should detect Safari', () => {
-            const result = (service as any).extractBrowser('Mozilla/5.0 Safari/605');
+            const result = (service as any).extractBrowser(
+                'Mozilla/5.0 Safari/605',
+            );
             expect(result).toBe('Safari');
         });
 
         it('should detect Edge', () => {
-            const result = (service as any).extractBrowser('Mozilla/5.0 Edge/91.0');
+            const result = (service as any).extractBrowser(
+                'Mozilla/5.0 Edge/91.0',
+            );
             expect(result).toBe('Edge');
         });
 
         it('should detect Opera', () => {
-            const result = (service as any).extractBrowser('Mozilla/5.0 OPR/77');
+            const result = (service as any).extractBrowser(
+                'Mozilla/5.0 OPR/77',
+            );
             expect(result).toBe('Opera');
         });
 
@@ -439,29 +510,39 @@ describe('AuthSessionsService', () => {
 
     describe('extractOS', () => {
         it('should detect Windows', () => {
-            const result = (service as any).extractOS('Mozilla/5.0 (Windows NT 10.0)');
+            const result = (service as any).extractOS(
+                'Mozilla/5.0 (Windows NT 10.0)',
+            );
             expect(result).toBe('Windows');
         });
 
         it('should detect MacOS', () => {
-            const result = (service as any).extractOS('Mozilla/5.0 (Macintosh; Intel Mac OS X)');
+            const result = (service as any).extractOS(
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X)',
+            );
             expect(result).toBe('MacOS');
         });
 
         it('should detect Linux', () => {
-            const result = (service as any).extractOS('Mozilla/5.0 (X11; Linux x86_64)');
+            const result = (service as any).extractOS(
+                'Mozilla/5.0 (X11; Linux x86_64)',
+            );
             expect(result).toBe('Linux');
         });
 
         it('should detect Android (returns Linux due to implementation order)', () => {
             // Note: The implementation checks Linux before Android,
             // so Android user agents containing "Linux" return "Linux"
-            const result = (service as any).extractOS('Mozilla/5.0 (Linux; Android 11)');
+            const result = (service as any).extractOS(
+                'Mozilla/5.0 (Linux; Android 11)',
+            );
             expect(result).toBe('Linux');
         });
 
         it('should detect iOS', () => {
-            const result = (service as any).extractOS('Mozilla/5.0 (iPhone; CPU iPhone OS 14)');
+            const result = (service as any).extractOS(
+                'Mozilla/5.0 (iPhone; CPU iPhone OS 14)',
+            );
             expect(result).toBe('iOS');
         });
 

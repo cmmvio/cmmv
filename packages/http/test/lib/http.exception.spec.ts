@@ -279,10 +279,7 @@ describe('HttpException', () => {
         });
 
         it('should preserve stack trace', () => {
-            const exception = new HttpException(
-                'Test',
-                HttpStatus.BAD_REQUEST,
-            );
+            const exception = new HttpException('Test', HttpStatus.BAD_REQUEST);
 
             expect(exception.stack).toBeDefined();
             // Stack trace format varies by environment, just check it exists and has content

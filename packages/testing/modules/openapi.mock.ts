@@ -70,7 +70,10 @@ export function createMockOpenAPISpec(overrides: any = {}) {
 /**
  * Create a mock path item
  */
-export function createMockPathItem(method: string = 'get', operationId: string = 'mockOperation') {
+export function createMockPathItem(
+    method: string = 'get',
+    operationId: string = 'mockOperation',
+) {
     return {
         [method]: {
             operationId,

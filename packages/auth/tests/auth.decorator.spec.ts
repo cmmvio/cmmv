@@ -55,12 +55,17 @@ describe('Auth Decorator', () => {
         mockRequest = {
             cookies: { token: 'sessionId123', refreshToken: 'refreshToken123' },
             session: {
-                get: vi.fn().mockResolvedValue({ user: { token: 'validToken' } }),
+                get: vi
+                    .fn()
+                    .mockResolvedValue({ user: { token: 'validToken' } }),
             },
             method: 'GET',
             path: '/test',
             req: {
-                headers: { authorization: 'Bearer validToken', 'user-agent': 'test-agent' },
+                headers: {
+                    authorization: 'Bearer validToken',
+                    'user-agent': 'test-agent',
+                },
                 socket: { remoteAddress: '127.0.0.1' },
             },
         };
@@ -73,16 +78,18 @@ describe('Auth Decorator', () => {
         mockNext = vi.fn();
 
         // Default config mocks
-        vi.mocked(Config.get).mockImplementation((key: string, defaultValue?: any) => {
-            const configs: Record<string, any> = {
-                'server.session.options.sessionCookieName': 'token',
-                'server.session.enabled': true,
-                'auth.refreshCookieName': 'refreshToken',
-                'server.logging': 'all',
-                'auth.jwtSecret': 'test-secret',
-            };
-            return configs[key] ?? defaultValue;
-        });
+        vi.mocked(Config.get).mockImplementation(
+            (key: string, defaultValue?: any) => {
+                const configs: Record<string, any> = {
+                    'server.session.options.sessionCookieName': 'token',
+                    'server.session.enabled': true,
+                    'auth.refreshCookieName': 'refreshToken',
+                    'server.logging': 'all',
+                    'auth.jwtSecret': 'test-secret',
+                };
+                return configs[key] ?? defaultValue;
+            },
+        );
     });
 
     afterEach(() => {
@@ -126,7 +133,10 @@ describe('Auth Decorator', () => {
             const decorator = Auth();
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             expect(metadata).toBeDefined();
             expect(metadata.middleware).toBeDefined();
             expect(metadata.middleware.length).toBeGreaterThan(0);
@@ -148,7 +158,10 @@ describe('Auth Decorator', () => {
             const decorator = Auth();
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             expect(metadata.middleware.length).toBe(2);
         });
     });
@@ -167,7 +180,10 @@ describe('Auth Decorator', () => {
             const decorator = Auth();
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             const middleware = metadata.middleware[0];
 
             await middleware(mockRequest, mockResponse, mockNext);
@@ -190,21 +206,28 @@ describe('Auth Decorator', () => {
                 'user-agent': 'test-agent',
             };
 
-            vi.mocked(jwt.verify).mockImplementation((token, secret, callback: any) => {
-                callback(null, {
-                    id: 'user-123',
-                    username: 'testuser',
-                    roles: ['user'],
-                    root: false,
-                });
-            });
+            vi.mocked(jwt.verify).mockImplementation(
+                (token, secret, callback: any) => {
+                    callback(null, {
+                        id: 'user-123',
+                        username: 'testuser',
+                        roles: ['user'],
+                        root: false,
+                    });
+                },
+            );
 
-            vi.mocked(AuthSessionsService.validateSession).mockResolvedValue(true);
+            vi.mocked(AuthSessionsService.validateSession).mockResolvedValue(
+                true,
+            );
 
             const decorator = Auth();
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             const middleware = metadata.middleware[0];
 
             await middleware(mockRequest, mockResponse, mockNext);
@@ -228,7 +251,10 @@ describe('Auth Decorator', () => {
             const decorator = Auth();
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             const middleware = metadata.middleware[0];
 
             await middleware(mockRequest, mockResponse, mockNext);
@@ -252,7 +278,10 @@ describe('Auth Decorator', () => {
             const decorator = Auth();
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             const middleware = metadata.middleware[0];
 
             await middleware(mockRequest, mockResponse, mockNext);
@@ -275,19 +304,24 @@ describe('Auth Decorator', () => {
                 'user-agent': 'test-agent',
             };
 
-            vi.mocked(jwt.verify).mockImplementation((token, secret, callback: any) => {
-                callback(null, {
-                    id: 'admin-123',
-                    username: 'admin',
-                    roles: [],
-                    root: true,
-                });
-            });
+            vi.mocked(jwt.verify).mockImplementation(
+                (token, secret, callback: any) => {
+                    callback(null, {
+                        id: 'admin-123',
+                        username: 'admin',
+                        roles: [],
+                        root: true,
+                    });
+                },
+            );
 
             const decorator = Auth(['admin']);
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             const middleware = metadata.middleware[0];
 
             await middleware(mockRequest, mockResponse, mockNext);
@@ -308,19 +342,24 @@ describe('Auth Decorator', () => {
                 'user-agent': 'test-agent',
             };
 
-            vi.mocked(jwt.verify).mockImplementation((token, secret, callback: any) => {
-                callback(null, {
-                    id: 'user-123',
-                    username: 'testuser',
-                    roles: ['user'],
-                    root: false,
-                });
-            });
+            vi.mocked(jwt.verify).mockImplementation(
+                (token, secret, callback: any) => {
+                    callback(null, {
+                        id: 'user-123',
+                        username: 'testuser',
+                        roles: ['user'],
+                        root: false,
+                    });
+                },
+            );
 
             const decorator = Auth({ rootOnly: true });
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             const middleware = metadata.middleware[0];
 
             await middleware(mockRequest, mockResponse, mockNext);
@@ -338,29 +377,40 @@ describe('Auth Decorator', () => {
 
             mockRequest.cookies = { token: 'sessionId123' };
             mockRequest.session = {
-                get: vi.fn().mockResolvedValue({ user: { token: 'sessionToken' } }),
+                get: vi
+                    .fn()
+                    .mockResolvedValue({ user: { token: 'sessionToken' } }),
             };
 
-            vi.mocked(jwt.verify).mockImplementation((token, secret, callback: any) => {
-                callback(null, {
-                    id: 'user-123',
-                    username: 'testuser',
-                    roles: ['user'],
-                    root: false,
-                });
-            });
+            vi.mocked(jwt.verify).mockImplementation(
+                (token, secret, callback: any) => {
+                    callback(null, {
+                        id: 'user-123',
+                        username: 'testuser',
+                        roles: ['user'],
+                        root: false,
+                    });
+                },
+            );
 
-            vi.mocked(AuthSessionsService.validateSession).mockResolvedValue(true);
+            vi.mocked(AuthSessionsService.validateSession).mockResolvedValue(
+                true,
+            );
 
             const decorator = Auth();
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             const middleware = metadata.middleware[0];
 
             await middleware(mockRequest, mockResponse, mockNext);
 
-            expect(mockRequest.session.get).toHaveBeenCalledWith('sessionId123');
+            expect(mockRequest.session.get).toHaveBeenCalledWith(
+                'sessionId123',
+            );
         });
     });
 
@@ -378,16 +428,23 @@ describe('Auth Decorator', () => {
                 'user-agent': 'test-agent',
             };
 
-            vi.mocked(jwt.verify).mockImplementation((token, secret, callback: any) => {
-                callback(new Error('Invalid token'), null);
-            });
+            vi.mocked(jwt.verify).mockImplementation(
+                (token, secret, callback: any) => {
+                    callback(new Error('Invalid token'), null);
+                },
+            );
 
-            vi.mocked(AuthSessionsService.validateRefreshToken).mockResolvedValue(false);
+            vi.mocked(
+                AuthSessionsService.validateRefreshToken,
+            ).mockResolvedValue(false);
 
             const decorator = Auth();
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             const middleware = metadata.middleware[0];
 
             await middleware(mockRequest, mockResponse, mockNext);
@@ -408,21 +465,30 @@ describe('Auth Decorator', () => {
                 'user-agent': 'test-agent',
             };
 
-            vi.mocked(jwt.verify).mockImplementation((token, secret, callback: any) => {
-                callback(new Error('Token expired'), null);
-            });
+            vi.mocked(jwt.verify).mockImplementation(
+                (token, secret, callback: any) => {
+                    callback(new Error('Token expired'), null);
+                },
+            );
 
-            vi.mocked(AuthSessionsService.validateRefreshToken).mockResolvedValue(true);
+            vi.mocked(
+                AuthSessionsService.validateRefreshToken,
+            ).mockResolvedValue(true);
 
             const decorator = Auth();
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             const middleware = metadata.middleware[0];
 
             await middleware(mockRequest, mockResponse, mockNext);
 
-            expect(AuthSessionsService.validateRefreshToken).toHaveBeenCalledWith('validRefreshToken');
+            expect(
+                AuthSessionsService.validateRefreshToken,
+            ).toHaveBeenCalledWith('validRefreshToken');
         });
     });
 
@@ -440,7 +506,10 @@ describe('Auth Decorator', () => {
             const decorator = Auth();
             decorator(target, 'testMethod', descriptor);
 
-            const metadata = Reflect.getMetadata('route_metadata', descriptor.value);
+            const metadata = Reflect.getMetadata(
+                'route_metadata',
+                descriptor.value,
+            );
             const middleware = metadata.middleware[0];
 
             await middleware(mockRequest, mockResponse, mockNext);

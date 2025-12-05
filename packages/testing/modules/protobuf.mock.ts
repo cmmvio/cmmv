@@ -61,7 +61,10 @@ export const MockProtobufRegistry = {
 /**
  * Create a mock proto message
  */
-export function createMockProtoMessage(name: string, fields: Record<string, string> = {}) {
+export function createMockProtoMessage(
+    name: string,
+    fields: Record<string, string> = {},
+) {
     return {
         name,
         fields: Object.entries(fields).map(([key, type], index) => ({

@@ -14,7 +14,10 @@ vi.mock('@cmmv/core', () => ({
 // Mock @cmmv/http
 vi.mock('@cmmv/http', () => ({
     HttpException: class MockHttpException extends Error {
-        constructor(message: string, public status: number) {
+        constructor(
+            message: string,
+            public status: number,
+        ) {
             super(message);
             this.name = 'HttpException';
         }
@@ -59,7 +62,10 @@ describe('AuthGroupsService', () => {
 
     describe('getAllGroups', () => {
         it('should return all groups', async () => {
-            const mockGroups = { data: [{ id: '1', name: 'Admin', roles: ['admin:*'] }], count: 1 };
+            const mockGroups = {
+                data: [{ id: '1', name: 'Admin', roles: ['admin:*'] }],
+                count: 1,
+            };
             vi.mocked(Repository.findAll).mockResolvedValue(mockGroups);
             vi.mocked(Application.getModel).mockReturnValue({
                 fromEntities: vi.fn((data) => data),
@@ -72,7 +78,10 @@ describe('AuthGroupsService', () => {
         });
 
         it('should return empty array when no groups', async () => {
-            vi.mocked(Repository.findAll).mockResolvedValue({ data: [], count: 0 });
+            vi.mocked(Repository.findAll).mockResolvedValue({
+                data: [],
+                count: 0,
+            });
 
             const result = await service.getAllGroups();
 
@@ -82,12 +91,19 @@ describe('AuthGroupsService', () => {
 
     describe('getGroupsIn', () => {
         it('should throw error when inArr is undefined', async () => {
-            await expect(service.getGroupsIn(undefined as any))
-                .rejects.toThrow('Ids must be defined in the URL query');
+            await expect(service.getGroupsIn(undefined as any)).rejects.toThrow(
+                'Ids must be defined in the URL query',
+            );
         });
 
         it('should get groups by array of ids', async () => {
-            const mockGroups = { data: [{ id: '1', name: 'Admin' }, { id: '2', name: 'User' }], count: 2 };
+            const mockGroups = {
+                data: [
+                    { id: '1', name: 'Admin' },
+                    { id: '2', name: 'User' },
+                ],
+                count: 2,
+            };
             vi.mocked(Repository.findAll).mockResolvedValue(mockGroups);
 
             const result = await service.getGroupsIn(['1', '2']);
@@ -110,15 +126,19 @@ describe('AuthGroupsService', () => {
         it('should throw error if group name already exists', async () => {
             vi.mocked(Repository.exists).mockResolvedValue(true);
 
-            await expect(service.createGroup({ name: 'Admin', roles: ['admin:*'] }))
-                .rejects.toThrow('Group name already exists');
+            await expect(
+                service.createGroup({ name: 'Admin', roles: ['admin:*'] }),
+            ).rejects.toThrow('Group name already exists');
         });
 
         it('should create group successfully', async () => {
             vi.mocked(Repository.exists).mockResolvedValue(false);
             vi.mocked(Repository.insert).mockResolvedValue({ success: true });
 
-            const result = await service.createGroup({ name: 'Admin', roles: ['admin:*'] });
+            const result = await service.createGroup({
+                name: 'Admin',
+                roles: ['admin:*'],
+            });
 
             expect(result).toEqual({ message: 'Group created successfully' });
             expect(Repository.insert).toHaveBeenCalled();
@@ -128,7 +148,10 @@ describe('AuthGroupsService', () => {
             vi.mocked(Repository.exists).mockResolvedValue(false);
             vi.mocked(Repository.insert).mockResolvedValue({ success: true });
 
-            const result = await service.createGroup({ name: 'User', roles: 'user:read' as any });
+            const result = await service.createGroup({
+                name: 'User',
+                roles: 'user:read' as any,
+            });
 
             expect(result).toEqual({ message: 'Group created successfully' });
         });
@@ -137,8 +160,9 @@ describe('AuthGroupsService', () => {
             vi.mocked(Repository.exists).mockResolvedValue(false);
             vi.mocked(Repository.insert).mockResolvedValue({ success: false });
 
-            await expect(service.createGroup({ name: 'Admin', roles: ['admin:*'] }))
-                .rejects.toThrow('Failed to create group');
+            await expect(
+                service.createGroup({ name: 'Admin', roles: ['admin:*'] }),
+            ).rejects.toThrow('Failed to create group');
         });
     });
 
@@ -146,26 +170,39 @@ describe('AuthGroupsService', () => {
         it('should throw error if group not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.updateGroup('group-123', { name: 'Updated' }))
-                .rejects.toThrow('Group not found');
+            await expect(
+                service.updateGroup('group-123', { name: 'Updated' }),
+            ).rejects.toThrow('Group not found');
         });
 
         it('should update group successfully', async () => {
-            vi.mocked(Repository.findBy).mockResolvedValue({ id: 'group-123', name: 'Admin', roles: [] });
+            vi.mocked(Repository.findBy).mockResolvedValue({
+                id: 'group-123',
+                name: 'Admin',
+                roles: [],
+            });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-            const result = await service.updateGroup('group-123', { name: 'UpdatedAdmin', roles: ['admin:*'] });
+            const result = await service.updateGroup('group-123', {
+                name: 'UpdatedAdmin',
+                roles: ['admin:*'],
+            });
 
             expect(result).toEqual({ message: 'Group updated successfully' });
             expect(Repository.updateById).toHaveBeenCalled();
         });
 
         it('should throw error on failed update', async () => {
-            vi.mocked(Repository.findBy).mockResolvedValue({ id: 'group-123', name: 'Admin', roles: [] });
+            vi.mocked(Repository.findBy).mockResolvedValue({
+                id: 'group-123',
+                name: 'Admin',
+                roles: [],
+            });
             vi.mocked(Repository.updateById).mockResolvedValue(false);
 
-            await expect(service.updateGroup('group-123', { name: 'Updated' }))
-                .rejects.toThrow('Failed to update group');
+            await expect(
+                service.updateGroup('group-123', { name: 'Updated' }),
+            ).rejects.toThrow('Failed to update group');
         });
     });
 
@@ -173,26 +210,37 @@ describe('AuthGroupsService', () => {
         it('should throw error if group not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.deleteGroup('group-123'))
-                .rejects.toThrow('Group not found');
+            await expect(service.deleteGroup('group-123')).rejects.toThrow(
+                'Group not found',
+            );
         });
 
         it('should delete group successfully', async () => {
-            vi.mocked(Repository.findBy).mockResolvedValue({ id: 'group-123', name: 'Admin' });
+            vi.mocked(Repository.findBy).mockResolvedValue({
+                id: 'group-123',
+                name: 'Admin',
+            });
             vi.mocked(Repository.delete).mockResolvedValue(true);
 
             const result = await service.deleteGroup('group-123');
 
             expect(result).toEqual({ message: 'Group deleted successfully' });
-            expect(Repository.delete).toHaveBeenCalledWith('GroupsEntity', 'group-123');
+            expect(Repository.delete).toHaveBeenCalledWith(
+                'GroupsEntity',
+                'group-123',
+            );
         });
 
         it('should throw error on failed delete', async () => {
-            vi.mocked(Repository.findBy).mockResolvedValue({ id: 'group-123', name: 'Admin' });
+            vi.mocked(Repository.findBy).mockResolvedValue({
+                id: 'group-123',
+                name: 'Admin',
+            });
             vi.mocked(Repository.delete).mockResolvedValue(false);
 
-            await expect(service.deleteGroup('group-123'))
-                .rejects.toThrow('Failed to delete group');
+            await expect(service.deleteGroup('group-123')).rejects.toThrow(
+                'Failed to delete group',
+            );
         });
     });
 
@@ -200,8 +248,9 @@ describe('AuthGroupsService', () => {
         it('should throw error if group not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.assignRolesToGroup('group-123', ['admin:*']))
-                .rejects.toThrow('Group not found');
+            await expect(
+                service.assignRolesToGroup('group-123', ['admin:*']),
+            ).rejects.toThrow('Group not found');
         });
 
         it('should assign roles successfully', async () => {
@@ -212,9 +261,13 @@ describe('AuthGroupsService', () => {
             });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-            const result = await service.assignRolesToGroup('group-123', ['admin:*']);
+            const result = await service.assignRolesToGroup('group-123', [
+                'admin:*',
+            ]);
 
-            expect(result).toEqual({ message: 'Roles assigned to group successfully' });
+            expect(result).toEqual({
+                message: 'Roles assigned to group successfully',
+            });
         });
 
         it('should merge roles without duplicates', async () => {
@@ -225,12 +278,15 @@ describe('AuthGroupsService', () => {
             });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-            await service.assignRolesToGroup('group-123', ['user:read', 'admin:*']);
+            await service.assignRolesToGroup('group-123', [
+                'user:read',
+                'admin:*',
+            ]);
 
             expect(Repository.updateById).toHaveBeenCalledWith(
                 'GroupsEntity',
                 'group-123',
-                { roles: expect.arrayContaining(['user:read', 'admin:*']) }
+                { roles: expect.arrayContaining(['user:read', 'admin:*']) },
             );
         });
 
@@ -242,9 +298,14 @@ describe('AuthGroupsService', () => {
             });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-            const result = await service.assignRolesToGroup('group-123', 'admin:*');
+            const result = await service.assignRolesToGroup(
+                'group-123',
+                'admin:*',
+            );
 
-            expect(result).toEqual({ message: 'Roles assigned to group successfully' });
+            expect(result).toEqual({
+                message: 'Roles assigned to group successfully',
+            });
         });
 
         it('should throw error on failed update', async () => {
@@ -255,8 +316,9 @@ describe('AuthGroupsService', () => {
             });
             vi.mocked(Repository.updateById).mockResolvedValue(false);
 
-            await expect(service.assignRolesToGroup('group-123', ['admin:*']))
-                .rejects.toThrow('Failed to assign roles to group');
+            await expect(
+                service.assignRolesToGroup('group-123', ['admin:*']),
+            ).rejects.toThrow('Failed to assign roles to group');
         });
     });
 
@@ -264,8 +326,9 @@ describe('AuthGroupsService', () => {
         it('should throw error if group not found', async () => {
             vi.mocked(Repository.findBy).mockResolvedValue(null);
 
-            await expect(service.removeRolesFromGroup('group-123', ['admin:*']))
-                .rejects.toThrow('Group not found');
+            await expect(
+                service.removeRolesFromGroup('group-123', ['admin:*']),
+            ).rejects.toThrow('Group not found');
         });
 
         it('should remove roles successfully', async () => {
@@ -276,13 +339,17 @@ describe('AuthGroupsService', () => {
             });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-            const result = await service.removeRolesFromGroup('group-123', ['admin:*']);
+            const result = await service.removeRolesFromGroup('group-123', [
+                'admin:*',
+            ]);
 
-            expect(result).toEqual({ message: 'Roles removed from group successfully' });
+            expect(result).toEqual({
+                message: 'Roles removed from group successfully',
+            });
             expect(Repository.updateById).toHaveBeenCalledWith(
                 'GroupsEntity',
                 'group-123',
-                { roles: ['user:read'] }
+                { roles: ['user:read'] },
             );
         });
 
@@ -294,9 +361,14 @@ describe('AuthGroupsService', () => {
             });
             vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-            const result = await service.removeRolesFromGroup('group-123', 'admin:*');
+            const result = await service.removeRolesFromGroup(
+                'group-123',
+                'admin:*',
+            );
 
-            expect(result).toEqual({ message: 'Roles removed from group successfully' });
+            expect(result).toEqual({
+                message: 'Roles removed from group successfully',
+            });
         });
 
         it('should throw error on failed update', async () => {
@@ -307,15 +379,19 @@ describe('AuthGroupsService', () => {
             });
             vi.mocked(Repository.updateById).mockResolvedValue(false);
 
-            await expect(service.removeRolesFromGroup('group-123', ['admin:*']))
-                .rejects.toThrow('Failed to remove roles from group');
+            await expect(
+                service.removeRolesFromGroup('group-123', ['admin:*']),
+            ).rejects.toThrow('Failed to remove roles from group');
         });
     });
 
     describe('GraphQL Handlers', () => {
         describe('handlerGroupGetAll', () => {
             it('should return all groups', async () => {
-                const mockGroups = { data: [{ id: '1', name: 'Admin' }], count: 1 };
+                const mockGroups = {
+                    data: [{ id: '1', name: 'Admin' }],
+                    count: 1,
+                };
                 vi.mocked(Repository.findAll).mockResolvedValue(mockGroups);
 
                 const result = await service.handlerGroupGetAll({}, {});
@@ -327,10 +403,16 @@ describe('AuthGroupsService', () => {
 
         describe('handlerGroupGetIn', () => {
             it('should return groups by ids', async () => {
-                const mockGroups = { data: [{ id: '1', name: 'Admin' }], count: 1 };
+                const mockGroups = {
+                    data: [{ id: '1', name: 'Admin' }],
+                    count: 1,
+                };
                 vi.mocked(Repository.findAll).mockResolvedValue(mockGroups);
 
-                const result = await service.handlerGroupGetIn({ ids: ['1'] }, {});
+                const result = await service.handlerGroupGetIn(
+                    { ids: ['1'] },
+                    {},
+                );
 
                 expect(result.success).toBe(true);
                 expect(result.data).toBeDefined();
@@ -340,9 +422,14 @@ describe('AuthGroupsService', () => {
         describe('handlerCreateGroup', () => {
             it('should create group and return success', async () => {
                 vi.mocked(Repository.exists).mockResolvedValue(false);
-                vi.mocked(Repository.insert).mockResolvedValue({ success: true });
+                vi.mocked(Repository.insert).mockResolvedValue({
+                    success: true,
+                });
 
-                const result = await service.handlerCreateGroup({ name: 'Admin', roles: [] }, {});
+                const result = await service.handlerCreateGroup(
+                    { name: 'Admin', roles: [] },
+                    {},
+                );
 
                 expect(result.success).toBe(true);
                 expect(result.message).toBe('Group created successfully');
@@ -351,10 +438,17 @@ describe('AuthGroupsService', () => {
 
         describe('handlerUpdateGroup', () => {
             it('should update group and return success', async () => {
-                vi.mocked(Repository.findBy).mockResolvedValue({ id: 'group-123', name: 'Old', roles: [] });
+                vi.mocked(Repository.findBy).mockResolvedValue({
+                    id: 'group-123',
+                    name: 'Old',
+                    roles: [],
+                });
                 vi.mocked(Repository.updateById).mockResolvedValue(true);
 
-                const result = await service.handlerUpdateGroup({ groupId: 'group-123', name: 'New' }, {});
+                const result = await service.handlerUpdateGroup(
+                    { groupId: 'group-123', name: 'New' },
+                    {},
+                );
 
                 expect(result.success).toBe(true);
                 expect(result.message).toBe('Group updated successfully');
@@ -363,10 +457,16 @@ describe('AuthGroupsService', () => {
 
         describe('handlerDeleteGroup', () => {
             it('should delete group and return success', async () => {
-                vi.mocked(Repository.findBy).mockResolvedValue({ id: 'group-123', name: 'Admin' });
+                vi.mocked(Repository.findBy).mockResolvedValue({
+                    id: 'group-123',
+                    name: 'Admin',
+                });
                 vi.mocked(Repository.delete).mockResolvedValue(true);
 
-                const result = await service.handlerDeleteGroup({ groupId: 'group-123' }, {});
+                const result = await service.handlerDeleteGroup(
+                    { groupId: 'group-123' },
+                    {},
+                );
 
                 expect(result.success).toBe(true);
                 expect(result.message).toBe('Group deleted successfully');
@@ -384,11 +484,13 @@ describe('AuthGroupsService', () => {
 
                 const result = await service.handlerAssignRolesToGroup(
                     { groupId: 'group-123', roles: ['admin:*'] },
-                    {}
+                    {},
                 );
 
                 expect(result.success).toBe(true);
-                expect(result.message).toBe('Roles assigned to group successfully');
+                expect(result.message).toBe(
+                    'Roles assigned to group successfully',
+                );
             });
         });
 
@@ -403,11 +505,13 @@ describe('AuthGroupsService', () => {
 
                 const result = await service.handlerRemoveRolesFromGroup(
                     { groupId: 'group-123', roles: ['admin:*'] },
-                    {}
+                    {},
                 );
 
                 expect(result.success).toBe(true);
-                expect(result.message).toBe('Roles removed from group successfully');
+                expect(result.message).toBe(
+                    'Roles removed from group successfully',
+                );
             });
         });
     });

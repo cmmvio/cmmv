@@ -40,4 +40,4 @@ Then a `start:prod` script MUST be available that runs `NODE_ENV=production node
 ## REMOVED Requirements
 
 ### Requirement: Compiled JavaScript Loading in Production
-The previous requirement to load pre-compiled .js files from dist/ directory in production is removed in favor of runtime TypeScript transpilation with SWC.
+The system SHALL no longer require pre-compiled .js files from dist/ directory in production. This requirement is removed in favor of runtime TypeScript transpilation with SWC, which provides better consistency and eliminates the need for separate build steps for generated files.
