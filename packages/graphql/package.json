@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/graphql",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "GraphQL module for CMMV",
     "keywords": [
         "cmmv",
@@ -23,8 +23,8 @@
     "homepage": "https://cmmv.io",
     "dependencies": {
         "@apollo/server": "^4.11.3",
-        "@cmmv/auth": "1.0.0",
-        "@cmmv/core": "1.0.0",
+        "@cmmv/auth": "1.0.1",
+        "@cmmv/core": "1.0.1",
         "@cmmv/server": "^0.9.1",
         "graphql": "^16.10.0",
         "graphql-scalars": "^1.24.1",
