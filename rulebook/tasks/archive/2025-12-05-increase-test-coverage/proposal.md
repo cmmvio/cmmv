@@ -1,14 +1,12 @@
 # Proposal: Increase Test Coverage
 
-## Problem Statement
+## Why
 
-The current test coverage across CMMV packages is approximately 23.36% overall, which is significantly below the target thresholds:
-- Lines: 80% (current: 23.36%)
-- Functions: 80% (current: 40.1%)
-- Branches: 70% (current: 68.61%)
-- Statements: 80% (current: 23.36%)
+The current test coverage across CMMV packages is approximately 23.36% overall, which is significantly below the target thresholds (80% lines, 80% functions, 70% branches). Low test coverage creates risks when using AI-assisted development, as changes may introduce regressions that aren't caught by automated tests.
 
-Low test coverage creates risks when using AI-assisted development, as changes may introduce regressions that aren't caught by automated tests.
+## What Changes
+
+This task will increase test coverage across all CMMV packages by creating comprehensive test suites for all public APIs. The approach will be priority-based, focusing on core packages first (@cmmv/core, @cmmv/http, @cmmv/repository), then expanding to other packages. Unit tests will be created for all exported functions and classes, and integration tests will be added for critical flows like authentication, HTTP routing, and repository operations. The existing @cmmv/testing package will be leveraged for consistent mocking patterns.
 
 ## Current Coverage by Package
 
