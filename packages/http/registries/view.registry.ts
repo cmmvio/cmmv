@@ -11,24 +11,32 @@ export class ViewRegistry extends Singleton {
      * Load the styles
      */
     static async load() {
-        const directoryPackages = path.resolve(
+        const directoryPackages =
             process.env.NODE_ENV === 'prod'
                 ? './node_modules/@cmmv/**/*.style.json'
-                : './packages/**/*.style.json',
-        );
+                : './packages/**/*.style.json';
 
-        const directory = path.resolve(
+        const directory =
             process.env.NODE_ENV === 'prod'
                 ? './dist/**/*.style.json'
-                : './src/**/*.style.json',
+                : './src/**/*.style.json';
+
+        const patterns = [
+            directoryPackages,
+            directory,
+            './public/**/*.style.json',
+        ].filter(
+            (pattern) =>
+                pattern && typeof pattern === 'string' && pattern.length > 0,
         );
 
-        const files = await fg(
-            [directoryPackages, directory, './public/**/*.style.json'],
-            {
-                ignore: ['node_modules/**'],
-            },
-        );
+        if (patterns.length === 0) {
+            return;
+        }
+
+        const files = await fg(patterns, {
+            ignore: ['node_modules/**'],
+        });
 
         for await (const filename of files) {
             if (!filename.includes('node_modules')) {
