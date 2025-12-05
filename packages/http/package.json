@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/http",
-    "version": "0.17.0",
+    "version": "1.0.0",
     "description": "HTTP module implementing controllers, using CMMV standard adapter",
     "keywords": [
         "cmmv",
@@ -27,10 +27,10 @@
         "@cmmv/cors": "^0.13.0",
         "@cmmv/etag": "^0.13.0",
         "@cmmv/helmet": "^0.13.0",
+        "@cmmv/multer": "^0.13.0",
+        "@cmmv/proxy": "^0.13.0",
         "@cmmv/server": "^0.13.0",
         "@cmmv/server-static": "^0.13.0",
-        "@cmmv/proxy": "^0.13.0",
-        "@cmmv/multer": "^0.13.0",
         "fast-glob": "^3.3.2",
         "fast-json-stringify": "^6.0.1",
         "html-minifier-terser": "^7.2.0",

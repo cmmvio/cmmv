@@ -1,6 +1,6 @@
 {
     "name": "@cmmv/throttler",
-    "version": "0.17.0",
+    "version": "1.0.0",
     "description": "CMMV rate-limit module for HTTP, RPC and GraphQL",
     "keywords": [
         "cmmv",
