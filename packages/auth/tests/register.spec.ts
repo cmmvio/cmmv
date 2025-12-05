@@ -4,8 +4,38 @@ import { Repository } from '@cmmv/repository';
 import { Application } from '@cmmv/core';
 import { HttpException, HttpStatus } from '@cmmv/http';
 
-vi.mock('@cmmv/repository');
-vi.mock('@cmmv/core');
+vi.mock('@cmmv/repository', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@cmmv/repository')>();
+    return {
+        ...actual,
+        Repository: {
+            ...actual.Repository,
+            findBy: vi.fn(),
+            findOne: vi.fn().mockResolvedValue(null),
+            insert: vi.fn(),
+            getEntity: vi.fn().mockReturnValue({}),
+        },
+    };
+});
+vi.mock('@cmmv/core', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@cmmv/core')>();
+    return {
+        ...actual,
+        Application: {
+            ...actual.Application,
+            getModel: vi.fn(),
+        },
+        Config: {
+            ...actual.Config,
+            get: vi.fn().mockImplementation((key: string, defaultValue?: any) => {
+                const config: Record<string, any> = {
+                    'env': 'test',
+                };
+                return config[key] ?? defaultValue;
+            }),
+        },
+    };
+});
 
 describe('AuthAutorizationService - User Registration', () => {
     let authService: AuthAutorizationService;

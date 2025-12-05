@@ -4,9 +4,17 @@ import { cwd } from 'node:process';
 import * as fg from 'fast-glob';
 import * as Terser from 'terser';
 
-import { IHTTPSettings, ConfigSchema, IContract } from './interfaces';
+import {
+    IHTTPSettings,
+    ConfigSchema,
+    IContract,
+    ApplicationScopeType,
+    IApplicationScopeConfig,
+} from './interfaces';
 
 import { AbstractHttpAdapter, AbstractWSAdapter } from './abstracts';
+import { AppRegistry } from './registries/app.registry';
+import { ScopeContext } from './utils/scope.context';
 
 import {
     ITranspile,
@@ -64,7 +72,7 @@ process.on('uncaughtException', (err) => {
 });
 
 export class Application {
-    protected logger: Logger = new Logger('Application');
+    protected logger: Logger;
     public static instance: Application;
 
     public static appModule = {
@@ -100,14 +108,105 @@ export class Application {
     protected host: string;
     protected port: number;
 
-    constructor(settings: IApplicationSettings, compile: boolean = false) {
-        this.logger.log('Initialize application');
+    // Scope-related properties
+    protected _scopeId: string;
+    protected _scope: ApplicationScopeType;
+    protected _isDisposed: boolean = false;
+
+    constructor(
+        settings: IApplicationSettings,
+        compile: boolean = false,
+        scopeConfig?: IApplicationScopeConfig,
+    ) {
+        // Set scope configuration
+        this._scope = scopeConfig?.scope || 'singleton';
+        this._scopeId = scopeConfig?.scopeId || AppRegistry.getSingletonId();
+
+        // Initialize logger with scope context
+        this.logger = new Logger('Application', this._scopeId);
+        this.logger.log(
+            `Initialize application (scope: ${this._scope}, id: ${this._scopeId})`,
+        );
 
         this.settings = settings;
         this.compile = compile;
         this.preInitialize();
 
-        Application.instance = this;
+        // For singleton scope, also set static instance for backward compatibility
+        if (this._scope === 'singleton') {
+            Application.instance = this;
+            AppRegistry.registerSingleton(this);
+        }
+    }
+
+    /**
+     * Get the scope ID of this application instance
+     */
+    public get scopeId(): string {
+        return this._scopeId;
+    }
+
+    /**
+     * Get the scope type of this application instance
+     */
+    public get scope(): ApplicationScopeType {
+        return this._scope;
+    }
+
+    /**
+     * Check if this application instance is disposed
+     */
+    public get isDisposed(): boolean {
+        return this._isDisposed;
+    }
+
+    /**
+     * Get the current Application instance based on scope context.
+     * Falls back to singleton for backward compatibility.
+     * @returns The current Application instance
+     */
+    public static current(): Application {
+        const scopeId = ScopeContext.getCurrentScopeId();
+
+        if (scopeId) {
+            const app = AppRegistry.get(scopeId);
+            if (app) return app;
+        }
+
+        // Fallback to singleton for backward compatibility
+        return Application.instance || AppRegistry.getSingleton();
+    }
+
+    /**
+     * Dispose this application instance and clean up resources
+     */
+    public async dispose(): Promise<void> {
+        if (this._isDisposed) return;
+
+        this.logger.log(
+            `Disposing application (scope: ${this._scope}, id: ${this._scopeId})`,
+        );
+
+        try {
+            if (this.httpAdapter) {
+                this.httpAdapter.close();
+            }
+
+            if (this.wsAdapter) {
+                this.wsAdapter.close();
+            }
+
+            // Clear providers
+            this.providersMap.clear();
+
+            // Execute cleanup hooks
+            await Hooks.execute(HooksType.onDispose);
+
+            this._isDisposed = true;
+        } catch (error) {
+            this.logger.error(`Error disposing application: ${error.message}`);
+            throw error;
+        }
     }
 
     /**

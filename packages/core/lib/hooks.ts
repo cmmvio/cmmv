@@ -10,6 +10,7 @@ export enum HooksType {
     'onHTTPServerInit',
     'Log',
     'onSettingChange',
+    'onDispose',
 }
 
 export class Hooks extends Singleton {

@@ -50,11 +50,11 @@ describe('SchedulingManager', () => {
         schedulingManager = new SchedulingManager('* * * * * *', mockOnTick);
         const cronJob = (schedulingManager as any).cronJob as CronJob;
 
-        expect(cronJob.running).toBe(false);
+        expect(cronJob.isActive).toBe(false);
 
         schedulingManager.start();
 
-        expect(cronJob.running).toBe(true);
+        expect(cronJob.isActive).toBe(true);
     });
 
     it('should stop the cron job', () => {
@@ -63,7 +63,7 @@ describe('SchedulingManager', () => {
         schedulingManager.stop();
 
         const cronJob = (schedulingManager as any).cronJob as CronJob;
-        expect(cronJob.running).toBe(false);
+        expect(cronJob.isActive).toBe(false);
     });
 
     it('should restart the cron job', () => {

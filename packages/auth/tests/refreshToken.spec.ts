@@ -6,8 +6,36 @@ import { Config } from '@cmmv/core';
 import { HttpException } from '@cmmv/http';
 import * as jwt from 'jsonwebtoken';
 
-vi.mock('@cmmv/repository');
-vi.mock('@cmmv/core');
+vi.mock('@cmmv/repository', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@cmmv/repository')>();
+    return {
+        ...actual,
+        Repository: {
+            ...actual.Repository,
+            findBy: vi.fn(),
+            getEntity: vi.fn().mockReturnValue({}),
+        },
+    };
+});
+vi.mock('@cmmv/core', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@cmmv/core')>();
+    return {
+        ...actual,
+        Config: {
+            ...actual.Config,
+            get: vi.fn().mockImplementation((key: string, defaultValue?: any) => {
+                const config: Record<string, any> = {
+                    'env': 'test',
+                    'auth.jwtSecret': 'test-secret',
+                    'auth.jwtSecretRefresh': 'test-refresh-secret',
+                    'auth.refreshCookieName': 'refreshToken',
+                    'repository.type': 'mongodb',
+                };
+                return config[key] ?? defaultValue;
+            }),
+        },
+    };
+});
 
 vi.mock('jsonwebtoken', () => ({
     sign: vi.fn().mockReturnValue('mockedNewAccessToken'),

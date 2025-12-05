@@ -6,8 +6,35 @@ import { HttpException, HttpStatus } from '@cmmv/http';
 import * as crypto from 'node:crypto';
 import * as jwt from 'jsonwebtoken';
 
-vi.mock('@cmmv/repository');
-vi.mock('@cmmv/core');
+vi.mock('@cmmv/repository', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@cmmv/repository')>();
+    return {
+        ...actual,
+        Repository: {
+            ...actual.Repository,
+            findBy: vi.fn(),
+            getEntity: vi.fn().mockReturnValue({}),
+        },
+    };
+});
+vi.mock('@cmmv/core', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('@cmmv/core')>();
+    return {
+        ...actual,
+        Config: {
+            ...actual.Config,
+            get: vi.fn().mockImplementation((key: string, defaultValue?: any) => {
+                const config: Record<string, any> = {
+                    'env': 'test',
+                    'auth.recaptcha.required': false,
+                    'auth.requireEmailValidation': false,
+                    'auth.jwtSecret': 'test-secret',
+                };
+                return config[key] ?? defaultValue;
+            }),
+        },
+    };
+});
 vi.mock('jsonwebtoken', () => ({
     sign: vi.fn().mockReturnValue('mockedAccessToken'),
     verify: vi.fn().mockReturnValue({ id: '123', username: 'testUser' }),

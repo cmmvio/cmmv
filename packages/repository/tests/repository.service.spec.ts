@@ -657,6 +657,377 @@ describe('Repository', () => {
             expect(result).toEqual({ tables: ['collection1', 'collection2'] });
         });
     });
+
+    describe('findOne', () => {
+        it('should find one entity by criteria', async () => {
+            const mockEntity = { id: '123', name: 'Test' };
+            vi.spyOn(Repository, 'validateCriteria').mockReturnValue(true);
+            vi.spyOn(Repository, 'findBy').mockResolvedValue(mockEntity);
+
+            const result = await Repository.findOne(class TestEntity {}, {
+                id: '123',
+            } as any);
+
+            expect(result).toEqual(mockEntity);
+        });
+
+        it('should remove t parameter for cdn cache fix', async () => {
+            const mockEntity = { id: '123', name: 'Test' };
+            vi.spyOn(Repository, 'validateCriteria').mockReturnValue(true);
+            vi.spyOn(Repository, 'findBy').mockResolvedValue(mockEntity);
+
+            const criteria = { id: '123', t: '12345' } as any;
+            await Repository.findOne(class TestEntity {}, criteria);
+
+            // findBy should be called without t parameter
+            expect(Repository.findBy).toHaveBeenCalled();
+        });
+    });
+
+    describe('count', () => {
+        it('should count entities by criteria', async () => {
+            const mockRepo = {
+                count: vi.fn().mockResolvedValue(5),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const result = await Repository.count(class TestEntity {}, {
+                status: 'active',
+            } as any);
+
+            expect(result).toBe(5);
+            expect(mockRepo.count).toHaveBeenCalled();
+        });
+
+        it('should remove t parameter for cdn cache fix', async () => {
+            const mockRepo = {
+                count: vi.fn().mockResolvedValue(3),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const criteria = { status: 'active', t: '12345' } as any;
+            await Repository.count(class TestEntity {}, criteria);
+
+            expect(mockRepo.count).toHaveBeenCalledWith({
+                where: { status: 'active' },
+            });
+        });
+    });
+
+    describe('insertIfNotExists', () => {
+        it('should insert entity if it does not exist', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockResolvedValue(null),
+                create: vi.fn().mockReturnValue({ name: 'Test' }),
+                save: vi.fn().mockResolvedValue({ id: '123', name: 'Test' }),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            await Repository.insertIfNotExists(
+                class TestEntity {},
+                { name: 'Test' },
+                'name',
+            );
+
+            expect(mockRepo.findOne).toHaveBeenCalled();
+            expect(mockRepo.create).toHaveBeenCalled();
+            expect(mockRepo.save).toHaveBeenCalled();
+        });
+
+        it('should not insert entity if it already exists', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockResolvedValue({ id: '123', name: 'Test' }),
+                create: vi.fn(),
+                save: vi.fn(),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            await Repository.insertIfNotExists(
+                class TestEntity {},
+                { name: 'Test' },
+                'name',
+            );
+
+            expect(mockRepo.findOne).toHaveBeenCalled();
+            expect(mockRepo.create).not.toHaveBeenCalled();
+            expect(mockRepo.save).not.toHaveBeenCalled();
+        });
+
+        it('should return false on error', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockRejectedValue(new Error('DB error')),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const result = await Repository.insertIfNotExists(
+                class TestEntity {},
+                { name: 'Test' },
+                'name',
+            );
+
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('updateOne', () => {
+        it('should update entity by criteria', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockResolvedValue({ id: '123', name: 'Old' }),
+                save: vi.fn().mockResolvedValue({ id: '123', name: 'New' }),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const result = await Repository.updateOne(
+                class TestEntity {},
+                { id: '123' } as any,
+                { name: 'New' },
+            );
+
+            expect(result).toBe(true);
+            expect(mockRepo.save).toHaveBeenCalled();
+        });
+
+        it('should return false if entity not found', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockResolvedValue(null),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const result = await Repository.updateOne(
+                class TestEntity {},
+                { id: '123' } as any,
+                { name: 'New' },
+            );
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false on error', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockRejectedValue(new Error('DB error')),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const result = await Repository.updateOne(
+                class TestEntity {},
+                { id: '123' } as any,
+                { name: 'New' },
+            );
+
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('updateById', () => {
+        it('should update entity by ID', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockResolvedValue({ id: '123' }),
+                save: vi.fn().mockResolvedValue({ id: '123', name: 'Updated' }),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const result = await Repository.updateById(
+                class TestEntity {},
+                '123',
+                { name: 'Updated' },
+            );
+
+            expect(result).toBe(true);
+        });
+
+        it('should return false if entity not found', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockResolvedValue(null),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const result = await Repository.updateById(
+                class TestEntity {},
+                '123',
+                { name: 'Updated' },
+            );
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false on error', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockRejectedValue(new Error('DB error')),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const result = await Repository.updateById(
+                class TestEntity {},
+                '123',
+                { name: 'Updated' },
+            );
+
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('upsert', () => {
+        it('should update existing entity', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockResolvedValue({ id: '123' }),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+            vi.spyOn(Repository, 'validateCriteria').mockReturnValue(true);
+            vi.spyOn(Repository, 'findOne').mockResolvedValue({ id: '123' });
+            vi.spyOn(Repository, 'update').mockResolvedValue(1);
+
+            const result = await Repository.upsert(
+                class TestEntity {},
+                { id: '123' } as any,
+                { name: 'Updated' },
+            );
+
+            expect(Repository.update).toHaveBeenCalled();
+            expect(result).toBe(1);
+        });
+
+        it('should insert new entity if not exists', async () => {
+            const mockRepo = {
+                findOne: vi.fn().mockResolvedValue(null),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+            vi.spyOn(Repository, 'validateCriteria').mockReturnValue(true);
+            vi.spyOn(Repository, 'findOne').mockResolvedValue(null);
+            vi.spyOn(Repository, 'insert').mockResolvedValue({
+                success: true,
+                data: { id: '123', name: 'New' },
+            });
+
+            const result = await Repository.upsert(
+                class TestEntity {},
+                { id: '123' } as any,
+                { name: 'New' },
+            );
+
+            expect(Repository.insert).toHaveBeenCalled();
+            expect(result).toEqual({ success: true, data: { id: '123', name: 'New' } });
+        });
+    });
+
+    describe('deleteMany', () => {
+        it('should delete multiple entities by criteria', async () => {
+            const mockRepo = {
+                delete: vi.fn().mockResolvedValue({ affected: 5 }),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const result = await Repository.deleteMany(class TestEntity {}, {
+                status: 'deleted',
+            } as any);
+
+            expect(result).toBe(5);
+        });
+
+        it('should return 0 on error', async () => {
+            const mockRepo = {
+                delete: vi.fn().mockRejectedValue(new Error('Delete failed')),
+            };
+
+            vi.spyOn(Repository, 'getRepository' as any).mockReturnValue(
+                mockRepo,
+            );
+
+            const result = await Repository.deleteMany(class TestEntity {}, {
+                status: 'deleted',
+            } as any);
+
+            expect(result).toBe(0);
+        });
+    });
+
+    describe('getEntity', () => {
+        it('should return entity from map', () => {
+            Repository.entities.set('TestEntity', class TestEntity {});
+            const entity = Repository.getEntity('TestEntity');
+            expect(entity).toBeDefined();
+        });
+
+        it('should throw error if entity not found', () => {
+            // Restore the original getEntity to test the throw behavior
+            vi.restoreAllMocks();
+            // Make sure the entity doesn't exist
+            Repository.entities.delete('NonExistentEntity');
+
+            expect(() => Repository.getEntity('NonExistentEntity')).toThrow(
+                "Could not load entity 'NonExistentEntity'",
+            );
+        });
+    });
+
+    describe('fixObjectIds', () => {
+        it('should fix string ID for MongoDB', () => {
+            vi.mocked(Config.get).mockReturnValue('mongodb');
+
+            const result = Repository.fixObjectIds('507f1f77bcf86cd799439011');
+
+            expect(result).toBeDefined();
+        });
+
+        it('should fix $in operator for MongoDB', () => {
+            vi.mocked(Config.get).mockReturnValue('mongodb');
+
+            const result = Repository.fixObjectIds({
+                $in: ['507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012'],
+            });
+
+            expect(result).toHaveProperty('$in');
+        });
+
+        it('should return value as-is for non-special objects', () => {
+            vi.mocked(Config.get).mockReturnValue('postgres');
+
+            const result = Repository.fixObjectIds({ some: 'value' });
+
+            expect(result).toEqual({ some: 'value' });
+        });
+    });
 });
 
 describe('RepositorySchema', () => {
@@ -922,6 +1293,297 @@ describe('RepositorySchema', () => {
             expect(result.items[0]).toHaveProperty('name', 'Item 1');
             expect(result.items[1]).toHaveProperty('name', 'Item 2');
             expect(result).toHaveProperty('metadata');
+        });
+    });
+
+    describe('count', () => {
+        it('should count entities by criteria', async () => {
+            vi.spyOn(Repository, 'count').mockResolvedValueOnce(10);
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.count({ status: 'active' });
+
+            expect(Repository.count).toHaveBeenCalled();
+            expect(result).toBe(10);
+        });
+    });
+
+    describe('exists', () => {
+        it('should check if entity exists', async () => {
+            vi.spyOn(Repository, 'exists').mockResolvedValueOnce(true);
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.exists({ id: '123' });
+
+            expect(Repository.exists).toHaveBeenCalled();
+            expect(result).toBe(true);
+        });
+
+        it('should return false if entity does not exist', async () => {
+            vi.spyOn(Repository, 'exists').mockResolvedValueOnce(false);
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.exists({ id: 'nonexistent' });
+
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('getIn', () => {
+        it('should get entities by array of IDs', async () => {
+            const mockEntities = [
+                { id: '1', name: 'Entity 1' },
+                { id: '2', name: 'Entity 2' },
+            ];
+
+            vi.spyOn(Repository, 'findAll').mockResolvedValueOnce({
+                data: mockEntities,
+                count: 2,
+                pagination: { limit: 10, offset: 0 } as any,
+            });
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.getIn(['1', '2']);
+
+            expect(Repository.findAll).toHaveBeenCalled();
+            expect(result.data).toHaveLength(2);
+            expect(result.count).toBe(2);
+        });
+
+        it('should handle single ID string', async () => {
+            const mockEntities = [{ id: '1', name: 'Entity 1' }];
+
+            vi.spyOn(Repository, 'findAll').mockResolvedValueOnce({
+                data: mockEntities,
+                count: 1,
+                pagination: { limit: 10, offset: 0 } as any,
+            });
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.getIn('1' as any);
+
+            expect(result.data).toHaveLength(1);
+        });
+
+        it('should apply resolvers if specified', async () => {
+            const mockEntities = [{ id: '1', name: 'Entity 1' }];
+
+            vi.spyOn(Repository, 'findAll').mockResolvedValueOnce({
+                data: mockEntities,
+                count: 1,
+                pagination: { limit: 10, offset: 0 } as any,
+            });
+
+            vi.mocked(Resolvers.has).mockReturnValueOnce(true);
+            vi.mocked(Resolvers.execute).mockImplementation(
+                (resolver, model) => {
+                    model.name = model.name + ' (Resolved)';
+                    return Promise.resolve(model);
+                },
+            );
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.getIn(['1'], { resolvers: 'testResolver' });
+
+            expect(Resolvers.execute).toHaveBeenCalled();
+            expect(result.data[0].name).toBe('Entity 1 (Resolved)');
+        });
+    });
+
+    describe('updateOne', () => {
+        it('should update entity by criteria', async () => {
+            vi.spyOn(Repository, 'updateOne').mockResolvedValueOnce(true);
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.updateOne({ id: '123' }, { name: 'Updated' });
+
+            expect(Repository.updateOne).toHaveBeenCalled();
+            expect(result).toBe(true);
+        });
+    });
+
+    describe('updateById', () => {
+        it('should update entity by ID', async () => {
+            vi.spyOn(Repository, 'updateById').mockResolvedValueOnce(true);
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.updateById('123', { name: 'Updated' });
+
+            expect(Repository.updateById).toHaveBeenCalled();
+            expect(result).toBe(true);
+        });
+    });
+
+    describe('upsert', () => {
+        it('should upsert entity', async () => {
+            vi.spyOn(Repository, 'upsert').mockResolvedValueOnce({
+                success: true,
+                data: { id: '123', name: 'Upserted' },
+            });
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.upsert({ id: '123' }, { name: 'Upserted' });
+
+            expect(Repository.upsert).toHaveBeenCalled();
+            expect(result).toEqual({ success: true, data: { id: '123', name: 'Upserted' } });
+        });
+    });
+
+    describe('deleteMany', () => {
+        it('should delete multiple entities by criteria', async () => {
+            vi.spyOn(Repository, 'deleteMany').mockResolvedValueOnce(5);
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.deleteMany({ status: 'deleted' });
+
+            expect(Repository.deleteMany).toHaveBeenCalled();
+            expect(result).toBe(5);
+        });
+    });
+
+    describe('update with fakeDelete', () => {
+        it('should update entity with fakeDelete constraint', async () => {
+            vi.spyOn(Repository, 'update').mockResolvedValueOnce(1);
+
+            const repo = new RepositorySchema(TestEntity, TestModel, true);
+            const result = await repo.update('123', { name: 'Updated' });
+
+            expect(Repository.update).toHaveBeenCalled();
+            expect(result).toEqual({ success: true, affected: 1 });
+        });
+
+        it('should strip deleted field from update data', async () => {
+            vi.spyOn(Repository, 'update').mockResolvedValueOnce(1);
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            await repo.update('123', { name: 'Updated', deleted: true } as any);
+
+            // The deleted field should be stripped
+            expect(Repository.update).toHaveBeenCalledWith(
+                TestEntity,
+                expect.any(Object),
+                expect.not.objectContaining({ deleted: true }),
+            );
+        });
+    });
+
+    describe('toModel and fromPartial', () => {
+        it('should convert entity to model', async () => {
+            vi.mocked(Config.get).mockReturnValue('postgres');
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = repo['toModel'](TestModel, { id: '123', name: 'Test' });
+
+            expect(result).toBeInstanceOf(TestModel);
+            expect(result.id).toBe('123');
+        });
+
+        it('should convert partial data to model', async () => {
+            const mockModel = {
+                fromPartial: vi.fn().mockReturnValue({ id: '123', name: 'Partial' }),
+            };
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = repo['fromPartial'](mockModel, { name: 'Partial' }, {});
+
+            expect(mockModel.fromPartial).toHaveBeenCalled();
+            expect(result).toEqual({ id: '123', name: 'Partial' });
+        });
+
+        it('should return data directly if fromPartial not available', () => {
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const data = { name: 'Test' };
+            const result = repo['fromPartial']({}, data, {});
+
+            expect(result).toBe(data);
+        });
+    });
+
+    describe('extraData', () => {
+        it('should add userCreator from request for postgres', () => {
+            vi.mocked(Config.get).mockReturnValue('postgres');
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = repo['extraData']({ name: 'Test' }, { user: { id: 'user-123' } });
+
+            expect(result.userCreator).toBe('user-123');
+        });
+
+        it('should not add userCreator if no user in request', () => {
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = repo['extraData']({ name: 'Test' }, {});
+
+            expect(result.userCreator).toBeUndefined();
+        });
+
+        it('should return original item if req is undefined', () => {
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const item = { name: 'Test' };
+            const result = repo['extraData'](item, undefined);
+
+            expect(result).toBe(item);
+        });
+    });
+
+    describe('getById with resolvers', () => {
+        it('should apply resolvers to result', async () => {
+            const mockEntity = { id: '123', name: 'Test Entity' };
+
+            vi.spyOn(Repository, 'findBy').mockResolvedValueOnce(mockEntity);
+
+            vi.mocked(Resolvers.has).mockReturnValueOnce(true);
+            vi.mocked(Resolvers.execute).mockImplementation(
+                (resolver, model) => {
+                    model.name = model.name + ' (Resolved)';
+                    return Promise.resolve(model);
+                },
+            );
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.getById('123', { resolvers: 'testResolver' });
+
+            expect(Resolvers.execute).toHaveBeenCalled();
+            expect(result.data.name).toBe('Test Entity (Resolved)');
+        });
+
+        it('should apply array of resolvers', async () => {
+            const mockEntity = { id: '123', name: 'Test Entity' };
+
+            vi.spyOn(Repository, 'findBy').mockResolvedValueOnce(mockEntity);
+
+            vi.mocked(Resolvers.has).mockReturnValue(true);
+            vi.mocked(Resolvers.execute).mockImplementation(
+                (resolver, model) => {
+                    model.name = model.name + ` (${resolver})`;
+                    return Promise.resolve(model);
+                },
+            );
+
+            const repo = new RepositorySchema(TestEntity, TestModel);
+            const result = await repo.getById('123', { resolvers: ['resolver1', 'resolver2'] });
+
+            expect(result.data.name).toContain('resolver1');
+            expect(result.data.name).toContain('resolver2');
+        });
+    });
+
+    describe('getById with fakeDelete', () => {
+        it('should include deleted=false in query', async () => {
+            const mockEntity = { id: '123', name: 'Test Entity' };
+
+            vi.spyOn(Repository, 'findBy').mockResolvedValueOnce(mockEntity);
+            vi.spyOn(Repository, 'queryBuilder').mockReturnValue({
+                id: '123',
+                deleted: false,
+            } as any);
+
+            const repo = new RepositorySchema(TestEntity, TestModel, true);
+            await repo.getById('123');
+
+            expect(Repository.queryBuilder).toHaveBeenCalledWith({
+                id: '123',
+                deleted: false,
+            });
         });
     });
 });

@@ -15,16 +15,19 @@ export interface LogEvent {
     timestamp: number;
     event?: any;
     metadata?: any;
+    scopeId?: string;
 }
 
 export class Logger {
     protected applicationContext: string = 'Server';
     protected defaultContext: string = 'Server';
     private context: string;
+    private scopeId: string | undefined;
     private emitLog = null;
 
-    constructor(context?: string) {
+    constructor(context?: string, scopeId?: string) {
         this.context = context || this.defaultContext;
+        this.scopeId = scopeId;
     }
 
     private formatDate(): string {
@@ -53,6 +56,7 @@ export class Logger {
                 message,
                 context: context || this.context,
                 timestamp: Date.now(),
+                scopeId: this.scopeId,
             });
         }
 

@@ -1,3 +1,4 @@
+export * from './application-scope.interface';
 export * from './contract.interface';
 export * from './config-shema.interface';
 export * from './http-server.interface';
